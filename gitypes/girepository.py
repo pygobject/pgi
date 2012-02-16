@@ -58,7 +58,7 @@ _methods = [
     ("get_option_group", GOptionGroupPtr, []),
     ("get_c_prefix", gchar_p, [GIRepositoryPtr, gchar_p]),
     ("dump", gboolean, [c_char_p, POINTER(POINTER(GError))]),
-    ("enumerate_versions", GList, [GIRepositoryPtr, gchar_p]),
+    ("enumerate_versions", GListPtr, [GIRepositoryPtr, gchar_p]),
 ]
 
 wrap_class(_gir, GIRepository, GIRepositoryPtr, "g_irepository_", _methods)
