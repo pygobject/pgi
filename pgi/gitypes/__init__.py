@@ -15,6 +15,7 @@ from giobjectinfo import *
 from giregisteredtypeinfo import *
 from girepository import *
 from gistructinfo import *
+from gitypeinfo import *
 from gitypelib import *
 from giunioninfo import *
 from glib import *

@@ -16,11 +16,10 @@ def gi_is_type_info(base_info):
     return base_info.get_type().value == GIInfoType.TYPE
 
 
-class GIArrayType(guint):
+class GIArrayType(Enum):
     C, ARRAY, PTR_ARRAY, BYTE_ARRAY = range(4)
 
-
-class GITypeTag(guint):
+class GITypeTag(Enum):
     VOID = 0
     BOOLEAN = 1
     INT8 = 2
@@ -62,10 +61,27 @@ class GITypeInfo(GIBaseInfo):
 class GITypeInfoPtr(POINTER(GITypeInfo)):
     _type_ = GITypeInfo
 
+    def __repr__(self):
+        values = {}
+        values["is_pointer"] = self.is_pointer()
+        values["tag"] = self.get_tag()
+        type_ = self.get_tag().value
+        if type_ == GITypeTag.INTERFACE:
+            values["interface"] = self.get_interface()
+        if type_ == GITypeTag.ARRAY:
+            values["array_length"] = self.get_array_length()
+            values["array_fixed_size"] = self.get_array_fixed_size()
+            values["zero_terminated"] = self.is_zero_terminated()
+            values["array_type"] = self.get_array_type()
+
+        l = ", ".join(("%s=%r" % (k, v) for (k, v) in sorted(values.items())))
+
+        return "<%s %s>" % (self._type_.__name__, l)
+
 _methods = [
     ("is_pointer", gboolean, [GITypeInfoPtr]),
     ("get_tag", GITypeTag, [GITypeInfoPtr]),
-    ("get_param_type", GITypeInfoPtr, [GITypeInfoPtr]),
+    ("get_param_type", GITypeInfoPtr, [GITypeInfoPtr, gint]),
     ("get_interface", GIBaseInfoPtr, [GITypeInfoPtr]),
     ("get_array_length", gint, [GITypeInfoPtr]),
     ("get_array_fixed_size", gint, [GITypeInfoPtr]),

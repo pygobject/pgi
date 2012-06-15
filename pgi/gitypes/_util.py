@@ -11,7 +11,6 @@ _so_mapping = {
     "girepository-1.0": "libgirepository-1.0.so.1",
 }
 
-
 def load(name):
     global _dll_cache, _so_mapping
     if name not in _dll_cache:
@@ -19,6 +18,15 @@ def load(name):
         _dll_cache[name] = CDLL(_so_mapping[name])
     return _dll_cache[name]
 
+count = 0
+
+def _debug(f, name, base):
+    def _add(*args):
+        global count
+        count += 1
+        print count, base.__name__ + "." + name
+        return f(*args)
+    return _add
 
 def wrap_class(lib, base, ptr, prefix, methods):
     for name, ret, args in methods:
@@ -29,5 +37,6 @@ def wrap_class(lib, base, ptr, prefix, methods):
         if args and args[0] == ptr:
             add_self = lambda f: lambda *args: f(*args)
             setattr(ptr, name, add_self(func))
+            #setattr(ptr, name, _debug(func, name, base))
         else:
             setattr(base, name, func)

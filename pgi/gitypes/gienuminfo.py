@@ -28,6 +28,14 @@ class GIValueInfo(GIBaseInfo):
 class GIValueInfoPtr(POINTER(GIValueInfo)):
     _type_ = GIValueInfo
 
+    def __repr__(self):
+        values = {}
+        values["value"] = self.get_value()
+
+        l = ", ".join(("%s=%r" % (k, v) for (k, v) in sorted(values.items())))
+
+        return "<%s %s>" % (self._type_.__name__, l)
+
 _methods = [
     ("get_value", gint64, [GIValueInfoPtr]),
 ]
@@ -48,6 +56,20 @@ class GIEnumInfo(GIBaseInfo):
 
 class GIEnumInfoPtr(POINTER(GIEnumInfo)):
     _type_ = GIEnumInfo
+
+    def __repr__(self):
+        values = {}
+        values["n_values"] = self.get_n_values()
+        values["n_methods"] = self.get_n_methods()
+        values["storage_type"] = self.get_storage_type()
+        args = map(self.get_value, xrange(self.get_n_values()))
+        values["values"] = args
+        args = map(self.get_method, xrange(self.get_n_methods()))
+        values["methods"] = args
+
+        l = ", ".join(("%s=%r" % (k, v) for (k, v) in sorted(values.items())))
+
+        return "<%s %s>" % (self._type_.__name__, l)
 
 _methods = [
     ("get_n_values", gint, [GIEnumInfoPtr]),

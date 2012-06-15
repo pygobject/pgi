@@ -1,1 +1,25 @@
-ctypes bindings for GObject Introspection
+PGI - Pure Python GObject Introspection Bindings
+================================================
+
+ Some experiments using GI with ctypes to generate bindings
+
+Longterm Goals
+~~~~~~~~~~~~~~
+
+ - PyGObject compatibility (at least a subset)
+ - Python 2.5 / PyPy
+
+Content
+~~~~~~~
+
+ /pgi
+    Bindings generation
+
+ /pgi/gitypes
+    ctypes bindings for GObject Introspection
+
+Installation & Tests
+~~~~~~~~~~~~~~~~~~~~
+
+ - Nothing atm
+ - test.py will run unit tests using PGI and PyGObject

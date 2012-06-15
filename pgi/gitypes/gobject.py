@@ -11,7 +11,7 @@ from _util import load, wrap_class
 _gobject = load("gobject-2.0")
 
 
-class GParamFlags(guint):
+class GParamFlags(Enum):
     READABLE = 1 << 0
     WRITABLE = 1 << 1
     CONSTRUCT = 1 << 2
@@ -23,7 +23,7 @@ class GParamFlags(guint):
     DEPRECATED = 1 << 31
 
 
-class GSignalFlags(guint):
+class GSignalFlags(Enum):
     RUN_FIRST = 1 << 0
     RUN_LAST = 1 << 1
     RUN_CLEANUP = 1 << 2
@@ -37,10 +37,27 @@ g_type_init = _gobject.g_type_init
 g_type_init.argtypes = []
 g_type_init.resttype = None
 
-GType = guint
+class GType(guint):
+    pass
+
+    def __repr__(self):
+        return repr(self.value)
+
+_methods = [
+    ("type_name", gchar_p, [GType]),
+]
+
+wrap_class(_gobject, GType, None, "g_", _methods)
+
+newv = _gobject.g_object_newv
+newv.argtypes = [GType, guint]
+newv.resttype = gpointer
+
+free = _gobject.g_free
+free.argtypes = [gpointer]
+free.resttype = None
 
 # GValue
-
 
 class GValue(Structure):
     pass

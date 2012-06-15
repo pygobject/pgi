@@ -18,15 +18,15 @@ def gi_is_arg_info(base_info):
     return base_info.get_type().value == GIInfoType.ARG
 
 
-class GITransfer(guint):
+class GITransfer(Enum):
     NOTHING, CONTAINER, EVERYTHING = range(3)
 
 
-class GIDirection(guint):
+class GIDirection(Enum):
     IN, OUT, INOUT = range(3)
 
 
-class GIScopeType(guint):
+class GIScopeType(Enum):
     INVALID, CALL, ASYNC, NOTIFIED = range(4)
 
 
@@ -36,6 +36,22 @@ class GIArgInfo(GIBaseInfo):
 
 class GIArgInfoPtr(POINTER(GIArgInfo)):
     _type_ = GIArgInfo
+
+    def __repr__(self):
+        values = {}
+        values["direction"] = self.get_direction()
+        values["is_caller_allocates"] = self.is_caller_allocates()
+        values["is_return_value"] = self.is_return_value()
+        values["is_optional"] = self.is_optional()
+        values["may_be_null"] = self.may_be_null()
+        values["ownership_transfer"] = self.get_ownership_transfer()
+        values["scope"] = self.get_scope()
+        values["closure"] = self.get_closure()
+        values["destroy"] = self.get_destroy()
+        values["type"] = self.get_type()
+
+        l = ", ".join(("%s=%r" % (k, v) for (k, v) in sorted(values.items())))
+        return "<%s %s>" % (self._type_.__name__, l)
 
 _methods = [
     ("get_direction", GIDirection, [GIArgInfoPtr]),

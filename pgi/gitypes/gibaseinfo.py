@@ -13,7 +13,7 @@ from _util import wrap_class, load
 _gir = load("girepository-1.0")
 
 
-class GIInfoType(guint):
+class GIInfoType(Enum):
     (INVALID, FUNCTION, CALLBACK, STRUCT, BOXED, ENUM, FLAGS, OBJECT,
      INTERFACE, CONSTANT, INVALID_0, UNION, VALUE, SIGNAL, VFUNC, PROPERTY,
      FIELD, ARG, TYPE, UNRESOLVED) = range(20)
@@ -49,6 +49,18 @@ class GIBaseInfo(Structure):
 
 class GIBaseInfoPtr(POINTER(GIBaseInfo)):
     _type_ = GIBaseInfo
+
+    def __repr__(self):
+        values = {}
+        values["type"] = self.get_type()
+        values["name"] = self.get_name()
+        values["namespace"] = self.get_namespace()
+        values["deprecated"] = self.is_deprecated()
+        container = self.get_container()
+        if container:
+            values["container"] = container
+        l = ", ".join(("%s=%r" % (k, v) for (k, v) in sorted(values.items())))
+        return "<%s %s>" % (self._type_.__name__, l)
 
 _methods = [
     ("ref", GIBaseInfoPtr, [GIBaseInfoPtr]),

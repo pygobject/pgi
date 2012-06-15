@@ -19,6 +19,12 @@ class GITypelib(Structure):
 class GITypelibPtr(POINTER(GITypelib)):
     _type_ = GITypelib
 
+    def __repr__(self):
+        values = {}
+        values["namespace"] = self.get_namespace()
+        l = ", ".join(("%s=%r" % (k, v) for (k, v) in sorted(values.items())))
+        return "<%s %s>" % (self._type_.__name__, l)
+
 _methods = [
     ("new_from_memory",
         GITypelibPtr, [POINTER(guint8), gsize, POINTER(POINTER(GError))]),

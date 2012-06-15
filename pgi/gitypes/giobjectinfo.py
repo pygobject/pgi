@@ -31,6 +31,30 @@ class GIObjectInfo(GIBaseInfo):
 class GIObjectInfoPtr(POINTER(GIObjectInfo)):
     _type_ = GIObjectInfo
 
+    def __repr__(self):
+        values = {}
+        values["type_name"] = self.get_type_name()
+        values["type_init"] = self.get_type_init()
+        values["abstract"] = self.get_abstract()
+        values["fundamental"] = self.get_fundamental()
+        #values["parent"] = self.get_parent()
+        values["n_interfaces"] = self.get_n_interfaces()
+        values["n_fields"] = self.get_n_fields()
+        values["n_properties"] = self.get_n_properties()
+
+        values["n_methods"] = self.get_n_methods()
+        values["n_signals"] = self.get_n_signals()
+        values["n_vfuncs"] = self.get_n_vfuncs()
+        values["class_struct"] = self.get_class_struct()
+        values["unref_function"] = self.get_unref_function()
+        values["ref_function"] = self.get_ref_function()
+
+        values["set_value_function"] = self.get_set_value_function()
+        values["get_value_function"] = self.get_get_value_function()
+
+        l = ", ".join(("%s=%r" % (k, v) for (k, v) in sorted(values.items())))
+        return "<%s %s>" % (self._type_.__name__, l)
+
 GIObjectInfoGetValueFunction = CFUNCTYPE(c_void_p, POINTER(GValue))
 GIObjectInfoRefFunction = CFUNCTYPE(c_void_p, c_void_p)
 GIObjectInfoSetValueFunction = CFUNCTYPE(None, POINTER(GValue), c_void_p)

@@ -28,6 +28,17 @@ class GIInterfaceInfo(GIBaseInfo):
 class GIInterfaceInfoPtr(POINTER(GIInterfaceInfo)):
     _type_ = GIInterfaceInfo
 
+    def __repr__(self):
+        values = {}
+        values["n_constants"] = self.get_n_constants()
+        values["n_signals"] = self.get_n_signals()
+        values["n_methods"] = self.get_n_methods()
+        values["n_properties"] = self.get_n_properties()
+        values["n_prerequisites"] = self.get_n_prerequisites()
+
+        l = ", ".join(("%s=%r" % (k, v) for (k, v) in sorted(values.items())))
+        return "<%s %s>" % (self._type_.__name__, l)
+
 _methods = [
     ("get_n_prerequisites", gint, [GIInterfaceInfoPtr]),
     ("get_prerequisite", GIBaseInfoPtr, [GIInterfaceInfoPtr, gint]),

@@ -36,6 +36,19 @@ class GICallableInfo(GIBaseInfo):
 class GICallableInfoPtr(POINTER(GICallableInfo)):
     _type_ = GICallableInfo
 
+    def __repr__(self):
+        values = {}
+        values["return_type"] = self.get_return_type()
+        values["caller_owns"] = self.get_caller_owns()
+        values["may_return_null"] = self.may_return_null()
+        args = map(self.get_arg, xrange(self.get_n_args()))
+        values["args"] = args
+
+        l = ", ".join(("%s=%r" % (k, v) for (k, v) in sorted(values.items())))
+
+        return "<%s %s>" % (self._type_.__name__, l)
+
+
 # GIFunctionInfo
 
 
@@ -43,7 +56,7 @@ def gi_is_function_info(base_info):
     return base_info.get_type().value == GIInfoType.FUNCTION
 
 
-class GIFunctionInfoFlags(guint):
+class GIFunctionInfoFlags(Enum):
     IS_METHOD = 1 << 0
     IS_CONSTRUCTOR = 1 << 1
     IS_GETTER = 1 << 2
@@ -52,7 +65,7 @@ class GIFunctionInfoFlags(guint):
     THROWS = 1 << 5
 
 
-class GInvokeError(guint):
+class GInvokeError(Enum):
     FAILED, SYMBOL_NOT_FOUND, ARGUMENT_MISMATCH = range(3)
 
 
@@ -63,6 +76,18 @@ class GIFunctionInfo(GIBaseInfo):
 class GIFunctionInfoPtr(POINTER(GIFunctionInfo)):
     _type_ = GIFunctionInfo
 
+    def __repr__(self):
+        values = {}
+        values["symbol"] = self.get_symbol()
+        values["flags"] = self.get_flags()
+        if values["flags"].value in (GIFunctionInfoFlags.IS_GETTER, GIFunctionInfoFlags.IS_SETTER):
+            values["property"] = self.get_property()
+        if values["flags"].value == GIFunctionInfoFlags.WRAPS_VFUNC:
+            values["vfunc"] = self.get_vfunc()
+
+        l = ", ".join(("%s=%r" % (k, v) for (k, v) in sorted(values.items())))
+        return "<%s %s>" % (self._type_.__name__, l)
+
 # GIVFuncInfo
 
 
@@ -70,7 +95,7 @@ def gi_is_vfunc_info(base_info):
     return base_info.get_type().value == GIInfoType.VFUNC
 
 
-class GIVFuncInfoFlags(guint):
+class GIVFuncInfoFlags(Enum):
     MUST_CHAIN_UP = 1 << 0
     MUST_OVERRIDE = 1 << 1
     MUST_NOT_OVERRIDE = 1 << 2

@@ -31,6 +31,20 @@ glong = c_long
 gulong = c_ulong
 gsize = c_size_t
 
+
+class Enum(guint):
+    def __str__(self):
+        for a in (c for c in dir(self) if c.upper() == c):
+            if getattr(self, a) == self.value:
+                return a
+        return "Unkown"
+
+    def __repr__(self):
+        return repr(str(self))
+
+    def __int__(self):
+        return self.value
+
 # GError
 
 
@@ -210,7 +224,7 @@ wrap_class(_glib, GList, GListPtr, "g_list_", _methods)
 __all__ = ["gchar_p", "guint", "gpointer", "gint32", "guint32", "gint",
            "gquark", "gboolean", "gint8", "guint8", "gint16", "guint16",
            "gint64", "guint64", "gfloat", "gdouble", "gshort", "gushort",
-           "glong", "gulong", "gsize",
+           "glong", "gulong", "gsize", "Enum",
            "GError", "GErrorException", "check_gerror", "GErrorPtr",
            "GMappedFile", "GMappedFilePtr",
            "GOptionGroup", "GOptionGroupPtr",
