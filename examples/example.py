@@ -11,5 +11,7 @@ from pgi import Gtk
 
 
 if __name__ == '__main__':
-    # TODO
-    pass
+    Gtk.init()
+    b = Gtk.Window()
+    b.show_all()
+    Gtk.main()
