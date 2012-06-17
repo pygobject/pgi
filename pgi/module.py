@@ -12,6 +12,9 @@ from function import FunctionAttribute
 from structure import StructureAttribute
 from obj import ObjectAttribute, InterfaceAttribute
 
+import overrides
+import const
+
 
 _attr_list = [None, FunctionAttribute, None, StructureAttribute, None,
               EnumAttribute, FlagsAttribute, ObjectAttribute,

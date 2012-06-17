@@ -161,10 +161,9 @@ def ObjectAttribute(info, namespace, name, lib):
     if ifaces:
         bases = tuple(list(bases) + ifaces)
 
-    cls_name = obj_info.get_type_name()
     cls_dict = dict(_Object.__dict__)
     cls_dict["_gtype"] = reg_info.get_g_type()
-    cls = type(cls_name, bases, cls_dict)
+    cls = type(name, bases, cls_dict)
 
     for i in xrange(obj_info.get_n_methods()):
         func_info = obj_info.get_method(i)

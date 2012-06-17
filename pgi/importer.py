@@ -6,6 +6,7 @@
 
 import sys
 from ctypes import c_char_p, byref, CDLL
+import warnings
 
 from gitypes import GIRepository, GErrorPtr, GIRepositoryLoadFlags
 from gitypes import check_gerror, gi_init, gobject
@@ -13,6 +14,7 @@ from gitypes import check_gerror, gi_init, gobject
 import const
 import module
 import util
+import overrides
 
 
 gi_init()
@@ -104,5 +106,11 @@ class Importer(object):
         # add to module and sys.modules
         setattr(__import__(const.PREFIX), namespace, instance)
         sys.modules[fullname] = instance
+
+        # Import a override module if available.
+        # This calls things like gtk_init and returns new
+        # classes / functions that replace the original ones
+        for name, replace in overrides.load(namespace).iteritems():
+            setattr(instance, name, replace)
 
         return instance
