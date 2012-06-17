@@ -16,9 +16,14 @@ from util import import_attribute
 class _Object(object):
     _obj = None
     _gtype = None
+    _gname = None
 
     def __init__(self):
         self._obj = gobject.newv(self._gtype, 0, 0)
+
+    def __repr__(self):
+        form = "<%s object at 0x%x (%s at 0x%x)>"
+        return form % (type(self).__name__, id(self), self._gname, self._obj)
 
 
 class _Interface(object):
@@ -163,7 +168,9 @@ def ObjectAttribute(info, namespace, name, lib):
 
     cls_dict = dict(_Object.__dict__)
     cls_dict["_gtype"] = reg_info.get_g_type()
+    cls_dict["_gname"] = obj_info.get_type_name()
     cls = type(name, bases, cls_dict)
+    cls.__module__ = namespace
 
     for i in xrange(obj_info.get_n_methods()):
         func_info = obj_info.get_method(i)

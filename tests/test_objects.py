@@ -29,3 +29,30 @@ class ObjectTest(unittest.TestCase):
 
         self.assertEqual(g.get_data("xx"), 42)
         self.assertEqual(c.get_data("xx"), 3)
+
+    def test_gtk(self):
+        w = Gtk.Window()
+        w.set_title("foobar")
+        self.assertEqual(w.get_title(), "foobar")
+
+    def test_obj_repr(self):
+        w = Gtk.Window()
+        r = repr(w)
+        self.assertTrue("<Window" in r)
+        self.assertTrue("GtkWindow" in r)
+        self.assertTrue(str(hex(id(w))) in r)
+
+        g = GObject.Object()
+        r = repr(g)
+        self.assertTrue("GObject" in r)
+        self.assertTrue(str(hex(id(g))) in r)
+
+    def test_mro(self):
+        klass = Gtk.Window
+        parents = [Gtk.Bin, Gtk.Container, Gtk.Widget, GObject.Object]
+        for parent in parents:
+            self.assertTrue(parent in klass.__mro__)
+
+    def test_class(self):
+        self.assertTrue("Gtk" in Gtk.Window().__module__)
+        self.assertEqual(Gtk.Window.__name__, "Window")

@@ -11,8 +11,9 @@ from _override import override
 Gtk.init()
 
 class Window(Gtk.Window):
-    def __init__(self, title):
+    def __init__(self, title=None):
         super(Window, self).__init__()
-        self.set_title(title)
+        if title is not None:
+            self.set_title(title)
 
 override(Window)
