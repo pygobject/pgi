@@ -56,3 +56,8 @@ class ObjectTest(unittest.TestCase):
     def test_class(self):
         self.assertTrue("Gtk" in Gtk.Window().__module__)
         self.assertEqual(Gtk.Window.__name__, "Window")
+
+    def test_gobject_duplicate(self):
+        self.assertEqual(GObject.GObject, GObject.Object)
+        self.assertTrue(issubclass(Gtk.Widget, GObject.GObject))
+        self.assertTrue(issubclass(Gtk.Widget, GObject.Object))

@@ -24,6 +24,11 @@ def load(namespace):
     return _overrides
 
 
+def duplicate(klass, name):
+    global _overrides
+    _overrides[name] = klass
+
+
 def override(klass):
     global _overrides
 

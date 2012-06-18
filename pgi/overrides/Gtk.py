@@ -8,7 +8,7 @@ from pgi import Gtk
 from _override import override
 
 
-Gtk.init()
+Gtk.init_check()
 
 class Window(Gtk.Window):
     def __init__(self, title=None):
