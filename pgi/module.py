@@ -58,5 +58,6 @@ def Module(repo, namespace, lib):
         name = info.get_name()
         attr = _ModuleAttribute(info, namespace, name, lib)
         setattr(cls, name, attr)
+        #getattr(cls, name)
 
     return cls(namespace)

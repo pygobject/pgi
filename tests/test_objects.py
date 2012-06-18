@@ -71,3 +71,36 @@ class ObjectTest(unittest.TestCase):
         self.assertTrue("GType" in repr(t))
         self.assertTrue("80" in repr(t))
         self.assertTrue("GObject" in repr(t))
+
+        inval = t.parent
+        self.assertEqual(inval, inval.parent)
+        self.assertEqual(inval.name, "invalid")
+        self.assertTrue("invalid" in repr(inval))
+
+        GType = type(t)
+        self.assertRaises(RuntimeError, GType.from_name, "foobar")
+        wt = Gtk.Widget.__gtype__
+        self.assertEqual(wt, GType.from_name("GtkWidget"))
+
+        self.assertTrue(wt.is_value_type())
+        self.assertTrue(t.is_value_type())
+        self.assertFalse(wt.is_value_abstract())
+        self.assertTrue(t.has_value_table())
+        self.assertTrue(wt.is_a(t))
+        self.assertFalse(t.is_a(wt))
+
+        self.assertTrue(wt.is_abstract())
+        self.assertTrue(wt.is_classed())
+        self.assertTrue(wt.is_deep_derivable())
+        self.assertTrue(wt.is_derivable())
+        self.assertTrue(wt.is_instantiatable())
+        self.assertFalse(t.is_abstract())
+
+        self.assertEqual(wt.fundamental, t)
+        self.assertEqual(t.fundamental, t)
+
+        self.assertFalse(wt.is_interface())
+        self.assertFalse(t.is_interface())
+
+        dfilter = lambda x: not x.startswith("_")
+        self.assertEqual(len(filter(dfilter, dir(t))), 18)

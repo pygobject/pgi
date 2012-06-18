@@ -37,6 +37,19 @@ g_type_init = _gobject.g_type_init
 g_type_init.argtypes = []
 g_type_init.resttype = None
 
+
+class GTypeFundamentalFlags(Enum):
+    CLASSED = 1 << 0
+    INSTANTIATABLE = 1 << 1
+    DERIVABLE = 1 << 2
+    DEEP_DERIVABLE = 1 << 3
+
+
+class GTypeFlags(Enum):
+    ABSTRACT = 1 << 4
+    VALUE_ABSTRACT = 1 << 5
+
+
 class GType(guint):
     pass
 
@@ -46,6 +59,13 @@ class GType(guint):
 _methods = [
     ("name", gchar_p, [GType]),
     ("depth", guint, [GType]),
+    ("parent", GType, [GType]),
+    ("from_name", GType, [gchar_p]),
+    ("check_is_value_type", gboolean, [GType]),
+    ("test_flags", gboolean, [GType, GTypeFlags]),
+    ("value_table_peek", gpointer, [GType]), # returns GTypeValueTable
+    ("is_a", gboolean, [GType, GType]),
+    ("fundamental", GType, [GType]),
 ]
 
 wrap_class(_gobject, GType, GType, "g_type_", _methods)
@@ -97,4 +117,5 @@ _methods = [
 wrap_class(_gobject, GValue, GValuePtr, "g_value_", _methods)
 
 __all__ = ["GType", "g_type_init", "GParamFlags", "GValue", "GValuePtr",
-           "GValueTransform", "GSignalFlags"]
+           "GValueTransform", "GSignalFlags", "GTypeFlags",
+           "GTypeFundamentalFlags"]
