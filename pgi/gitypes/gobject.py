@@ -49,9 +49,20 @@ _methods = [
 
 wrap_class(_gobject, GType, None, "g_", _methods)
 
-newv = _gobject.g_object_newv
-newv.argtypes = [GType, guint]
-newv.resttype = gpointer
+
+_methods = [
+    ("newv", gpointer, [GType, guint]),
+    ("new", gpointer, [GType, guint]),
+    ("unref", None, [gpointer]),
+    ("ref_sink", gpointer, [gpointer]),
+    ("is_floating", gboolean, [gpointer]),
+]
+
+for (name, ret, args) in _methods:
+    h = getattr(_gobject, "g_object_" + name)
+    h.argtypes = args
+    h.resttype = ret
+    globals()[name] = h
 
 free = _gobject.g_free
 free.argtypes = [gpointer]

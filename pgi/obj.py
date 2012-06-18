@@ -19,11 +19,15 @@ class _Object(object):
     _gname = None
 
     def __init__(self):
-        self._obj = gobject.newv(self._gtype, 0, 0)
+        self._obj = gobject.new(self._gtype, 0)
+        gobject.ref_sink(self._obj)
 
     def __repr__(self):
         form = "<%s object at 0x%x (%s at 0x%x)>"
         return form % (type(self).__name__, id(self), self._gname, self._obj)
+
+    def __del__(self):
+        gobject.unref(self._obj)
 
 
 class _Interface(object):
