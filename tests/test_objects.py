@@ -61,3 +61,13 @@ class ObjectTest(unittest.TestCase):
         self.assertEqual(GObject.GObject, GObject.Object)
         self.assertTrue(issubclass(Gtk.Widget, GObject.GObject))
         self.assertTrue(issubclass(Gtk.Widget, GObject.Object))
+
+    def test_gtype(self):
+        a = GObject.GObject()
+        t = a.__gtype__
+        self.assertEqual(t.name, "GObject")
+        self.assertEqual(t.depth, 1)
+
+        self.assertTrue("GType" in repr(t))
+        self.assertTrue("80" in repr(t))
+        self.assertTrue("GObject" in repr(t))

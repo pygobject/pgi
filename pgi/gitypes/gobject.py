@@ -44,10 +44,11 @@ class GType(guint):
         return repr(self.value)
 
 _methods = [
-    ("type_name", gchar_p, [GType]),
+    ("name", gchar_p, [GType]),
+    ("depth", guint, [GType]),
 ]
 
-wrap_class(_gobject, GType, None, "g_", _methods)
+wrap_class(_gobject, GType, GType, "g_type_", _methods)
 
 
 _methods = [

@@ -11,20 +11,20 @@ from gitypes import GICallableInfoPtr, GITypeTag, GIInterfaceInfoPtr
 from gitypes import gpointer, gchar_p, gboolean, guint32
 
 from util import import_attribute
+from gtype import PGType
 
 
 class _Object(object):
     _obj = None
-    _gtype = None
-    _gname = None
 
     def __init__(self):
-        self._obj = gobject.new(self._gtype, 0)
+        self._obj = gobject.new(self.__gtype__._type, 0)
         gobject.ref_sink(self._obj)
 
     def __repr__(self):
         form = "<%s object at 0x%x (%s at 0x%x)>"
-        return form % (type(self).__name__, id(self), self._gname, self._obj)
+        name = type(self).__name__
+        return form % (name, id(self), self.__gtype__.name, self._obj)
 
     def __del__(self):
         gobject.unref(self._obj)
@@ -171,8 +171,7 @@ def ObjectAttribute(info, namespace, name, lib):
         bases = tuple(list(bases) + ifaces)
 
     cls_dict = dict(_Object.__dict__)
-    cls_dict["_gtype"] = reg_info.get_g_type()
-    cls_dict["_gname"] = obj_info.get_type_name()
+    cls_dict["__gtype__"] = PGType(reg_info.get_g_type())
     cls = type(name, bases, cls_dict)
     cls.__module__ = namespace
 
