@@ -104,3 +104,8 @@ class ObjectTest(unittest.TestCase):
 
         dfilter = lambda x: not x.startswith("_")
         self.assertEqual(len(filter(dfilter, dir(t))), 18)
+
+        self.assertEqual(wt.parent.parent.pytype, GObject.Object)
+        self.assertEqual(wt.pytype, Gtk.Widget)
+        # pygobject doesn't like it
+        #self.assertEqual(inval.pytype, None)

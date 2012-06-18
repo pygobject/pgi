@@ -4,8 +4,8 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from gitypes import GType, GTypeFlags, GTypeFundamentalFlags
-
+from gitypes import GType, GTypeFlags, GTypeFundamentalFlags, GIRepository
+from util import import_attribute
 
 class PGType(object):
 
@@ -77,8 +77,18 @@ class PGType(object):
 
     @property
     def pytype(self):
-        # TODO
-        pass
+        if self._type.value == 0:
+            return None
+
+        repo = GIRepository.get_default()
+        base_info = repo.find_by_gtype(self._type)
+        if not base_info:
+            return None
+        name = base_info.get_name()
+        namespace = base_info.get_namespace()
+        base_info.unref()
+
+        return import_attribute(namespace, name)
 
     def __eq__(self, other):
         return self._type.value == other._type.value
