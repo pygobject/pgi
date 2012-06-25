@@ -1,0 +1,6 @@
+include tests/*.py
+include examples/*.py
+include setup.py
+recursive-include pgi *.py
+include README
+include COPYING

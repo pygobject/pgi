@@ -18,8 +18,7 @@ Content
  /pgi/gitypes
     ctypes bindings for GObject Introspection
 
-Installation & Tests
-~~~~~~~~~~~~~~~~~~~~
+Tests
+~~~~~
 
- - Nothing atm
- - test.py will run unit tests using PGI and PyGObject
+ - `./setup.py test` will run unit tests using PGI and PyGObject
