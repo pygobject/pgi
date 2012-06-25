@@ -8,10 +8,18 @@ from ctypes import byref
 
 from gitypes import GType, GTypeFlags, GTypeFundamentalFlags, GIRepository
 from gitypes import guint, gobject
-from util import import_attribute
+from util import import_attribute, cached_property
 
 class PGType(object):
-    __slots__ = ["_type"]
+    __types = {}
+
+    def __new__(cls, type_):
+        value = type_.value
+        if value in cls.__types:
+            return cls.__types[value]
+        obj = super(PGType, cls).__new__(cls, type_)
+        cls.__types[value] = obj
+        return obj
 
     def __init__(self, type_):
         self._type = type_
@@ -24,11 +32,11 @@ class PGType(object):
         gobject.free(array)
         return items
 
-    @property
+    @cached_property
     def children(self):
         return self.__get_gtype_list("children")
 
-    @property
+    @cached_property
     def interfaces(self):
         return self.__get_gtype_list("interfaces")
 
@@ -39,7 +47,7 @@ class PGType(object):
             raise RuntimeError("unknown type name")
         return PGType(type_)
 
-    @property
+    @cached_property
     def fundamental(self):
         return PGType(self._type.fundamental())
 
@@ -73,19 +81,19 @@ class PGType(object):
     def is_value_type(self):
         return self._type.check_is_value_type()
 
-    @property
+    @cached_property
     def parent(self):
         return PGType(self._type.parent())
 
-    @property
+    @cached_property
     def name(self):
         return self._type.name() or "invalid"
 
-    @property
+    @cached_property
     def depth(self):
         return self._type.depth()
 
-    @property
+    @cached_property
     def pytype(self):
         if self._type.value == 0:
             return None
