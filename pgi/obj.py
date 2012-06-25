@@ -16,6 +16,7 @@ from gtype import PGType
 
 class _Object(object):
     _obj = None
+    __gtype__ = None
 
     def __init__(self):
         self._obj = gobject.new(self.__gtype__._type, 0)

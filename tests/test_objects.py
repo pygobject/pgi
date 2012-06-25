@@ -62,25 +62,34 @@ class ObjectTest(unittest.TestCase):
         self.assertTrue(issubclass(Gtk.Widget, GObject.GObject))
         self.assertTrue(issubclass(Gtk.Widget, GObject.Object))
 
-    def test_gtype(self):
+
+class GTypeTest(unittest.TestCase):
+    def test_repr(self):
         a = GObject.GObject()
         t = a.__gtype__
-        self.assertEqual(t.name, "GObject")
-        self.assertEqual(t.depth, 1)
-
         self.assertTrue("GType" in repr(t))
         self.assertTrue("80" in repr(t))
         self.assertTrue("GObject" in repr(t))
 
+    def test_inval(self):
+        a = GObject.GObject()
+        t = a.__gtype__
         inval = t.parent
         self.assertEqual(inval, inval.parent)
         self.assertEqual(inval.name, "invalid")
         self.assertTrue("invalid" in repr(inval))
+        # pygobject doesn't like it
+        #self.assertEqual(inval.pytype, None)
 
-        GType = type(t)
+    def test_from_name(self):
+        GType = type(GObject.GObject.__gtype__)
         self.assertRaises(RuntimeError, GType.from_name, "foobar")
         wt = Gtk.Widget.__gtype__
         self.assertEqual(wt, GType.from_name("GtkWidget"))
+
+    def test_methods(self):
+        wt = Gtk.Widget.__gtype__
+        t = GObject.GObject.__gtype__
 
         self.assertTrue(wt.is_value_type())
         self.assertTrue(t.is_value_type())
@@ -96,16 +105,30 @@ class ObjectTest(unittest.TestCase):
         self.assertTrue(wt.is_instantiatable())
         self.assertFalse(t.is_abstract())
 
-        self.assertEqual(wt.fundamental, t)
-        self.assertEqual(t.fundamental, t)
-
         self.assertFalse(wt.is_interface())
         self.assertFalse(t.is_interface())
 
+    def test_properties(self):
+        wt = Gtk.Widget.__gtype__
+        t = GObject.GObject.__gtype__
+        self.assertEqual(t.name, "GObject")
+        self.assertEqual(t.depth, 1)
+        self.assertEqual(wt.fundamental, t)
+        self.assertEqual(t.fundamental, t)
+
+    def test_check_missing(self):
+        t = GObject.GObject.__gtype__
         dfilter = lambda x: not x.startswith("_")
         self.assertEqual(len(filter(dfilter, dir(t))), 18)
 
+    def test_ptype(self):
+        wt = Gtk.Widget.__gtype__
         self.assertEqual(wt.parent.parent.pytype, GObject.Object)
         self.assertEqual(wt.pytype, Gtk.Widget)
-        # pygobject doesn't like it
-        #self.assertEqual(inval.pytype, None)
+
+    def test_lists(self):
+        wt = Gtk.Widget.__gtype__
+        # FIXME: interfaces returns some inval
+        # and there are not enough children
+        self.failUnlessEqual(wt.children[0].pytype, Gtk.Container)
+        self.failUnlessEqual(wt.interfaces[0].pytype, Atk.ImplementorIface)

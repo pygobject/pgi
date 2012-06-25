@@ -4,23 +4,33 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+from ctypes import byref
+
 from gitypes import GType, GTypeFlags, GTypeFundamentalFlags, GIRepository
+from gitypes import guint, gobject
 from util import import_attribute
 
 class PGType(object):
+    __slots__ = ["_type"]
 
     def __init__(self, type_):
         self._type = type_
 
+    def __get_gtype_list(self, function):
+        length = guint()
+        array = getattr(self._type, function)(byref(length))
+        # copy the gtypes and free the array so we don't leak
+        items = [PGType(GType(v.value)) for v in array[:length.value]]
+        gobject.free(array)
+        return items
+
     @property
     def children(self):
-        # TODO
-        pass
+        return self.__get_gtype_list("children")
 
     @property
     def interfaces(self):
-        # TODO
-        pass
+        return self.__get_gtype_list("interfaces")
 
     @classmethod
     def from_name(self, name):

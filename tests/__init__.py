@@ -15,12 +15,10 @@ def test(gi):
     print "#"*80
     if gi:
         if not is_pypy:
-            from gi.repository import Gtk
-            from gi.repository import GObject
+            from gi.repository import Gtk, GObject, GLib, Atk
         print "GI"
     else:
-        from pgi import Gtk
-        from pgi import GObject, GLib
+        from pgi import Gtk, GObject, GLib, Atk
         print "PGI"
     print "#"*80
 
@@ -31,6 +29,8 @@ def test(gi):
     import __builtin__
     __builtin__.__dict__["Gtk"] = Gtk
     __builtin__.__dict__["GObject"] = GObject
+    __builtin__.__dict__["GLib"] = GLib
+    __builtin__.__dict__["Atk"] = Atk
 
     loader = unittest.defaultTestLoader
     current_dir = os.path.join(os.path.dirname(__file__))

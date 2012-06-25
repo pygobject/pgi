@@ -66,6 +66,8 @@ _methods = [
     ("value_table_peek", gpointer, [GType]), # returns GTypeValueTable
     ("is_a", gboolean, [GType, GType]),
     ("fundamental", GType, [GType]),
+    ("children", POINTER(GType), [GType, POINTER(guint)]),
+    ("interfaces", POINTER(GType), [GType, POINTER(guint)]),
 ]
 
 wrap_class(_gobject, GType, GType, "g_type_", _methods)
