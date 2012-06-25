@@ -19,4 +19,5 @@ def glist_get_all(g, type_):
 
 
 def import_attribute(namespace, name):
-    return getattr(getattr(__import__(const.PREFIX), namespace), name)
+    mod = __import__(const.PREFIX + "." + namespace)
+    return getattr(getattr(mod, namespace), name)

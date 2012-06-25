@@ -47,50 +47,15 @@ class Importer(object):
         versions.sort()
         version = versions[-1]
 
-        return self.__require(namespace, version)
-
-    def __get_name(self, fullname):
-        if not fullname.startswith(self.PATH):
-            return
-
-        return fullname[len(self.PATH):]
-
-    def __get_fullname(self, namespace):
-        return self.PATH + namespace
-
-    def __require_dependencies(self, namespace):
-        array = repository.get_dependencies(namespace)
-        if not array:
-            return
-
-        i = 0
-        dep = array[i]
-        while dep:
-            # FIXME: free dep
-            depns, version = dep.split("-", 1)
-            self.__require(depns, version)
-            i += 1
-            dep = array[i]
-
-        gobject.free(array)
-
-    def __require(self, namespace, version):
-        fullname = self.__get_fullname(namespace)
-
         # Dependency already loaded, skip
         if fullname in sys.modules:
             return sys.modules[fullname]
 
         error = GErrorPtr()
-        typelib = repository.require(namespace, version,
-                                     GIRepositoryLoadFlags.LAZY,
-                                     byref(error))
+        typelib = repository.require(namespace, version, 0, byref(error))
         if not typelib:
             check_gerror(error)
             error.free()
-
-        # Load all dependencies
-        self.__require_dependencies(namespace)
 
         library = repository.get_shared_library(namespace)
         # FIXME: I guess ignore those?
@@ -114,3 +79,9 @@ class Importer(object):
             setattr(instance, name, replace)
 
         return instance
+
+    def __get_name(self, fullname):
+        if not fullname.startswith(self.PATH):
+            return
+
+        return fullname[len(self.PATH):]
