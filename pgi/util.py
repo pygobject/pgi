@@ -4,6 +4,8 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+import keyword
+import re
 from ctypes import cast
 
 import const
@@ -35,3 +37,7 @@ class cached_property(object):
             return self
         obj.__dict__[self.__name__] = result = self.fget(obj)
         return result
+
+
+def escape_keyword(text, reg=re.compile("^(%s)$" % "|".join(keyword.kwlist))):
+    return reg.sub(r"\1_", text)
