@@ -80,7 +80,8 @@ class GIFunctionInfoPtr(POINTER(GIFunctionInfo)):
         values = {}
         values["symbol"] = self.get_symbol()
         values["flags"] = self.get_flags()
-        if values["flags"].value in (GIFunctionInfoFlags.IS_GETTER, GIFunctionInfoFlags.IS_SETTER):
+        if values["flags"].value in (GIFunctionInfoFlags.IS_GETTER,
+                                     GIFunctionInfoFlags.IS_SETTER):
             values["property"] = self.get_property()
         if values["flags"].value == GIFunctionInfoFlags.WRAPS_VFUNC:
             values["vfunc"] = self.get_vfunc()

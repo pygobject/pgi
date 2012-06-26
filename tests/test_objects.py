@@ -68,6 +68,7 @@ class ObjectTest(unittest.TestCase):
         w.destroy()
         self.assertEqual(w.__grefcount__, 1)
 
+
 class GTypeTest(unittest.TestCase):
     def test_repr(self):
         a = GObject.GObject()

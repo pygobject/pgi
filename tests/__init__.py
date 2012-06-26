@@ -12,7 +12,7 @@ import unittest
 def test(gi):
     is_pypy = "PyPy" in sys.copyright
 
-    print "#"*80
+    print "#" * 80
     if gi:
         if not is_pypy:
             from gi.repository import Gtk, GObject, GLib, Atk, Gdk
@@ -20,7 +20,7 @@ def test(gi):
     else:
         from pgi.repository import Gtk, GObject, GLib, Atk, Gdk
         print "PGI"
-    print "#"*80
+    print "#" * 80
 
     if gi and is_pypy:
         print "skipping, no GI with PyPy..."

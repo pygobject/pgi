@@ -5,3 +5,6 @@
 # published by the Free Software Foundation.
 
 from _override import load
+
+
+load = load

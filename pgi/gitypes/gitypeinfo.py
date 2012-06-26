@@ -19,6 +19,7 @@ def gi_is_type_info(base_info):
 class GIArrayType(Enum):
     C, ARRAY, PTR_ARRAY, BYTE_ARRAY = range(4)
 
+
 class GITypeTag(Enum):
     VOID = 0
     BOOLEAN = 1

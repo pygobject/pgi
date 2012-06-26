@@ -63,7 +63,7 @@ _methods = [
     ("from_name", GType, [gchar_p]),
     ("check_is_value_type", gboolean, [GType]),
     ("test_flags", gboolean, [GType, GTypeFlags]),
-    ("value_table_peek", gpointer, [GType]), # returns GTypeValueTable
+    ("value_table_peek", gpointer, [GType]),  # returns GTypeValueTable
     ("is_a", gboolean, [GType, GType]),
     ("fundamental", GType, [GType]),
     ("children", POINTER(GType), [GType, POINTER(guint)]),
@@ -91,6 +91,7 @@ free = _gobject.g_free
 free.argtypes = [gpointer]
 free.resttype = None
 
+
 class GObject(Structure):
     _fields_ = [
         ("dummy", gpointer),
@@ -100,6 +101,7 @@ class GObject(Structure):
 GObjectPtr = POINTER(GObject)
 
 # GValue
+
 
 class GValue(Structure):
     pass

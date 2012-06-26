@@ -19,17 +19,17 @@ class TestCommand(Command):
         pass
 
     def run(self):
-      import tests
-      import os
+        import tests
+        import os
 
-      # Run with both bindings, PGI first
-      # Skip the second run if the first one fails
-      pid = os.fork()
-      if pid != 0:
-          pid, status = os.waitpid(pid, 0)
-          if status:
-              exit(status)
-      exit(tests.test(pid != 0))
+        # Run with both bindings, PGI first
+        # Skip the second run if the first one fails
+        pid = os.fork()
+        if pid != 0:
+            pid, status = os.waitpid(pid, 0)
+            if status:
+                exit(status)
+        exit(tests.test(pid != 0))
 
 
 setup(name='PGI',

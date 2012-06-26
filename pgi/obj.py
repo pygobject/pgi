@@ -38,6 +38,7 @@ class _Object(object):
 class _Interface(object):
     pass
 
+
 def gtypeinfo_to_ctypes(info):
     tag = info.get_tag().value
     ptr = info.is_pointer()

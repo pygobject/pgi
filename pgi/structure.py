@@ -7,6 +7,7 @@
 from ctypes import cast
 from gitypes import GIStructInfoPtr, GIRegisteredTypeInfoPtr
 
+
 def StructureAttribute(info, namespace, name, lib):
     cast(info, GIRegisteredTypeInfoPtr)
     cast(info, GIStructInfoPtr)

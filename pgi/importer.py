@@ -6,10 +6,8 @@
 
 import sys
 from ctypes import c_char_p, byref, CDLL
-import warnings
 
-from gitypes import GIRepository, GErrorPtr, GIRepositoryLoadFlags
-from gitypes import check_gerror, gi_init, gobject
+from gitypes import GIRepository, GErrorPtr, check_gerror, gi_init
 
 import const
 import module

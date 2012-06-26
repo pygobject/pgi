@@ -10,6 +10,7 @@ from gitypes import GType, GTypeFlags, GTypeFundamentalFlags, GIRepository
 from gitypes import guint, gobject
 from util import import_attribute, cached_property
 
+
 class PGType(object):
     __types = {}
 

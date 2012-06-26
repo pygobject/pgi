@@ -7,6 +7,8 @@
 import os
 import sys
 
+_overrides = None
+
 
 def load(namespace):
     global _overrides
@@ -16,8 +18,8 @@ def load(namespace):
     p = sys.path
     sys.path = [os.path.dirname(__file__)]
     try:
-        m = __import__(namespace, globals())
-    except ImportError, e:
+        __import__(namespace, globals())
+    except ImportError:
         pass
     sys.path = p
 

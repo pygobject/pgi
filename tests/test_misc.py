@@ -7,6 +7,7 @@
 import unittest
 import sys
 
+
 class MiscTest(unittest.TestCase):
     def test_module_dir(self):
         # make sure all descriptors show up in dir(module)

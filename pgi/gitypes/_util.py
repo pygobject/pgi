@@ -11,6 +11,7 @@ _so_mapping = {
     "girepository-1.0": "libgirepository-1.0.so.1",
 }
 
+
 def load(name):
     global _dll_cache, _so_mapping
     if name not in _dll_cache:
@@ -20,6 +21,7 @@ def load(name):
 
 count = 0
 
+
 def _debug(f, name, base):
     def _add(*args):
         global count
@@ -27,6 +29,7 @@ def _debug(f, name, base):
         print count, base.__name__ + "." + name
         return f(*args)
     return _add
+
 
 def wrap_class(lib, base, ptr, prefix, methods):
     for name, ret, args in methods:
