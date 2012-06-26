@@ -38,7 +38,7 @@ setup(name='PGI',
       author='Christoph Reiter',
       author_email='reiter.christoph@gmail.com',
       url='https://github.com/lazka/pgi',
-      packages=['pgi', 'pgi.gitypes', 'pgi.overrides'],
+      packages=['pgi', 'pgi.gitypes', 'pgi.overrides', 'pgi.repository'],
       license='GPLv2',
       cmdclass={
             'test': TestCommand
