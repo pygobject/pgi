@@ -15,10 +15,10 @@ def test(gi):
     print "#"*80
     if gi:
         if not is_pypy:
-            from gi.repository import Gtk, GObject, GLib, Atk
+            from gi.repository import Gtk, GObject, GLib, Atk, Gdk
         print "GI"
     else:
-        from pgi import Gtk, GObject, GLib, Atk
+        from pgi.repository import Gtk, GObject, GLib, Atk, Gdk
         print "PGI"
     print "#"*80
 

@@ -4,5 +4,12 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-VERSION = (0, 1)
-PREFIX = "pgi.repository"
+import sys
+
+from pgi.importer import Importer
+
+
+sys.meta_path.append(Importer())
+
+del sys
+del Importer

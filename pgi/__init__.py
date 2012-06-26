@@ -5,7 +5,4 @@
 # published by the Free Software Foundation.
 
 import sys
-from importer import Importer
 from const import VERSION as version
-
-sys.meta_path.append(Importer())

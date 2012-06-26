@@ -21,8 +21,8 @@ def glist_get_all(g, type_):
 
 
 def import_attribute(namespace, name):
-    mod = __import__(const.PREFIX + "." + namespace)
-    return getattr(getattr(mod, namespace), name)
+    mod = __import__(const.PREFIX + "." + namespace, fromlist=[namespace])
+    return getattr(mod, name)
 
 
 class cached_property(object):
