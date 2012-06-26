@@ -27,6 +27,10 @@ class _Object(object):
         name = type(self).__name__
         return form % (name, id(self), self.__gtype__.name, self._obj)
 
+    @property
+    def __grefcount__(self):
+        return cast(self._obj, gobject.GObjectPtr).contents.ref_count
+
     def __del__(self):
         gobject.unref(self._obj)
 

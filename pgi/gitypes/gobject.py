@@ -91,6 +91,14 @@ free = _gobject.g_free
 free.argtypes = [gpointer]
 free.resttype = None
 
+class GObject(Structure):
+    _fields_ = [
+        ("dummy", gpointer),
+        ("ref_count", guint32),
+    ]
+
+GObjectPtr = POINTER(GObject)
+
 # GValue
 
 class GValue(Structure):
@@ -120,4 +128,4 @@ wrap_class(_gobject, GValue, GValuePtr, "g_value_", _methods)
 
 __all__ = ["GType", "g_type_init", "GParamFlags", "GValue", "GValuePtr",
            "GValueTransform", "GSignalFlags", "GTypeFlags",
-           "GTypeFundamentalFlags"]
+           "GTypeFundamentalFlags", "GObjectPtr"]

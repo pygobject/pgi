@@ -62,6 +62,11 @@ class ObjectTest(unittest.TestCase):
         self.assertTrue(issubclass(Gtk.Widget, GObject.GObject))
         self.assertTrue(issubclass(Gtk.Widget, GObject.Object))
 
+    def test_refcount(self):
+        w = Gtk.Window()
+        self.assertEqual(w.__grefcount__, 2)
+        w.destroy()
+        self.assertEqual(w.__grefcount__, 1)
 
 class GTypeTest(unittest.TestCase):
     def test_repr(self):
