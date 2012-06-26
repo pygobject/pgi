@@ -5,7 +5,7 @@
 # published by the Free Software Foundation.
 
 import sys
-sys.path.append('..')
+sys.path.insert(0, '..')
 
 from pgi.repository import Gtk
 
