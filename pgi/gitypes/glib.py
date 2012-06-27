@@ -45,6 +45,21 @@ class Enum(guint):
     def __int__(self):
         return self.value
 
+
+class Flags(guint):
+    def __str__(self):
+        values = []
+        for a in (c for c in dir(self) if c.upper() == c):
+            if getattr(self, a) & self.value:
+                values.append(a)
+        return " | ".join(values) or "Unkown"
+
+    def __repr__(self):
+        return repr(str(self))
+
+    def __int__(self):
+        return self.value
+
 # GError
 
 
@@ -224,7 +239,7 @@ wrap_class(_glib, GList, GListPtr, "g_list_", _methods)
 __all__ = ["gchar_p", "guint", "gpointer", "gint32", "guint32", "gint",
            "gquark", "gboolean", "gint8", "guint8", "gint16", "guint16",
            "gint64", "guint64", "gfloat", "gdouble", "gshort", "gushort",
-           "glong", "gulong", "gsize", "Enum",
+           "glong", "gulong", "gsize", "Enum", "Flags",
            "GError", "GErrorException", "check_gerror", "GErrorPtr",
            "GMappedFile", "GMappedFilePtr",
            "GOptionGroup", "GOptionGroupPtr",

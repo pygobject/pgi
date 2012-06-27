@@ -11,19 +11,7 @@ from _util import load, wrap_class
 _gobject = load("gobject-2.0")
 
 
-class GParamFlags(Enum):
-    READABLE = 1 << 0
-    WRITABLE = 1 << 1
-    CONSTRUCT = 1 << 2
-    CONSTRUCT_ONLY = 1 << 3
-    LAX_VALIDATION = 1 << 4
-    STATIC_NAME = 1 << 5
-    STATIC_NICK = 1 << 6
-    STATIC_BLURB = 1 << 7
-    DEPRECATED = 1 << 31
-
-
-class GSignalFlags(Enum):
+class GSignalFlags(Flags):
     RUN_FIRST = 1 << 0
     RUN_LAST = 1 << 1
     RUN_CLEANUP = 1 << 2
@@ -38,14 +26,14 @@ g_type_init.argtypes = []
 g_type_init.resttype = None
 
 
-class GTypeFundamentalFlags(Enum):
+class GTypeFundamentalFlags(Flags):
     CLASSED = 1 << 0
     INSTANTIATABLE = 1 << 1
     DERIVABLE = 1 << 2
     DEEP_DERIVABLE = 1 << 3
 
 
-class GTypeFlags(Enum):
+class GTypeFlags(Flags):
     ABSTRACT = 1 << 4
     VALUE_ABSTRACT = 1 << 5
 
@@ -128,6 +116,41 @@ _methods = [
 
 wrap_class(_gobject, GValue, GValuePtr, "g_value_", _methods)
 
+
+class GParamFlags(Flags):
+    READABLE = 1 << 0
+    WRITABLE = 1 << 1
+    CONSTRUCT = 1 << 2
+    CONSTRUCT_ONLY = 1 << 3
+    LAX_VALIDATION = 1 << 4
+    STATIC_NAME = 1 << 5
+    STATIC_NICK = 1 << 6
+    STATIC_BLURB = 1 << 7
+    DEPRECATED = 1 << 31
+
+
+class GParamSpec(Structure):
+    _fields_ = [
+        ("g_type_instance", gpointer),
+        ("name", gchar_p),
+        ("flags", GParamFlags),
+        ("value_type", GType),
+        ("owner_type", GType),
+    ]
+
+
+class GParamSpecPtr(POINTER(GParamSpec)):
+    _type_ = GParamSpec
+
+
+_methods = [
+    ("get_name", gchar_p, [GParamSpecPtr]),
+]
+
+wrap_class(_gobject, GParamSpec, GParamSpecPtr, "g_param_spec_", _methods)
+
+
 __all__ = ["GType", "g_type_init", "GParamFlags", "GValue", "GValuePtr",
            "GValueTransform", "GSignalFlags", "GTypeFlags",
-           "GTypeFundamentalFlags", "GObjectPtr"]
+           "GTypeFundamentalFlags", "GObjectPtr", "GParamSpec",
+           "GParamSpecPtr"]
