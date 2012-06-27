@@ -9,22 +9,18 @@ from gitypes import GICallableInfoPtr, GIFunctionInfoPtr, GITypeTag
 from gitypes.glib import *
 
 
-class array_return(object):
-    def __init__(self, info):
-        self.zero = info.is_zero_terminated()
-
-    def convert(self, p):
-        r = []
-        if not p:
-            return r
-        if self.zero:
-            i = 0
-            x = p[i]
-            while x:
-                r.append(x)
-                i += 1
-                x = p[i]
+def get_array(info, value):
+    r = []
+    if not value:
         return r
+    if info.is_zero_terminated():
+        i = 0
+        x = value[i]
+        while x:
+            r.append(x)
+            i += 1
+            x = value[i]
+    return r
 
 
 def gtypeinfo_to_ctypes(info):
@@ -49,29 +45,38 @@ def gtypeinfo_to_ctypes(info):
             return
 
 
+def handle_return(return_info, value):
+    tag = return_info.get_tag().value
+    ptr = return_info.is_pointer()
+
+    if tag == GITypeTag.UTF8:
+        return value
+    elif tag == GITypeTag.ARRAY:
+        return get_array(return_info, value)
+    else:
+        return value
+
+
 class Function(object):
     _handle = None
-    _convert = None
+    _return_info = None
 
     def __init__(self, info, lib):
-        info = cast(info, GICallableInfoPtr)
-        return_info = info.get_return_type()
+        call_info = cast(info, GICallableInfoPtr)
+        return_info = call_info.get_return_type()
         tag = return_info.get_tag()
-        func = cast(info, GIFunctionInfoPtr)
+        func = cast(call_info, GIFunctionInfoPtr)
 
         h = getattr(lib, func.get_symbol())
         h.restype = gtypeinfo_to_ctypes(return_info)
-        h.argtypes = []
+        h.argtypes = tuple()
 
-        if tag.value == GITypeTag.ARRAY:
-            self._convert = array_return(return_info)
         self._handle = h
+        self._return_info = return_info
 
     def __call__(self, *args):
-        r = self._handle()
-        if self._convert:
-            return self._convert.convert(r)
-        return r
+        value = self._handle()
+        return handle_return(self._return_info, value)
 
 
 def FunctionAttribute(info, namespace, name, lib):
