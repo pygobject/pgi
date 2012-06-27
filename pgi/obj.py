@@ -139,7 +139,7 @@ class GParam(object):
         self._prop = prop
         self.name = name
 
-        self.__flags = prop.get_flags()
+        self.__flags = prop.get_flags().value
 
         self.__gtype__ = PGType.from_name("GParamObject")
 
@@ -149,7 +149,7 @@ class GParam(object):
 
     @property
     def flags(self):
-        return int(self.__flags)
+        return self.__flags
 
     def __repr__(self):
         type_name = str(typeinfo_get_name(self._prop.get_type())).capitalize()
