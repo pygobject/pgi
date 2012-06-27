@@ -10,21 +10,14 @@ import unittest
 
 
 def test(gi):
-    is_pypy = "PyPy" in sys.copyright
-
     print "#" * 80
     if gi:
-        if not is_pypy:
-            from gi.repository import Gtk, GObject, GLib, Atk, Gdk
+        from gi.repository import Gtk, GObject, GLib, Atk, Gdk
         print "GI"
     else:
         from pgi.repository import Gtk, GObject, GLib, Atk, Gdk
         print "PGI"
     print "#" * 80
-
-    if gi and is_pypy:
-        print "skipping, no GI with PyPy..."
-        return 0
 
     import __builtin__
     __builtin__.__dict__["Gtk"] = Gtk

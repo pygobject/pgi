@@ -21,10 +21,16 @@ class TestCommand(Command):
     def run(self):
         import tests
         import os
+        import platform
+
+        is_cpython = platform.python_implementation() == "CPython"
 
         # Run with both bindings, PGI first
         # Skip the second run if the first one fails
-        pid = os.fork()
+        if not is_cpython:
+            pid = 0
+        else:
+            pid = os.fork()
         if pid != 0:
             pid, status = os.waitpid(pid, 0)
             if status:
