@@ -8,7 +8,47 @@ import keyword
 import re
 from ctypes import cast
 
+from gitypes import GITypeTag
+from gitypes.glib import *
 import const
+
+
+def typeinfo_to_ctypes(info):
+    """Get a ctypes type for defining arguments and return types"""
+    tag = info.get_tag().value
+    ptr = info.is_pointer()
+
+    if ptr:
+        if tag == GITypeTag.UTF8:
+            return gchar_p
+        elif tag == GITypeTag.VOID:
+            return gpointer
+        elif tag == GITypeTag.UTF8 or tag == GITypeTag.FILENAME:
+            return gchar_p
+        elif tag == GITypeTag.ARRAY:
+            return gpointer
+    else:
+        if tag == GITypeTag.BOOLEAN:
+            return gboolean
+        elif tag == GITypeTag.UINT32:
+            return guint32
+        elif tag == GITypeTag.VOID:
+            return
+
+
+def typeinfo_get_name(info):
+    """Get a suitable name for debugging and reprs"""
+    tag = info.get_tag()
+    value = tag.value
+    if value == GITypeTag.INTERFACE:
+        interface = info.get_interface()
+        type_ = interface.get_type()
+        interface.unref()
+        return str(type_)
+    elif value == GITypeTag.UTF8:
+        return "STRING"
+    else:
+        return str(tag)
 
 
 def glist_get_all(g, type_):

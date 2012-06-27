@@ -8,6 +8,8 @@ from ctypes import cast
 from gitypes import GICallableInfoPtr, GIFunctionInfoPtr, GITypeTag
 from gitypes.glib import *
 
+from util import typeinfo_to_ctypes
+
 
 def get_array(info, value):
     r = []
@@ -21,28 +23,6 @@ def get_array(info, value):
             i += 1
             x = value[i]
     return r
-
-
-def gtypeinfo_to_ctypes(info):
-    tag = info.get_tag().value
-    ptr = info.is_pointer()
-
-    if ptr:
-        if tag == GITypeTag.UTF8:
-            return gchar_p
-        elif tag == GITypeTag.VOID:
-            return None
-        elif tag == GITypeTag.UTF8 or tag == GITypeTag.FILENAME:
-            return gchar_p
-        elif tag == GITypeTag.ARRAY:
-            return gpointer
-    else:
-        if tag == GITypeTag.BOOLEAN:
-            return gboolean
-        elif tag == GITypeTag.UINT32:
-            return guint32
-        elif tag == GITypeTag.VOID:
-            return
 
 
 def handle_return(return_info, value):
@@ -68,7 +48,7 @@ class Function(object):
         func = cast(call_info, GIFunctionInfoPtr)
 
         h = getattr(lib, func.get_symbol())
-        h.restype = gtypeinfo_to_ctypes(return_info)
+        h.restype = typeinfo_to_ctypes(return_info)
         h.argtypes = tuple()
 
         self._handle = h

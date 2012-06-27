@@ -13,6 +13,7 @@ from gitypes import GICallableInfoPtr, GITypeTag, GIInterfaceInfoPtr
 from gitypes import gpointer, gchar_p, gboolean, guint32
 
 from util import import_attribute, escape_name
+from util import typeinfo_to_ctypes, typeinfo_get_name
 from gtype import PGType
 
 
@@ -40,28 +41,6 @@ class _Object(object):
 
 class _Interface(object):
     pass
-
-
-def gtypeinfo_to_ctypes(info):
-    tag = info.get_tag().value
-    ptr = info.is_pointer()
-
-    if ptr:
-        if tag == GITypeTag.UTF8:
-            return gchar_p
-        elif tag == GITypeTag.VOID:
-            return gpointer
-        elif tag == GITypeTag.UTF8 or tag == GITypeTag.FILENAME:
-            return gchar_p
-        elif tag == GITypeTag.ARRAY:
-            return gpointer
-    else:
-        if tag == GITypeTag.BOOLEAN:
-            return gboolean
-        elif tag == GITypeTag.UINT32:
-            return guint32
-        elif tag == GITypeTag.VOID:
-            return
 
 
 class Method(object):
@@ -96,7 +75,7 @@ class _ClassMethodAttribute(object):
             arg_base = cast(arg_info, GIBaseInfoPtr)
 
             arg_type_info = arg_info.get_type()
-            args.append(gtypeinfo_to_ctypes(arg_type_info))
+            args.append(typeinfo_to_ctypes(arg_type_info))
             cast(arg_type_info, GIBaseInfoPtr).unref()
 
             arg_base.unref()
@@ -107,7 +86,7 @@ class _ClassMethodAttribute(object):
         # setup ctypes function
         func_info = cast(info, GIFunctionInfoPtr)
         h = getattr(self._lib, func_info.get_symbol())
-        h.restype = gtypeinfo_to_ctypes(return_info)
+        h.restype = typeinfo_to_ctypes(return_info)
         h.argtypes = args
 
         cast(return_info, GIBaseInfoPtr).unref()
@@ -153,30 +132,21 @@ def InterfaceAttribute(info, namespace, name, lib):
     return cls
 
 
-def get_type_info_name(info):
-    tag = info.get_tag()
-    value = tag.value
-    if value == GITypeTag.INTERFACE:
-        interface = info.get_interface()
-        type_ = interface.get_type()
-        interface.unref()
-        return type_
-    elif value == GITypeTag.UTF8:
-        return "STRING"
-    else:
-        return tag
-
-
 class GParam(object):
     __name = None
+    __type_name = None
     _prop = None
 
     def __init__(self, name, prop):
         self._prop = prop
         self.__name = name
 
+        type_ = self._prop.get_type()
+        self.__type_name = str(typeinfo_get_name(type_)).capitalize()
+        cast(type_, GIBaseInfoPtr).unref()
+
     def __repr__(self):
-        type_name = str(get_type_info_name(self._prop.get_type())).capitalize()
+        type_name = str(typeinfo_get_name(self._prop.get_type())).capitalize()
         return "<GParam%s %r>" % (type_name, self.__name)
 
 
