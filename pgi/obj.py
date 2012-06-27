@@ -10,7 +10,7 @@ from gitypes import gobject, GIFunctionInfoFlags, GIFunctionInfoPtr
 from gitypes import GICallableInfoPtr, GITypeTag, GIInterfaceInfoPtr
 from gitypes import gpointer, gchar_p, gboolean, guint32
 
-from util import import_attribute
+from util import import_attribute, escape_name
 from gtype import PGType
 
 
@@ -21,6 +21,7 @@ class _Object(object):
     def __init__(self):
         self._obj = gobject.new(self.__gtype__._type, 0)
         gobject.ref_sink(self._obj)
+        self.props = self.props(self)
 
     def __repr__(self):
         form = "<%s object at 0x%x (%s at 0x%x)>"
@@ -147,6 +148,53 @@ def InterfaceAttribute(info, namespace, name, lib):
     return cls
 
 
+def get_type_info_name(info):
+    tag = info.get_tag()
+    value = tag.value
+    if value == GITypeTag.INTERFACE:
+        interface = info.get_interface()
+        type_ = interface.get_type()
+        interface.unref()
+        return type_
+    elif value == GITypeTag.UTF8:
+        return "STRING"
+    else:
+        return tag
+
+
+class GParam(object):
+    __name = None
+    _prop = None
+
+    def __init__(self, name, prop):
+        self._prop = prop
+        self.__name = name
+
+    def __repr__(self):
+        type_name = str(get_type_info_name(self._prop.get_type())).capitalize()
+        return "<GParam%s %r>" % (type_name, self.__name)
+
+
+class _PropertiesAttribute(object):
+    def __init__(self, obj):
+        pass
+
+
+def Properties(info):
+    cls = _PropertiesAttribute
+    cls_dict = dict(cls.__dict__)
+
+    for i in xrange(info.get_n_properties()):
+        prop_info = info.get_property(i)
+        prop_base = cast(prop_info, GIBaseInfoPtr)
+        real_name = prop_base.get_name()
+        attr_name = escape_name(real_name)
+        cls_dict[attr_name] = GParam(real_name, prop_info)
+        #prop_base.unref()
+
+    return type("props", cls.__bases__, cls_dict)
+
+
 def ObjectAttribute(info, namespace, name, lib):
     obj_info = cast(info, GIObjectInfoPtr)
     reg_info = cast(info, GIRegisteredTypeInfoPtr)
@@ -178,6 +226,7 @@ def ObjectAttribute(info, namespace, name, lib):
 
     cls_dict = dict(_Object.__dict__)
     cls_dict["__gtype__"] = PGType(reg_info.get_g_type())
+    cls_dict["props"] = Properties(obj_info)
     cls = type(name, bases, cls_dict)
     cls.__module__ = namespace
 

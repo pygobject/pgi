@@ -39,5 +39,10 @@ class cached_property(object):
         return result
 
 
-def escape_keyword(text, reg=re.compile("^(%s)$" % "|".join(keyword.kwlist))):
+def escape_name(text, reg=re.compile("^(%s)$" % "|".join(keyword.kwlist))):
+    """Escape identifiers and keywords by changing them in a defined way
+     - '-' will be replaced by '_'
+     - keywords get '_' appended"""
+    # see http://docs.python.org/reference/lexical_analysis.html#identifiers
+    text = text.replace("-", "_")
     return reg.sub(r"\1_", text)

@@ -26,6 +26,14 @@ class GIPropertyInfo(GIBaseInfo):
 class GIPropertyInfoPtr(POINTER(GIPropertyInfo)):
     _type_ = GIPropertyInfo
 
+    def __repr__(self):
+        values = {}
+        values["flags"] = self.get_flags()
+        values["type"] = self.get_type()
+        values["ownership_transfer"] = self.get_ownership_transfer()
+        l = ", ".join(("%s=%r" % (k, v) for (k, v) in sorted(values.items())))
+        return "<%s %s>" % (self._type_.__name__, l)
+
 _methods = [
     ("get_flags", GParamFlags, [GIPropertyInfoPtr]),
     ("get_type", GITypeInfoPtr, [GIPropertyInfoPtr]),
