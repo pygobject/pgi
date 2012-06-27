@@ -4,7 +4,9 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+from warnings import warn
 from ctypes import cast
+
 from gitypes import GIObjectInfoPtr, GIRegisteredTypeInfoPtr, GIBaseInfoPtr
 from gitypes import gobject, GIFunctionInfoFlags, GIFunctionInfoPtr
 from gitypes import GICallableInfoPtr, GITypeTag, GIInterfaceInfoPtr
@@ -129,9 +131,12 @@ class _ClassMethodAttribute(object):
 
 def InterfaceAttribute(info, namespace, name, lib):
     iface_info = cast(info, GIInterfaceInfoPtr)
-
+    iface_info.get_n_constants()
     cls_dict = dict(_Interface.__dict__)
     cls = type(name, _Interface.__bases__, cls_dict)
+
+    if iface_info.get_n_constants():
+        warn("Constants of interface not supported (%r)" % name, Warning)
 
     for i in xrange(iface_info.get_n_methods()):
         func_info = iface_info.get_method(i)
@@ -198,6 +203,9 @@ def Properties(info):
 def ObjectAttribute(info, namespace, name, lib):
     obj_info = cast(info, GIObjectInfoPtr)
     reg_info = cast(info, GIRegisteredTypeInfoPtr)
+
+    if obj_info.get_n_constants():
+        warn("Constants of object not supported (%r)" % name, Warning)
 
     # get the parent classes if there are any
     parent_obj = obj_info.get_parent()
