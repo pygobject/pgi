@@ -7,6 +7,8 @@
 from ctypes import cast
 
 from gitypes import GObjectClassPtr, G_TYPE_FROM_INSTANCE, GIBaseInfoPtr
+from gitypes import GIRepositoryPtr, GIInfoType, GIObjectInfoPtr
+from gitypes import GIInterfaceInfoPtr
 
 from util import escape_name
 from gtype import PGType
@@ -44,6 +46,14 @@ class GParamSpec(object):
         return "<%s %r>" % (self.__gtype__.name, self.name)
 
 
+class Property(object):
+    def __get__(self, instance, owner):
+        return None
+
+    def __set__(self, instance, value):
+        raise AttributeError
+
+
 class _GProps(object):
     def __init__(self, name):
         self.__name = name
@@ -52,18 +62,45 @@ class _GProps(object):
         return "<GProps of %r>" % self.__name
 
 
-def PropertyAttribute(info, g_type, name):
-    cls = _GProps
+class _Props(object):
+    def __init__(self, namespace, name, gtype):
+        self.__namespace = namespace
+        self.__name = name
+        self.__gtype = gtype
+
+    def __get__(self, instance, owner):
+        repo = GIRepositoryPtr()
+        base_info = repo.find_by_name(self.__namespace, self.__name)
+        type_ = base_info.get_type().value
+        if type_ == GIInfoType.OBJECT:
+            info = cast(base_info, GIObjectInfoPtr)
+        else:
+            info = cast(base_info, GIInterfaceInfoPtr)
+
+        cls = _GProps
+        cls_dict = dict(cls.__dict__)
+
+        obj_class = cast(self.__gtype.class_peek(), GObjectClassPtr)
+        for i in xrange(info.get_n_properties()):
+            prop_info = info.get_property(i)
+            prop_base = cast(prop_info, GIBaseInfoPtr)
+            real_name = prop_base.get_name()
+            spec = obj_class.find_property(real_name)
+            attr_name = escape_name(real_name)
+            if instance:
+                cls_dict[attr_name] = Property()
+            else:
+                cls_dict[attr_name] = GParamSpec(spec)
+            prop_base.unref()
+
+        base_info.unref()
+
+        attr = type("props", cls.__bases__, cls_dict)(self.__name)
+        setattr(instance or owner, self.__name, attr)
+        return attr
+
+
+def PropertyAttribute(info, namespace, name, gtype):
+    cls = _Props
     cls_dict = dict(cls.__dict__)
-
-    obj_class = cast(g_type.class_peek(), GObjectClassPtr)
-    for i in xrange(info.get_n_properties()):
-        prop_info = info.get_property(i)
-        prop_base = cast(prop_info, GIBaseInfoPtr)
-        real_name = prop_base.get_name()
-        spec = obj_class.find_property(real_name)
-        attr_name = escape_name(real_name)
-        cls_dict[attr_name] = GParamSpec(spec)
-        prop_base.unref()
-
-    return type("props", cls.__bases__, cls_dict)(name)
+    return type("props", cls.__bases__, cls_dict)(namespace, name, gtype)

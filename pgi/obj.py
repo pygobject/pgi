@@ -165,7 +165,7 @@ def ObjectAttribute(info, namespace, name, lib):
     cls_dict = dict(_Object.__dict__)
     g_type = reg_info.get_g_type()
     cls_dict["__gtype__"] = PGType(g_type)
-    cls_dict["props"] = PropertyAttribute(obj_info, g_type, name)
+    cls_dict["props"] = PropertyAttribute(obj_info, namespace, name, g_type)
     cls = type(name, bases, cls_dict)
     cls.__module__ = namespace
 

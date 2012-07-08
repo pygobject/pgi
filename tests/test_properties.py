@@ -33,3 +33,7 @@ class PropertiesTest(unittest.TestCase):
     def test_gtype(self):
         w = Gtk.Window
         self.assertEqual(w.props.transient_for.__gtype__.name, "GParamObject")
+
+    def test_props(self):
+        w = Gtk.Window()
+        self.assertEqual(w.props.title, None)
