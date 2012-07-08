@@ -10,9 +10,10 @@ from ctypes import cast
 from gitypes import GIObjectInfoPtr, GIRegisteredTypeInfoPtr, GIBaseInfoPtr
 from gitypes import gobject, GIFunctionInfoFlags, GIFunctionInfoPtr
 from gitypes import GICallableInfoPtr, GIInterfaceInfoPtr, gpointer
+from gitypes import GObjectClassPtr, G_TYPE_FROM_INSTANCE
 
 from util import import_attribute, escape_name
-from util import typeinfo_to_ctypes, typeinfo_get_name
+from util import typeinfo_to_ctypes
 from gtype import PGType
 
 
@@ -130,33 +131,39 @@ def InterfaceAttribute(info, namespace, name, lib):
     return cls
 
 
-class GParam(object):
-    __type_name = None
-    __flags = None
-    _prop = None
+class GParamSpec(object):
+    _spec = None
 
-    def __init__(self, name, prop):
-        self._prop = prop
-        self.name = name
-
-        self.__flags = prop.get_flags().value
-
-        self.__gtype__ = PGType.from_name("GParamObject")
-
-        type_ = prop.get_type()
-        self.__type_name = str(typeinfo_get_name(type_)).capitalize()
-        cast(type_, GIBaseInfoPtr).unref()
+    def __init__(self, spec):
+        self._spec = spec
+        g_type = G_TYPE_FROM_INSTANCE(spec.contents.g_type_instance)
+        self.__gtype__ = PGType(g_type)
 
     @property
     def flags(self):
-        return self.__flags
+        return self._spec.contents.flags.value
+
+    @property
+    def nick(self):
+        return self._spec.get_nick()
+
+    @property
+    def name(self):
+        return self._spec.get_name()
+
+    @property
+    def owner_type(self):
+        return PGType(self._spec.contents.owner_type)
+
+    @property
+    def value_type(self):
+        return PGType(self._spec.contents.value_type)
 
     def __repr__(self):
-        type_name = str(typeinfo_get_name(self._prop.get_type())).capitalize()
-        return "<GParam%s %r>" % (type_name, self.name)
+        return "<%s %r>" % (self.__gtype__.name, self.name)
 
 
-class _GParamAttribute(object):
+class _GPropsAttribute(object):
     def __init__(self, name):
         self.__name = name
 
@@ -164,17 +171,20 @@ class _GParamAttribute(object):
         return "<GProps of %r>" % self.__name
 
 
-def ClassProperties(info, name):
-    cls = _GParamAttribute
+def ClassProperties(info, g_type, name):
+    cls = _GPropsAttribute
     cls_dict = dict(cls.__dict__)
+
+    obj_class = cast(g_type.class_peek(), GObjectClassPtr)
 
     for i in xrange(info.get_n_properties()):
         prop_info = info.get_property(i)
         prop_base = cast(prop_info, GIBaseInfoPtr)
         real_name = prop_base.get_name()
+        spec = obj_class.find_property(real_name)
         attr_name = escape_name(real_name)
-        cls_dict[attr_name] = GParam(real_name, prop_info)
-        #prop_base.unref()
+        cls_dict[attr_name] = GParamSpec(spec)
+        prop_base.unref()
 
     return type("props", cls.__bases__, cls_dict)(name)
 
@@ -212,8 +222,9 @@ def ObjectAttribute(info, namespace, name, lib):
         bases = tuple(list(bases) + ifaces)
 
     cls_dict = dict(_Object.__dict__)
-    cls_dict["__gtype__"] = PGType(reg_info.get_g_type())
-    cls_dict["props"] = ClassProperties(obj_info, name)
+    g_type = reg_info.get_g_type()
+    cls_dict["__gtype__"] = PGType(g_type)
+    cls_dict["props"] = ClassProperties(obj_info, g_type, name)
     cls = type(name, bases, cls_dict)
     cls.__module__ = namespace
 

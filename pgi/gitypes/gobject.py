@@ -39,10 +39,8 @@ class GTypeFlags(Flags):
 
 
 class GType(guint):
-    pass
-
     def __repr__(self):
-        return repr(self.value)
+        return "<GType %r>" % repr(self.value)
 
 _methods = [
     ("name", gchar_p, [GType]),
@@ -56,6 +54,7 @@ _methods = [
     ("fundamental", GType, [GType]),
     ("children", POINTER(GType), [GType, POINTER(guint)]),
     ("interfaces", POINTER(GType), [GType, POINTER(guint)]),
+    ("class_peek", gpointer, [GType]),
 ]
 
 wrap_class(_gobject, GType, GType, "g_type_", _methods)
@@ -80,13 +79,35 @@ free.argtypes = [gpointer]
 free.resttype = None
 
 
+
+class GTypeClass(Structure):
+    _fields_ = [
+        ("g_type", GType),
+    ]
+
+
+class GTypeClassPtr(POINTER(GTypeClass)):
+    _type_ = GTypeClass
+
+
+class GTypeInstance(Structure):
+    _fields_ = [
+        ("g_class", GTypeClassPtr),
+    ]
+
+
+class GTypeInstancePtr(POINTER(GTypeInstance)):
+    _type_ = GTypeInstance
+
+
 class GObject(Structure):
     _fields_ = [
-        ("dummy", gpointer),
+        ("g_type_instance", GTypeInstance),
         ("ref_count", guint32),
     ]
 
 GObjectPtr = POINTER(GObject)
+
 
 # GValue
 
@@ -131,7 +152,7 @@ class GParamFlags(Flags):
 
 class GParamSpec(Structure):
     _fields_ = [
-        ("g_type_instance", gpointer),
+        ("g_type_instance", GTypeInstance),
         ("name", gchar_p),
         ("flags", GParamFlags),
         ("value_type", GType),
@@ -145,12 +166,32 @@ class GParamSpecPtr(POINTER(GParamSpec)):
 
 _methods = [
     ("get_name", gchar_p, [GParamSpecPtr]),
+    ("get_nick", gchar_p, [GParamSpecPtr]),
+    ("get_blurb", gchar_p, [GParamSpecPtr]),
 ]
 
 wrap_class(_gobject, GParamSpec, GParamSpecPtr, "g_param_spec_", _methods)
 
 
+class GObjectClass(Structure):
+    pass
+
+
+class GObjectClassPtr(POINTER(GObjectClass)):
+    _type_ = GObjectClass
+
+_methods = [
+    ("find_property", GParamSpecPtr, [GObjectClassPtr, gchar_p]),
+]
+
+wrap_class(_gobject, GObjectClass, GObjectClassPtr, "g_object_class_", _methods)
+
+
+def G_TYPE_FROM_INSTANCE(instance):
+    return instance.g_class.contents.g_type
+
+
 __all__ = ["GType", "g_type_init", "GParamFlags", "GValue", "GValuePtr",
            "GValueTransform", "GSignalFlags", "GTypeFlags",
            "GTypeFundamentalFlags", "GObjectPtr", "GParamSpec",
-           "GParamSpecPtr"]
+           "GParamSpecPtr", "GObjectClassPtr", "G_TYPE_FROM_INSTANCE"]

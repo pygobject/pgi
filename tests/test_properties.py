@@ -21,11 +21,14 @@ class PropertiesTest(unittest.TestCase):
 
     def test_gparam(self):
         param = Gtk.Window.props.transient_for
-        #'flags', 'name', 'nick', 'owner_type', 'value_type'
 
-        # FIXME: pygobject uses the gparamspec flags directly
         self.assertEqual(param.flags & 0xF, 7)
+        self.assertEqual(param.flags, 231)
         self.assertEqual(param.name, "transient-for")
+        self.assertEqual(param.nick, "Transient for Window")
+        self.assertEqual(param.owner_type, Gtk.Window.__gtype__)
+        # FIXME:
+        #self.assertEqual(param.value_type, None)
 
     def test_gtype(self):
         w = Gtk.Window
