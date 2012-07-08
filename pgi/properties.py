@@ -63,14 +63,21 @@ class _GProps(object):
 
 
 class _Props(object):
+    __cache = None
+
     def __init__(self, namespace, name, gtype):
         self.__namespace = namespace
         self.__name = name
         self.__gtype = gtype
 
     def __get__(self, instance, owner):
+        if not instance and self.__cache:
+            return self.__cache
+
+        namespace, name = self.__namespace, self.__name
+
         repo = GIRepositoryPtr()
-        base_info = repo.find_by_name(self.__namespace, self.__name)
+        base_info = repo.find_by_name(namespace, name)
         type_ = base_info.get_type().value
         if type_ == GIInfoType.OBJECT:
             info = cast(base_info, GIObjectInfoPtr)
@@ -95,8 +102,11 @@ class _Props(object):
 
         base_info.unref()
 
-        attr = type("props", cls.__bases__, cls_dict)(self.__name)
-        setattr(instance or owner, self.__name, attr)
+        attr = type("props", cls.__bases__, cls_dict)(name)
+        if instance:
+            setattr(instance, "props", attr)
+        else:
+            self.__cache = attr
         return attr
 
 
