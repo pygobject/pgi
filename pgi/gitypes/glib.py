@@ -10,6 +10,8 @@ from _util import wrap_class, load
 _glib = load("glib-2.0")
 
 gchar_p = c_char_p
+gchar = c_char
+guchar = c_uint8
 guint = c_uint
 gpointer = c_void_p
 gint32 = c_int32
@@ -30,6 +32,7 @@ gushort = c_ushort
 glong = c_long
 gulong = c_ulong
 gsize = c_size_t
+gconstpointer = c_void_p
 
 
 class Enum(guint):
@@ -239,9 +242,9 @@ wrap_class(_glib, GList, GListPtr, "g_list_", _methods)
 __all__ = ["gchar_p", "guint", "gpointer", "gint32", "guint32", "gint",
            "gquark", "gboolean", "gint8", "guint8", "gint16", "guint16",
            "gint64", "guint64", "gfloat", "gdouble", "gshort", "gushort",
-           "glong", "gulong", "gsize", "Enum", "Flags",
+           "glong", "gulong", "gsize", "Enum", "Flags", "gchar", "guchar",
            "GError", "GErrorException", "check_gerror", "GErrorPtr",
-           "GMappedFile", "GMappedFilePtr",
+           "GMappedFile", "GMappedFilePtr", "gconstpointer",
            "GOptionGroup", "GOptionGroupPtr",
            "GSList", "GSListPtr",
            "GList", "GListPtr"]

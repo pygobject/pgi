@@ -133,6 +133,23 @@ _methods = [
     ("type_transformable", gboolean, [GType, GType]),
     ("transform", gboolean, [GValuePtr, GValuePtr]),
     ("register_transform_func", None, [GType, GType, GValueTransform]),
+    ("set_string", None, [GValuePtr, gchar_p]),
+    ("set_boxed", None, [GValuePtr, gpointer]),
+    ("set_pointer", None, [GValuePtr, gpointer]),
+    ("set_object", None, [GValuePtr, gpointer]),
+    ("set_boolean", None, [GValuePtr, gboolean]),
+    ("set_char", None, [GValuePtr, gchar]),
+    ("set_uchar", None, [GValuePtr, guchar]),
+    ("set_int", None, [GValuePtr, gint]),
+    ("set_uint", None, [GValuePtr, guint]),
+    ("set_long", None, [GValuePtr, glong]),
+    ("set_ulong", None, [GValuePtr, gulong]),
+    ("set_int64", None, [GValuePtr, gint64]),
+    ("set_uint64", None, [GValuePtr, guint64]),
+    ("set_float", None, [GValuePtr, gfloat]),
+    ("set_double", None, [GValuePtr, gdouble]),
+    ("set_enum", None, [GValuePtr, gint]),
+    ("set_flags", None, [GValuePtr, guint]),
 ]
 
 wrap_class(_gobject, GValue, GValuePtr, "g_value_", _methods)
