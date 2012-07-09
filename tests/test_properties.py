@@ -37,3 +37,11 @@ class PropertiesTest(unittest.TestCase):
     def test_props(self):
         w = Gtk.Window()
         self.assertEqual(w.props.title, None)
+        self.assertTrue(hasattr(w.props, "double_buffered"))
+        props = [p for p in dir(w.props) if not p.startswith("_")]
+        self.assertEqual(len(props), 70)
+
+        w = Gtk.Window
+        specs = [p for p in dir(w.props) if not p.startswith("_")]
+        self.assertEqual(len(props), 70)
+        self.assertEqual(w.props.double_buffered.name, "double-buffered")
