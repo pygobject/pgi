@@ -38,7 +38,7 @@ class GTypeFlags(Flags):
     VALUE_ABSTRACT = 1 << 5
 
 
-class GType(guint):
+class GType(gulong):
     def __repr__(self):
         return "<GType %r>" % repr(self.value)
 
@@ -55,6 +55,9 @@ _methods = [
     ("children", POINTER(GType), [GType, POINTER(guint)]),
     ("interfaces", POINTER(GType), [GType, POINTER(guint)]),
     ("class_peek", gpointer, [GType]),
+    ("class_ref", gpointer, [GType]),
+    ("class_unref", None, [gpointer]),
+    ("class_peek_parent", gpointer, [gpointer]),
 ]
 
 wrap_class(_gobject, GType, GType, "g_type_", _methods)
@@ -77,8 +80,6 @@ for (name, ret, args) in _methods:
 free = _gobject.g_free
 free.argtypes = [gpointer]
 free.resttype = None
-
-
 
 class GTypeClass(Structure):
     _fields_ = [
@@ -113,7 +114,9 @@ GObjectPtr = POINTER(GObject)
 
 
 class GValue(Structure):
-    pass
+    _fields_ = [
+        ("g_type", GType),
+    ]
 
 
 class GValuePtr(POINTER(GValue)):
@@ -150,10 +153,21 @@ _methods = [
     ("set_double", None, [GValuePtr, gdouble]),
     ("set_enum", None, [GValuePtr, gint]),
     ("set_flags", None, [GValuePtr, guint]),
+    ("get_string", gchar_p, [GValuePtr]),
+    ("get_int", gint, [GValuePtr]),
+    ("get_boolean", gboolean, [GValuePtr]),
 ]
 
 wrap_class(_gobject, GValue, GValuePtr, "g_value_", _methods)
 
+
+set_property = _gobject.g_object_set_property
+set_property.argtypes = [gpointer, gchar_p, GValuePtr]
+set_property.resttype = None
+
+get_property = _gobject.g_object_get_property
+get_property.argtypes = [gpointer, gchar_p, GValuePtr]
+get_property.resttype = None
 
 class GParamFlags(Flags):
     READABLE = 1 << 0
@@ -185,6 +199,8 @@ _methods = [
     ("get_name", gchar_p, [GParamSpecPtr]),
     ("get_nick", gchar_p, [GParamSpecPtr]),
     ("get_blurb", gchar_p, [GParamSpecPtr]),
+    ("ref", GParamSpecPtr, [GParamSpecPtr]),
+    ("unref", None, [GParamSpecPtr]),
 ]
 
 wrap_class(_gobject, GParamSpec, GParamSpecPtr, "g_param_spec_", _methods)

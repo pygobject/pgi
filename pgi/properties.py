@@ -4,11 +4,12 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from ctypes import cast
+from ctypes import cast, byref, pointer, POINTER
 
 from gitypes import GObjectClassPtr, G_TYPE_FROM_INSTANCE, GIBaseInfoPtr
 from gitypes import GIRepositoryPtr, GIInfoType, GIObjectInfoPtr
-from gitypes import GIInterfaceInfoPtr
+from gitypes import GIInterfaceInfoPtr, GValue, GValuePtr, GITypeTag
+from gitypes import gobject
 
 from util import escape_name
 from gtype import PGType
@@ -16,9 +17,11 @@ from gtype import PGType
 
 class GParamSpec(object):
     _spec = None
+    _info = None
 
-    def __init__(self, spec, name):
+    def __init__(self, spec, name, info):
         self._spec = spec
+        self._info = info
         g_type = G_TYPE_FROM_INSTANCE(spec.contents.g_type_instance)
         self.__gtype__ = PGType(g_type)
         self.name = name
@@ -44,14 +47,53 @@ class GParamSpec(object):
 
 
 class Property(object):
-    def __init__(self, name):
-        self.__name = name
+    def __init__(self, spec, obj):
+        self.__spec = spec
+        self.__obj = obj._obj
+        type_ = spec._info.get_type()
+        self.__tag = type_.get_tag().value
+        cast(type_, GIBaseInfoPtr).unref()
+        self.__value_type = spec.value_type._type.value
+        self.__ref_pool = []
 
     def __get__(self, instance, owner):
-        return None
+        gvalue = GValue(0)
+        ptr = GValuePtr(gvalue)
+        ptr.init(self.__value_type)
+
+        tag = self.__tag
+        if tag == GITypeTag.UTF8:
+            func = ptr.get_string
+        elif tag == GITypeTag.INT32:
+            func = ptr.get_int
+        elif tag == GITypeTag.BOOLEAN:
+            func = ptr.get_boolean
+        else:
+            ptr.unset()
+            return None
+
+        gobject.get_property(self.__obj, self.__spec.name, ptr)
+        return func()
 
     def __set__(self, instance, value):
-        raise AttributeError
+        gvalue = GValue(0)
+        ptr = GValuePtr(gvalue)
+        ptr.init(self.__value_type)
+
+        tag = self.__tag
+        if tag == GITypeTag.BOOLEAN:
+            ptr.set_boolean(value)
+        elif tag == GITypeTag.INT32:
+            ptr.set_int(value)
+        elif tag == GITypeTag.UTF8:
+            if isinstance(value, unicode):
+                value = value.encode("utf-8")
+            ptr.set_string(value)
+        else:
+            ptr.unset()
+            raise AttributeError
+
+        gobject.set_property(self.__obj, self.__spec.name, ptr)
 
 
 class _GProps(object):
@@ -100,16 +142,17 @@ class _Props(object):
         prop_bases = tuple(prop_bases) or cls.__bases__
 
 
-        obj_class = cast(self.__gtype.class_peek(), GObjectClassPtr)
+        klass = self.__gtype.class_ref()
+        obj_class = cast(klass, GObjectClassPtr)
         for i in xrange(info.get_n_properties()):
             prop_info = info.get_property(i)
             prop_base = cast(prop_info, GIBaseInfoPtr)
             real_name = prop_base.get_name()
             spec = obj_class.find_property(real_name)
             attr_name = escape_name(real_name)
-            cls_dict[attr_name] = GParamSpec(spec, real_name)
-            prop_base.unref()
+            cls_dict[attr_name] = GParamSpec(spec, real_name, prop_info)
 
+        self.__gtype.class_unref(klass)
         base_info.unref()
 
         attr = type("GProps", tuple(prop_bases), cls_dict)(name, False)
@@ -128,7 +171,7 @@ class _Props(object):
 
             for key in (p for p in dir(specs) if not p.startswith("_")):
                 spec = getattr(specs, key)
-                cls_dict[key] = Property(spec.name)
+                cls_dict[key] = Property(spec, instance)
 
             attr = type("GProps", cls.__bases__, cls_dict)(self.__name, True)
             self.__inst_cache = attr

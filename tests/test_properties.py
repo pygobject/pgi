@@ -27,8 +27,7 @@ class PropertiesTest(unittest.TestCase):
         self.assertEqual(param.name, "transient-for")
         self.assertEqual(param.nick, "Transient for Window")
         self.assertEqual(param.owner_type, Gtk.Window.__gtype__)
-        # FIXME:
-        #self.assertEqual(param.value_type, None)
+        self.assertEqual(param.value_type, Gtk.Window.__gtype__)
 
     def test_gtype(self):
         w = Gtk.Window
@@ -45,3 +44,14 @@ class PropertiesTest(unittest.TestCase):
         specs = [p for p in dir(w.props) if not p.startswith("_")]
         self.assertEqual(len(props), 70)
         self.assertEqual(w.props.double_buffered.name, "double-buffered")
+
+    def test_set_basic(self):
+        w = Gtk.Window()
+        w.props.title = "foobar"
+        self.assertEqual(w.props.title, "foobar")
+        w.props.width_request = 42
+        self.assertEqual(w.props.width_request, 42)
+        w.props.no_show_all = 42
+        self.assertEqual(w.props.no_show_all, True)
+        w.props.no_show_all = False
+        self.assertEqual(w.props.no_show_all, False)
