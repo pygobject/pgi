@@ -116,6 +116,7 @@ GObjectPtr = POINTER(GObject)
 class GValue(Structure):
     _fields_ = [
         ("g_type", GType),
+        ("dummy", guint64 * 2),
     ]
 
 

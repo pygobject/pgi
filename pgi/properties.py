@@ -57,8 +57,7 @@ class Property(object):
         self.__ref_pool = []
 
     def __get__(self, instance, owner):
-        gvalue = GValue(0)
-        ptr = GValuePtr(gvalue)
+        ptr = GValuePtr(GValue())
         ptr.init(self.__value_type)
 
         tag = self.__tag
@@ -76,8 +75,7 @@ class Property(object):
         return func()
 
     def __set__(self, instance, value):
-        gvalue = GValue(0)
-        ptr = GValuePtr(gvalue)
+        ptr = GValuePtr(GValue())
         ptr.init(self.__value_type)
 
         tag = self.__tag
