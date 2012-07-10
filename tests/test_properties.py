@@ -60,3 +60,10 @@ class PropertiesTest(unittest.TestCase):
         w = Gtk.Window()
         w.props.title = u'\xf6\xe4\xfc'
         self.assertEqual(w.props.title, '\xc3\xb6\xc3\xa4\xc3\xbc')
+
+    def test_instance(self):
+        w = Gtk.Window()
+        w.props.title = "a"
+        w2 = Gtk.Window()
+        w2.props.title = "b"
+        self.assertEqual(w.props.title, "a")

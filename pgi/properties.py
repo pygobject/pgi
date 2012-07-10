@@ -106,7 +106,6 @@ class _GProps(object):
 
 class _Props(object):
     __cache = None
-    __inst_cache = None
 
     def __init__(self, namespace, name, gtype):
         self.__namespace = namespace
@@ -162,17 +161,14 @@ class _Props(object):
         if not instance:
             return specs
 
-        attr = self.__inst_cache
-        if not attr:
-            cls = _GProps
-            cls_dict = dict(cls.__dict__)
+        cls = _GProps
+        cls_dict = dict(cls.__dict__)
 
-            for key in (p for p in dir(specs) if not p.startswith("_")):
-                spec = getattr(specs, key)
-                cls_dict[key] = Property(spec, instance)
+        for key in (p for p in dir(specs) if not p.startswith("_")):
+            spec = getattr(specs, key)
+            cls_dict[key] = Property(spec, instance)
 
-            attr = type("GProps", cls.__bases__, cls_dict)(self.__name, True)
-            self.__inst_cache = attr
+        attr = type("GProps", cls.__bases__, cls_dict)(self.__name, True)
 
         setattr(instance, "props", attr)
         return attr
