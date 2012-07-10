@@ -55,3 +55,8 @@ class PropertiesTest(unittest.TestCase):
         self.assertEqual(w.props.no_show_all, True)
         w.props.no_show_all = False
         self.assertEqual(w.props.no_show_all, False)
+
+    def test_unicode(self):
+        w = Gtk.Window()
+        w.props.title = u'\xf6\xe4\xfc'
+        self.assertEqual(w.props.title, '\xc3\xb6\xc3\xa4\xc3\xbc')
