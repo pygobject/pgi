@@ -14,3 +14,7 @@ class MiscTest(unittest.TestCase):
         self.assertTrue(len(dir(Gtk)) > 1000)
 
         self.assertEqual(sys.getdefaultencoding(), "ascii")
+
+        self.assertEqual(Gtk._version, "3.0")
+        self.assertEqual(GObject._version, "2.0")
+        self.assertEqual(GLib._version, "2.0")

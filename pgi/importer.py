@@ -65,6 +65,7 @@ class Importer(object):
 
         # Generate bindings, set up lazy attributes
         instance = module.Module(repository, namespace, library)
+        instance._version = version
 
         # add to module and sys.modules
         setattr(__import__(const.PREFIX), namespace, instance)
