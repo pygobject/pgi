@@ -72,10 +72,7 @@ class Importer(object):
         sys.modules[fullname] = instance
 
         # Import a override module if available.
-        # This calls things like gtk_init and returns new
-        # classes / functions that replace the original ones
-        for name, replace in overrides.load(namespace).iteritems():
-            setattr(instance, name, replace)
+        overrides.load(namespace, instance)
 
         return instance
 

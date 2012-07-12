@@ -20,9 +20,13 @@ class _Object(object):
     _obj = None
     __gtype__ = None
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         self._obj = gobject.new(self.__gtype__._type, 0)
         gobject.ref_sink(self._obj)
+
+        props = self.props
+        for key, value in kwargs.iteritems():
+            setattr(props, key, value)
 
     def __repr__(self):
         form = "<%s object at 0x%x (%s at 0x%x)>"

@@ -4,6 +4,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+from warnings import warn
 from ctypes import cast, byref, pointer, POINTER
 
 from gitypes import GObjectClassPtr, G_TYPE_FROM_INSTANCE, GIBaseInfoPtr
@@ -69,6 +70,8 @@ class Property(object):
             func = ptr.get_boolean
         else:
             ptr.unset()
+            name = self.__spec.name
+            warn("Property %r unhandled. Type not supported" % name, Warning)
             return None
 
         gobject.get_property(self.__obj, self.__spec.name, ptr)
@@ -89,7 +92,9 @@ class Property(object):
             ptr.set_string(value)
         else:
             ptr.unset()
-            raise AttributeError
+            name = self.__spec.name
+            warn("Property %r unhandled. Type not supported" % name, Warning)
+            return
 
         gobject.set_property(self.__obj, self.__spec.name, ptr)
 

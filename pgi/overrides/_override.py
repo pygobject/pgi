@@ -6,40 +6,56 @@
 
 import os
 import sys
+import types
 
-_overrides = None
+_overrides = []
+_active_module = []
 
-
-def load(namespace):
-    global _overrides
-    _overrides = {}
+def load(namespace, module):
+    global _active_module, _overrides
 
     # look away now
     p = sys.path
     sys.path = [os.path.dirname(__file__)]
+    _active_module.append(module)
+    _overrides.append({})
     try:
-        __import__(namespace, globals())
+        override_module = __import__(namespace, globals())
     except ImportError:
         pass
-    sys.path = p
+    else:
+        # inject a module copy into the override module that
+        # has the original classes for all overriden ones
+        # so the classes can access the bases at runtime
+        module_copy = types.ModuleType("")
+        module_copy.__dict__.update(module.__dict__)
+        for name, klass in _overrides[-1].iteritems():
+            setattr(module_copy, name, klass)
+        vars(override_module)[namespace] = module_copy
 
-    return _overrides
+    _active_module.pop(-1)
+    _overrides.pop(-1)
+    sys.path = p
 
 
 def duplicate(klass, name):
-    global _overrides
-    _overrides[name] = klass
+    global _active_module
+
+    assert not hasattr(_active_module[-1], name)
+    setattr(_active_module[-1], name, klass)
 
 
 def override(klass):
-    global _overrides
+    global _active_module
 
     old_klass = klass.__mro__[1]
     name = old_klass.__name__
-
-    _overrides[name] = klass
-
     klass.__name__ = name
     klass.__module__ = old_klass.__module__
+
+    assert getattr(_active_module[-1], name) is old_klass
+
+    setattr(_active_module[-1], name, klass)
+    _overrides[-1][name] = old_klass
 
     return klass

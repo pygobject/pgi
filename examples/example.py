@@ -11,6 +11,6 @@ from pgi.repository import Gtk
 
 
 if __name__ == '__main__':
-    b = Gtk.Window("Helllloooo")
+    b = Gtk.Window(title="Helllloooo")
     b.show_all()
     Gtk.main()
