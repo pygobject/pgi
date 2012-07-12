@@ -586,8 +586,8 @@ class IMContext(Gtk.IMContext):
 IMContext = override(IMContext)
 __all__.append('IMContext')
 
-# FIXME
-"""class RecentInfo(Gtk.RecentInfo):
+
+class RecentInfo(Gtk.RecentInfo):
 
     def get_application_info(self, app_name):
         success, app_exec, count, time = super(RecentInfo, self).get_application_info(app_name)
@@ -595,7 +595,7 @@ __all__.append('IMContext')
             return (app_exec, count, time,)
 
 RecentInfo = override(RecentInfo)
-__all__.append('RecentInfo')"""
+__all__.append('RecentInfo')
 
 
 class TextBuffer(Gtk.TextBuffer):
@@ -686,8 +686,8 @@ class TextBuffer(Gtk.TextBuffer):
 TextBuffer = override(TextBuffer)
 __all__.append('TextBuffer')
 
-# FIXME
-"""class TextIter(Gtk.TextIter):
+
+class TextIter(Gtk.TextIter):
 
     def forward_search(self, string, flags, limit):
         success, match_start, match_end = super(TextIter, self).forward_search(string,
@@ -715,7 +715,7 @@ __all__.append('TextBuffer')
         return super(TextIter, self).toggles_tag(tag)
 
 TextIter = override(TextIter)
-__all__.append('TextIter')"""
+__all__.append('TextIter')
 
 
 class TreeModel(Gtk.TreeModel):
@@ -1158,8 +1158,8 @@ class TreeModelRowIter(object):
 
 __all__.append('TreeModelRowIter')
 
-# FIXME
-"""class TreePath(Gtk.TreePath):
+
+class TreePath(Gtk.TreePath):
 
     def __new__(cls, path=0):
         if isinstance(path, int):
@@ -1199,7 +1199,7 @@ __all__.append('TreeModelRowIter')
         return (int(part) for part in str(self).split(':'))
 
 TreePath = override(TreePath)
-__all__.append('TreePath')"""
+__all__.append('TreePath')
 
 
 class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
@@ -1504,8 +1504,8 @@ class Arrow(Gtk.Arrow):
 Arrow = override(Arrow)
 __all__.append('Arrow')
 
-# FIXME
-"""class IconSet(Gtk.IconSet):
+
+class IconSet(Gtk.IconSet):
     def __new__(cls, pixbuf=None):
         if pixbuf is not None:
             iconset = Gtk.IconSet.new_from_pixbuf(pixbuf)
@@ -1514,7 +1514,7 @@ __all__.append('Arrow')
         return iconset
 
 IconSet = override(IconSet)
-__all__.append('IconSet')"""
+__all__.append('IconSet')
 
 
 class Viewport(Gtk.Viewport):
