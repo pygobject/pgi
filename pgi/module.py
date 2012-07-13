@@ -11,11 +11,12 @@ from constant import ConstantAttribute
 from function import FunctionAttribute
 from structure import StructureAttribute
 from obj import ObjectAttribute, InterfaceAttribute
+from union import UnionAttribute
 
 
 _attr_list = [None, FunctionAttribute, None, StructureAttribute, None,
               EnumAttribute, FlagsAttribute, ObjectAttribute,
-              InterfaceAttribute, ConstantAttribute, None, None, None, None,
+              InterfaceAttribute, ConstantAttribute, None, UnionAttribute, None, None,
               None, None, None, None, None, None]
 
 
