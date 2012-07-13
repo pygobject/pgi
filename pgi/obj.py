@@ -35,11 +35,15 @@ def gparamspec_to_gvalue_ptr(spec, value):
             ptr.set_enum(int(value))
         else:
             done = False
+    elif tag == GITypeTag.UTF8:
+        if isinstance(value, unicode):
+            value = value.encode("utf-8")
+        ptr.set_string(value)
     else:
         done = False
 
     if not done:
-        ptr.unest()
+        ptr.unset()
         return None
 
     return ptr

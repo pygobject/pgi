@@ -75,6 +75,13 @@ class ObjectTest(unittest.TestCase):
         w = Gtk.Window()
         self.assertEqual(w.props.type, Gtk.WindowType.TOPLEVEL)
 
+        w = Gtk.Window(title="test123")
+        self.assertEqual(w.props.title, "test123")
+
+        w = Gtk.Window(title=u"test123")
+        self.assertTrue(isinstance(w.props.title, str))
+        self.assertEqual(w.props.title, "test123")
+
 
 class GTypeTest(unittest.TestCase):
     def test_repr(self):
