@@ -10,9 +10,9 @@ from ctypes import cast, byref, pointer, POINTER
 from gitypes import GObjectClassPtr, G_TYPE_FROM_INSTANCE, GIBaseInfoPtr
 from gitypes import GIRepositoryPtr, GIInfoType, GIObjectInfoPtr
 from gitypes import GIInterfaceInfoPtr, GValue, GValuePtr, GITypeTag
-from gitypes import gobject
+from gitypes import gobject, GIInfoType
 
-from util import escape_name
+from util import escape_name, import_attribute
 from gtype import PGType
 
 
@@ -53,6 +53,17 @@ class Property(object):
         self.__obj = obj._obj
         type_ = spec._info.get_type()
         self.__tag = type_.get_tag().value
+
+        self.__interface = False
+        if self.__tag == GITypeTag.INTERFACE:
+            iface_info = type_.get_interface()
+            self.__tag = iface_info.get_type().value
+            name = iface_info.get_name()
+            namespace = iface_info.get_namespace()
+            self.__iclass = import_attribute(namespace, name)
+            iface_info.unref()
+            self.__interface = True
+
         cast(type_, GIBaseInfoPtr).unref()
         self.__value_type = spec.value_type._type.value
         self.__ref_pool = []
@@ -62,13 +73,19 @@ class Property(object):
         ptr.init(self.__value_type)
 
         tag = self.__tag
-        if tag == GITypeTag.UTF8:
-            func = ptr.get_string
-        elif tag == GITypeTag.INT32:
-            func = ptr.get_int
-        elif tag == GITypeTag.BOOLEAN:
-            func = ptr.get_boolean
+        func = None
+        if not self.__interface:
+            if tag == GITypeTag.UTF8:
+                func = ptr.get_string
+            elif tag == GITypeTag.INT32:
+                func = ptr.get_int
+            elif tag == GITypeTag.BOOLEAN:
+                func = ptr.get_boolean
         else:
+            if tag == GIInfoType.ENUM:
+                func = lambda: self.__iclass(ptr.get_enum())
+
+        if not func:
             ptr.unset()
             name = self.__spec.name
             warn("Property %r unhandled. Type not supported" % name, Warning)
@@ -82,15 +99,25 @@ class Property(object):
         ptr.init(self.__value_type)
 
         tag = self.__tag
-        if tag == GITypeTag.BOOLEAN:
-            ptr.set_boolean(value)
-        elif tag == GITypeTag.INT32:
-            ptr.set_int(value)
-        elif tag == GITypeTag.UTF8:
-            if isinstance(value, unicode):
-                value = value.encode("utf-8")
-            ptr.set_string(value)
+        done = True
+        if not self.__interface:
+            if tag == GITypeTag.BOOLEAN:
+                ptr.set_boolean(value)
+            elif tag == GITypeTag.INT32:
+                ptr.set_int(value)
+            elif tag == GITypeTag.UTF8:
+                if isinstance(value, unicode):
+                    value = value.encode("utf-8")
+                ptr.set_string(value)
+            else:
+                done = False
         else:
+            if tag == GIInfoType.ENUM:
+                done = False
+            else:
+                done = False
+
+        if not done:
             ptr.unset()
             name = self.__spec.name
             warn("Property %r unhandled. Type not supported" % name, Warning)

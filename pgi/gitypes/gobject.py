@@ -157,6 +157,7 @@ _methods = [
     ("get_string", gchar_p, [GValuePtr]),
     ("get_int", gint, [GValuePtr]),
     ("get_boolean", gboolean, [GValuePtr]),
+    ("get_enum", gint, [GValuePtr]),
 ]
 
 wrap_class(_gobject, GValue, GValuePtr, "g_value_", _methods)
