@@ -40,22 +40,31 @@ def load(namespace, module):
 
 def duplicate(klass, name):
     global _active_module
+    module = _active_module[-1]
 
-    assert not hasattr(_active_module[-1], name)
-    setattr(_active_module[-1], name, klass)
+    assert not hasattr(module, name)
+    setattr(module, name, klass)
 
 
 def override(klass):
-    global _active_module
+    global _active_module, _overrides
+    module = _active_module[-1]
+
+    # FIXME: hack
+    if hasattr(klass, "_is_function"):
+        def wrap(wrapped):
+            setattr(module, klass.__class__.__name__, wrapped)
+            return wrapped
+        return wrap
 
     old_klass = klass.__mro__[1]
     name = old_klass.__name__
     klass.__name__ = name
     klass.__module__ = old_klass.__module__
 
-    assert getattr(_active_module[-1], name) is old_klass
+    assert getattr(module, name) is old_klass
 
-    setattr(_active_module[-1], name, klass)
+    setattr(module, name, klass)
     _overrides[-1][name] = old_klass
 
     return klass

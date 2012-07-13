@@ -40,6 +40,7 @@ def handle_return(return_info, value):
 class Function(object):
     _handle = None
     _return_info = None
+    _is_function = True
 
     def __init__(self, info, lib):
         call_info = cast(info, GICallableInfoPtr)
