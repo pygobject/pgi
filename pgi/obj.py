@@ -5,15 +5,44 @@
 # published by the Free Software Foundation.
 
 from warnings import warn
-from ctypes import cast
+from ctypes import cast, byref, CDLL, sizeof
 
 from gitypes import GIObjectInfoPtr, GIRegisteredTypeInfoPtr, GIBaseInfoPtr
 from gitypes import gobject, GIFunctionInfoFlags, GIFunctionInfoPtr
 from gitypes import GICallableInfoPtr, GIInterfaceInfoPtr, gpointer
+from gitypes import GValuePtr, GValue, GITypeTag, GIInfoType, GParameter
+from gitypes import GParameterPtr, g_malloc0
 
 from util import import_attribute, typeinfo_to_ctypes
 from gtype import PGType
 from properties import PropertyAttribute
+
+
+def gparamspec_to_gvalue_ptr(spec, value):
+    type_ = spec._info.get_type()
+    tag = type_.get_tag().value
+
+    ptr = GValuePtr(GValue())
+    ptr.init(spec.value_type._type.value)
+
+    done = True
+    if tag == GITypeTag.INTERFACE:
+        iface_info = type_.get_interface()
+        tag = iface_info.get_type().value
+        iface_info.unref()
+
+        if tag == GIInfoType.ENUM:
+            ptr.set_enum(int(value))
+        else:
+            done = False
+    else:
+        done = False
+
+    if not done:
+        ptr.unest()
+        return None
+
+    return ptr
 
 
 class _Object(object):
@@ -21,12 +50,27 @@ class _Object(object):
     __gtype__ = None
 
     def __init__(self, **kwargs):
-        self._obj = gobject.new(self.__gtype__._type, 0)
+        num_params, params = self.__get_gparam_array(**kwargs)
+        self._obj = gobject.newv(self.__gtype__._type, num_params, params)
         gobject.ref_sink(self._obj)
 
-        props = self.props
-        for key, value in kwargs.iteritems():
-            setattr(props, key, value)
+    def __get_gparam_array(self, **kwargs):
+        if not kwargs:
+            return 0, None
+
+        specs = type(self).props
+        array_size = sizeof(GParameter) * len(kwargs)
+        array = cast(g_malloc0(array_size), GParameterPtr)
+
+        for i ,(key, value) in enumerate(kwargs.iteritems()):
+            spec = getattr(specs, key)
+            gvalue_ptr = gparamspec_to_gvalue_ptr(spec, value)
+            if not gvalue_ptr:
+                raise TypeError
+            array[i].name = spec.name
+            array[i].value = gvalue_ptr.contents
+
+        return i + 1, array
 
     def __repr__(self):
         form = "<%s object at 0x%x (%s at 0x%x)>"

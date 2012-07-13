@@ -68,6 +68,13 @@ class ObjectTest(unittest.TestCase):
         w.destroy()
         self.assertEqual(w.__grefcount__, 1)
 
+    def test_props_construct(self):
+        w = Gtk.Window(type=1)
+        self.assertEqual(w.props.type, Gtk.WindowType.POPUP)
+
+        w = Gtk.Window()
+        self.assertEqual(w.props.type, Gtk.WindowType.TOPLEVEL)
+
 
 class GTypeTest(unittest.TestCase):
     def test_repr(self):

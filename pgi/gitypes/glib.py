@@ -34,6 +34,9 @@ gulong = c_ulong
 gsize = c_size_t
 gconstpointer = c_void_p
 
+g_malloc0 = _glib.g_malloc0
+g_malloc0.argtypes = [gsize]
+g_malloc0.resttype = gpointer
 
 class Enum(guint):
     def __str__(self):
@@ -244,7 +247,7 @@ __all__ = ["gchar_p", "guint", "gpointer", "gint32", "guint32", "gint",
            "gint64", "guint64", "gfloat", "gdouble", "gshort", "gushort",
            "glong", "gulong", "gsize", "Enum", "Flags", "gchar", "guchar",
            "GError", "GErrorException", "check_gerror", "GErrorPtr",
-           "GMappedFile", "GMappedFilePtr", "gconstpointer",
+           "GMappedFile", "GMappedFilePtr", "gconstpointer", "g_malloc0",
            "GOptionGroup", "GOptionGroupPtr",
            "GSList", "GSListPtr",
            "GList", "GListPtr"]

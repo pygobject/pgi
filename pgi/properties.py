@@ -66,7 +66,6 @@ class Property(object):
 
         cast(type_, GIBaseInfoPtr).unref()
         self.__value_type = spec.value_type._type.value
-        self.__ref_pool = []
 
     def __get__(self, instance, owner):
         ptr = GValuePtr(GValue())

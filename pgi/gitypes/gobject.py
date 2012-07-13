@@ -62,21 +62,6 @@ _methods = [
 
 wrap_class(_gobject, GType, GType, "g_type_", _methods)
 
-
-_methods = [
-    ("newv", gpointer, [GType, guint]),
-    ("new", gpointer, [GType, guint]),
-    ("unref", None, [gpointer]),
-    ("ref_sink", gpointer, [gpointer]),
-    ("is_floating", gboolean, [gpointer]),
-]
-
-for (name, ret, args) in _methods:
-    h = getattr(_gobject, "g_object_" + name)
-    h.argtypes = args
-    h.resttype = ret
-    globals()[name] = h
-
 free = _gobject.g_free
 free.argtypes = [gpointer]
 free.resttype = None
@@ -208,6 +193,32 @@ _methods = [
 wrap_class(_gobject, GParamSpec, GParamSpecPtr, "g_param_spec_", _methods)
 
 
+class GParameter(Structure):
+    _fields_ = [
+        ("name", gchar_p),
+        ("value", GValue),
+    ]
+
+
+class GParameterPtr(POINTER(GParameter)):
+    _type_ = GParameter
+
+
+_methods = [
+    ("newv", gpointer, [GType, guint, GParameterPtr]),
+    ("new", gpointer, [GType, guint]),
+    ("unref", None, [gpointer]),
+    ("ref_sink", gpointer, [gpointer]),
+    ("is_floating", gboolean, [gpointer]),
+]
+
+for (name, ret, args) in _methods:
+    h = getattr(_gobject, "g_object_" + name)
+    h.argtypes = args
+    h.resttype = ret
+    globals()[name] = h
+
+
 class GObjectClass(Structure):
     pass
 
@@ -227,6 +238,7 @@ def G_TYPE_FROM_INSTANCE(instance):
 
 
 __all__ = ["GType", "g_type_init", "GParamFlags", "GValue", "GValuePtr",
-           "GValueTransform", "GSignalFlags", "GTypeFlags",
+           "GValueTransform", "GSignalFlags", "GTypeFlags", "GParameter",
            "GTypeFundamentalFlags", "GObjectPtr", "GParamSpec",
-           "GParamSpecPtr", "GObjectClassPtr", "G_TYPE_FROM_INSTANCE"]
+           "GParamSpecPtr", "GObjectClassPtr", "G_TYPE_FROM_INSTANCE",
+           "GParameterPtr",]
