@@ -36,7 +36,7 @@ gconstpointer = c_void_p
 
 g_malloc0 = _glib.g_malloc0
 g_malloc0.argtypes = [gsize]
-g_malloc0.resttype = gpointer
+g_malloc0.restype = gpointer
 
 class Enum(guint):
     def __str__(self):
