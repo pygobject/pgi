@@ -147,8 +147,14 @@ class GTypeTest(unittest.TestCase):
         self.assertEqual(wt.pytype, Gtk.Widget)
 
     def test_lists(self):
-        wt = Gtk.Widget.__gtype__
-        # FIXME: interfaces returns some inval
-        # and there are not enough children
-        self.failUnlessEqual(wt.children[0].pytype, Gtk.Container)
-        self.failUnlessEqual(wt.interfaces[0].pytype, Atk.ImplementorIface)
+        wt = Gtk.Window.__gtype__
+        children = set([x.pytype for x in wt.children])
+        self.assertEqual(children, set([Gtk.Dialog]))
+        interfaces = set([x.pytype for x in wt.interfaces])
+        should = set([Atk.ImplementorIface, Gtk.Buildable])
+        self.assertEqual(interfaces, should)
+
+    def test_interfaces(self):
+        t = Gtk.Editable.__gtype__
+        self.assertEqual(t.parent.pytype, None)
+        self.assertTrue(t.is_interface)

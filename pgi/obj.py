@@ -177,6 +177,7 @@ def InterfaceAttribute(info, namespace, name, lib):
     iface_info = cast(info, GIInterfaceInfoPtr)
     iface_info.get_n_constants()
     cls_dict = dict(_Interface.__dict__)
+    cls_dict["__gtype__"] = PGType(iface_info.get_g_type())
     cls = type(name, _Interface.__bases__, cls_dict)
 
     if iface_info.get_n_constants():
