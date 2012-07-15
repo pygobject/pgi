@@ -10,6 +10,7 @@ from ctypes import cast, sizeof
 from gitypes import GIInterfaceInfoPtr, gpointer, gobject, GIFunctionInfoFlags
 from gitypes import GValuePtr, GValue, GITypeTag, GIInfoType, GParameter
 from gitypes import GParameterPtr, g_malloc0, GIObjectInfoPtr
+from gitypes import signal_connect_data, GCallback, GClosureNotify
 
 from util import import_attribute, typeinfo_to_ctypes
 from gtype import PGType
@@ -50,6 +51,7 @@ def gparamspec_to_gvalue_ptr(spec, value):
 class _Object(object):
     _obj = None
     __gtype__ = None
+    __signal_cb_ref = {}
 
     def __init__(self, **kwargs):
         num_params, params = self.__get_gparam_array(**kwargs)
@@ -78,6 +80,12 @@ class _Object(object):
         form = "<%s object at 0x%x (%s at 0x%x)>"
         name = type(self).__name__
         return form % (name, id(self), self.__gtype__.name, self._obj)
+
+    def connect(self, name, callback):
+        cb = GCallback(callback)
+        destroy = GClosureNotify()
+        id_ = signal_connect_data(self._obj, name, cb, None, destroy, 0)
+        self.__signal_cb_ref[id_] = (cb, destroy)
 
     @property
     def __grefcount__(self):

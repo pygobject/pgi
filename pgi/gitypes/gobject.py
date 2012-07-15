@@ -8,6 +8,7 @@ from ctypes import POINTER, Structure, CFUNCTYPE
 
 from glib import Flags, gulong, gchar_p, guint, gboolean, gpointer, guint32
 from glib import guint64, gchar, guchar, gint, glong, gint64, gfloat, gdouble
+from glib import Enum
 from _util import load, wrap_class
 
 _gobject = load("gobject-2.0")
@@ -239,9 +240,24 @@ def G_TYPE_FROM_INSTANCE(instance):
     return instance.g_class.contents.g_type
 
 
+class GConnectFlags(Enum):
+    CONNECT_AFTER = 1 << 0
+    CONNECT_SWAPPED = 1 << 1
+
+
+GCallback = CFUNCTYPE(None)
+GClosureNotify = CFUNCTYPE(None, gpointer, gpointer)
+
+signal_connect_data = _gobject.g_signal_connect_data
+signal_connect_data.argtypes = [gpointer, gchar_p, GCallback, gpointer,
+                                GClosureNotify, GConnectFlags]
+signal_connect_data.resttype = gulong
+
+
 __all__ = ["GType", "g_type_init", "GParamFlags", "GValue", "GValuePtr",
            "GValueTransform", "GSignalFlags", "GTypeFlags", "GParameter",
            "GTypeFundamentalFlags", "GObjectPtr", "GParamSpec",
            "GParamSpecPtr", "GObjectClassPtr", "G_TYPE_FROM_INSTANCE",
-           "GParameterPtr",
+           "GParameterPtr", "signal_connect_data", "GCallback",
+           "GClosureNotify",
 ]

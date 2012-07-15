@@ -13,4 +13,5 @@ from pgi.repository import Gtk
 if __name__ == '__main__':
     b = Gtk.Window(title="Helllloooo")
     b.show_all()
+    b.connect("destroy", lambda *x: Gtk.main_quit())
     Gtk.main()
