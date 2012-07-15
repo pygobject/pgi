@@ -43,12 +43,11 @@ class Function(object):
     _is_function = True
 
     def __init__(self, info, lib):
-        call_info = cast(info, GICallableInfoPtr)
-        return_info = call_info.get_return_type()
+        func_info = cast(info, GIFunctionInfoPtr)
+        return_info = func_info.get_return_type()
         tag = return_info.get_tag()
-        func = cast(call_info, GIFunctionInfoPtr)
 
-        h = getattr(lib, func.get_symbol())
+        h = getattr(lib, func_info.get_symbol())
         h.restype = typeinfo_to_ctypes(return_info)
         h.argtypes = tuple()
 

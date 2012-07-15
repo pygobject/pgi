@@ -7,7 +7,7 @@
 from warnings import warn
 from ctypes import cast
 
-from gitypes import GIEnumInfoPtr, GIBaseInfoPtr, GIRegisteredTypeInfoPtr
+from gitypes import GIEnumInfoPtr
 
 
 class _EnumClass(int):
@@ -53,9 +53,8 @@ def _get_values(enum):
     for i in xrange(enum.get_n_values()):
         value = enum.get_value(i)
         num = value.get_value()
-        base = cast(value, GIBaseInfoPtr)
-        vname = base.get_name().upper()
-        base.unref()
+        vname = value.get_name().upper()
+        value.unref()
         values.append((num, vname))
 
     return values
@@ -63,7 +62,7 @@ def _get_values(enum):
 
 def FlagsAttribute(info, namespace, name, lib):
     enum = cast(info, GIEnumInfoPtr)
-    enum_name = cast(info, GIRegisteredTypeInfoPtr).get_type_name()
+    enum_name = enum.get_type_name()
 
     if enum.get_n_methods():
         warn("Methods of flags not supported (%r)" % enum_name, Warning)
@@ -84,7 +83,7 @@ def FlagsAttribute(info, namespace, name, lib):
 
 def EnumAttribute(info, namespace, name, lib):
     enum = cast(info, GIEnumInfoPtr)
-    enum_name = cast(info, GIRegisteredTypeInfoPtr).get_type_name()
+    enum_name = enum.get_type_name()
 
     if enum.get_n_methods():
         warn("Methods of enums not supported (%r)" % enum_name, Warning)

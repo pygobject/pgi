@@ -24,7 +24,7 @@ def ConstantAttribute(info, namespace, name, lib):
 
     const_type = const.get_type()
     tag_type = const_type.get_tag().value
-    cast(const_type, GIBaseInfoPtr).unref()
+    const_type.unref()
 
     value_member = _union_access[tag_type]
     if not value_member:

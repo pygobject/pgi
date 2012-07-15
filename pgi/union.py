@@ -23,11 +23,10 @@ class _Union(object):
 
 
 def UnionAttribute(info, namespace, name, lib):
-    reg_info = cast(info, GIRegisteredTypeInfoPtr)
     struct_info = cast(info, GIUnionInfoPtr)
 
     cls_dict = dict(_Union.__dict__)
-    g_type = reg_info.get_g_type()
+    g_type = struct_info.get_g_type()
     cls_dict["__gtype__"] = PGType(g_type)
     cls = type(name, _Union.__bases__, cls_dict)
     cls.__module__ = namespace

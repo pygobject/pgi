@@ -63,7 +63,7 @@ class Property(object):
             iface_info.unref()
             self.__interface = True
 
-        cast(type_, GIBaseInfoPtr).unref()
+        type_.unref()
         self.__value_type = spec.value_type._type.value
 
     def __get__(self, instance, owner):
@@ -178,8 +178,7 @@ class _Props(object):
         obj_class = cast(klass, GObjectClassPtr)
         for i in xrange(info.get_n_properties()):
             prop_info = info.get_property(i)
-            prop_base = cast(prop_info, GIBaseInfoPtr)
-            real_name = prop_base.get_name()
+            real_name = prop_info.get_name()
             spec = obj_class.find_property(real_name)
             attr_name = escape_name(real_name)
             cls_dict[attr_name] = GParamSpec(spec, real_name, prop_info)
