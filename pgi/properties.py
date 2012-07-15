@@ -48,9 +48,8 @@ class GParamSpec(object):
 
 
 class Property(object):
-    def __init__(self, spec, obj):
+    def __init__(self, spec):
         self.__spec = spec
-        self.__obj = obj._obj
         type_ = spec._info.get_type()
         self.__tag = type_.get_tag().value
 
@@ -90,7 +89,7 @@ class Property(object):
             warn("Property %r unhandled. Type not supported" % name, Warning)
             return None
 
-        gobject.get_property(self.__obj, self.__spec.name, ptr)
+        gobject.get_property(instance._object, self.__spec.name, ptr)
         return func()
 
     def __set__(self, instance, value):
@@ -122,13 +121,17 @@ class Property(object):
             warn("Property %r unhandled. Type not supported" % name, Warning)
             return
 
-        gobject.set_property(self.__obj, self.__spec.name, ptr)
+        gobject.set_property(instance._object, self.__spec.name, ptr)
 
 
 class _GProps(object):
     def __init__(self, name, instance):
         self.__name = name
         self.__instance = instance
+
+    @property
+    def _object(self):
+        return self.__instance._obj
 
     def __repr__(self):
         text = (self.__instance and "instance ") or ""
@@ -137,6 +140,7 @@ class _GProps(object):
 
 class _Props(object):
     __cache = None
+    __cls_cache = None
 
     def __init__(self, namespace, name, gtype):
         self.__namespace = namespace
@@ -192,15 +196,20 @@ class _Props(object):
         if not instance:
             return specs
 
-        cls = _GProps
-        cls_dict = dict(cls.__dict__)
+        # get all the property names of the specs and build properties
+        if not self.__cls_cache:
+            props = {}
+            for key in (p for p in dir(specs) if not p.startswith("_")):
+                spec = getattr(specs, key)
+                props[key] = Property(spec)
 
-        for key in (p for p in dir(specs) if not p.startswith("_")):
-            spec = getattr(specs, key)
-            cls_dict[key] = Property(spec, instance)
+            cls = _GProps
+            cls_dict = dict(cls.__dict__)
+            cls_dict.update(props)
 
-        attr = type("GProps", cls.__bases__, cls_dict)(self.__name, True)
+            self.__cls_cache = type("GProps", cls.__bases__, cls_dict)
 
+        attr = self.__cls_cache(self.__name, instance)
         setattr(instance, "props", attr)
         return attr
 
