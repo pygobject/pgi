@@ -253,11 +253,23 @@ signal_connect_data.argtypes = [gpointer, gchar_p, GCallback, gpointer,
                                 GClosureNotify, GConnectFlags]
 signal_connect_data.resttype = gulong
 
+signal_handler_disconnect = _gobject.g_signal_handler_disconnect
+signal_handler_disconnect.argtypes = [gpointer, gulong]
+signal_handler_disconnect.resttype = None
+
+signal_handler_block = _gobject.g_signal_handler_block
+signal_handler_block.argtypes = [gpointer, gulong]
+signal_handler_block.resttype = None
+
+signal_handler_unblock = _gobject.g_signal_handler_unblock
+signal_handler_unblock.argtypes = [gpointer, gulong]
+signal_handler_unblock.resttype = None
 
 __all__ = ["GType", "g_type_init", "GParamFlags", "GValue", "GValuePtr",
            "GValueTransform", "GSignalFlags", "GTypeFlags", "GParameter",
            "GTypeFundamentalFlags", "GObjectPtr", "GParamSpec",
            "GParamSpecPtr", "GObjectClassPtr", "G_TYPE_FROM_INSTANCE",
            "GParameterPtr", "signal_connect_data", "GCallback",
-           "GClosureNotify",
+           "GClosureNotify", "signal_handler_disconnect", "GConnectFlags",
+           "signal_handler_unblock", "signal_handler_block",
 ]

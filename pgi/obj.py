@@ -11,6 +11,8 @@ from gitypes import GIInterfaceInfoPtr, gpointer, gobject, GIFunctionInfoFlags
 from gitypes import GValuePtr, GValue, GITypeTag, GIInfoType, GParameter
 from gitypes import GParameterPtr, g_malloc0, GIObjectInfoPtr
 from gitypes import signal_connect_data, GCallback, GClosureNotify
+from gitypes import GConnectFlags, signal_handler_disconnect
+from gitypes import signal_handler_unblock, signal_handler_block
 
 from util import import_attribute, typeinfo_to_ctypes
 from gtype import PGType
@@ -81,11 +83,32 @@ class _Object(object):
         name = type(self).__name__
         return form % (name, id(self), self.__gtype__.name, self._obj)
 
+
     def connect(self, name, callback):
         cb = GCallback(callback)
         destroy = GClosureNotify()
         id_ = signal_connect_data(self._obj, name, cb, None, destroy, 0)
         self.__signal_cb_ref[id_] = (cb, destroy)
+        return id_
+
+    def connect_after(self, name, callback):
+        cb = GCallback(callback)
+        destroy =GClosureNotify()
+        flags = GConnectFlags.CONNECT_AFTER
+        id_ = signal_connect_data(self._obj, name, cb, None, destroy, flags)
+        self.__signal_cb_ref[id_] = (cb, destroy)
+        return id_
+
+    def disconnect(self, id_):
+        if id_ in self.__signal_cb_ref:
+            signal_handler_disconnect(self._obj, id_)
+            del self.__signal_cb_ref[id_]
+
+    def handler_block(self, id_):
+        signal_handler_block(self._obj, id_)
+
+    def handler_unblock(self, id_):
+        signal_handler_unblock(self._obj, id_)
 
     @property
     def __grefcount__(self):
