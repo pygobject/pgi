@@ -18,7 +18,7 @@ class PGType(object):
         value = type_.value
         if value in cls.__types:
             return cls.__types[value]
-        obj = super(PGType, cls).__new__(cls, type_)
+        obj = super(PGType, cls).__new__(cls)
         cls.__types[value] = obj
         return obj
 
