@@ -14,7 +14,7 @@ from gitypes import signal_connect_data, GCallback, GClosureNotify
 from gitypes import GConnectFlags, signal_handler_disconnect
 from gitypes import signal_handler_unblock, signal_handler_block
 
-from util import import_attribute, typeinfo_to_ctypes
+from util import import_attribute, typeinfo_to_ctypes, set_gvalue_from_py
 from gtype import PGType
 from properties import PropertyAttribute
 
@@ -26,24 +26,14 @@ def gparamspec_to_gvalue_ptr(spec, value):
     ptr = GValuePtr(GValue())
     ptr.init(spec.value_type._type.value)
 
-    done = True
+    is_interface = False
     if tag == GITypeTag.INTERFACE:
         iface_info = type_.get_interface()
         tag = iface_info.get_type().value
         iface_info.unref()
+        is_interface = True
 
-        if tag == GIInfoType.ENUM:
-            ptr.set_enum(int(value))
-        else:
-            done = False
-    elif tag == GITypeTag.UTF8:
-        if isinstance(value, unicode):
-            value = value.encode("utf-8")
-        ptr.set_string(value)
-    else:
-        done = False
-
-    if not done:
+    if not set_gvalue_from_py(ptr, is_interface, tag, value):
         ptr.unset()
         return None
 

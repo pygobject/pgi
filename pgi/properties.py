@@ -12,7 +12,7 @@ from gitypes import GIRepositoryPtr, GIInfoType, GIObjectInfoPtr
 from gitypes import GIInterfaceInfoPtr, GValue, GValuePtr, GITypeTag
 from gitypes import gobject
 
-from util import escape_name, import_attribute
+from util import escape_name, import_attribute, set_gvalue_from_py
 from gtype import PGType
 
 
@@ -97,25 +97,8 @@ class Property(object):
         ptr.init(self.__value_type)
 
         tag = self.__tag
-        done = True
-        if not self.__interface:
-            if tag == GITypeTag.BOOLEAN:
-                ptr.set_boolean(value)
-            elif tag == GITypeTag.INT32:
-                ptr.set_int(value)
-            elif tag == GITypeTag.UTF8:
-                if isinstance(value, unicode):
-                    value = value.encode("utf-8")
-                ptr.set_string(value)
-            else:
-                done = False
-        else:
-            if tag == GIInfoType.ENUM:
-                done = False
-            else:
-                done = False
 
-        if not done:
+        if not set_gvalue_from_py(ptr, self.__interface, tag, value):
             ptr.unset()
             name = self.__spec.name
             warn("Property %r unhandled. Type not supported" % name, Warning)

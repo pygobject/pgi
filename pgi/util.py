@@ -8,7 +8,7 @@ import keyword
 import re
 from ctypes import cast
 
-from gitypes import GITypeTag
+from gitypes import GITypeTag, GIInfoType
 from gitypes.glib import *
 
 import const
@@ -37,19 +37,25 @@ def typeinfo_to_ctypes(info):
             return
 
 
-def typeinfo_get_name(info):
-    """Get a suitable name for debugging and reprs"""
-    tag = info.get_tag()
-    value = tag.value
-    if value == GITypeTag.INTERFACE:
-        interface = info.get_interface()
-        type_ = interface.get_type()
-        interface.unref()
-        return str(type_)
-    elif value == GITypeTag.UTF8:
-        return "STRING"
+def set_gvalue_from_py(ptr, is_interface, tag, value):
+    if is_interface:
+        if tag == GIInfoType.ENUM:
+            ptr.set_enum(int(value))
+        else:
+            return False
     else:
-        return str(tag)
+        if tag == GITypeTag.BOOLEAN:
+            ptr.set_boolean(value)
+        elif tag == GITypeTag.INT32:
+            ptr.set_int(value)
+        elif tag == GITypeTag.UTF8:
+            if isinstance(value, unicode):
+                value = value.encode("utf-8")
+            ptr.set_string(value)
+        else:
+            return False
+
+    return True
 
 
 def glist_get_all(g, type_):
