@@ -4,26 +4,24 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from ctypes import POINTER
-
-from gobject import *
-from gibaseinfo import *
-from gitypeinfo import *
-from giarginfo import *
+from gobject import GParamFlags
+from gibaseinfo import GIBaseInfo, GIBaseInfoPtr
+from gitypeinfo import GITypeInfoPtr, GIInfoType
+from giarginfo import GITransfer
 from _util import load, wrap_class
 
 _gir = load("girepository-1.0")
 
 
-def gi_is_property_info(base_info):
-    return base_info.get_type().value == GIInfoType.PROPERTY
+def gi_is_property_info(base_info, _type=GIInfoType.PROPERTY):
+    return base_info.get_type().value == _type
 
 
 class GIPropertyInfo(GIBaseInfo):
     pass
 
 
-class GIPropertyInfoPtr(POINTER(GIPropertyInfo)):
+class GIPropertyInfoPtr(GIBaseInfoPtr):
     _type_ = GIPropertyInfo
 
     def __repr__(self):

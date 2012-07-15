@@ -23,4 +23,6 @@ from gobject import *
 
 
 def gi_init():
+    from _util import wrap_setup
+    wrap_setup()
     g_type_init()

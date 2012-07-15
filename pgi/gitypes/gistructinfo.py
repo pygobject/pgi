@@ -4,26 +4,25 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from ctypes import POINTER
-
-from glib import *
-from gibaseinfo import *
-from gifieldinfo import *
-from gicallableinfo import *
+from glib import gint, gchar_p, gsize, gboolean
+from gibaseinfo import GIInfoType
+from gifieldinfo import GIFieldInfoPtr
+from gicallableinfo import GIFunctionInfoPtr
+from giregisteredtypeinfo import GIRegisteredTypeInfo, GIRegisteredTypeInfoPtr
 from _util import load, wrap_class
 
 _gir = load("girepository-1.0")
 
 
-def gi_is_struct_info(base_info):
-    return base_info.get_type().value == GIInfoType.STRUCT
+def gi_is_struct_info(base_info, _type=GIInfoType.STRUCT):
+    return base_info.get_type().value == _type
 
 
-class GIStructInfo(GIBaseInfo):
+class GIStructInfo(GIRegisteredTypeInfo):
     pass
 
 
-class GIStructInfoPtr(POINTER(GIStructInfo)):
+class GIStructInfoPtr(GIRegisteredTypeInfoPtr):
     _type_ = GIStructInfo
 
     def __repr__(self):

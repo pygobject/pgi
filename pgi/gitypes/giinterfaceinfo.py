@@ -4,28 +4,27 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from ctypes import POINTER
-
-from glib import *
-from gibaseinfo import *
-from gipropertyinfo import *
-from gicallableinfo import *
-from giconstantinfo import *
-from gistructinfo import *
+from glib import gint, gchar_p
+from gibaseinfo import GIInfoType, GIBaseInfoPtr
+from gipropertyinfo import GIPropertyInfoPtr
+from gicallableinfo import GIFunctionInfoPtr, GISignalInfoPtr, GIVFuncInfoPtr
+from giconstantinfo import GIConstantInfoPtr
+from gistructinfo import GIStructInfoPtr
+from giregisteredtypeinfo import GIRegisteredTypeInfo, GIRegisteredTypeInfoPtr
 from _util import load, wrap_class
 
 _gir = load("girepository-1.0")
 
 
-def gi_is_interface_info(base_info):
-    return base_info.get_type().value == GIInfoType.INTERFACE
+def gi_is_interface_info(base_info, _type=GIInfoType.INTERFACE):
+    return base_info.get_type().value == _type
 
 
-class GIInterfaceInfo(GIBaseInfo):
+class GIInterfaceInfo(GIRegisteredTypeInfo):
     pass
 
 
-class GIInterfaceInfoPtr(POINTER(GIInterfaceInfo)):
+class GIInterfaceInfoPtr(GIRegisteredTypeInfoPtr):
     _type_ = GIInterfaceInfo
 
     def __repr__(self):

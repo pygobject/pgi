@@ -4,28 +4,27 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from ctypes import POINTER
-
-from glib import *
-from gibaseinfo import *
-from gifieldinfo import *
-from gicallableinfo import *
-from gitypeinfo import *
-from giconstantinfo import *
+from glib import gint, gboolean, gchar_p, gsize
+from gibaseinfo import GIInfoType
+from gifieldinfo import GIFieldInfoPtr
+from gicallableinfo import GIFunctionInfoPtr
+from gitypeinfo import GITypeInfoPtr
+from giconstantinfo import GIConstantInfoPtr
+from giregisteredtypeinfo import GIRegisteredTypeInfo, GIRegisteredTypeInfoPtr
 from _util import load, wrap_class
 
 _gir = load("girepository-1.0")
 
 
-def gi_is_union_info(base_info):
-    return base_info.get_type().value == GIInfoType.UNION
+def gi_is_union_info(base_info, _type=GIInfoType.UNION):
+    return base_info.get_type().value == _type
 
 
-class GIUnionInfo(GIBaseInfo):
+class GIUnionInfo(GIRegisteredTypeInfo):
     pass
 
 
-class GIUnionInfoPtr(POINTER(GIUnionInfo)):
+class GIUnionInfoPtr(GIRegisteredTypeInfoPtr):
     _type_ = GIUnionInfo
 
 _methods = [

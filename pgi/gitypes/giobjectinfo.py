@@ -4,31 +4,32 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from ctypes import POINTER, c_char_p, CFUNCTYPE, c_void_p
+from ctypes import c_char_p, CFUNCTYPE, c_void_p
 
-from glib import *
-from gobject import *
-from gibaseinfo import *
-from giinterfaceinfo import *
-from gifieldinfo import *
-from gipropertyinfo import *
-from gicallableinfo import *
-from giconstantinfo import *
-from gistructinfo import *
+from glib import gchar_p, gboolean, gint
+from gobject import GValuePtr
+from gibaseinfo import GIInfoType
+from giinterfaceinfo import GIInterfaceInfoPtr
+from gifieldinfo import GIFieldInfoPtr
+from gipropertyinfo import GIPropertyInfoPtr
+from gicallableinfo import GIFunctionInfoPtr, GISignalInfoPtr, GIVFuncInfoPtr
+from giregisteredtypeinfo import GIRegisteredTypeInfo, GIRegisteredTypeInfoPtr
+from giconstantinfo import GIConstantInfoPtr
+from gistructinfo import GIStructInfoPtr
 from _util import load, wrap_class
 
 _gir = load("girepository-1.0")
 
 
-def gi_is_object_info(base_info):
-    return base_info.get_type().value == GIInfoType.OBJECT
+def gi_is_object_info(base_info, _type=GIInfoType.OBJECT):
+    return base_info.get_type().value == _type
 
 
-class GIObjectInfo(GIBaseInfo):
+class GIObjectInfo(GIRegisteredTypeInfo):
     pass
 
 
-class GIObjectInfoPtr(POINTER(GIObjectInfo)):
+class GIObjectInfoPtr(GIRegisteredTypeInfoPtr):
     _type_ = GIObjectInfo
 
     def __repr__(self):
@@ -55,9 +56,9 @@ class GIObjectInfoPtr(POINTER(GIObjectInfo)):
         l = ", ".join(("%s=%r" % (k, v) for (k, v) in sorted(values.items())))
         return "<%s %s>" % (self._type_.__name__, l)
 
-GIObjectInfoGetValueFunction = CFUNCTYPE(c_void_p, POINTER(GValue))
+GIObjectInfoGetValueFunction = CFUNCTYPE(c_void_p, GValuePtr)
 GIObjectInfoRefFunction = CFUNCTYPE(c_void_p, c_void_p)
-GIObjectInfoSetValueFunction = CFUNCTYPE(None, POINTER(GValue), c_void_p)
+GIObjectInfoSetValueFunction = CFUNCTYPE(None, GValuePtr, c_void_p)
 GIObjectInfoUnrefFunction = CFUNCTYPE(None, c_void_p)
 
 _methods = [

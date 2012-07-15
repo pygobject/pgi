@@ -4,16 +4,15 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from ctypes import POINTER
-from glib import *
-from gibaseinfo import *
+from glib import Enum, gchar_p, gboolean, gint
+from gibaseinfo import GIInfoType, GIBaseInfo, GIBaseInfoPtr
 from _util import load, wrap_class
 
 _gir = load("girepository-1.0")
 
 
-def gi_is_type_info(base_info):
-    return base_info.get_type().value == GIInfoType.TYPE
+def gi_is_type_info(base_info, _type=GIInfoType.TYPE):
+    return base_info.get_type().value == _type
 
 
 class GIArrayType(Enum):
@@ -59,7 +58,7 @@ class GITypeInfo(GIBaseInfo):
     pass
 
 
-class GITypeInfoPtr(POINTER(GITypeInfo)):
+class GITypeInfoPtr(GIBaseInfoPtr):
     _type_ = GITypeInfo
 
     def __repr__(self):

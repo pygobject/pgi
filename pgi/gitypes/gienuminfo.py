@@ -4,28 +4,25 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from ctypes import POINTER
-
-from glib import *
-from gibaseinfo import *
-from gicallableinfo import *
-from gitypeinfo import *
+from glib import gint64, gint
+from gibaseinfo import GIBaseInfo, GIBaseInfoPtr, GIInfoType
+from gicallableinfo import GIFunctionInfoPtr
+from gitypeinfo import GITypeTag
+from giregisteredtypeinfo import GIRegisteredTypeInfo, GIRegisteredTypeInfoPtr
 from _util import load, wrap_class
 
 _gir = load("girepository-1.0")
 
-# GIValueInfo
 
-
-def gi_is_value_info(base_info):
-    return base_info.get_type().value == GIInfoType.VALUE
+def gi_is_value_info(base_info, _type=GIInfoType.VALUE):
+    return base_info.get_type().value == _type
 
 
 class GIValueInfo(GIBaseInfo):
     pass
 
 
-class GIValueInfoPtr(POINTER(GIValueInfo)):
+class GIValueInfoPtr(GIBaseInfoPtr):
     _type_ = GIValueInfo
 
     def __repr__(self):
@@ -42,19 +39,17 @@ _methods = [
 
 wrap_class(_gir, GIValueInfo, GIValueInfoPtr, "g_value_info_", _methods)
 
-# GIEnumInfo
-
 
 def gi_is_enum_info(base_info):
     it = GIInfoType
     return base_info.get_type().value in (it.ENUM, it.FLAGS)
 
 
-class GIEnumInfo(GIBaseInfo):
+class GIEnumInfo(GIRegisteredTypeInfo):
     pass
 
 
-class GIEnumInfoPtr(POINTER(GIEnumInfo)):
+class GIEnumInfoPtr(GIRegisteredTypeInfoPtr):
     _type_ = GIEnumInfo
 
     def __repr__(self):

@@ -4,10 +4,10 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from ctypes import *
-from glib import *
-from gitypelib import *
+from ctypes import POINTER, Structure, c_char_p
 
+from glib import gchar_p, Enum, gboolean
+from gitypelib import GITypelibPtr
 from _util import wrap_class, load
 
 _gir = load("girepository-1.0")
@@ -26,25 +26,15 @@ wrap_class(_gir, GIInfoType, None, "g_info_type_", _methods)
 
 
 class GIAttributeIter(Structure):
-    _fields_ = [
-        ("data", gpointer),
-        ("data2", gpointer),
-        ("data3", gpointer),
-        ("data4", gpointer),
-    ]
+    pass
+
+
+class GIAttributeIterPtr(POINTER(GIAttributeIter)):
+    _type_ = GIAttributeIter
 
 
 class GIBaseInfo(Structure):
-    _fields_ = [
-        ("dummy1", gint32),
-        ("dummy2", gint32),
-        ("dummy3", gpointer),
-        ("dummy4", gpointer),
-        ("dummy5", gpointer),
-        ("dummy6", guint32),
-        ("dummy7", guint32),
-        ("padding", gpointer * 4),
-    ]
+    pass
 
 
 class GIBaseInfoPtr(POINTER(GIBaseInfo)):
@@ -70,7 +60,7 @@ _methods = [
     ("get_namespace", gchar_p, [GIBaseInfoPtr]),
     ("is_deprecated", gboolean, [GIBaseInfoPtr]),
     ("get_attribute", gchar_p, [GIBaseInfoPtr, gchar_p]),
-    ("iterate_attributes", gboolean, [GIBaseInfoPtr, POINTER(GIAttributeIter),
+    ("iterate_attributes", gboolean, [GIBaseInfoPtr, GIAttributeIterPtr,
                                       POINTER(c_char_p), POINTER(c_char_p)]),
     ("get_container", GIBaseInfoPtr, [GIBaseInfoPtr]),
     ("get_typelib", GITypelibPtr, [GIBaseInfoPtr]),
@@ -79,4 +69,5 @@ _methods = [
 
 wrap_class(_gir, GIBaseInfo, GIBaseInfoPtr, "g_base_info_", _methods)
 
-__all__ = ["GIInfoType", "GIAttributeIter", "GIBaseInfo", "GIBaseInfoPtr"]
+__all__ = ["GIInfoType", "GIAttributeIter", "GIBaseInfo", "GIBaseInfoPtr",
+           "GIAttributeIterPtr"]

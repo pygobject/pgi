@@ -4,12 +4,13 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from ctypes import *
+from ctypes import Structure, POINTER, c_char_p
 
-from glib import *
-from gobject import *
-from gibaseinfo import *
-from gitypelib import *
+from glib import guint, gchar_p, GError, gboolean, gint
+from glib import GSListPtr, GOptionGroupPtr, GListPtr
+from gobject import GType
+from gibaseinfo import GIBaseInfoPtr
+from gitypelib import GITypelibPtr
 from _util import wrap_class, load
 
 _gir = load("girepository-1.0")

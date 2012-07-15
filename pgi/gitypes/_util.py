@@ -32,10 +32,16 @@ class _CMethod(object):
         setattr(owner, name, func)
         return func
 
+_wraps = []
+def wrap_class(*args):
+    wraps = _wraps
+    wraps.append(args)
 
-def wrap_class(lib, base, ptr, prefix, methods):
-    for name, ret, args in methods:
-        if args and args[0] == ptr:
-            setattr(ptr, name, _CMethod(lib, name, prefix, ret, args, True))
-        else:
-            setattr(base, name, _CMethod(lib, name, prefix, ret, args, False))
+def wrap_setup():
+    wraps = _wraps
+    for (lib, base, ptr, pre, methods) in wraps:
+        for name, ret, args in methods:
+            if args and args[0] == ptr:
+                setattr(ptr, name, _CMethod(lib, name, pre, ret, args, True))
+            else:
+                setattr(base, name, _CMethod(lib, name, pre, ret, args, False))

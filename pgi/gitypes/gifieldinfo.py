@@ -6,17 +6,17 @@
 
 from ctypes import POINTER
 
-from glib import *
-from gibaseinfo import *
-from gitypeinfo import *
-from giargument import *
+from glib import Enum, gint, gboolean, gpointer
+from gibaseinfo import GIBaseInfo, GIBaseInfoPtr, GIInfoType
+from gitypeinfo import GITypeInfoPtr
+from giargument import GIArgument
 from _util import load, wrap_class
 
 _gir = load("girepository-1.0")
 
 
-def gi_is_field_info(base_info, type_=None):
-    return base_info.get_type().value == GIInfoType.FIELD
+def gi_is_field_info(base_info, _type=GIInfoType.FIELD):
+    return base_info.get_type().value == _type
 
 
 class GIFieldInfoFlags(Enum):
@@ -28,7 +28,7 @@ class GIFieldInfo(GIBaseInfo):
     pass
 
 
-class GIFieldInfoPtr(POINTER(GIFieldInfo)):
+class GIFieldInfoPtr(GIBaseInfoPtr):
     _type_ = GIFieldInfo
 
     def __repr__(self):

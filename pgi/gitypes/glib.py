@@ -38,6 +38,7 @@ g_malloc0 = _glib.g_malloc0
 g_malloc0.argtypes = [gsize]
 g_malloc0.restype = gpointer
 
+
 class Enum(guint):
     def __str__(self):
         for a in (c for c in dir(self) if c.upper() == c):
@@ -65,8 +66,6 @@ class Flags(guint):
 
     def __int__(self):
         return self.value
-
-# GError
 
 
 class GError(Structure):
@@ -103,8 +102,6 @@ def check_gerror(gerror_ptr):
     except ValueError:
         return
 
-# GMappedFile
-
 
 class GMappedFile(Structure):
     pass
@@ -125,8 +122,6 @@ _methods = [
 
 wrap_class(_glib, GMappedFile, GMappedFilePtr, "g_mapped_file_", _methods)
 
-# GOptionGroup
-
 
 class GOptionGroup(Structure):
     pass
@@ -134,8 +129,6 @@ class GOptionGroup(Structure):
 
 class GOptionGroupPtr(POINTER(GOptionGroup)):
     _type_ = GOptionGroup
-
-# GSList
 
 
 class GSList(Structure):
@@ -185,8 +178,6 @@ _methods = [
 ]
 
 wrap_class(_glib, GSList, GSListPtr, "g_slist_", _methods)
-
-# GList
 
 
 class GList(Structure):

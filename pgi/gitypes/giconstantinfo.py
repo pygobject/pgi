@@ -6,24 +6,24 @@
 
 from ctypes import POINTER
 
-from glib import *
-from gibaseinfo import *
-from gitypeinfo import *
-from giargument import *
+from glib import gint
+from gibaseinfo import GIBaseInfo, GIBaseInfoPtr, GIInfoType
+from gitypeinfo import GITypeInfoPtr
+from giargument import GIArgument
 from _util import load, wrap_class
 
 _gir = load("girepository-1.0")
 
 
-def gi_is_constant_info(base_info):
-    return base_info.get_type().value == GIInfoType.CONSTANT
+def gi_is_constant_info(base_info, _type=GIInfoType.CONSTANT):
+    return base_info.get_type().value == _type
 
 
 class GIConstantInfo(GIBaseInfo):
     pass
 
 
-class GIConstantInfoPtr(POINTER(GIConstantInfo)):
+class GIConstantInfoPtr(GIBaseInfoPtr):
     _type_ = GIConstantInfo
 
 _methods = [

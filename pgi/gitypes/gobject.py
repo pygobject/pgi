@@ -4,8 +4,10 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from glib import *
-from ctypes import *
+from ctypes import POINTER, Structure, CFUNCTYPE
+
+from glib import Flags, gulong, gchar_p, guint, gboolean, gpointer, guint32
+from glib import guint64, gchar, guchar, gint, glong, gint64, gfloat, gdouble
 from _util import load, wrap_class
 
 _gobject = load("gobject-2.0")
@@ -66,6 +68,7 @@ free = _gobject.g_free
 free.argtypes = [gpointer]
 free.resttype = None
 
+
 class GTypeClass(Structure):
     _fields_ = [
         ("g_type", GType),
@@ -93,9 +96,6 @@ class GObject(Structure):
     ]
 
 GObjectPtr = POINTER(GObject)
-
-
-# GValue
 
 
 class GValue(Structure):
@@ -155,6 +155,7 @@ set_property.resttype = None
 get_property = _gobject.g_object_get_property
 get_property.argtypes = [gpointer, gchar_p, GValuePtr]
 get_property.resttype = None
+
 
 class GParamFlags(Flags):
     READABLE = 1 << 0
@@ -230,7 +231,8 @@ _methods = [
     ("find_property", GParamSpecPtr, [GObjectClassPtr, gchar_p]),
 ]
 
-wrap_class(_gobject, GObjectClass, GObjectClassPtr, "g_object_class_", _methods)
+wrap_class(_gobject, GObjectClass, GObjectClassPtr,
+           "g_object_class_", _methods)
 
 
 def G_TYPE_FROM_INSTANCE(instance):
@@ -241,4 +243,5 @@ __all__ = ["GType", "g_type_init", "GParamFlags", "GValue", "GValuePtr",
            "GValueTransform", "GSignalFlags", "GTypeFlags", "GParameter",
            "GTypeFundamentalFlags", "GObjectPtr", "GParamSpec",
            "GParamSpecPtr", "GObjectClassPtr", "G_TYPE_FROM_INSTANCE",
-           "GParameterPtr",]
+           "GParameterPtr",
+]

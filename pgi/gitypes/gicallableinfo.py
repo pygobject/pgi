@@ -4,36 +4,31 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from ctypes import *
+from ctypes import c_char_p, POINTER, c_int
 
-from glib import *
-from gobject import *
-from gibaseinfo import *
-from gitypeinfo import *
-from giarginfo import *
-from gipropertyinfo import *
-from giargument import *
+from glib import gint, Enum, gboolean, gchar_p, GError
+from gobject import GSignalFlags
+from gibaseinfo import GIBaseInfo, GIBaseInfoPtr
+from gibaseinfo import GIAttributeIterPtr, GIInfoType
+from gitypeinfo import GITypeInfoPtr
+from giarginfo import GITransfer, GIArgInfoPtr
+from gipropertyinfo import GIPropertyInfoPtr
+from giargument import GIArgument
 from _util import load, wrap_class
 
 _gir = load("girepository-1.0")
 
-# Definitions & Helpers:
-# ----------------------
 
-# GICallableInfo
-
-
-def gi_is_callable_info(base_info):
+def gi_is_callable_info(base_info, _it=GIInfoType):
     type_ = base_info.get_type().value
-    it = GIInfoType
-    return (type_ in (it.FUNCTION, it.CALLBACK, it.SIGNAL, it.VFUNC))
+    return (type_ in (_it.FUNCTION, _it.CALLBACK, _it.SIGNAL, _it.VFUNC))
 
 
 class GICallableInfo(GIBaseInfo):
     pass
 
 
-class GICallableInfoPtr(POINTER(GICallableInfo)):
+class GICallableInfoPtr(GIBaseInfoPtr):
     _type_ = GICallableInfo
 
     def __repr__(self):
@@ -47,9 +42,6 @@ class GICallableInfoPtr(POINTER(GICallableInfo)):
         l = ", ".join(("%s=%r" % (k, v) for (k, v) in sorted(values.items())))
 
         return "<%s %s>" % (self._type_.__name__, l)
-
-
-# GIFunctionInfo
 
 
 def gi_is_function_info(base_info):
@@ -69,11 +61,11 @@ class GInvokeError(Enum):
     FAILED, SYMBOL_NOT_FOUND, ARGUMENT_MISMATCH = range(3)
 
 
-class GIFunctionInfo(GIBaseInfo):
+class GIFunctionInfo(GICallableInfo):
     pass
 
 
-class GIFunctionInfoPtr(POINTER(GIFunctionInfo)):
+class GIFunctionInfoPtr(GICallableInfoPtr):
     _type_ = GIFunctionInfo
 
     def __repr__(self):
@@ -89,8 +81,6 @@ class GIFunctionInfoPtr(POINTER(GIFunctionInfo)):
         l = ", ".join(("%s=%r" % (k, v) for (k, v) in sorted(values.items())))
         return "<%s %s>" % (self._type_.__name__, l)
 
-# GIVFuncInfo
-
 
 def gi_is_vfunc_info(base_info):
     return base_info.get_type().value == GIInfoType.VFUNC
@@ -102,31 +92,24 @@ class GIVFuncInfoFlags(Enum):
     MUST_NOT_OVERRIDE = 1 << 2
 
 
-class GIVFuncInfo(GIBaseInfo):
+class GIVFuncInfo(GICallableInfo):
     pass
 
 
-class GIVFuncInfoPtr(POINTER(GIVFuncInfo)):
+class GIVFuncInfoPtr(GICallableInfoPtr):
     _type_ = GIVFuncInfo
-
-# GISignalInfo
 
 
 def gi_is_signal_info(base_info):
     return base_info.get_type().value == GIInfoType.SIGNAL
 
 
-class GISignalInfo(GIBaseInfo):
+class GISignalInfo(GICallableInfo):
     pass
 
 
-class GISignalInfoPtr(POINTER(GISignalInfo)):
+class GISignalInfoPtr(GICallableInfoPtr):
     _type_ = GISignalInfo
-
-# Functions:
-# ----------
-
-# GICallableInfo
 
 _methods = [
     ("get_return_type", GITypeInfoPtr, [GICallableInfoPtr]),
@@ -134,7 +117,7 @@ _methods = [
     ("may_return_null", gboolean, [GICallableInfoPtr]),
     ("get_return_attribute", gchar_p, [GICallableInfoPtr, gchar_p]),
     ("iterate_return_attributes", gint, [GICallableInfoPtr,
-        POINTER(GIAttributeIter), POINTER(c_char_p), POINTER(c_char_p)]),
+        GIAttributeIterPtr, POINTER(c_char_p), POINTER(c_char_p)]),
     ("get_n_args", gint, [GICallableInfoPtr]),
     ("get_arg", GIArgInfoPtr, [GICallableInfoPtr, gint]),
     ("load_arg", None, [GICallableInfoPtr, gint, GIArgInfoPtr]),
@@ -143,8 +126,6 @@ _methods = [
 
 wrap_class(_gir, GICallableInfo, GICallableInfoPtr,
            "g_callable_info_", _methods)
-
-# GIFunctionInfo
 
 _methods = [
     ("get_symbol", gchar_p, [GIFunctionInfoPtr]),
@@ -159,8 +140,6 @@ _methods = [
 wrap_class(_gir, GIFunctionInfo, GIFunctionInfoPtr,
            "g_function_info_", _methods)
 
-# GIVFuncInfo
-
 _methods = [
     ("get_flags", GIVFuncInfoFlags, [GIVFuncInfoPtr]),
     ("get_offset", gint, [GIVFuncInfoPtr]),
@@ -169,8 +148,6 @@ _methods = [
 ]
 
 wrap_class(_gir, GIVFuncInfo, GIVFuncInfoPtr, "g_vfunc_info_", _methods)
-
-# GISignalInfo
 
 _methods = [
     ("get_flags", GSignalFlags, [GISignalInfoPtr]),

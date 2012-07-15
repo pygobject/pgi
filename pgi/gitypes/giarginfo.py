@@ -4,18 +4,16 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from ctypes import POINTER
-
-from glib import *
-from gitypeinfo import *
-from gibaseinfo import *
+from glib import Enum, gboolean, gint
+from gitypeinfo import GITypeInfoPtr
+from gibaseinfo import GIBaseInfo, GIBaseInfoPtr, GIInfoType
 from _util import wrap_class, load
 
 _gir = load("girepository-1.0")
 
 
-def gi_is_arg_info(base_info):
-    return base_info.get_type().value == GIInfoType.ARG
+def gi_is_arg_info(base_info, _type=GIInfoType.ARG):
+    return base_info.get_type().value == _type
 
 
 class GITransfer(Enum):
@@ -34,7 +32,7 @@ class GIArgInfo(GIBaseInfo):
     pass
 
 
-class GIArgInfoPtr(POINTER(GIArgInfo)):
+class GIArgInfoPtr(GIBaseInfoPtr):
     _type_ = GIArgInfo
 
     def __repr__(self):

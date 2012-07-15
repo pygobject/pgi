@@ -6,7 +6,8 @@
 
 from ctypes import POINTER, Structure
 
-from glib import *
+from glib import guint8, gsize, gboolean, gchar_p, gpointer
+from glib import GError, GMappedFilePtr
 from _util import wrap_class, load
 
 _gir = load("girepository-1.0")

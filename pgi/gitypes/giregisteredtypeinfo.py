@@ -4,28 +4,25 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from ctypes import POINTER
-
-from glib import *
-from gobject import *
-from gibaseinfo import *
+from glib import gchar_p
+from gobject import GType
+from gibaseinfo import GIBaseInfo, GIBaseInfoPtr, GIInfoType
 from _util import load, wrap_class
 
 _gir = load("girepository-1.0")
 
 
-def gi_is_registered_type_info(base_info):
+def gi_is_registered_type_info(base_info, _it=GIInfoType):
     type_ = base_info.get_type().value
-    it = GIInfoType
-    return type_ in (it.BOXED, it.ENUM, it.FLAGS, it.INTERFACE, it.OBJECT,
-                     it.STRUCT, it.UNION)
+    return type_ in (_it.BOXED, _it.ENUM, _it.FLAGS, _it.INTERFACE, _it.OBJECT,
+                     _it.STRUCT, _it.UNION)
 
 
 class GIRegisteredTypeInfo(GIBaseInfo):
     pass
 
 
-class GIRegisteredTypeInfoPtr(POINTER(GIRegisteredTypeInfo)):
+class GIRegisteredTypeInfoPtr(GIBaseInfoPtr):
     _type_ = GIRegisteredTypeInfo
 
     def __repr__(self):
