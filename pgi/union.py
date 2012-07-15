@@ -6,10 +6,8 @@
 
 from ctypes import cast
 
-from gitypes import GIUnionInfoPtr, GIBaseInfoPtr, GIFunctionInfoFlags
-from gitypes import GIRegisteredTypeInfoPtr
+from gitypes import GIUnionInfoPtr
 
-from obj import _ClassMethodAttribute
 from gtype import PGType
 
 

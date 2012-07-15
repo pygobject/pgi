@@ -5,13 +5,11 @@
 # published by the Free Software Foundation.
 
 from warnings import warn
-from ctypes import cast, byref, CDLL, sizeof
+from ctypes import cast, sizeof
 
-from gitypes import GIObjectInfoPtr, GIRegisteredTypeInfoPtr, GIBaseInfoPtr
-from gitypes import gobject, GIFunctionInfoFlags, GIFunctionInfoPtr
-from gitypes import GICallableInfoPtr, GIInterfaceInfoPtr, gpointer
+from gitypes import GIInterfaceInfoPtr, gpointer, gobject, GIFunctionInfoFlags
 from gitypes import GValuePtr, GValue, GITypeTag, GIInfoType, GParameter
-from gitypes import GParameterPtr, g_malloc0
+from gitypes import GParameterPtr, g_malloc0, GIObjectInfoPtr
 
 from util import import_attribute, typeinfo_to_ctypes
 from gtype import PGType

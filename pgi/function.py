@@ -5,8 +5,8 @@
 # published by the Free Software Foundation.
 
 from ctypes import cast
-from gitypes import GICallableInfoPtr, GIFunctionInfoPtr, GITypeTag
-from gitypes.glib import *
+
+from gitypes import GIFunctionInfoPtr, GITypeTag
 
 from util import typeinfo_to_ctypes
 
@@ -27,7 +27,7 @@ def get_array(info, value):
 
 def handle_return(return_info, value):
     tag = return_info.get_tag().value
-    ptr = return_info.is_pointer()
+    #ptr = return_info.is_pointer()
 
     if tag == GITypeTag.UTF8:
         return value
@@ -45,7 +45,7 @@ class Function(object):
     def __init__(self, info, lib):
         func_info = cast(info, GIFunctionInfoPtr)
         return_info = func_info.get_return_type()
-        tag = return_info.get_tag()
+        #tag = return_info.get_tag()
 
         h = getattr(lib, func_info.get_symbol())
         h.restype = typeinfo_to_ctypes(return_info)

@@ -8,6 +8,7 @@ from ctypes import byref
 
 from gitypes import GType, GTypeFlags, GTypeFundamentalFlags, GIRepository
 from gitypes import guint, gobject
+
 from util import import_attribute, cached_property
 
 

@@ -5,12 +5,12 @@
 # published by the Free Software Foundation.
 
 from warnings import warn
-from ctypes import cast, byref, pointer, POINTER
+from ctypes import cast
 
-from gitypes import GObjectClassPtr, G_TYPE_FROM_INSTANCE, GIBaseInfoPtr
+from gitypes import GObjectClassPtr, G_TYPE_FROM_INSTANCE
 from gitypes import GIRepositoryPtr, GIInfoType, GIObjectInfoPtr
 from gitypes import GIInterfaceInfoPtr, GValue, GValuePtr, GITypeTag
-from gitypes import gobject, GIInfoType
+from gitypes import gobject
 
 from util import escape_name, import_attribute
 from gtype import PGType

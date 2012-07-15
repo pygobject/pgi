@@ -6,8 +6,7 @@
 
 from ctypes import cast
 
-from gitypes import GIStructInfoPtr, GIBaseInfoPtr, GIFunctionInfoFlags
-from gitypes import GIRegisteredTypeInfoPtr
+from gitypes import GIStructInfoPtr, GIFunctionInfoFlags
 
 from obj import _ClassMethodAttribute
 from gtype import PGType

@@ -10,6 +10,7 @@ from ctypes import cast
 
 from gitypes import GITypeTag
 from gitypes.glib import *
+
 import const
 
 
