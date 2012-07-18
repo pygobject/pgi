@@ -6,7 +6,7 @@
 
 from ctypes import cast
 
-from gitypes import GIFunctionInfoPtr, GITypeTag
+from gitypes import GIFunctionInfoPtr, GITypeTag, gpointer
 
 from util import typeinfo_to_ctypes
 
@@ -49,13 +49,13 @@ class Function(object):
 
         h = getattr(lib, func_info.get_symbol())
         h.restype = typeinfo_to_ctypes(return_info)
-        h.argtypes = tuple()
+        h.argtypes = tuple([gpointer, gpointer])
 
         self._handle = h
         self._return_info = return_info
 
     def __call__(self, *args):
-        value = self._handle()
+        value = self._handle(0, 0)
         return handle_return(self._return_info, value)
 
 
