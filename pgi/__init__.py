@@ -6,6 +6,7 @@
 # published by the Free Software Foundation.
 
 from ctypes import c_char_p
+
 from gitypes import GIRepositoryPtr, gi_init
 from const import VERSION as version
 import util
@@ -14,6 +15,16 @@ from importer import _versions
 version = version
 
 gi_init()
+
+
+def replace_gi():
+    """Call before the first gi import to redirect gi imports to pgi"""
+    import sys
+    import pgi
+    import const
+    sys.modules["gi"] = pgi
+    const.PREFIX = "gi.repository"
+
 
 def require_version(namespace, version):
     """Set a version for the namespace to be loaded.
@@ -45,6 +56,7 @@ def require_version(namespace, version):
                          (namespace, version))
 
     _versions[namespace] = version
+
 
 def get_required_version(namespace):
     """Returns the version string for the namespace that was previously

@@ -17,7 +17,6 @@ import overrides
 _versions = {}
 
 class Importer(object):
-    PATH = const.PREFIX + "."
 
     def find_module(self, fullname, path):
         name = self.__get_name(fullname)
@@ -76,7 +75,7 @@ class Importer(object):
         return instance
 
     def __get_name(self, fullname):
-        if not fullname.startswith(self.PATH):
+        if not fullname.startswith(const.PREFIX + "."):
             return
 
-        return fullname[len(self.PATH):]
+        return fullname[len(const.PREFIX) + 1:]

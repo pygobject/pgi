@@ -1,0 +1,5 @@
+This examples are taken from the PyGObject turorial [1] by
+Sebastian Pölsterl et al. which is based on the gtkmm (public domain) and
+pygtk (GNU FDL) tutorials.
+
+[1] https://github.com/sebp/PyGObject-Tutorial
