@@ -1,4 +1,5 @@
-# Copyright 2012 Christoph Reiter
+# Copyright 2005-2009 Johan Dahlin <johan@gnome.org>
+#           2012 Christoph Reiter
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as

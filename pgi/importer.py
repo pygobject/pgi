@@ -34,13 +34,10 @@ class Importer(object):
         namespace = self.__get_name(fullname)
         repository = GIRepositoryPtr()
 
-        glist = repository.enumerate_versions(namespace)
-        if not glist:
-            raise ImportError
-
         if namespace in _versions:
             version = _versions[namespace]
         else:
+            glist = repository.enumerate_versions(namespace)
             versions = sorted(util.glist_to_list(glist, c_char_p))
             if not versions:
                 raise ImportError
@@ -66,6 +63,7 @@ class Importer(object):
 
         # Generate bindings, set up lazy attributes
         instance = module.Module(repository, namespace, library)
+        instance.__file__ = repository.get_typelib_path(namespace)
         instance._version = version
 
         # add to module and sys.modules
