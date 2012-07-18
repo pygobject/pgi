@@ -271,5 +271,5 @@ __all__ = ["GType", "g_type_init", "GParamFlags", "GValue", "GValuePtr",
            "GParamSpecPtr", "GObjectClassPtr", "G_TYPE_FROM_INSTANCE",
            "GParameterPtr", "signal_connect_data", "GCallback",
            "GClosureNotify", "signal_handler_disconnect", "GConnectFlags",
-           "signal_handler_unblock", "signal_handler_block",
+           "signal_handler_unblock", "signal_handler_block", "free",
 ]

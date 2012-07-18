@@ -7,17 +7,14 @@
 import sys
 from ctypes import c_char_p, byref, CDLL
 
-from gitypes import GIRepository, GErrorPtr, check_gerror, gi_init
+from gitypes import GIRepositoryPtr, GErrorPtr, check_gerror
 
 import const
 import module
 import util
 import overrides
 
-
-gi_init()
-repository = GIRepository.get_default()
-
+_versions = {}
 
 class Importer(object):
     PATH = const.PREFIX + "."
@@ -27,6 +24,7 @@ class Importer(object):
         if not name:
             return
 
+        repository = GIRepositoryPtr()
         if not repository.enumerate_versions(name):
             return
 
@@ -34,16 +32,19 @@ class Importer(object):
 
     def load_module(self, fullname):
         namespace = self.__get_name(fullname)
+        repository = GIRepositoryPtr()
 
         glist = repository.enumerate_versions(namespace)
         if not glist:
             raise ImportError
 
-        versions = util.glist_get_all(glist, c_char_p)
-        glist.free()
-
-        versions.sort()
-        version = versions[-1]
+        if namespace in _versions:
+            version = _versions[namespace]
+        else:
+            versions = sorted(util.glist_to_list(glist, c_char_p))
+            if not versions:
+                raise ImportError
+            version = versions[-1]
 
         # Dependency already loaded, skip
         if fullname in sys.modules:

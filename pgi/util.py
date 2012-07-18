@@ -6,9 +6,9 @@
 
 import keyword
 import re
-from ctypes import cast
+from ctypes import cast, POINTER, c_void_p
 
-from gitypes import GITypeTag, GIInfoType
+from gitypes import GITypeTag, GIInfoType, free
 from gitypes.glib import *
 
 import const
@@ -58,12 +58,34 @@ def set_gvalue_from_py(ptr, is_interface, tag, value):
     return True
 
 
-def glist_get_all(g, type_):
+def array_to_list(array):
+    """Takes a null terminated array, copies the values into a list
+    and frees each value and the list"""
+    addrs = cast(array, POINTER(c_void_p))
+    l = []
+    i = 0
+    value = array[i]
+    while value:
+        l.append(value)
+        free(addrs[i])
+        i += 1
+        value = array[i]
+    free(addrs)
+    return l
+
+
+def glist_to_list(g, type_):
+    """Takes a glist, copies the values casted to type_ in to a list
+    and frees all items and the list"""
     values = []
-    while g:
-        value = cast(g.contents.data, type_).value
+    item = g
+    while item:
+        ptr = item.contents.data
+        value = cast(ptr, type_).value
         values.append(value)
-        g = g.next()
+        free(ptr)
+        item = item.next()
+    g.free()
     return values
 
 
