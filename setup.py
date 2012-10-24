@@ -5,11 +5,15 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+import os
+import sys
+import glob
+
 from distutils.core import setup, Command
 
 
-class TestCommand(Command):
-    description = "run unit tests"
+class CoverageCommand(Command):
+    description = "generaqte coverage"
     user_options = []
 
     def initialize_options(self):
@@ -17,6 +21,63 @@ class TestCommand(Command):
 
     def finalize_options(self):
         pass
+
+    def run(self):
+        import trace
+        tracer = trace.Trace(
+            count=True, trace=False,
+            ignoredirs=[sys.prefix, sys.exec_prefix])
+
+        def run_tests():
+            try:
+                 # we don't want to fork and use PyGObject
+                cmd = self.reinitialize_command("test")
+                cmd.pgi_only = True
+                cmd.ensure_finalized()
+                cmd.run()
+            except:
+                pass
+
+        tracer.runfunc(run_tests)
+        results = tracer.results()
+        coverage = os.path.join(os.path.dirname(__file__), "coverage")
+        results.write_results(show_missing=True, coverdir=coverage)
+
+        # remove coverage we don't want
+        for f in os.listdir(coverage):
+            if not f.startswith("pgi."):
+                os.unlink(os.path.join(coverage, f))
+                continue
+            if f.startswith("pgi.overrides") and \
+                    not os.path.basename(f).startswith("_"):
+                os.unlink(os.path.join(coverage, f))
+                continue
+
+        # compute coverage
+        total_lines = 0
+        bad_lines = 0
+        for filename in glob.glob(os.path.join(coverage, "*.cover")):
+            lines = file(filename, "rU").readlines()
+            lines = filter(None, map(str.strip, lines))
+            total_lines += len(lines)
+            bad_lines += len([l for l in lines if l.startswith(">>>>>>")])
+
+        print "Coverage data written to", coverage, "(%d/%d, %0.2f%%)" % (
+            total_lines - bad_lines, total_lines,
+            100.0 * (total_lines - bad_lines) / float(total_lines))
+
+
+class TestCommand(Command):
+    description = "run unit tests"
+    user_options = [
+        ("pgi-only", None, "only run pgi"),
+    ]
+
+    def initialize_options(self):
+        self.pgi_only = False
+
+    def finalize_options(self):
+        self.pgi_only = bool(self.pgi_only)
 
     def run(self):
         import tests
@@ -27,7 +88,7 @@ class TestCommand(Command):
 
         # Run with both bindings, PGI first
         # Skip the second run if the first one fails
-        if not is_cpython:
+        if not is_cpython or self.pgi_only:
             pid = 0
         else:
             pid = os.fork()
@@ -47,6 +108,7 @@ setup(name='PGI',
       packages=['pgi', 'pgi.gitypes', 'pgi.overrides', 'pgi.repository'],
       license='GPLv2',
       cmdclass={
-            'test': TestCommand
+            'test': TestCommand,
+            'coverage': CoverageCommand,
       }
      )
