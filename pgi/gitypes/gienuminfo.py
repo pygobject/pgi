@@ -25,7 +25,7 @@ class GIValueInfo(GIBaseInfo):
 class GIValueInfoPtr(GIBaseInfoPtr):
     _type_ = GIValueInfo
 
-    def __arepr__(self):
+    def __repr__(self):
         values = {}
         values["value"] = self.get_value()
 
