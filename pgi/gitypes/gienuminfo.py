@@ -25,7 +25,7 @@ class GIValueInfo(GIBaseInfo):
 class GIValueInfoPtr(GIBaseInfoPtr):
     _type_ = GIValueInfo
 
-    def __repr__(self):
+    def __arepr__(self):
         values = {}
         values["value"] = self.get_value()
 
@@ -68,7 +68,7 @@ class GIEnumInfoPtr(GIRegisteredTypeInfoPtr):
 
 _methods = [
     ("get_n_values", gint, [GIEnumInfoPtr]),
-    ("get_value", GIValueInfoPtr, [GIEnumInfoPtr]),
+    ("get_value", GIValueInfoPtr, [GIEnumInfoPtr, gint]),
     ("get_n_methods", gint, [GIEnumInfoPtr]),
     ("get_method", GIFunctionInfoPtr, [GIEnumInfoPtr]),
     ("get_storage_type", GITypeTag, [GIEnumInfoPtr]),

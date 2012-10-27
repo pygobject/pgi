@@ -10,6 +10,12 @@ import unittest
 
 
 def test(gi):
+    """Run the test suite.
+
+    gi -- run all tests in the pygobject suite with PyGObject
+
+    """
+
     print "#" * 80
     if gi:
         from gi.repository import Gtk, GObject, GLib, Atk, Gdk
@@ -25,10 +31,16 @@ def test(gi):
     __builtin__.__dict__["GLib"] = GLib
     __builtin__.__dict__["Atk"] = Atk
 
-    loader = unittest.defaultTestLoader
     current_dir = os.path.join(os.path.dirname(__file__))
-    base_dir = os.path.split(current_dir)[0]
-    sys.path.append(base_dir)
-    suite = loader.discover(current_dir)
-    run = unittest.TextTestRunner(verbosity=2).run(suite)
+
+    suites = []
+
+    loader = unittest.TestLoader()
+    suites.append(loader.discover(os.path.join(current_dir, "pygobject")))
+
+    if not gi:
+        loader = unittest.TestLoader()
+        suites.append(loader.discover(os.path.join(current_dir, "gitypes")))
+
+    run = unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite(suites))
     return len(run.failures) + len(run.errors)
