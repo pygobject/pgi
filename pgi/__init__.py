@@ -64,3 +64,7 @@ def get_required_version(namespace):
     global _versions
 
     return _versions.get(namespace, None)
+
+
+class PGIDeprecationWarning(RuntimeWarning):
+    pass

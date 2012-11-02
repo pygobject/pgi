@@ -9,7 +9,16 @@
 import sys
 
 from pgi import Gtk
+from pgi import PGIDeprecationWarning as PyGIDeprecationWarning
 from _override import override
+
+if sys.version_info >= (3, 0):
+    _basestring = str
+    _callable = lambda c: hasattr(c, '__call__')
+else:
+    _basestring = basestring
+    _callable = callable
+
 __all__ = []
 
 if Gtk._version == '2.0':
@@ -312,7 +321,10 @@ __all__.append('SizeGroup')
 
 class MenuItem(Gtk.MenuItem):
     def __init__(self, label=None, **kwds):
-        super(MenuItem, self).__init__(label=label, **kwds)
+        if label:
+            super(MenuItem, self).__init__(label=label, **kwds)
+        else:
+            super(MenuItem, self).__init__(**kwds)
 
 MenuItem = override(MenuItem)
 __all__.append('MenuItem')
@@ -374,7 +386,13 @@ __all__.append('Builder')
 
 class Window(Gtk.Window):
     def __init__(self, type=Gtk.WindowType.TOPLEVEL, **kwds):
-        Gtk.Window.__init__(self, type=type, **kwds)
+        # type is a construct-only property; if it is already set (e. g. by
+        # GtkBuilder), do not try to set it again and just ignore it
+        try:
+            self.get_property('type')
+            Gtk.Window.__init__(self, **kwds)
+        except TypeError:
+            Gtk.Window.__init__(self, type=type, **kwds)
 
 Window = override(Window)
 __all__.append('Window')
@@ -410,7 +428,7 @@ class Dialog(Gtk.Dialog, Container):
         if hasattr(Gtk.DialogFlags, "NO_SEPARATOR") and (flags & Gtk.DialogFlags.NO_SEPARATOR):
             self.set_has_separator(False)
             import warnings
-            warnings.warn("Gtk.DialogFlags.NO_SEPARATOR has been depricated since Gtk+-3.0", DeprecationWarning)
+            warnings.warn("Gtk.DialogFlags.NO_SEPARATOR has been depricated since Gtk+-3.0", PyGIDeprecationWarning)
 
         if buttons is not None:
             self.add_buttons(*buttons)
@@ -455,13 +473,13 @@ class MessageDialog(Gtk.MessageDialog, Dialog):
                  message_format=None,
                  **kwds):
 
-        if message_format != None:
+        if message_format:
             kwds['text'] = message_format
 
         # type keyword is used for backwards compat with PyGTK
         if 'type' in kwds:
             import warnings
-            warnings.warn("The use of the keyword type as a parameter of the Gtk.MessageDialog constructor has been depricated. Please use message_type instead.", DeprecationWarning)
+            warnings.warn("The use of the keyword type as a parameter of the Gtk.MessageDialog constructor has been depricated. Please use message_type instead.", PyGIDeprecationWarning)
             message_type = kwds.pop('type')
 
         Gtk.MessageDialog.__init__(self,
@@ -533,11 +551,11 @@ class RecentChooserDialog(Gtk.RecentChooserDialog):
                  **kwds):
 
         Gtk.RecentChooserDialog.__init__(self,
-                recent_manager=manager,
-                title=title,
-                parent=parent,
-                buttons=buttons,
-                **kwds)
+                                         recent_manager=manager,
+                                         title=title,
+                                         parent=parent,
+                                         buttons=buttons,
+                                         **kwds)
 
 RecentChooserDialog = override(RecentChooserDialog)
 __all__.append('RecentChooserDialog')
@@ -691,7 +709,7 @@ class TextIter(Gtk.TextIter):
 
     def forward_search(self, string, flags, limit):
         success, match_start, match_end = super(TextIter, self).forward_search(string,
-            flags, limit)
+                                                                               flags, limit)
         if success:
             return (match_start, match_end)
         else:
@@ -699,7 +717,7 @@ class TextIter(Gtk.TextIter):
 
     def backward_search(self, string, flags, limit):
         success, match_start, match_end = super(TextIter, self).backward_search(string,
-            flags, limit)
+                                                                                flags, limit)
         if success:
             return (match_start, match_end)
         else:
@@ -959,6 +977,14 @@ TreeSortable = override(TreeSortable)
 __all__.append('TreeSortable')
 
 
+class TreeModelSort(Gtk.TreeModelSort):
+    def __init__(self, model, **kwds):
+        Gtk.TreeModelSort.__init__(self, model=model, **kwds)
+
+TreeModelSort = override(TreeModelSort)
+__all__.append('TreeModelSort')
+
+
 class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
     def __init__(self, *column_types):
         Gtk.ListStore.__init__(self)
@@ -1117,7 +1143,7 @@ class TreeModelRow(object):
             if len(indexList) != len(value):
                 raise ValueError(
                     "attempt to assign sequence of size %d to slice of size %d"
-                        % (len(value), len(indexList)))
+                    % (len(value), len(indexList)))
 
             for i, v in enumerate(indexList):
                 self.model.set_value(self.iter, v, value[i])
@@ -1196,7 +1222,13 @@ class TreePath(Gtk.TreePath):
         return other is None or self.compare(other) >= 0
 
     def __iter__(self):
-        return (int(part) for part in str(self).split(':'))
+        return iter(self.get_indices())
+
+    def __len__(self):
+        return self.get_depth()
+
+    def __getitem__(self, index):
+        return self.get_indices()[index]
 
 TreePath = override(TreePath)
 __all__.append('TreePath')
@@ -1339,6 +1371,13 @@ class TreeView(Gtk.TreeView, Container):
             path = TreePath(path)
         return super(TreeView, self).get_cell_area(path, column)
 
+    def insert_column_with_attributes(self, position, title, cell, **kwargs):
+        column = TreeViewColumn()
+        column.set_title(title)
+        column.pack_start(cell, False)
+        self.insert_column(column, position)
+        column.set_attributes(cell, **kwargs)
+
 TreeView = override(TreeView)
 __all__.append('TreeView')
 
@@ -1361,6 +1400,13 @@ class TreeViewColumn(Gtk.TreeViewColumn):
 
     def set_cell_data_func(self, cell_renderer, func, func_data=None):
         super(TreeViewColumn, self).set_cell_data_func(cell_renderer, func, func_data)
+
+    def set_attributes(self, cell_renderer, **attributes):
+        Gtk.CellLayout.clear_attributes(self, cell_renderer)
+
+        for (name, value) in attributes.items():
+            Gtk.CellLayout.add_attribute(self, cell_renderer, name, value)
+
 
 TreeViewColumn = override(TreeViewColumn)
 __all__.append('TreeViewColumn')
@@ -1543,11 +1589,13 @@ if Gtk._version != '2.0':
 
 _Gtk_main_quit = Gtk.main_quit
 
+
 @override(Gtk.main_quit)
 def main_quit(*args):
     _Gtk_main_quit()
 
 _Gtk_stock_lookup = Gtk.stock_lookup
+
 
 @override(Gtk.stock_lookup)
 def stock_lookup(*args):
