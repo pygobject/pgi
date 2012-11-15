@@ -17,7 +17,6 @@ gpointer = c_void_p
 gint32 = c_int32
 guint32 = c_uint32
 gint = c_int
-gquark = guint32
 gboolean = c_bool
 gint8 = c_int8
 guint8 = c_uint8
@@ -67,41 +66,35 @@ class Flags(guint):
     def __int__(self):
         return self.value
 
+class GQuark(guint32):
+    def to_string(self):
+        GQuark.to_string(self)
+
+_methods = [
+    ("from_string", GQuark, [gchar_p]),
+    ("from_static_string", GQuark, [gchar_p]),
+    ("to_string", gchar_p, [GQuark]),
+    ("try_string", GQuark, [gchar_p]),
+]
+
+wrap_class(_glib, GQuark, None, "g_quark_", _methods)
 
 class GError(Structure):
     _fields_ = [
-        ("domain", gquark),
+        ("domain", GQuark),
         ("code", gint),
         ("message", gchar_p),
     ]
-
 
 class GErrorPtr(POINTER(GError)):
     _type_ = GError
 
 _methods = [
     ("free", None, [GErrorPtr]),
+    ("copy", GErrorPtr, [GErrorPtr]),
 ]
 
 wrap_class(_glib, GError, GErrorPtr, "g_error_", _methods)
-
-
-class GErrorException(Exception):
-    def __init__(self, message):
-        super(GErrorException, self).__init__()
-        self.message = message
-
-    def __str__(self):
-        return self.message
-
-
-def check_gerror(gerror_ptr):
-    try:
-        gerror = gerror_ptr.contents
-        raise GErrorException(gerror.message)
-    except ValueError:
-        return
-
 
 class GMappedFile(Structure):
     pass
@@ -234,10 +227,10 @@ _methods = [
 wrap_class(_glib, GList, GListPtr, "g_list_", _methods)
 
 __all__ = ["gchar_p", "guint", "gpointer", "gint32", "guint32", "gint",
-           "gquark", "gboolean", "gint8", "guint8", "gint16", "guint16",
+           "GQuark", "gboolean", "gint8", "guint8", "gint16", "guint16",
            "gint64", "guint64", "gfloat", "gdouble", "gshort", "gushort",
            "glong", "gulong", "gsize", "Enum", "Flags", "gchar", "guchar",
-           "GError", "GErrorException", "check_gerror", "GErrorPtr",
+           "GError", "GErrorPtr",
            "GMappedFile", "GMappedFilePtr", "gconstpointer", "g_malloc0",
            "GOptionGroup", "GOptionGroupPtr",
            "GSList", "GSListPtr",

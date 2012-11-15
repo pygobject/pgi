@@ -4,7 +4,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from ctypes import byref, POINTER, cast
+from ctypes import byref, cast
 import sys
 sys.path.insert(0, '..')
 
@@ -14,9 +14,10 @@ gi_init()
 
 repo = GIRepository.get_default()
 
-error = POINTER(GError)()
+error = GErrorPtr()
 repo.require("GLib", "2.0", GIRepositoryLoadFlags.LAZY, byref(error))
-check_gerror(error)
+if error:
+    raise Exception(error.contents.message)
 
 base_info = repo.find_by_name("GLib", "warn_message")
 if not base_info:
@@ -33,8 +34,9 @@ in_args = in_args_type(GIArgument(v_string="GITYPES"),
 )
 retval = GIArgument()
 
-error = POINTER(GError)()
+error = GErrorPtr()
 function_info.invoke(in_args, 5, None, 0, byref(retval), byref(error))
-check_gerror(error)
+if error:
+    raise Exception(error.contents.message)
 
 base_info.unref()

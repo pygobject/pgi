@@ -4,12 +4,6 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-import sys
+from pgi.importer import install_import_hook
 
-from pgi.importer import Importer
-
-
-sys.meta_path.append(Importer())
-
-del sys
-del Importer
+install_import_hook()

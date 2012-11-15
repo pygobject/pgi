@@ -4,33 +4,89 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+"""Provides a custom PEP-302 import hook to load GI libraries"""
+
 import sys
 from ctypes import c_char_p, byref, CDLL
 
-from gitypes import GIRepositoryPtr, GErrorPtr, check_gerror
-
-import const
-import module
-import util
-import overrides
+from pgi.gitypes import GIRepositoryPtr, GErrorPtr
+from pgi import const, module, util, overrides
 
 _versions = {}
 
+
+def require_version(namespace, version):
+    """Set a version for the namespace to be loaded.
+    This needs to be called before importing the namespace or any
+    namespace that depends on it.
+    """
+
+    global _versions
+
+    repo = GIRepositoryPtr()
+
+    namespaces = util.array_to_list(repo.get_loaded_namespaces())
+
+    if namespace in namespaces:
+        loaded_version = repo.get_version(namespace)
+        if loaded_version != version:
+            raise ValueError('Namespace %s is already loaded with version %s' %
+                             (namespace, loaded_version))
+
+    if namespace in _versions and _versions[namespace] != version:
+        raise ValueError('Namespace %s already requires version %s' %
+                         (namespace, _versions[namespace]))
+
+    version_glist = repo.enumerate_versions(namespace)
+    available_versions = util.glist_to_list(version_glist, c_char_p)
+    if not available_versions:
+        raise ValueError('Namespace %s not available' % namespace)
+
+    if version not in available_versions:
+        raise ValueError('Namespace %s not available for version %s' %
+                         (namespace, version))
+
+    _versions[namespace] = version
+
+
+def get_required_version(namespace):
+    """Returns the version string for the namespace that was previously
+    required through 'require_version' or None
+    """
+
+    global _versions
+
+    return _versions.get(namespace, None)
+
+
+def extract_namespace(fullname):
+    if not fullname.startswith(const.PREFIX + "."):
+        return
+
+    return fullname[len(const.PREFIX) + 1:]
+
+
+def install_import_hook():
+    sys.meta_path.append(Importer())
+
+
 class Importer(object):
+    """Import hook according to http://www.python.org/dev/peps/pep-0302/"""
 
     def find_module(self, fullname, path):
-        name = self.__get_name(fullname)
+        name = extract_namespace(fullname)
         if not name:
             return
 
-        repository = GIRepositoryPtr()
-        if not repository.enumerate_versions(name):
+        if not GIRepositoryPtr().enumerate_versions(name):
             return
 
         return self
 
     def load_module(self, fullname):
-        namespace = self.__get_name(fullname)
+        global _versions
+
+        namespace = extract_namespace(fullname)
         repository = GIRepositoryPtr()
 
         if namespace in _versions:
@@ -39,7 +95,7 @@ class Importer(object):
             glist = repository.enumerate_versions(namespace)
             versions = sorted(util.glist_to_list(glist, c_char_p))
             if not versions:
-                raise ImportError
+                raise ImportError("%r not found." % namespace)
             version = versions[-1]
 
         # Dependency already loaded, skip
@@ -47,18 +103,22 @@ class Importer(object):
             return sys.modules[fullname]
 
         error = GErrorPtr()
-        typelib = repository.require(namespace, version, 0, byref(error))
-        if not typelib:
-            check_gerror(error)
-            error.free()
+        repository.require(namespace, version, 0, byref(error))
+        if error:
+            try:
+                raise ImportError(error.contents.message)
+            finally:
+                error.free()
 
-        library = repository.get_shared_library(namespace)
-        # FIXME: I guess ignore those?
-        if not library:
-            return
+        library_name = repository.get_shared_library(namespace)
+        if not library_name:
+            raise ImportError("No shared library found for %r" % namespace)
+        library_name = library_name.split(",")[0]
 
-        # FIXME: Sometimes returns a comma separated list
-        library = CDLL(library.split(",")[0])
+        try:
+            library = CDLL(library_name)
+        except OSError:
+            raise ImportError("Couldn't load %r" % library)
 
         # Generate bindings, set up lazy attributes
         instance = module.Module(repository, namespace, library)
@@ -73,9 +133,3 @@ class Importer(object):
         overrides.load(namespace, instance)
 
         return instance
-
-    def __get_name(self, fullname):
-        if not fullname.startswith(const.PREFIX + "."):
-            return
-
-        return fullname[len(const.PREFIX) + 1:]
