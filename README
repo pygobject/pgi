@@ -7,18 +7,10 @@ Longterm Goals
 ~~~~~~~~~~~~~~
 
  - PyGObject compatibility (at least a subset)
- - Python 2.5 / PyPy
-
-Content
-~~~~~~~
-
- /pgi
-    Bindings generation
-
- /pgi/gitypes
-    ctypes bindings for GObject Introspection
+ - Python 2.6 / PyPy
 
 Tests
 ~~~~~
 
  - `./setup.py test` will run unit tests using PGI and PyGObject
+ - `./setup.py test --pgi-only` to skip PyGObject tests
