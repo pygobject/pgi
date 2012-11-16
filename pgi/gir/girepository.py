@@ -6,14 +6,14 @@
 
 from ctypes import Structure, POINTER, c_char_p
 
-from glib import guint, gchar_p, GError, gboolean, gint
-from glib import GSListPtr, GOptionGroupPtr, GListPtr
-from gobject import GType
+from pgi.glib import guint, gchar_p, GError, gboolean, gint
+from pgi.glib import GSListPtr, GOptionGroupPtr, GListPtr
+from pgi.gobject import GType
 from gibaseinfo import GIBaseInfoPtr
 from gitypelib import GITypelibPtr
-from _util import wrap_class, load
+from pgi.ctypesutil import find_library, wrap_class
 
-_gir = load("girepository-1.0")
+_gir = find_library("girepository-1.0")
 
 
 class GIRepositoryError(guint):

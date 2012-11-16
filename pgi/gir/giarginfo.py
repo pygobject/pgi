@@ -4,12 +4,12 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from glib import Enum, gboolean, gint
+from pgi.glib import Enum, gboolean, gint
 from gitypeinfo import GITypeInfoPtr
 from gibaseinfo import GIBaseInfo, GIBaseInfoPtr, GIInfoType
-from _util import wrap_class, load
+from pgi.ctypesutil import find_library, wrap_class
 
-_gir = load("girepository-1.0")
+_gir = find_library("girepository-1.0")
 
 
 def gi_is_arg_info(base_info, _type=GIInfoType.ARG):

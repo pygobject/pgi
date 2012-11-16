@@ -6,10 +6,9 @@
 
 from ctypes import cast
 
-from gitypes import GIStructInfoPtr, GIFunctionInfoFlags
-
-from obj import _ClassMethodAttribute
-from gtype import PGType
+from pgi.gir import GIStructInfoPtr, GIFunctionInfoFlags
+from pgi.obj import _ClassMethodAttribute
+from pgi.gtype import PGType
 
 
 class _Structure(object):

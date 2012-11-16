@@ -4,14 +4,10 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from pgi.gitypes import gi_init
 from pgi.const import VERSION as version
 from pgi.importer import require_version, get_required_version
 
 version = version
-
-gi_init()
-
 
 def replace_gi():
     """Call before the first gi import to redirect gi imports to pgi"""

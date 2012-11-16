@@ -13,7 +13,7 @@ _so_mapping = {
     "girepository-1.0": "libgirepository-1.0.so.1",
 }
 
-load = lambda name: CDLL(_so_mapping[name])
+find_library = lambda name: CDLL(_so_mapping[name])
 
 
 class _CMethod(object):
@@ -32,12 +32,17 @@ class _CMethod(object):
         setattr(owner, name, func)
         return func
 
+
 _wraps = []
 def wrap_class(*args):
-    wraps = _wraps
-    wraps.append(args)
+    global _wraps
+
+    _wraps.append(args)
+
 
 def wrap_setup():
+    global _wraps
+
     wraps = _wraps
     for (lib, base, ptr, pre, methods) in wraps:
         for name, ret, args in methods:
@@ -45,3 +50,5 @@ def wrap_setup():
                 setattr(ptr, name, _CMethod(lib, name, pre, ret, args, True))
             else:
                 setattr(base, name, _CMethod(lib, name, pre, ret, args, False))
+
+    _wraps = []

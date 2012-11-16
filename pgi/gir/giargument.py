@@ -5,7 +5,7 @@
 # published by the Free Software Foundation.
 
 from ctypes import Union
-from glib import *
+from pgi.glib import *
 
 
 class GIArgument(Union):

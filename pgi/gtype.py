@@ -6,10 +6,10 @@
 
 from ctypes import byref
 
-from gitypes import GType, GTypeFlags, GTypeFundamentalFlags, GIRepository
-from gitypes import guint, gobject
-
-from util import import_attribute, cached_property
+from pgi.gir import GIRepository
+from pgi.gobject import GType, GTypeFlags, GTypeFundamentalFlags
+from pgi.glib import guint, free
+from pgi.util import import_attribute, cached_property
 
 
 class PGType(object):
@@ -31,7 +31,7 @@ class PGType(object):
         array = getattr(self._type, function)(byref(length))
         # copy the gtypes and free the array so we don't leak
         items = [PGType(GType(v.value)) for v in array[:length.value]]
-        gobject.free(array)
+        free(array)
         return items
 
     @cached_property

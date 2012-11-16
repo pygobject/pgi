@@ -7,7 +7,7 @@
 from warnings import warn
 from ctypes import cast, byref
 
-from gitypes import GIConstantInfoPtr, GIArgument
+from pgi.gir import GIConstantInfoPtr, GIArgument
 
 
 _union_access = [None, "v_boolean", "v_int8", "v_uint8", "v_int16",

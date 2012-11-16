@@ -4,14 +4,14 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from glib import gint64, gint
+from pgi.glib import gint64, gint
 from gibaseinfo import GIBaseInfo, GIBaseInfoPtr, GIInfoType
 from gicallableinfo import GIFunctionInfoPtr
 from gitypeinfo import GITypeTag
 from giregisteredtypeinfo import GIRegisteredTypeInfo, GIRegisteredTypeInfoPtr
-from _util import load, wrap_class
+from pgi.ctypesutil import find_library, wrap_class
 
-_gir = load("girepository-1.0")
+_gir = find_library("girepository-1.0")
 
 
 def gi_is_value_info(base_info, _type=GIInfoType.VALUE):

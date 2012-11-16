@@ -4,16 +4,16 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from glib import gint, gchar_p
+from pgi.glib import gint, gchar_p
 from gibaseinfo import GIInfoType, GIBaseInfoPtr
 from gipropertyinfo import GIPropertyInfoPtr
 from gicallableinfo import GIFunctionInfoPtr, GISignalInfoPtr, GIVFuncInfoPtr
 from giconstantinfo import GIConstantInfoPtr
 from gistructinfo import GIStructInfoPtr
 from giregisteredtypeinfo import GIRegisteredTypeInfo, GIRegisteredTypeInfoPtr
-from _util import load, wrap_class
+from pgi.ctypesutil import find_library, wrap_class
 
-_gir = load("girepository-1.0")
+_gir = find_library("girepository-1.0")
 
 
 def gi_is_interface_info(base_info, _type=GIInfoType.INTERFACE):

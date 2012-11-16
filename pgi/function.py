@@ -6,9 +6,9 @@
 
 from ctypes import cast
 
-from gitypes import GIFunctionInfoPtr, GITypeTag, gpointer
-
-from util import typeinfo_to_ctypes
+from pgi.gir import GIFunctionInfoPtr, GITypeTag
+from pgi.glib import gpointer
+from pgi.util import typeinfo_to_ctypes
 
 
 def get_array(info, value):

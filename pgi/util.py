@@ -8,10 +8,9 @@ import keyword
 import re
 from ctypes import cast, POINTER, c_void_p
 
-from gitypes import GITypeTag, GIInfoType, free
-from gitypes.glib import *
-
-import const
+from pgi import const
+from pgi.gir import GITypeTag, GIInfoType
+from pgi.glib import *
 
 
 def typeinfo_to_ctypes(info):
@@ -94,6 +93,15 @@ def import_attribute(namespace, name):
     return getattr(mod, name)
 
 
+def escape_name(text, reg=re.compile("^(%s)$" % "|".join(keyword.kwlist))):
+    """Escape identifiers and keywords by changing them in a defined way
+     - '-' will be replaced by '_'
+     - keywords get '_' appended"""
+    # see http://docs.python.org/reference/lexical_analysis.html#identifiers
+    text = text.replace("-", "_")
+    return reg.sub(r"\1_", text)
+
+
 class cached_property(object):
     """A read-only @property that is only evaluated once."""
     def __init__(self, fget, doc=None):
@@ -106,12 +114,3 @@ class cached_property(object):
             return self
         obj.__dict__[self.__name__] = result = self.fget(obj)
         return result
-
-
-def escape_name(text, reg=re.compile("^(%s)$" % "|".join(keyword.kwlist))):
-    """Escape identifiers and keywords by changing them in a defined way
-     - '-' will be replaced by '_'
-     - keywords get '_' appended"""
-    # see http://docs.python.org/reference/lexical_analysis.html#identifiers
-    text = text.replace("-", "_")
-    return reg.sub(r"\1_", text)

@@ -6,9 +6,8 @@
 
 from ctypes import cast
 
-from gitypes import GIUnionInfoPtr
-
-from gtype import PGType
+from pgi.gir import GIUnionInfoPtr
+from pgi.gtype import PGType
 
 
 class _DummyInfo(object):

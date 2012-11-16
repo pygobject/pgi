@@ -6,8 +6,8 @@
 
 from ctypes import c_char_p, CFUNCTYPE, c_void_p
 
-from glib import gchar_p, gboolean, gint
-from gobject import GValuePtr
+from pgi.glib import gchar_p, gboolean, gint
+from pgi.gobject import GValuePtr
 from gibaseinfo import GIInfoType
 from giinterfaceinfo import GIInterfaceInfoPtr
 from gifieldinfo import GIFieldInfoPtr
@@ -16,9 +16,9 @@ from gicallableinfo import GIFunctionInfoPtr, GISignalInfoPtr, GIVFuncInfoPtr
 from giregisteredtypeinfo import GIRegisteredTypeInfo, GIRegisteredTypeInfoPtr
 from giconstantinfo import GIConstantInfoPtr
 from gistructinfo import GIStructInfoPtr
-from _util import load, wrap_class
+from pgi.ctypesutil import find_library, wrap_class
 
-_gir = load("girepository-1.0")
+_gir = find_library("girepository-1.0")
 
 
 def gi_is_object_info(base_info, _type=GIInfoType.OBJECT):

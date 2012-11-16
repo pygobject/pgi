@@ -7,16 +7,18 @@
 from warnings import warn
 from ctypes import cast, sizeof
 
-from gitypes import GIInterfaceInfoPtr, gpointer, gobject, GIFunctionInfoFlags
-from gitypes import GValuePtr, GValue, GITypeTag, GIInfoType, GParameter
-from gitypes import GParameterPtr, g_malloc0, GIObjectInfoPtr
-from gitypes import signal_connect_data, GCallback, GClosureNotify
-from gitypes import GConnectFlags, signal_handler_disconnect
-from gitypes import signal_handler_unblock, signal_handler_block
+from pgi import gobject
+from pgi.gobject import GValuePtr, GValue, GParameterPtr, GParameter
+from pgi.gobject import GCallback, GClosureNotify, signal_connect_data
+from pgi.gobject import signal_handler_unblock, signal_handler_block
+from pgi.gobject import GConnectFlags, signal_handler_disconnect
+from pgi.glib import gpointer, g_malloc0
+from pgi.gir import GIInterfaceInfoPtr, GIFunctionInfoFlags
+from pgi.gir import GITypeTag, GIInfoType, GIObjectInfoPtr
 
-from util import import_attribute, typeinfo_to_ctypes, set_gvalue_from_py
-from gtype import PGType
-from properties import PropertyAttribute
+from pgi.util import import_attribute, typeinfo_to_ctypes, set_gvalue_from_py
+from pgi.gtype import PGType
+from pgi.properties import PropertyAttribute
 
 
 def gparamspec_to_gvalue_ptr(spec, value):

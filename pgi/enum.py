@@ -7,7 +7,7 @@
 from warnings import warn
 from ctypes import cast
 
-from gitypes import GIEnumInfoPtr
+from pgi.gir import GIEnumInfoPtr
 
 
 class _EnumClass(int):

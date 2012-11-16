@@ -6,13 +6,13 @@
 
 from ctypes import POINTER
 
-from glib import gint
+from pgi.glib import gint
 from gibaseinfo import GIBaseInfo, GIBaseInfoPtr, GIInfoType
 from gitypeinfo import GITypeInfoPtr
 from giargument import GIArgument
-from _util import load, wrap_class
+from pgi.ctypesutil import find_library, wrap_class
 
-_gir = load("girepository-1.0")
+_gir = find_library("girepository-1.0")
 
 
 def gi_is_constant_info(base_info, _type=GIInfoType.CONSTANT):

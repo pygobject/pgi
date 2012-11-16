@@ -6,17 +6,17 @@
 
 from ctypes import c_char_p, POINTER, c_int
 
-from glib import gint, Enum, gboolean, gchar_p, GError
-from gobject import GSignalFlags
+from pgi.glib import gint, Enum, gboolean, gchar_p, GError
+from pgi.gobject import GSignalFlags
 from gibaseinfo import GIBaseInfo, GIBaseInfoPtr
 from gibaseinfo import GIAttributeIterPtr, GIInfoType
 from gitypeinfo import GITypeInfoPtr
 from giarginfo import GITransfer, GIArgInfoPtr
 from gipropertyinfo import GIPropertyInfoPtr
 from giargument import GIArgument
-from _util import load, wrap_class
+from pgi.ctypesutil import find_library, wrap_class
 
-_gir = load("girepository-1.0")
+_gir = find_library("girepository-1.0")
 
 
 def gi_is_callable_info(base_info, _it=GIInfoType):

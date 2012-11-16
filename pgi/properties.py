@@ -7,13 +7,14 @@
 from warnings import warn
 from ctypes import cast
 
-from gitypes import GObjectClassPtr, G_TYPE_FROM_INSTANCE
-from gitypes import GIRepositoryPtr, GIInfoType, GIObjectInfoPtr
-from gitypes import GIInterfaceInfoPtr, GValue, GValuePtr, GITypeTag
-from gitypes import gobject
+from pgi import gobject
+from pgi.gobject import GValue, GValuePtr, GObjectClassPtr
+from pgi.gobject import G_TYPE_FROM_INSTANCE
+from pgi.gir import GIRepositoryPtr, GIInfoType, GIObjectInfoPtr
+from pgi.gir import GIInterfaceInfoPtr, GITypeTag
 
-from util import escape_name, import_attribute, set_gvalue_from_py
-from gtype import PGType
+from pgi.util import escape_name, import_attribute, set_gvalue_from_py
+from pgi.gtype import PGType
 
 
 class GParamSpec(object):

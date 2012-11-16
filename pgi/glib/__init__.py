@@ -5,9 +5,9 @@
 # published by the Free Software Foundation.
 
 from ctypes import *
-from _util import wrap_class, load
+from pgi.ctypesutil import wrap_class, wrap_setup, find_library
 
-_glib = load("glib-2.0")
+_glib = find_library("glib-2.0")
 
 gchar_p = c_char_p
 gchar = c_char
@@ -37,6 +37,9 @@ g_malloc0 = _glib.g_malloc0
 g_malloc0.argtypes = [gsize]
 g_malloc0.restype = gpointer
 
+free = _glib.g_free
+free.argtypes = [gpointer]
+free.resttype = None
 
 class Enum(guint):
     def __str__(self):
@@ -226,11 +229,13 @@ _methods = [
 
 wrap_class(_glib, GList, GListPtr, "g_list_", _methods)
 
+wrap_setup()
+
 __all__ = ["gchar_p", "guint", "gpointer", "gint32", "guint32", "gint",
            "GQuark", "gboolean", "gint8", "guint8", "gint16", "guint16",
            "gint64", "guint64", "gfloat", "gdouble", "gshort", "gushort",
            "glong", "gulong", "gsize", "Enum", "Flags", "gchar", "guchar",
-           "GError", "GErrorPtr",
+           "GError", "GErrorPtr", "free",
            "GMappedFile", "GMappedFilePtr", "gconstpointer", "g_malloc0",
            "GOptionGroup", "GOptionGroupPtr",
            "GSList", "GSListPtr",

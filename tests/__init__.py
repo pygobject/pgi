@@ -40,7 +40,7 @@ def test(gi):
 
     if not gi:
         loader = unittest.TestLoader()
-        suites.append(loader.discover(os.path.join(current_dir, "gitypes")))
+        suites.append(loader.discover(os.path.join(current_dir, "gir")))
 
     run = unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite(suites))
     return len(run.failures) + len(run.errors)

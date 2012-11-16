@@ -18,11 +18,7 @@ from gistructinfo import *
 from gitypeinfo import *
 from gitypelib import *
 from giunioninfo import *
-from glib import *
-from gobject import *
 
+from pgi.ctypesutil import wrap_setup
 
-def gi_init():
-    from _util import wrap_setup
-    wrap_setup()
-    g_type_init()
+wrap_setup()

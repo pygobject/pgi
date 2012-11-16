@@ -6,12 +6,12 @@
 
 from ctypes import POINTER, Structure, CFUNCTYPE
 
-from glib import Flags, gulong, gchar_p, guint, gboolean, gpointer, guint32
-from glib import guint64, gchar, guchar, gint, glong, gint64, gfloat, gdouble
-from glib import Enum
-from _util import load, wrap_class
+from pgi.glib import Flags, gulong, gchar_p, guint, gboolean, gpointer, guint32
+from pgi.glib import guint64, gchar, guchar, gint, glong, gint64, gfloat, gdouble
+from pgi.glib import Enum
+from pgi.ctypesutil import find_library, wrap_class, wrap_setup
 
-_gobject = load("gobject-2.0")
+_gobject = find_library("gobject-2.0")
 
 
 class GSignalFlags(Flags):
@@ -64,10 +64,6 @@ _methods = [
 ]
 
 wrap_class(_gobject, GType, GType, "g_type_", _methods)
-
-free = _gobject.g_free
-free.argtypes = [gpointer]
-free.resttype = None
 
 
 class GTypeClass(Structure):
@@ -265,11 +261,14 @@ signal_handler_unblock = _gobject.g_signal_handler_unblock
 signal_handler_unblock.argtypes = [gpointer, gulong]
 signal_handler_unblock.resttype = None
 
+wrap_setup()
+g_type_init()
+
 __all__ = ["GType", "g_type_init", "GParamFlags", "GValue", "GValuePtr",
            "GValueTransform", "GSignalFlags", "GTypeFlags", "GParameter",
            "GTypeFundamentalFlags", "GObjectPtr", "GParamSpec",
            "GParamSpecPtr", "GObjectClassPtr", "G_TYPE_FROM_INSTANCE",
            "GParameterPtr", "signal_connect_data", "GCallback",
            "GClosureNotify", "signal_handler_disconnect", "GConnectFlags",
-           "signal_handler_unblock", "signal_handler_block", "free",
+           "signal_handler_unblock", "signal_handler_block",
 ]

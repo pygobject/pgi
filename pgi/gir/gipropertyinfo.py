@@ -4,13 +4,13 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from gobject import GParamFlags
+from pgi.gobject import GParamFlags
 from gibaseinfo import GIBaseInfo, GIBaseInfoPtr
 from gitypeinfo import GITypeInfoPtr, GIInfoType
 from giarginfo import GITransfer
-from _util import load, wrap_class
+from pgi.ctypesutil import find_library, wrap_class
 
-_gir = load("girepository-1.0")
+_gir = find_library("girepository-1.0")
 
 
 def gi_is_property_info(base_info, _type=GIInfoType.PROPERTY):

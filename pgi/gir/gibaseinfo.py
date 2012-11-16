@@ -6,11 +6,11 @@
 
 from ctypes import POINTER, Structure, c_char_p
 
-from glib import gchar_p, Enum, gboolean
+from pgi.glib import gchar_p, Enum, gboolean
+from pgi.ctypesutil import wrap_class, find_library
 from gitypelib import GITypelibPtr
-from _util import wrap_class, load
 
-_gir = load("girepository-1.0")
+_gir = find_library("girepository-1.0")
 
 
 class GIInfoType(Enum):
