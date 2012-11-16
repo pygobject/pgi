@@ -6,12 +6,12 @@
 
 import types
 
-from enum import EnumAttribute, FlagsAttribute
-from constant import ConstantAttribute
-from function import FunctionAttribute
-from structure import StructureAttribute
-from obj import ObjectAttribute, InterfaceAttribute
-from union import UnionAttribute
+from pgi.enum import EnumAttribute, FlagsAttribute
+from pgi.constant import ConstantAttribute
+from pgi.function import FunctionAttribute
+from pgi.structure import StructureAttribute
+from pgi.obj import ObjectAttribute, InterfaceAttribute
+from pgi.union import UnionAttribute
 
 
 _attr_list = [None, FunctionAttribute, None, StructureAttribute, None,
