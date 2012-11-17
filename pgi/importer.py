@@ -120,6 +120,8 @@ class Importer(object):
         # Generate bindings, set up lazy attributes
         instance = module.Module(repository, namespace, library)
         instance.__file__ = repository.get_typelib_path(namespace)
+        instance.__loader__ = self
+        instance.__package__ = const.PREFIX[-1]
         instance._version = version
 
         # add to module and sys.modules

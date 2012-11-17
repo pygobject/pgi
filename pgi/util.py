@@ -89,7 +89,7 @@ def glist_to_list(g, type_):
 
 
 def import_attribute(namespace, name):
-    mod = __import__(const.PREFIX[0] + "." + namespace, fromlist=[namespace])
+    mod = __import__(const.PREFIX[-1] + "." + namespace, fromlist=[namespace])
     return getattr(mod, name)
 
 
