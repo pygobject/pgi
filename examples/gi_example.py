@@ -8,9 +8,10 @@ from ctypes import byref, cast
 import sys
 sys.path.insert(0, '..')
 
-from pgi.gir import *
-from pgi.glib import *
-from pgi.gobject import *
+from pgi.gir import GIRepository, GIRepositoryLoadFlags, GIFunctionInfoPtr
+from pgi.gir import GIArgument
+from pgi.glib import GErrorPtr
+from pgi.gobject import g_type_init
 
 g_type_init()
 
