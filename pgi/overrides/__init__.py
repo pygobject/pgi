@@ -5,7 +5,6 @@
 # published by the Free Software Foundation.
 
 import os
-import sys
 import types
 import imp
 import traceback
@@ -22,7 +21,7 @@ def load(namespace, module):
     try:
         name = __package__ + "." + namespace
         override_module = __import__(name, fromlist=[""])
-    except ImportError, e:
+    except ImportError:
         exc = traceback.format_exc()
         try:
             paths = [os.path.dirname(__file__)]
