@@ -10,6 +10,7 @@ import sys
 import glob
 
 from distutils.core import setup, Command
+import pgi
 
 
 class CoverageCommand(Command):
@@ -112,13 +113,14 @@ class TestCommand(Command):
         exit(tests.test(pid != 0))
 
 
-setup(name='PGI',
-      version='0.0.1',
+setup(name='pgi',
+      version=".".join(map(str, pgi.version)),
       description='Pure Python GObject Introspection Bindings',
       author='Christoph Reiter',
       author_email='reiter.christoph@gmail.com',
       url='https://github.com/lazka/pgi',
-      packages=['pgi', 'pgi.gitypes', 'pgi.overrides', 'pgi.repository'],
+      packages=['pgi', 'pgi.gir', 'pgi.glib', 'pgi.gobject',
+                'pgi.overrides', 'pgi.repository'],
       license='GPLv2',
       cmdclass={
             'test': TestCommand,
