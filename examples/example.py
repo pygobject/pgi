@@ -7,6 +7,7 @@
 import sys
 sys.path.insert(0, '..')
 import pgi
+pgi.replace_gi()
 
 from gi.repository import Gtk
 
