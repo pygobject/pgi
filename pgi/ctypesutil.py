@@ -4,7 +4,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from ctypes import CDLL
+from ctypes import cdll
 
 
 _so_mapping = {
@@ -13,7 +13,7 @@ _so_mapping = {
     "girepository-1.0": "libgirepository-1.0.so.1",
 }
 
-find_library = lambda name: CDLL(_so_mapping[name])
+find_library = lambda name: getattr(cdll, _so_mapping[name])
 
 
 class _CMethod(object):
