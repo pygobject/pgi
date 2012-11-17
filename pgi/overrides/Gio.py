@@ -6,8 +6,8 @@
 
 import sys
 
-from _override import override
-from pgi.repository import Gio
+from pgi.overrides import override
+from pgi.repository import Gio, GLib
 
 __all__ = []
 

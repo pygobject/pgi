@@ -8,9 +8,9 @@
 
 import sys
 
-from pgi.repository import Gtk
+from pgi.repository import Gtk, GObject
 from pgi import PGIDeprecationWarning as PyGIDeprecationWarning
-from _override import override
+from pgi.overrides import override
 
 if sys.version_info >= (3, 0):
     _basestring = str

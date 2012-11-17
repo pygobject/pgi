@@ -5,6 +5,6 @@
 # published by the Free Software Foundation.
 
 from pgi.repository import GObject
-from _override import duplicate
+from pgi.overrides import duplicate
 
 duplicate(GObject.Object, "GObject")

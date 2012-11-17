@@ -61,10 +61,9 @@ def get_required_version(namespace):
 
 
 def extract_namespace(fullname):
-    if not fullname.startswith(const.PREFIX + "."):
-        return
-
-    return fullname[len(const.PREFIX) + 1:]
+    for prefix in const.PREFIX:
+        if fullname.startswith(prefix):
+            return fullname[len(prefix) + 1:]
 
 
 def install_import_hook():
@@ -75,14 +74,10 @@ class Importer(object):
     """Import hook according to http://www.python.org/dev/peps/pep-0302/"""
 
     def find_module(self, fullname, path):
-        name = extract_namespace(fullname)
-        if not name:
-            return
-
-        if not GIRepositoryPtr().enumerate_versions(name):
-            return
-
-        return self
+        namespace = extract_namespace(fullname)
+        if namespace:
+            if GIRepositoryPtr().enumerate_versions(namespace):
+                return self
 
     @util.no_jit
     def load_module(self, fullname):
@@ -128,8 +123,9 @@ class Importer(object):
         instance._version = version
 
         # add to module and sys.modules
-        setattr(__import__(const.PREFIX, fromlist=[""]), namespace, instance)
-        sys.modules[fullname] = instance
+        for prefix in const.PREFIX:
+            setattr(__import__(prefix, fromlist=[""]), namespace, instance)
+            sys.modules[prefix + "." + namespace] = instance
 
         # Import a override module if available.
         overrides.load(namespace, instance)

@@ -5,4 +5,4 @@
 # published by the Free Software Foundation.
 
 VERSION = (0, 1)
-PREFIX = "pgi.repository"
+PREFIX = ["pgi.repository"]

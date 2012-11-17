@@ -18,7 +18,7 @@ def replace_gi():
     import sys
 
     # check if gi has already been replaces
-    if sys.modules.get("gi") is sys.modules[__name__]:
+    if "gi.repository" in const.PREFIX:
         return
 
     # make sure gi isn't loaded first
@@ -31,7 +31,7 @@ def replace_gi():
     import pgi.repository
     sys.modules["gi"] = pgi
     sys.modules["gi.repository"] = pgi.repository
-    const.PREFIX = "gi.repository"
+    const.PREFIX.append("gi.repository")
 
 
 class PGIDeprecationWarning(RuntimeWarning):

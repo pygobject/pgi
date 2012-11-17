@@ -5,7 +5,7 @@
 # published by the Free Software Foundation.
 
 from pgi.repository import Pango
-from _override import override
+from pgi.overrides import override
 
 
 __all__ = []
