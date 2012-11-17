@@ -128,7 +128,7 @@ class Importer(object):
         instance._version = version
 
         # add to module and sys.modules
-        setattr(__import__(const.PREFIX), namespace, instance)
+        setattr(__import__(const.PREFIX, fromlist=[""]), namespace, instance)
         sys.modules[fullname] = instance
 
         # Import a override module if available.

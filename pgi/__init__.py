@@ -17,7 +17,7 @@ def replace_gi():
 
     import sys
 
-    # check if gi is already replaces
+    # check if gi has already been replaces
     if sys.modules.get("gi") is sys.modules[__name__]:
         return
 
@@ -27,7 +27,10 @@ def replace_gi():
             raise AssertionError("pgi has to be imported before gi")
 
     # replace and tell the import hook
-    sys.modules["gi"] = sys.modules[__name__]
+    import pgi
+    import pgi.repository
+    sys.modules["gi"] = pgi
+    sys.modules["gi.repository"] = pgi.repository
     const.PREFIX = "gi.repository"
 
 

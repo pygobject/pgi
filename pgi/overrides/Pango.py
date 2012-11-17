@@ -4,7 +4,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from pgi import Pango
+from pgi.repository import Pango
 from _override import override
 
 

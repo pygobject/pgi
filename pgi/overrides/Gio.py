@@ -7,7 +7,7 @@
 import sys
 
 from _override import override
-from pgi import Gio
+from pgi.repository import Gio
 
 __all__ = []
 

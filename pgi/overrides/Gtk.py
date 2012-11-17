@@ -8,7 +8,7 @@
 
 import sys
 
-from pgi import Gtk
+from pgi.repository import Gtk
 from pgi import PGIDeprecationWarning as PyGIDeprecationWarning
 from _override import override
 
