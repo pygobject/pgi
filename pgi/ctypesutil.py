@@ -27,7 +27,7 @@ class _CMethod(object):
         func.restype = ret
 
         if wrap:
-            setattr(owner, name, (lambda f: lambda *x: f(*x))(func))
+            setattr(owner, name, lambda *x: func(*x))
             return getattr(instance, name)
         setattr(owner, name, func)
         return func
