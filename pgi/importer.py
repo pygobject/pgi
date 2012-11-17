@@ -84,6 +84,7 @@ class Importer(object):
 
         return self
 
+    @util.no_jit
     def load_module(self, fullname):
         global _versions
 
