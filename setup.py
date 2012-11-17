@@ -24,6 +24,11 @@ class CoverageCommand(Command):
         pass
 
     def run(self):
+
+        for k in sys.modules.keys():
+            if k.startswith("pgi"):
+                del sys.modules[k]
+
         import trace
         tracer = trace.Trace(
             count=True, trace=False,
