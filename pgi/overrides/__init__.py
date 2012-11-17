@@ -7,6 +7,8 @@
 import os
 import sys
 import types
+import imp
+import traceback
 
 _overrides = []
 _active_module = []
@@ -15,16 +17,23 @@ _active_module = []
 def load(namespace, module):
     global _active_module, _overrides
 
-    # look away now
-    p = sys.path
-    sys.path = [os.path.dirname(__file__)]
     _active_module.append(module)
     _overrides.append({})
     try:
         name = __package__ + "." + namespace
         override_module = __import__(name, fromlist=[""])
-    except ImportError:
-        pass
+    except ImportError, e:
+        exc = traceback.format_exc()
+        try:
+            paths = [os.path.dirname(__file__)]
+            fp, pn, desc = imp.find_module(namespace, paths)
+        except ImportError:
+            pass
+        else:
+            if fp:
+                fp.close()
+            print exc
+            raise ImportError("Failed to load overrides for %r" % namespace)
     else:
         # inject a module copy into the override module that
         # has the original classes for all overriden ones
@@ -37,7 +46,6 @@ def load(namespace, module):
 
     _active_module.pop(-1)
     _overrides.pop(-1)
-    sys.path = p
 
 
 def duplicate(klass, name):
