@@ -6,6 +6,8 @@
 
 import unittest
 
+from gi.repository import Gtk, GObject, Atk
+
 
 class ObjectTest(unittest.TestCase):
 

@@ -6,6 +6,8 @@
 
 import unittest
 
+from gi.repository import Gtk
+
 
 class FuncsTest(unittest.TestCase):
     def test_basic(self):

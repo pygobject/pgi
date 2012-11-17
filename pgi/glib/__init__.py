@@ -41,6 +41,7 @@ free = _glib.g_free
 free.argtypes = [gpointer]
 free.resttype = None
 
+
 class Enum(guint):
     def __str__(self):
         for a in (c for c in dir(self) if c.upper() == c):
@@ -69,9 +70,11 @@ class Flags(guint):
     def __int__(self):
         return self.value
 
+
 class GQuark(guint32):
     def to_string(self):
         GQuark.to_string(self)
+
 
 _methods = [
     ("from_string", GQuark, [gchar_p]),
@@ -82,12 +85,14 @@ _methods = [
 
 wrap_class(_glib, GQuark, None, "g_quark_", _methods)
 
+
 class GError(Structure):
     _fields_ = [
         ("domain", GQuark),
         ("code", gint),
         ("message", gchar_p),
     ]
+
 
 class GErrorPtr(POINTER(GError)):
     _type_ = GError
@@ -97,7 +102,9 @@ _methods = [
     ("copy", GErrorPtr, [GErrorPtr]),
 ]
 
+
 wrap_class(_glib, GError, GErrorPtr, "g_error_", _methods)
+
 
 class GMappedFile(Structure):
     pass

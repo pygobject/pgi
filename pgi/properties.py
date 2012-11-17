@@ -157,7 +157,6 @@ class _Props(object):
                 prop_bases.append(base.props.__class__)
         prop_bases = tuple(prop_bases) or cls.__bases__
 
-
         klass = self.__gtype.class_ref()
         obj_class = cast(klass, GObjectClassPtr)
         for i in xrange(info.get_n_properties()):

@@ -6,6 +6,8 @@
 
 import unittest
 
+from gi.repository import Gtk
+
 
 class EnumTest(unittest.TestCase):
     def test_enum(self):

@@ -6,6 +6,8 @@
 
 import unittest
 
+from gi.repository import Gtk
+
 
 class InterfaceTest(unittest.TestCase):
     def test_iface(self):

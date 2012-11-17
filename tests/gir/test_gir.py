@@ -11,6 +11,7 @@ from pgi.gir import *
 from pgi.gobject import *
 from pgi.glib import *
 
+
 class GITypesTest(unittest.TestCase):
 
     def setUp(self):

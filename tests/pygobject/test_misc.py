@@ -7,6 +7,8 @@
 import unittest
 import sys
 
+from gi.repository import Gtk, GObject, GLib
+
 
 class MiscTest(unittest.TestCase):
     def test_module_dir(self):

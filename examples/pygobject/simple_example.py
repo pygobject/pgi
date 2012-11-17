@@ -7,8 +7,9 @@
 # or any later version published by the Free Software Foundation;
 # with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 
-import sys; sys.path.insert(0, '../..')
-import pgi; pgi.replace_gi()
+import sys
+sys.path.insert(0, '../..')
+import pgi
 
 from gi.repository import Gtk
 

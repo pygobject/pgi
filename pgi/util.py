@@ -10,7 +10,7 @@ from ctypes import cast, POINTER, c_void_p
 
 from pgi import const
 from pgi.gir import GITypeTag, GIInfoType
-from pgi.glib import *
+from pgi.glib import gchar_p, gpointer, gboolean, guint32, free
 
 
 def typeinfo_to_ctypes(info):

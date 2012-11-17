@@ -5,31 +5,24 @@
 # published by the Free Software Foundation.
 
 import os
-import sys
 import unittest
 
 
-def test(gi):
+def test(load_gi):
     """Run the test suite.
 
     gi -- run all tests in the pygobject suite with PyGObject
 
     """
 
-    print "#" * 80
-    if gi:
-        from gi.repository import Gtk, GObject, GLib, Atk, Gdk
-        print "GI"
-    else:
-        from pgi.repository import Gtk, GObject, GLib, Atk, Gdk
-        print "PGI"
-    print "#" * 80
+    if not load_gi:
+        import pgi
 
-    import __builtin__
-    __builtin__.__dict__["Gtk"] = Gtk
-    __builtin__.__dict__["GObject"] = GObject
-    __builtin__.__dict__["GLib"] = GLib
-    __builtin__.__dict__["Atk"] = Atk
+    import gi
+    if load_gi:
+        assert gi.__name__ == "gi"
+    else:
+        assert gi.__name__ == "pgi"
 
     current_dir = os.path.join(os.path.dirname(__file__))
 
@@ -38,7 +31,7 @@ def test(gi):
     loader = unittest.TestLoader()
     suites.append(loader.discover(os.path.join(current_dir, "pygobject")))
 
-    if not gi:
+    if not load_gi:
         loader = unittest.TestLoader()
         suites.append(loader.discover(os.path.join(current_dir, "gir")))
 

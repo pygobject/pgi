@@ -16,8 +16,8 @@ from pgi.union import UnionAttribute
 
 _attr_list = [None, FunctionAttribute, None, StructureAttribute, None,
               EnumAttribute, FlagsAttribute, ObjectAttribute,
-              InterfaceAttribute, ConstantAttribute, None, UnionAttribute, None, None,
-              None, None, None, None, None, None]
+              InterfaceAttribute, ConstantAttribute, None, UnionAttribute,
+              None, None, None, None, None, None, None, None]
 
 
 class _ModuleAttribute(object):

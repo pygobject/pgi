@@ -34,6 +34,8 @@ class _CMethod(object):
 
 
 _wraps = []
+
+
 def wrap_class(*args):
     global _wraps
 

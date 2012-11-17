@@ -6,6 +6,8 @@
 
 import unittest
 
+from gi.repository import Gtk
+
 
 class ConstTest(unittest.TestCase):
     def test_int(self):

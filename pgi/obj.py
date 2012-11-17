@@ -14,7 +14,7 @@ from pgi.gobject import signal_handler_unblock, signal_handler_block
 from pgi.gobject import GConnectFlags, signal_handler_disconnect
 from pgi.glib import gpointer, g_malloc0
 from pgi.gir import GIInterfaceInfoPtr, GIFunctionInfoFlags
-from pgi.gir import GITypeTag, GIInfoType, GIObjectInfoPtr
+from pgi.gir import GITypeTag, GIObjectInfoPtr
 
 from pgi.util import import_attribute, typeinfo_to_ctypes, set_gvalue_from_py
 from pgi.gtype import PGType
@@ -60,7 +60,7 @@ class _Object(object):
         array_size = sizeof(GParameter) * len(kwargs)
         array = cast(g_malloc0(array_size), GParameterPtr)
 
-        for i ,(key, value) in enumerate(kwargs.iteritems()):
+        for i, (key, value) in enumerate(kwargs.iteritems()):
             spec = getattr(specs, key)
             gvalue_ptr = gparamspec_to_gvalue_ptr(spec, value)
             if not gvalue_ptr:
@@ -75,7 +75,6 @@ class _Object(object):
         name = type(self).__name__
         return form % (name, id(self), self.__gtype__.name, self._obj)
 
-
     def connect(self, name, callback):
         cb = GCallback(callback)
         destroy = GClosureNotify()
@@ -85,7 +84,7 @@ class _Object(object):
 
     def connect_after(self, name, callback):
         cb = GCallback(callback)
-        destroy =GClosureNotify()
+        destroy = GClosureNotify()
         flags = GConnectFlags.CONNECT_AFTER
         id_ = signal_connect_data(self._obj, name, cb, None, destroy, flags)
         self.__signal_cb_ref[id_] = (cb, destroy)

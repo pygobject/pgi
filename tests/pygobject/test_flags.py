@@ -6,6 +6,8 @@
 
 import unittest
 
+from gi.repository import Gtk
+
 
 class FlagsTest(unittest.TestCase):
     def test_flags(self):

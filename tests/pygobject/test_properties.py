@@ -6,6 +6,8 @@
 
 import unittest
 
+from gi.repository import Gtk
+
 
 class PropertiesTest(unittest.TestCase):
     def test_basic(self):
@@ -42,7 +44,7 @@ class PropertiesTest(unittest.TestCase):
 
         w = Gtk.Window
         specs = [p for p in dir(w.props) if not p.startswith("_")]
-        self.assertEqual(len(props), 70)
+        self.assertEqual(len(specs), 70)
         self.assertEqual(w.props.double_buffered.name, "double-buffered")
 
     def test_set_basic(self):

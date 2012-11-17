@@ -8,9 +8,11 @@ from ctypes import byref, cast
 import sys
 sys.path.insert(0, '..')
 
-from pgi.gitypes import *
+from pgi.gir import *
+from pgi.glib import *
+from pgi.gobject import *
 
-gi_init()
+g_type_init()
 
 repo = GIRepository.get_default()
 

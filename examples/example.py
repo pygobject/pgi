@@ -6,8 +6,9 @@
 
 import sys
 sys.path.insert(0, '..')
+import pgi
 
-from pgi.repository import Gtk
+from gi.repository import Gtk
 
 
 if __name__ == '__main__':
