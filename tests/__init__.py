@@ -22,8 +22,10 @@ def test(load_gi):
     import gi
     if load_gi:
         assert gi.__name__ == "gi"
+        print "### GI " + "#" * 61
     else:
         assert gi.__name__ == "pgi"
+        print "### PGI " + "#" * 60
 
     current_dir = os.path.join(os.path.dirname(__file__))
 

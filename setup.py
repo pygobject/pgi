@@ -118,6 +118,38 @@ class TestCommand(Command):
         exit(tests.test(pid != 0))
 
 
+class BenchmarkCommand(Command):
+    description = "run benchmarks"
+    user_options = [
+        ("pgi-only", None, "only run pgi"),
+    ]
+
+    def initialize_options(self):
+        self.pgi_only = False
+
+    def finalize_options(self):
+        self.pgi_only = bool(self.pgi_only)
+
+    def run(self):
+        import benchmarks
+        import os
+        import platform
+
+        is_cpython = platform.python_implementation() == "CPython"
+
+        # Run with both bindings, PGI first
+        # Skip the second run if the first one fails
+        if not is_cpython or self.pgi_only:
+            pid = 0
+        else:
+            pid = os.fork()
+        if pid != 0:
+            pid, status = os.waitpid(pid, 0)
+            if status:
+                exit(status)
+        exit(benchmarks.run(pid != 0))
+
+
 setup(name='pgi',
       version=".".join(map(str, pgi.version)),
       description='Pure Python GObject Introspection Bindings',
@@ -130,5 +162,6 @@ setup(name='pgi',
       cmdclass={
             'test': TestCommand,
             'coverage': CoverageCommand,
+            'benchmark': BenchmarkCommand,
       }
      )
