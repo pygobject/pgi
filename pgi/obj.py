@@ -11,7 +11,7 @@ from pgi import gobject
 from pgi.gobject import GValuePtr, GValue, GParameterPtr, GParameter
 from pgi.gobject import GCallback, GClosureNotify, signal_connect_data
 from pgi.gobject import signal_handler_unblock, signal_handler_block
-from pgi.gobject import GConnectFlags, signal_handler_disconnect
+from pgi.gobject import GConnectFlags, signal_handler_disconnect, signal_lookup
 from pgi.glib import gpointer, g_malloc0
 from pgi.gir import GIInterfaceInfoPtr, GIFunctionInfoFlags
 from pgi.gir import GITypeTag, GIObjectInfoPtr
@@ -76,6 +76,9 @@ class _Object(object):
         return form % (name, id(self), self.__gtype__.name, self._obj)
 
     def connect(self, name, callback):
+        if not signal_lookup(name, self.__gtype__._type):
+            raise TypeError("unknown signal name %r" % name)
+
         cb = GCallback(callback)
         destroy = GClosureNotify()
         id_ = signal_connect_data(self._obj, name, cb, None, destroy, 0)
@@ -83,6 +86,9 @@ class _Object(object):
         return id_
 
     def connect_after(self, name, callback):
+        if not signal_lookup(name, self.__gtype__._type):
+            raise TypeError("unknown signal name %r" % name)
+
         cb = GCallback(callback)
         destroy = GClosureNotify()
         flags = GConnectFlags.CONNECT_AFTER

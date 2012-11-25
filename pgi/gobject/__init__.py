@@ -261,6 +261,10 @@ signal_handler_unblock = _gobject.g_signal_handler_unblock
 signal_handler_unblock.argtypes = [gpointer, gulong]
 signal_handler_unblock.resttype = None
 
+signal_lookup = _gobject.g_signal_lookup
+signal_lookup.argtypes = [gchar_p, GType]
+signal_lookup.resttype = guint
+
 wrap_setup()
 g_type_init()
 
@@ -270,5 +274,5 @@ __all__ = ["GType", "g_type_init", "GParamFlags", "GValue", "GValuePtr",
            "GParamSpecPtr", "GObjectClassPtr", "G_TYPE_FROM_INSTANCE",
            "GParameterPtr", "signal_connect_data", "GCallback",
            "GClosureNotify", "signal_handler_disconnect", "GConnectFlags",
-           "signal_handler_unblock", "signal_handler_block",
+           "signal_handler_unblock", "signal_handler_block", "signal_lookup"
 ]
