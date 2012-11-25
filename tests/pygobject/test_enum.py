@@ -4,6 +4,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+import sys
 import unittest
 
 from gi.repository import Gtk
@@ -24,6 +25,7 @@ class EnumTest(unittest.TestCase):
 
     def test_inval_value(self):
         self.assertRaises(ValueError, Gtk.WindowPosition, 9)
+        self.assertRaises(OverflowError, Gtk.WindowPosition, sys.maxsize + 1)
         self.assertRaises(TypeError, Gtk.WindowPosition, "a")
         self.assertRaises(TypeError, Gtk.WindowPosition, [])
         self.assertRaises(TypeError, Gtk.WindowPosition, 3.0)

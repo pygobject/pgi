@@ -14,10 +14,11 @@ class _EnumClass(int):
     _allowed = {}
 
     def __new__(cls, value):
-        if not isinstance(value, int):
+        if not isinstance(value, (long, int)):
             raise TypeError("int expected, got %r instead" % type(value))
+        instance = int.__new__(cls, value)
         if value in cls._allowed:
-            return int.__new__(cls, value)
+            return instance
         raise ValueError("invalid enum value: %r", value)
 
     def __repr__(self):
@@ -31,7 +32,7 @@ class _FlagsClass(int):
     _flags = []
 
     def __new__(cls, value):
-        if not isinstance(value, int):
+        if not isinstance(value, (long, int)):
             raise TypeError("int expected, got %r instead" % type(value))
         return int.__new__(cls, value)
 

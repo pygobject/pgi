@@ -4,6 +4,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+import sys
 import unittest
 
 from gi.repository import Gtk
@@ -26,3 +27,4 @@ class FlagsTest(unittest.TestCase):
         self.assertRaises(TypeError, Gtk.RcFlags, [])
         self.assertRaises(TypeError, Gtk.RcFlags, None)
         self.assertRaises(TypeError, Gtk.RcFlags, 1.1)
+        self.assertRaises(OverflowError, Gtk.RcFlags, sys.maxsize + 1)
