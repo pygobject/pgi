@@ -1,8 +1,22 @@
+# -*- Mode: Python; py-indent-offset: 4 -*-
+# vim: tabstop=4 shiftwidth=4 expandtab
+#
 # Copyright (C) 2010 Ignacio Casal Quinteiro <icq@gnome.org>
 #
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License version 2 as
-# published by the Free Software Foundation.
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
+# USA
 
 import sys
 
@@ -30,6 +44,16 @@ class FileEnumerator(Gio.FileEnumerator):
 
 FileEnumerator = override(FileEnumerator)
 __all__.append('FileEnumerator')
+
+
+class MenuItem(Gio.MenuItem):
+    def set_attribute(self, attributes):
+        for (name, format_string, value) in attributes:
+            self.set_attribute_value(name, GLib.Variant(format_string, value))
+
+
+MenuItem = override(MenuItem)
+__all__.append('MenuItem')
 
 
 class Settings(Gio.Settings):
@@ -73,8 +97,15 @@ class Settings(Gio.Settings):
             type_str = v.get_child_value(0).get_type_string()
             assert type_str.startswith('a')
             type_str = type_str[1:]
+        elif type_ == 'enum':
+            # v is an array with the allowed values
+            assert v.get_child_value(0).get_type_string().startswith('a')
+            type_str = v.get_child_value(0).get_child_value(0).get_type_string()
+            allowed = v.unpack()
+            if value not in allowed:
+                raise ValueError('value %s is not an allowed enum (%s)' % (value, allowed))
         else:
-            raise NotImplementedError('Cannot handle allowed type range class' + str(type_))
+            raise NotImplementedError('Cannot handle allowed type range class ' + str(type_))
 
         self.set_value(key, GLib.Variant(type_str, value))
 
@@ -123,14 +154,17 @@ class _DBusProxyMethodCall:
         if 'result_handler' in kwargs:
             # asynchronous call
             user_data = (kwargs['result_handler'],
-                    kwargs.get('error_handler'), kwargs.get('user_data'))
+                         kwargs.get('error_handler'),
+                         kwargs.get('user_data'))
             self.dbus_proxy.call(self.method_name, arg_variant,
-                    kwargs.get('flags', 0), kwargs.get('timeout', -1), None,
-                    self.__async_result_handler, user_data)
+                                 kwargs.get('flags', 0), kwargs.get('timeout', -1), None,
+                                 self.__async_result_handler, user_data)
         else:
             # synchronous call
             result = self.dbus_proxy.call_sync(self.method_name, arg_variant,
-                    kwargs.get('flags', 0), kwargs.get('timeout', -1), None)
+                                               kwargs.get('flags', 0),
+                                               kwargs.get('timeout', -1),
+                                               None)
             return self._unpack_result(result)
 
     @classmethod

@@ -24,7 +24,7 @@ def run(load_gi):
         print "### PGI " + "#" * 60
 
     t = time.time()
-    from gi.repository import Gtk, GObject, GLib, Gio, Pango
+    from gi.repository import Gtk, GObject, GLib, Gio, Pango, Gdk
     t = time.time() - t
     print "%15s: %5.2f ms" % ("import", t * (10 ** 3))
 

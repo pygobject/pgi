@@ -36,7 +36,6 @@ def typeinfo_to_ctypes(info):
             return gint32
         elif tag == GITypeTag.VOID:
             return
-    raise TypeError(info)
 
 
 def set_gvalue_from_py(ptr, is_interface, tag, value):
