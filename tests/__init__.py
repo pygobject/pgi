@@ -6,6 +6,7 @@
 
 import os
 import unittest
+import logging
 
 
 def test(load_gi):
@@ -26,6 +27,9 @@ def test(load_gi):
     else:
         assert gi.__name__ == "pgi"
         print "### PGI " + "#" * 60
+
+    # gi uses logging
+    logging.disable(logging.ERROR)
 
     current_dir = os.path.join(os.path.dirname(__file__))
 
