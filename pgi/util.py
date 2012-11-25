@@ -10,7 +10,7 @@ from ctypes import cast, POINTER, c_void_p
 
 from pgi import const
 from pgi.gir import GITypeTag, GIInfoType
-from pgi.glib import gchar_p, gpointer, gboolean, guint32, free
+from pgi.glib import gchar_p, gpointer, gboolean, guint32, free, gint32
 
 
 def typeinfo_to_ctypes(info):
@@ -32,8 +32,11 @@ def typeinfo_to_ctypes(info):
             return gboolean
         elif tag == GITypeTag.UINT32:
             return guint32
+        elif tag == GITypeTag.INT32:
+            return gint32
         elif tag == GITypeTag.VOID:
             return
+    raise TypeError(info)
 
 
 def set_gvalue_from_py(ptr, is_interface, tag, value):

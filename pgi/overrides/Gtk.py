@@ -1605,7 +1605,7 @@ def stock_lookup(*args):
 
     return item
 
-Gtk.init_check()
+Gtk.init_check(0, 0)
 
 """initialized, argv = Gtk.init_check(sys.argv)
 sys.argv = list(argv)

@@ -6,7 +6,7 @@
 
 import unittest
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 
 
 class FuncsTest(unittest.TestCase):
@@ -15,3 +15,7 @@ class FuncsTest(unittest.TestCase):
         self.assertTrue(Gtk.rc_get_module_dir().startswith("/"))
         self.assertEqual(Gtk.rc_get_default_files(), [])
         self.assertEqual(Gtk.get_current_event_time(), 0)
+
+    def test_basic_argument(self):
+        self.assertEqual(GLib.basename("/omg/foo/test"), "test")
+        self.assertEqual(GLib.basename(u"/omg/foo/test"), "test")

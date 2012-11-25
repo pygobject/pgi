@@ -4,59 +4,90 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+import ctypes
 from ctypes import cast
 
-from pgi.gir import GIFunctionInfoPtr, GITypeTag
-from pgi.glib import gpointer
+from pgi.gir import GIFunctionInfoPtr, GITypeTag, GIDirection
 from pgi.util import typeinfo_to_ctypes
 
 
-def get_array(info, value):
-    r = []
-    if not value:
-        return r
-    if info.is_zero_terminated():
-        i = 0
-        x = value[i]
-        while x:
-            r.append(x)
-            i += 1
-            x = value[i]
-    return r
+def indent(lines):
+    return ["    " + l for l in lines]
 
 
-def handle_return(return_info, value):
-    tag = return_info.get_tag().value
-    #ptr = return_info.is_pointer()
-
-    if tag == GITypeTag.UTF8:
-        return value
-    elif tag == GITypeTag.ARRAY:
-        return get_array(return_info, value)
-    else:
-        return value
+def wrap_exc(lines, catch, new, arg):
+    l = []
+    l.append("try:")
+    l.extend(indent(lines))
+    l.append("except %s:" % catch)
+    l.extend(indent(["raise %s('%s')" % (new, arg)]))
+    return l
 
 
-class Function(object):
-    _handle = None
-    _return_info = None
-    _is_function = True
+def wrap_func(name, args, lines):
+    l = ["def %s(%s):" % (name, ", ".join(args))]
+    l.extend(indent(lines))
+    return l
 
-    def __init__(self, info, lib):
-        func_info = cast(info, GIFunctionInfoPtr)
-        return_info = func_info.get_return_type()
 
-        h = getattr(lib, func_info.get_symbol())
-        h.restype = typeinfo_to_ctypes(return_info)
-        h.argtypes = tuple([gpointer, gpointer])
+def unpack_array_zeroterm(name):
+    l = ["temp2 = []"]
+    l.append("i = 0")
+    l.append("x = %s and %s[i]" % (name, name))
+    l.append("while x:")
 
-        self._handle = h
-        self._return_info = return_info
+    loop = ["temp2.append(x)",
+            "i += 1",
+            "x = %s[i]" % name]
 
-    def __call__(self, *args):
-        value = self._handle(0, 0)
-        return handle_return(self._return_info, value)
+    l.extend(indent(loop))
+    l.append("%s = temp2" % name)
+    return l
+
+
+def call_func(name, args, res):
+    return "%s = %s(%s)" % (res, name, ", ".join(args))
+
+
+def return_var(name):
+    return "return %s" % name
 
 
 def FunctionAttribute(info, namespace, name, lib):
-    return type(name, Function.__bases__, dict(Function.__dict__))(info, lib)
+    func_info = cast(info, GIFunctionInfoPtr)
+    args = func_info.get_args()
+
+    symbol = func_info.get_symbol()
+    h = getattr(lib, symbol)
+
+    arguments = []
+    for arg in args:
+        if arg.get_direction().value == GIDirection.OUT:
+            continue
+        arguments.append(arg)
+
+    return_type = func_info.get_return_type()
+    h.restype = typeinfo_to_ctypes(return_type)
+    h.argtypes = [typeinfo_to_ctypes(a.get_type()) for a in arguments]
+
+    lines = []
+    arg_names = [a.get_name() for a in arguments]
+    lines.append(call_func("handle", arg_names, "temp"))
+    lines = wrap_exc(lines, "ctypes.ArgumentError",
+                     "TypeError", "Wrong input type")
+
+    if return_type.get_tag().value == GITypeTag.ARRAY:
+        if return_type.is_zero_terminated():
+            lines.extend(unpack_array_zeroterm("temp"))
+
+    if h.restype:
+        lines.append(return_var("temp"))
+    f = "\n".join(wrap_func(name, arg_names, lines))
+
+    code = compile(f, "<%s>" % namespace, "exec")
+    d = {"handle": h, "ctypes": ctypes}
+    exec code in d
+
+    func = d[name]
+    func._is_function = True
+    return func
