@@ -18,6 +18,8 @@ from gistructinfo import *
 from gitypeinfo import *
 from gitypelib import *
 from giunioninfo import *
+from giarginfo import *
+from gipropertyinfo import *
 
 from pgi.ctypesutil import wrap_setup
 

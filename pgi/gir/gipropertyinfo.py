@@ -24,13 +24,14 @@ class GIPropertyInfo(GIBaseInfo):
 class GIPropertyInfoPtr(GIBaseInfoPtr):
     _type_ = GIPropertyInfo
 
-    def __repr__(self):
-        values = {}
-        values["flags"] = self.get_flags()
-        values["type"] = self.get_type()
-        values["ownership_transfer"] = self.get_ownership_transfer()
-        l = ", ".join(("%s=%r" % (k, v) for (k, v) in sorted(values.items())))
-        return "<%s %s>" % (self._type_.__name__, l)
+    def _get_repr(self):
+        values = super(GIPropertyInfoPtr, self)._get_repr()
+        values["flags"] = repr(self.get_flags())
+        type_ = self.get_type()
+        values["type"] = repr(type_)
+        type_.unref()
+        values["ownership_transfer"] = repr(self.get_ownership_transfer())
+        return values
 
 _methods = [
     ("get_flags", GParamFlags, [GIPropertyInfoPtr]),

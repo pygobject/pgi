@@ -25,13 +25,10 @@ class GIValueInfo(GIBaseInfo):
 class GIValueInfoPtr(GIBaseInfoPtr):
     _type_ = GIValueInfo
 
-    def __repr__(self):
-        values = {}
-        values["value"] = self.get_value()
-
-        l = ", ".join(("%s=%r" % (k, v) for (k, v) in sorted(values.items())))
-
-        return "<%s %s>" % (self._type_.__name__, l)
+    def _get_repr(self):
+        values = super(GIValueInfoPtr, self)._get_repr()
+        values["value"] = repr(self.get_value())
+        return values
 
 _methods = [
     ("get_value", gint64, [GIValueInfoPtr]),
@@ -52,19 +49,18 @@ class GIEnumInfo(GIRegisteredTypeInfo):
 class GIEnumInfoPtr(GIRegisteredTypeInfoPtr):
     _type_ = GIEnumInfo
 
-    def __repr__(self):
-        values = {}
-        values["n_values"] = self.get_n_values()
-        values["n_methods"] = self.get_n_methods()
-        values["storage_type"] = self.get_storage_type()
-        args = map(self.get_value, xrange(self.get_n_values()))
-        values["values"] = args
-        args = map(self.get_method, xrange(self.get_n_methods()))
-        values["methods"] = args
+    def get_values(self):
+        return map(self.get_value, xrange(self.get_n_values()))
 
-        l = ", ".join(("%s=%r" % (k, v) for (k, v) in sorted(values.items())))
+    def get_methods(self):
+        return map(self.get_method, xrange(self.get_n_methods()))
 
-        return "<%s %s>" % (self._type_.__name__, l)
+    def _get_repr(self):
+        values = super(GIEnumInfoPtr, self)._get_repr()
+        values["n_values"] = repr(self.get_n_values())
+        values["n_methods"] = repr(self.get_n_methods())
+        values["storage_type"] = repr(self.get_storage_type())
+        return values
 
 _methods = [
     ("get_n_values", gint, [GIEnumInfoPtr]),

@@ -49,7 +49,7 @@ class GIBaseInfoPtr(POINTER(GIBaseInfo)):
         values["namespace"] = repr(self.get_namespace())
         values["deprecated"] = repr(self.is_deprecated())
         if self.get_container():
-            values["container"] = repr(self.get_container())
+            values["container"] = repr(self.get_container().get_name())
 
         return values
 

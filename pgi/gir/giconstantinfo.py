@@ -26,6 +26,13 @@ class GIConstantInfo(GIBaseInfo):
 class GIConstantInfoPtr(GIBaseInfoPtr):
     _type_ = GIConstantInfo
 
+    def _get_repr(self):
+        values = super(GIConstantInfoPtr, self)._get_repr()
+        type_ = self.get_type()
+        values["type"] = repr(type_)
+        type_.unref()
+        return values
+
 _methods = [
     ("get_type", GITypeInfoPtr, [GIConstantInfoPtr]),
     ("get_value", gint, [GIConstantInfoPtr, POINTER(GIArgument)]),

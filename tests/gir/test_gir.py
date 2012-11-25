@@ -49,41 +49,122 @@ class GITypesTest(unittest.TestCase):
 
     def test_objectinfo(self):
         e = self.infos["Expander"]
+        self.failUnless(gi_is_registered_type_info(e))
+        self.failUnless(gi_is_object_info(e))
         e = cast(e, GIObjectInfoPtr)
         repr(e)
         self.failUnlessEqual(e.get_type_name(), "GtkExpander")
         self.failUnlessEqual(e.get_type_init(), "gtk_expander_get_type")
 
+        map(lambda x: x.unref(), e.get_methods())
+        map(lambda x: x.unref(), e.get_fields())
+        map(lambda x: x.unref(), e.get_interfaces())
+        map(lambda x: x.unref(), e.get_properties())
+        map(lambda x: x.unref(), e.get_signals())
+        map(lambda x: x.unref(), e.get_vfuncs())
+
     def test_enuminfo(self):
         t = self.infos["WindowType"]
+        self.failUnless(gi_is_enum_info(t))
+        self.failUnless(gi_is_registered_type_info(t))
         t = cast(t, GIEnumInfoPtr)
         repr(t)
         self.failUnlessEqual(t.get_n_methods(), 0)
         self.failUnlessEqual(t.get_storage_type().value, GITypeTag.UINT32)
         self.failUnlessEqual(t.get_value(0).get_value(), 0)
 
+        map(lambda x: x.unref(), t.get_values())
+        map(lambda x: x.unref(), t.get_methods())
+
+    def test_valueinfo(self):
+        t = self.infos["WindowType"]
+        t = cast(t, GIEnumInfoPtr)
+        v = t.get_value(0)
+        self.failUnless(gi_is_value_info(cast(v, GIBaseInfoPtr)))
+        repr(v)
+        v.unref()
+
     def test_functioninfo(self):
         e = self.infos["Expander"]
         e = cast(e, GIObjectInfoPtr)
         fi = e.get_method(10)
+        self.failUnless(gi_is_function_info(cast(fi, GIBaseInfoPtr)))
         repr(fi)
         self.failUnlessEqual(fi.get_symbol(), "gtk_expander_set_expanded")
         self.failUnlessEqual(fi.get_flags().value,
                              GIFunctionInfoFlags.IS_METHOD)
         fi.unref()
 
+        w = self.infos["Window"]
+        w = cast(w, GIObjectInfoPtr)
+        for i in xrange(w.get_n_methods()):
+            fi = w.get_method(i)
+            repr(fi)
+            fi.unref()
+
+    def test_structinfo(self):
+        s = self.infos["TargetEntry"]
+        self.failUnless(gi_is_struct_info(s))
+        self.failUnless(gi_is_registered_type_info(s))
+        s = cast(s, GIStructInfoPtr)
+        repr(s)
+        s.unref()
+
+    def test_fieldinfo(self):
+        s = self.infos["TargetEntry"]
+        s = cast(s, GIStructInfoPtr)
+        f = s.get_field(0)
+        self.failUnless(gi_is_field_info(cast(f, GIBaseInfoPtr)))
+        repr(f)
+        f.unref()
+
     def test_callableinfo(self):
         e = self.infos["Expander"]
         e = cast(e, GIObjectInfoPtr)
         fi = e.get_method(9)
         ci = cast(fi, GICallableInfoPtr)
+        self.failUnless(gi_is_callable_info(cast(ci, GIBaseInfoPtr)))
         repr(ci)
         fi.unref()
 
     def test_interfaceinfo(self):
         i = self.infos["Editable"]
+        self.failUnless(gi_is_interface_info(i))
+        self.failUnless(gi_is_registered_type_info(i))
         i = cast(i, GIInterfaceInfoPtr)
         repr(i)
+
+    def test_vfuncinfo(self):
+        i = self.infos["Editable"]
+        i = cast(i, GIInterfaceInfoPtr)
+        for x in xrange(i.get_n_vfuncs()):
+            v = i.get_vfunc(x)
+            self.failUnless(gi_is_vfunc_info(cast(v, GIBaseInfoPtr)))
+            repr(v)
+            v.unref()
+
+    def test_signalinfo(self):
+        i = self.infos["Editable"]
+        i = cast(i, GIInterfaceInfoPtr)
+        for x in xrange(i.get_n_signals()):
+            v = i.get_signal(x)
+            self.failUnless(gi_is_signal_info(cast(v, GIBaseInfoPtr)))
+            repr(v)
+            v.unref()
+
+    def test_propertyinfo(self):
+        e = self.infos["Expander"]
+        e = cast(e, GIObjectInfoPtr)
+        p = e.get_property(0)
+        self.failUnless(gi_is_property_info(cast(p, GIBaseInfoPtr)))
+        repr(p)
+        p.unref()
+
+    def test_constantinfo(self):
+        c = self.infos["STOCK_ABOUT"]
+        self.failUnless(gi_is_constant_info(c))
+        c = cast(c, GIConstantInfoPtr)
+        repr(c)
 
     def test_typeinfo(self):
         fi = GIRepositoryPtr().find_by_name("Gtk", "get_major_version")
@@ -96,6 +177,7 @@ class GITypesTest(unittest.TestCase):
         fi = GIRepositoryPtr().find_by_name("Gtk", "init")
         fi = cast(fi, GICallableInfoPtr)
         argv = fi.get_arg(1)
+        self.failUnless(gi_is_arg_info(cast(argv, GIBaseInfoPtr)))
         repr(argv)
         argv.unref()
         fi.unref()

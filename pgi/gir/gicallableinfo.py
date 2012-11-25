@@ -79,12 +79,12 @@ class GIFunctionInfoPtr(GICallableInfoPtr):
 
         values["symbol"] = repr(self.get_symbol())
         values["flags"] = repr(self.get_flags())
-        if self.get_flags().value in (GIFunctionInfoFlags.IS_GETTER,
-                                      GIFunctionInfoFlags.IS_SETTER):
+        if self.get_flags().value & (GIFunctionInfoFlags.IS_GETTER |
+                                     GIFunctionInfoFlags.IS_SETTER):
             prop = self.get_property()
             values["property"] = repr(prop)
             prop.unref()
-        elif self.get_flags().value == GIFunctionInfoFlags.WRAPS_VFUNC:
+        elif self.get_flags().value & GIFunctionInfoFlags.WRAPS_VFUNC:
             vfunc = self.get_vfunc()
             values["vfunc"] = repr(vfunc)
             vfunc.unref()

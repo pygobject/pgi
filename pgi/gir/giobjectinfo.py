@@ -32,29 +32,57 @@ class GIObjectInfo(GIRegisteredTypeInfo):
 class GIObjectInfoPtr(GIRegisteredTypeInfoPtr):
     _type_ = GIObjectInfo
 
-    def __repr__(self):
-        values = {}
-        values["type_name"] = self.get_type_name()
-        values["type_init"] = self.get_type_init()
-        values["abstract"] = self.get_abstract()
-        values["fundamental"] = self.get_fundamental()
-        #values["parent"] = self.get_parent()
-        values["n_interfaces"] = self.get_n_interfaces()
-        values["n_fields"] = self.get_n_fields()
-        values["n_properties"] = self.get_n_properties()
+    def get_methods(self):
+        return map(self.get_method, xrange(self.get_n_methods()))
 
-        values["n_methods"] = self.get_n_methods()
-        values["n_signals"] = self.get_n_signals()
-        values["n_vfuncs"] = self.get_n_vfuncs()
-        values["class_struct"] = self.get_class_struct()
-        values["unref_function"] = self.get_unref_function()
-        values["ref_function"] = self.get_ref_function()
+    def get_interfaces(self):
+        return map(self.get_interface, xrange(self.get_n_interfaces()))
 
-        values["set_value_function"] = self.get_set_value_function()
-        values["get_value_function"] = self.get_get_value_function()
+    def get_properties(self):
+        return map(self.get_property, xrange(self.get_n_properties()))
 
-        l = ", ".join(("%s=%r" % (k, v) for (k, v) in sorted(values.items())))
-        return "<%s %s>" % (self._type_.__name__, l)
+    def get_signals(self):
+        return map(self.get_signal, xrange(self.get_n_signals()))
+
+    def get_vfuncs(self):
+        return map(self.get_vfunc, xrange(self.get_n_vfuncs()))
+
+    def get_fields(self):
+        return map(self.get_field, xrange(self.get_n_fields()))
+
+    def _get_repr(self):
+        values = super(GIObjectInfoPtr, self)._get_repr()
+        values["type_name"] = repr(self.get_type_name())
+        values["type_init"] = repr(self.get_type_init())
+        values["abstract"] = repr(self.get_abstract())
+        values["fundamental"] = repr(self.get_fundamental())
+        parent = self.get_parent()
+        if parent:
+            values["parent"] = repr(parent.get_name())
+            parent.unref()
+        values["n_interfaces"] = repr(self.get_n_interfaces())
+        values["n_fields"] = repr(self.get_n_fields())
+        values["n_properties"] = repr(self.get_n_properties())
+        values["n_methods"] = repr(self.get_n_methods())
+        values["n_signals"] = repr(self.get_n_signals())
+        values["n_vfuncs"] = repr(self.get_n_vfuncs())
+        class_struct = self.get_class_struct()
+        values["class_struct"] = repr(class_struct.get_name())
+        class_struct.unref()
+        unref_function = self.get_unref_function()
+        if unref_function:
+            values["unref_function"] = repr(unref_function)
+        ref_function = self.get_ref_function()
+        if ref_function:
+            values["ref_function"] = repr(ref_function)
+        set_value_function =  self.get_set_value_function()
+        if set_value_function:
+            values["set_value_function"] = repr(set_value_function)
+        get_value_function = self.get_get_value_function()
+        if get_value_function:
+            values["get_value_function"] = repr(get_value_function)
+        return values
+
 
 GIObjectInfoGetValueFunction = CFUNCTYPE(c_void_p, GValuePtr)
 GIObjectInfoRefFunction = CFUNCTYPE(c_void_p, c_void_p)

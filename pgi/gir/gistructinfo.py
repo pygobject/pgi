@@ -25,17 +25,28 @@ class GIStructInfo(GIRegisteredTypeInfo):
 class GIStructInfoPtr(GIRegisteredTypeInfoPtr):
     _type_ = GIStructInfo
 
-    def __repr__(self):
+    def _get_repr(self):
+        values = super(GIStructInfoPtr, self)._get_repr()
         values = {}
-        values["size"] = self.get_size()
-        values["alignment"] = self.get_alignment()
-        values["is_gtype_struct"] = self.is_gtype_struct()
-        values["is_foreign"] = self.is_foreign()
-        values["methods"] = self.get_n_methods()
-        values["fields"] = self.get_n_fields()
+        values["size"] = repr(self.get_size())
+        values["alignment"] = repr(self.get_alignment())
+        values["is_gtype_struct"] = repr(self.is_gtype_struct())
+        values["is_foreign"] = repr(self.is_foreign())
+        methods = self.get_methods()
+        values["methods"] = repr(methods)
+        for method in methods:
+            method.unref()
+        fields = self.get_fields()
+        values["fields"] = repr(fields)
+        for field in fields:
+            field.unref()
+        return values
 
-        l = ", ".join(("%s=%r" % (k, v) for (k, v) in sorted(values.items())))
-        return "<%s %s>" % (self._type_.__name__, l)
+    def get_fields(self):
+        return map(self.get_field, xrange(self.get_n_fields()))
+
+    def get_methods(self):
+        return map(self.get_method, xrange(self.get_n_methods()))
 
 _methods = [
     ("get_n_fields", gint, [GIStructInfoPtr]),
