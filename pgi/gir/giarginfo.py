@@ -35,21 +35,22 @@ class GIArgInfo(GIBaseInfo):
 class GIArgInfoPtr(GIBaseInfoPtr):
     _type_ = GIArgInfo
 
-    def __repr__(self):
-        values = {}
-        values["direction"] = self.get_direction()
-        values["is_caller_allocates"] = self.is_caller_allocates()
-        values["is_return_value"] = self.is_return_value()
-        values["is_optional"] = self.is_optional()
-        values["may_be_null"] = self.may_be_null()
-        values["ownership_transfer"] = self.get_ownership_transfer()
-        values["scope"] = self.get_scope()
-        values["closure"] = self.get_closure()
-        values["destroy"] = self.get_destroy()
-        values["type"] = self.get_type()
+    def _get_repr(self):
+        values = super(GIArgInfoPtr, self)._get_repr()
+        values["direction"] = repr(self.get_direction())
+        values["is_caller_allocates"] = repr(self.is_caller_allocates())
+        values["is_return_value"] = repr(self.is_return_value())
+        values["is_optional"] = repr(self.is_optional())
+        values["may_be_null"] = repr(self.may_be_null())
+        values["ownership_transfer"] = repr(self.get_ownership_transfer())
+        values["scope"] = repr(self.get_scope())
+        values["closure"] = repr(self.get_closure())
+        values["destroy"] = repr(self.get_destroy())
+        type_ = self.get_type()
+        values["type"] = repr(type_)
+        type_.unref()
 
-        l = ", ".join(("%s=%r" % (k, v) for (k, v) in sorted(values.items())))
-        return "<%s %s>" % (self._type_.__name__, l)
+        return values
 
 _methods = [
     ("get_direction", GIDirection, [GIArgInfoPtr]),

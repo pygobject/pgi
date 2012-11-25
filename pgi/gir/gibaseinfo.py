@@ -40,16 +40,21 @@ class GIBaseInfo(Structure):
 class GIBaseInfoPtr(POINTER(GIBaseInfo)):
     _type_ = GIBaseInfo
 
-    def __repr__(self):
+    def _get_repr(self):
         values = {}
-        values["type"] = self.get_type()
-        values["name"] = self.get_name()
-        values["namespace"] = self.get_namespace()
-        values["deprecated"] = self.is_deprecated()
-        container = self.get_container()
-        if container:
-            values["container"] = container
-        l = ", ".join(("%s=%r" % (k, v) for (k, v) in sorted(values.items())))
+        values["type"] = repr(self.get_type())
+        real_type = GIBaseInfoPtr.get_type(self).value
+        if real_type != GIInfoType.TYPE and self.get_name():
+            values["name"] = repr(self.get_name())
+        values["namespace"] = repr(self.get_namespace())
+        values["deprecated"] = repr(self.is_deprecated())
+        if self.get_container():
+            values["container"] = repr(self.get_container())
+
+        return values
+
+    def __repr__(self):
+        l = ", ".join(("%s=%s" % v for v in sorted(self._get_repr().items())))
         return "<%s %s>" % (self._type_.__name__, l)
 
 _methods = [

@@ -45,7 +45,6 @@ class Function(object):
     def __init__(self, info, lib):
         func_info = cast(info, GIFunctionInfoPtr)
         return_info = func_info.get_return_type()
-        #tag = return_info.get_tag()
 
         h = getattr(lib, func_info.get_symbol())
         h.restype = typeinfo_to_ctypes(return_info)

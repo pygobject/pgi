@@ -84,3 +84,23 @@ class GITypesTest(unittest.TestCase):
         i = self.infos["Editable"]
         i = cast(i, GIInterfaceInfoPtr)
         repr(i)
+
+    def test_typeinfo(self):
+        fi = GIRepositoryPtr().find_by_name("Gtk", "get_major_version")
+        fi = cast(fi, GICallableInfoPtr)
+        rt = fi.get_return_type()
+        self.failUnless(gi_is_type_info(cast(rt, GIBaseInfoPtr)))
+        rt.unref()
+        fi.unref()
+
+        fi = GIRepositoryPtr().find_by_name("Gtk", "init")
+        fi = cast(fi, GICallableInfoPtr)
+        argv = fi.get_arg(1)
+        repr(argv)
+        argv.unref()
+        fi.unref()
+
+    def test_typetag(self):
+        self.failIf(GITypeTag(18).is_basic())
+        self.failUnless(GITypeTag(21).is_basic())
+        self.failUnless(GITypeTag(10).is_basic())

@@ -43,9 +43,8 @@ class GITypeTag(Enum):
     ERROR = 20
     UNICHAR = 21
 
-    @classmethod
-    def is_basic(cls, tag):
-        return (tag < cls.ARRAY or tag == cls.UNICHAR)
+    def is_basic(self):
+        return (self.value < self.ARRAY or self.value == self.UNICHAR)
 
 _methods = [
     ("to_string", gchar_p, [GITypeTag]),
@@ -61,22 +60,22 @@ class GITypeInfo(GIBaseInfo):
 class GITypeInfoPtr(GIBaseInfoPtr):
     _type_ = GITypeInfo
 
-    def __repr__(self):
-        values = {}
-        values["is_pointer"] = self.is_pointer()
-        values["tag"] = self.get_tag()
-        type_ = self.get_tag().value
-        if type_ == GITypeTag.INTERFACE:
-            values["interface"] = self.get_interface()
-        if type_ == GITypeTag.ARRAY:
+    def _get_repr(self):
+        values = super(GITypeInfoPtr, self)._get_repr()
+        values["is_pointer"] = repr(self.is_pointer())
+        tag = self.get_tag()
+        values["tag"] = tag
+        if tag.value == GITypeTag.INTERFACE:
+            interface = self.get_interface()
+            values["interface"] = interface
+            interface.unref()
+        elif tag.value == GITypeTag.ARRAY:
             values["array_length"] = self.get_array_length()
             values["array_fixed_size"] = self.get_array_fixed_size()
             values["zero_terminated"] = self.is_zero_terminated()
             values["array_type"] = self.get_array_type()
+        return values
 
-        l = ", ".join(("%s=%r" % (k, v) for (k, v) in sorted(values.items())))
-
-        return "<%s %s>" % (self._type_.__name__, l)
 
 _methods = [
     ("is_pointer", gboolean, [GITypeInfoPtr]),

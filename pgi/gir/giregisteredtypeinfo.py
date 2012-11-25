@@ -25,14 +25,12 @@ class GIRegisteredTypeInfo(GIBaseInfo):
 class GIRegisteredTypeInfoPtr(GIBaseInfoPtr):
     _type_ = GIRegisteredTypeInfo
 
-    def __repr__(self):
-        values = {}
+    def _get_repr(self):
+        values = super(GIRegisteredTypeInfoPtr, self)._get_repr()
         values["type_name"] = self.get_type_name()
         values["type_init"] = self.get_type_init()
         values["g_type"] = self.get_g_type()
-
-        l = ", ".join(("%s=%r" % (k, v) for (k, v) in sorted(values.items())))
-        return "<%s %s>" % (self._type_.__name__, l)
+        return values
 
 _methods = [
     ("get_type_name", gchar_p, [GIRegisteredTypeInfoPtr]),

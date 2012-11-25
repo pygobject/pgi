@@ -27,6 +27,9 @@ class GIUnionInfo(GIRegisteredTypeInfo):
 class GIUnionInfoPtr(GIRegisteredTypeInfoPtr):
     _type_ = GIUnionInfo
 
+    def get_methods(self):
+        return map(self.get_method, xrange(self.get_n_methods()))
+
 _methods = [
     ("get_n_fields", gint, [GIUnionInfoPtr]),
     ("get_field", GIFieldInfoPtr, [GIUnionInfoPtr, gint]),

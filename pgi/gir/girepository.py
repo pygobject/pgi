@@ -6,7 +6,7 @@
 
 from ctypes import Structure, POINTER, c_char_p
 
-from pgi.glib import guint, gchar_p, GError, gboolean, gint
+from pgi.glib import guint, gchar_p, GErrorPtr, gboolean, gint
 from pgi.glib import GSListPtr, GOptionGroupPtr, GListPtr
 from pgi.gobject import GType
 from gibaseinfo import GIBaseInfoPtr
@@ -36,18 +36,18 @@ _methods = [
     ("get_default", GIRepositoryPtr, []),
     ("require", GITypelibPtr, [GIRepositoryPtr, gchar_p, gchar_p,
                                GIRepositoryLoadFlags,
-                               POINTER(POINTER(GError))]),
+                               POINTER(GErrorPtr)]),
     ("find_by_name", GIBaseInfoPtr, [GIRepositoryPtr, gchar_p, gchar_p]),
     ("get_version", gchar_p, [GIRepositoryPtr, gchar_p]),
     ("prepend_search_path", None, [c_char_p]),
     ("get_search_path", GSListPtr, []),
     ("load_typelib", c_char_p,
         [GIRepositoryPtr, GITypelibPtr, GIRepositoryLoadFlags,
-         POINTER(POINTER(GError))]),
+         POINTER(GErrorPtr)]),
     ("is_registered", gboolean, [GIRepositoryPtr, gchar_p, gchar_p]),
     ("require_private",
         GITypelibPtr, [GIRepositoryPtr, gchar_p, gchar_p, gchar_p,
-                       GIRepositoryLoadFlags, POINTER(POINTER(GError))]),
+                       GIRepositoryLoadFlags, POINTER(GErrorPtr)]),
     ("get_dependencies", POINTER(gchar_p), [GIRepositoryPtr, gchar_p]),
     ("get_loaded_namespaces", POINTER(gchar_p), [GIRepositoryPtr]),
     ("find_by_gtype", GIBaseInfoPtr, [GIRepositoryPtr, GType]),
@@ -58,7 +58,7 @@ _methods = [
     ("get_version", gchar_p, [GIRepositoryPtr, gchar_p]),
     ("get_option_group", GOptionGroupPtr, []),
     ("get_c_prefix", gchar_p, [GIRepositoryPtr, gchar_p]),
-    ("dump", gboolean, [c_char_p, POINTER(POINTER(GError))]),
+    ("dump", gboolean, [c_char_p, POINTER(GErrorPtr)]),
     ("enumerate_versions", GListPtr, [GIRepositoryPtr, gchar_p]),
 ]
 
