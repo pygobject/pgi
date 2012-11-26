@@ -6,6 +6,7 @@
 
 from warnings import warn
 from ctypes import cast, sizeof
+import weakref
 
 from pgi import gobject
 from pgi.gobject import GValuePtr, GValue, GParameterPtr, GParameter
@@ -46,11 +47,19 @@ class _Object(object):
     _obj = None
     __gtype__ = None
     __signal_cb_ref = {}
+    __weak = {}
 
     def __init__(self, **kwargs):
         num_params, params = self.__get_gparam_array(**kwargs)
-        self._obj = gobject.newv(self.__gtype__._type, num_params, params)
-        gobject.ref_sink(self._obj)
+        obj = gobject.newv(self.__gtype__._type, num_params, params)
+        gobject.ref_sink(obj)
+
+        self.__weak[weakref.ref(self, self.__destroy)] = obj
+        self._obj = obj
+
+    @classmethod
+    def __destroy(cls, ref):
+        gobject.unref(cls.__weak.pop(ref))
 
     def __get_gparam_array(self, **kwargs):
         if not kwargs:
@@ -110,9 +119,6 @@ class _Object(object):
     @property
     def __grefcount__(self):
         return cast(self._obj, gobject.GObjectPtr).contents.ref_count
-
-    def __del__(self):
-        gobject.unref(self._obj)
 
 
 class _Interface(object):
