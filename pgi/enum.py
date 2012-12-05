@@ -65,9 +65,6 @@ def FlagsAttribute(info, namespace, name, lib):
     enum = cast(info, GIEnumInfoPtr)
     enum_name = enum.get_type_name()
 
-    if enum.get_n_methods():
-        warn("Methods of flags not supported (%r)" % enum_name, Warning)
-
     values = _get_values(enum)
 
     # add them to the class for init checks
@@ -82,12 +79,17 @@ def FlagsAttribute(info, namespace, name, lib):
     return cls
 
 
+class _EnumMethod(object):
+    def __init__(self, name):
+        self._name = name
+
+    def __get__(self, instance, owner):
+        raise NotImplementedError("%r not supported" % self._name)
+
+
 def EnumAttribute(info, namespace, name, lib):
     enum = cast(info, GIEnumInfoPtr)
     enum_name = enum.get_type_name()
-
-    if enum.get_n_methods():
-        warn("Methods of enums not supported (%r)" % enum_name, Warning)
 
     values = _get_values(enum)
 
@@ -95,6 +97,11 @@ def EnumAttribute(info, namespace, name, lib):
     cls_dict = dict(_EnumClass.__dict__)
     cls_dict["_allowed"] = dict(values)
     cls = type(enum_name, _EnumClass.__bases__, cls_dict)
+
+    for method in enum.get_methods():
+        name = method.get_name()
+        setattr(cls, name, _EnumMethod(name))
+        method.unref()
 
     # create instances for all of them and add to the class
     for num, vname in values:

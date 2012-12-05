@@ -9,6 +9,8 @@ import unittest
 import logging
 
 
+is_gi = False
+
 def test(load_gi):
     """Run the test suite.
 
@@ -16,15 +18,19 @@ def test(load_gi):
 
     """
 
+    global is_gi
+
     if not load_gi:
         import pgi
         pgi.replace_gi()
 
     import gi
     if load_gi:
+        is_gi = True
         assert gi.__name__ == "gi"
         print "### GI " + "#" * 61
     else:
+        is_gi = False
         assert gi.__name__ == "pgi"
         print "### PGI " + "#" * 60
 

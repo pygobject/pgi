@@ -27,6 +27,8 @@ def typeinfo_to_ctypes(info):
             return gchar_p
         elif tag == GITypeTag.ARRAY:
             return gpointer
+        elif tag == GITypeTag.INTERFACE:
+            return gpointer
     else:
         if tag == GITypeTag.BOOLEAN:
             return gboolean

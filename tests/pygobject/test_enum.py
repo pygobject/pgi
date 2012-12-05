@@ -7,6 +7,7 @@
 import sys
 import unittest
 
+from tests import is_gi
 from gi.repository import Gtk
 
 
@@ -29,3 +30,7 @@ class EnumTest(unittest.TestCase):
         self.assertRaises(TypeError, Gtk.WindowPosition, "a")
         self.assertRaises(TypeError, Gtk.WindowPosition, [])
         self.assertRaises(TypeError, Gtk.WindowPosition, 3.0)
+
+    @unittest.skipIf(is_gi, "no enum methods in gi")
+    def test_methods(self):
+        self.assertTrue("from_name" in dir(Gtk.IconSize))

@@ -19,3 +19,12 @@ class FuncsTest(unittest.TestCase):
     def test_basic_argument(self):
         self.assertEqual(GLib.basename("/omg/foo/test"), "test")
         self.assertEqual(GLib.basename(u"/omg/foo/test"), "test")
+
+    def test_return_guint(self):
+        self.assertTrue(isinstance(Gtk.get_binary_age(), (long, int)))
+
+    def test_return_misc(self):
+        self.assertTrue(
+            isinstance(Gtk.icon_size_register("foo", 1, 2), (int, long)))
+        self.assertEqual(Gtk.icon_size_get_name(Gtk.IconSize.MENU),
+                         "gtk-menu")
