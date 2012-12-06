@@ -63,6 +63,7 @@ class GITypesTest(unittest.TestCase):
         map(lambda x: x.unref(), e.get_properties())
         map(lambda x: x.unref(), e.get_signals())
         map(lambda x: x.unref(), e.get_vfuncs())
+        map(lambda x: x.unref(), e.get_constants())
 
     def test_enuminfo(self):
         t = self.infos["WindowType"]
@@ -134,6 +135,12 @@ class GITypesTest(unittest.TestCase):
         self.failUnless(gi_is_registered_type_info(i))
         i = cast(i, GIInterfaceInfoPtr)
         repr(i)
+
+        map(lambda x: x.unref(), i.get_methods())
+        map(lambda x: x.unref(), i.get_properties())
+        map(lambda x: x.unref(), i.get_signals())
+        map(lambda x: x.unref(), i.get_constants())
+        map(lambda x: x.unref(), i.get_prerequisites())
 
     def test_vfuncinfo(self):
         i = self.infos["Editable"]

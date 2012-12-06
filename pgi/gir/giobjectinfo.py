@@ -51,6 +51,9 @@ class GIObjectInfoPtr(GIRegisteredTypeInfoPtr):
     def get_fields(self):
         return map(self.get_field, xrange(self.get_n_fields()))
 
+    def get_constants(self):
+        return map(self.get_constant, xrange(self.get_n_constants()))
+
     def _get_repr(self):
         values = super(GIObjectInfoPtr, self)._get_repr()
         values["type_name"] = repr(self.get_type_name())

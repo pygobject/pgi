@@ -28,16 +28,29 @@ class GIInterfaceInfo(GIRegisteredTypeInfo):
 class GIInterfaceInfoPtr(GIRegisteredTypeInfoPtr):
     _type_ = GIInterfaceInfo
 
-    def __repr__(self):
-        values = {}
-        values["n_constants"] = self.get_n_constants()
-        values["n_signals"] = self.get_n_signals()
-        values["n_methods"] = self.get_n_methods()
-        values["n_properties"] = self.get_n_properties()
-        values["n_prerequisites"] = self.get_n_prerequisites()
+    def get_methods(self):
+        return map(self.get_method, xrange(self.get_n_methods()))
 
-        l = ", ".join(("%s=%r" % (k, v) for (k, v) in sorted(values.items())))
-        return "<%s %s>" % (self._type_.__name__, l)
+    def get_properties(self):
+        return map(self.get_property, xrange(self.get_n_properties()))
+
+    def get_signals(self):
+        return map(self.get_signal, xrange(self.get_n_signals()))
+
+    def get_constants(self):
+        return map(self.get_constant, xrange(self.get_n_constants()))
+
+    def get_prerequisites(self):
+        return map(self.get_prerequisite, xrange(self.get_n_prerequisites()))
+
+    def _get_repr(self):
+        values = super(GIInterfaceInfoPtr, self)._get_repr()
+        values["n_constants"] = repr(self.get_n_constants())
+        values["n_signals"] = repr(self.get_n_signals())
+        values["n_methods"] = repr(self.get_n_methods())
+        values["n_properties"] = repr(self.get_n_properties())
+        values["n_prerequisites"] = repr(self.get_n_prerequisites())
+        return values
 
 _methods = [
     ("get_n_prerequisites", gint, [GIInterfaceInfoPtr]),

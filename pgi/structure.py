@@ -13,30 +13,37 @@ from pgi.gtype import PGType
 
 
 class _Structure(object):
-    _obj = None
-    __gtype__ = None
+    """Class template for structures."""
+
+    _obj = None  # the address of the struct
+    __gtype__ = None  # the gtype
 
     def __init__(self, *args, **kwargs):
         raise TypeError
 
 
 def StructureAttribute(info, namespace, name, lib):
+    """Creates a new struct class."""
+
     struct_info = cast(info, GIStructInfoPtr)
 
+    # copy the template and add the gtype
     cls_dict = dict(_Structure.__dict__)
-    g_type = struct_info.get_g_type()
-    cls_dict["__gtype__"] = PGType(g_type)
+    cls_dict["__gtype__"] = PGType(struct_info.get_g_type())
+
+    # create a new class
     cls = type(name, _Structure.__bases__, cls_dict)
     cls.__module__ = namespace
 
+    # add methods
     for i in xrange(struct_info.get_n_methods()):
         func_info = struct_info.get_method(i)
-        func_flags = func_info.get_flags().value
+        func_flags = func_info.get_flags()
 
-        if func_flags == 0 or func_flags == GIFunctionInfoFlags.IS_METHOD:
-            mname = func_info.get_name()
-            attr = _ClassMethodAttribute(func_info, namespace, mname, lib)
-            setattr(cls, mname, attr)
+        if func_flags.value == GIFunctionInfoFlags.IS_METHOD:
+            method_name = func_info.get_name()
+            attr = _ClassMethodAttribute(func_info, method_name, lib)
+            setattr(cls, method_name, attr)
         else:
             func_info.unref()
 

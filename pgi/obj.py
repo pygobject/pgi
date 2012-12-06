@@ -21,6 +21,7 @@ from pgi.gir import GITypeTag, GIObjectInfoPtr
 from pgi.util import import_attribute, typeinfo_to_ctypes, set_gvalue_from_py
 from pgi.gtype import PGType
 from pgi.properties import PropertyAttribute
+from pgi.constant import ConstantAttribute
 
 
 def gparamspec_to_gvalue_ptr(spec, value):
@@ -136,10 +137,9 @@ class Method(object):
 
 
 class _ClassMethodAttribute(object):
-    def __init__(self, info, namespace, name, lib):
+    def __init__(self, info, name, lib):
         self._name = name
         self._info = info
-        self._namespace = namespace
         self._lib = lib
         self._handles = {}
 
@@ -188,36 +188,45 @@ class _ClassMethodAttribute(object):
 
 
 def InterfaceAttribute(info, namespace, name, lib):
+    """Creates a GInterface class"""
+
     iface_info = cast(info, GIInterfaceInfoPtr)
-    iface_info.get_n_constants()
+
+    # Create a new class with a corresponding gtype
     cls_dict = dict(_Interface.__dict__)
     cls_dict["__gtype__"] = PGType(iface_info.get_g_type())
     cls = type(name, _Interface.__bases__, cls_dict)
 
-    if iface_info.get_n_constants():
-        warn("Constants of interface not supported (%r)" % name, Warning)
+    # Add constants
+    for constant in iface_info.get_constants():
+        constant_name = constant.get_name()
+        attr = ConstantAttribute(constant, namespace, constant_name, lib)
+        setattr(cls, constant_name, attr)
+        constant.unref()
 
-    for i in xrange(iface_info.get_n_methods()):
-        func_info = iface_info.get_method(i)
-        func_flags = func_info.get_flags().value
+    # Add methods
+    for method in iface_info.get_methods():
+        func_flags = method.get_flags()
 
-        if func_flags == 0 or func_flags == GIFunctionInfoFlags.IS_METHOD:
-            mname = func_info.get_name()
-            attr = _ClassMethodAttribute(func_info, namespace, mname, lib)
-            setattr(cls, mname, attr)
+        if func_flags.value == GIFunctionInfoFlags.IS_METHOD:
+            method_name = method.get_name()
+            attr = _ClassMethodAttribute(method, method_name, lib)
+            setattr(cls, method_name, attr)
         else:
-            func_info.unref()
+            method.unref()
 
     return cls
 
 
 def ObjectAttribute(info, namespace, name, lib):
+    """Creates a GObject class.
+
+    It inherits from the base class and all interfaces it implements.
+    """
+
     obj_info = cast(info, GIObjectInfoPtr)
 
-    if obj_info.get_n_constants():
-        warn("Constants of object not supported (%r)" % name, Warning)
-
-    # get the parent classes if there are any
+    # Get the parent class
     parent_obj = obj_info.get_parent()
     if parent_obj:
         parent_namespace = parent_obj.get_namespace()
@@ -229,33 +238,46 @@ def ObjectAttribute(info, namespace, name, lib):
     else:
         bases = _Object.__bases__
 
+    # Get all object interfaces
     ifaces = []
-    for i in xrange(obj_info.get_n_interfaces()):
-        if_info = obj_info.get_interface(i)
-        if_name, if_namespace = if_info.get_name(), if_info.get_namespace()
-        attr = import_attribute(if_namespace, if_name)
-        ifaces.append(attr)
-        if_info.unref()
+    for interface in obj_info.get_interfaces():
+        interface_namespace = interface.get_namespace()
+        interface_name = interface.get_name()
+        interface.unref()
 
+        attr = import_attribute(interface_namespace, interface_name)
+        ifaces.append(attr)
+
+    # Combine them to a base class list
     if ifaces:
         bases = tuple(list(bases) + ifaces)
 
+    # Copy template and add gtype, properties
     cls_dict = dict(_Object.__dict__)
     g_type = obj_info.get_g_type()
     cls_dict["__gtype__"] = PGType(g_type)
     cls_dict["props"] = PropertyAttribute(obj_info, namespace, name, g_type)
+
+    # Create a new class
     cls = type(name, bases, cls_dict)
     cls.__module__ = namespace
 
-    for i in xrange(obj_info.get_n_methods()):
-        func_info = obj_info.get_method(i)
-        func_flags = func_info.get_flags().value
+    # Add constants
+    for constant in obj_info.get_constants():
+        constant_name = constant.get_name()
+        attr = ConstantAttribute(constant, namespace, constant_name, lib)
+        setattr(cls, constant_name, attr)
+        constant.unref()
 
-        if func_flags == 0 or func_flags == GIFunctionInfoFlags.IS_METHOD:
-            mname = func_info.get_name()
-            attr = _ClassMethodAttribute(func_info, namespace, mname, lib)
-            setattr(cls, mname, attr)
+    # Add methods
+    for method in obj_info.get_methods():
+        func_flags = method.get_flags().value
+
+        if func_flags == GIFunctionInfoFlags.IS_METHOD:
+            method_name = method.get_name()
+            attr = _ClassMethodAttribute(method, method_name, lib)
+            setattr(cls, method_name, attr)
         else:
-            func_info.unref()
+            method.unref()
 
     return cls
