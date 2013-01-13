@@ -52,8 +52,7 @@ class _Module(types.ModuleType):
 def Module(repo, namespace, lib):
     cls = type(namespace, _Module.__bases__, dict(_Module.__dict__))
 
-    for i in xrange(repo.get_n_infos(namespace)):
-        info = repo.get_info(namespace, i)
+    for info in repo.get_infos(namespace):
         name = info.get_name()
         attr = _ModuleAttribute(info, namespace, name, lib)
         setattr(cls, name, attr)

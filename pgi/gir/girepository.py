@@ -33,6 +33,11 @@ class GIRepository(Structure):
 class GIRepositoryPtr(POINTER(GIRepository)):
     _type_ = GIRepository
 
+    def get_infos(self, namespace):
+        n_infos = self.get_n_infos(namespace)
+        return [self.get_info(namespace, i) for i in xrange(n_infos)]
+
+
 _methods = [
     ("get_default", GIRepositoryPtr, []),
     ("require", GITypelibPtr, [GIRepositoryPtr, gchar_p, gchar_p,

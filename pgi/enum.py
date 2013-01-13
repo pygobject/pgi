@@ -51,8 +51,7 @@ class _FlagsClass(int):
 def _get_values(enum):
     values = []
 
-    for i in xrange(enum.get_n_values()):
-        value = enum.get_value(i)
+    for value in enum.get_values():
         num = value.get_value()
         vname = value.get_name().upper()
         value.unref()

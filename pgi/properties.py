@@ -160,8 +160,7 @@ class _Props(object):
 
         klass = self.__gtype.class_ref()
         obj_class = cast(klass, GObjectClassPtr)
-        for i in xrange(info.get_n_properties()):
-            prop_info = info.get_property(i)
+        for prop_info in info.get_properties():
             real_name = prop_info.get_name()
             spec = obj_class.find_property(real_name)
             attr_name = escape_name(real_name)
