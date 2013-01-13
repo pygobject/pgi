@@ -63,7 +63,7 @@ def override(klass):
     # FIXME: hack
     if hasattr(klass, "_is_function"):
         def wrap(wrapped):
-            setattr(module, klass.__class__.__name__, wrapped)
+            setattr(module, klass.__name__, wrapped)
             return wrapped
         return wrap
 

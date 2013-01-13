@@ -90,7 +90,9 @@ class _Object(object):
         if not signal_lookup(name, self.__gtype__._type):
             raise TypeError("unknown signal name %r" % name)
 
-        cb = GCallback(callback)
+        def _add_self(*args):
+            return callback(self, *args)
+        cb = GCallback(_add_self)
         destroy = GClosureNotify()
         id_ = signal_connect_data(self._obj, name, cb, None, destroy, 0)
         self.__signal_cb_ref[id_] = (cb, destroy)
@@ -100,7 +102,9 @@ class _Object(object):
         if not signal_lookup(name, self.__gtype__._type):
             raise TypeError("unknown signal name %r" % name)
 
-        cb = GCallback(callback)
+        def _add_self(*args):
+            return callback(self, *args)
+        cb = GCallback(_add_self)
         destroy = GClosureNotify()
         flags = GConnectFlags.CONNECT_AFTER
         id_ = signal_connect_data(self._obj, name, cb, None, destroy, flags)
