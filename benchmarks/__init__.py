@@ -55,15 +55,16 @@ def run(load_gi):
             w.props.title = "this"
 
     def bench_method(n):
+        b = Gtk.Button()
         for i in xrange(n):
-            b = Gtk.Button()
             b.set_name("foobar")
+            b.get_name()
 
     bench = [
         (bench_constants, 100000),
         (bench_flags, 100000),
         (bench_func, 100000),
-        (bench_method, 1000),
+        (bench_method, 100000),
         (bench_gtype, 100000),
         (bench_object, 10000),
     ]
