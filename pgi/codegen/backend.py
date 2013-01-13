@@ -12,6 +12,9 @@ class CodeGenBackend(object):
         super(CodeGenBackend, self).__init__()
         self._gen = codegen
 
+    def var(self):
+        return self._gen.var()
+
     def parse(self, *args, **kwargs):
         return self._gen.parse(*args, **kwargs)
 

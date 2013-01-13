@@ -105,3 +105,15 @@ $array_ref = ctypes.byref($array_ptr)
 
         return (block, var["array_ptr"], var["array_ref"],
                 var["length_c"], var["length_ref"])
+
+    def unpack_enum(self, name, type_):
+        type_var = self.var()
+
+        block, var = self.parse("""
+# unpack enum
+$enum = $enum_class($value)
+""", enum_class=type_var, value=name)
+
+        block.add_dependency(type_var, type_)
+
+        return block, var["enum"]

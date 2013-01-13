@@ -87,6 +87,9 @@ class _Object(object):
         return form % (name, id(self), self.__gtype__.name, self._obj)
 
     def connect(self, name, callback):
+        if not callable(callback):
+            raise TypeError("second argument must be callable")
+
         if not signal_lookup(name, self.__gtype__._type):
             raise TypeError("unknown signal name %r" % name)
 
@@ -99,6 +102,9 @@ class _Object(object):
         return id_
 
     def connect_after(self, name, callback):
+        if not callable(callback):
+            raise TypeError("second argument must be callable")
+
         if not signal_lookup(name, self.__gtype__._type):
             raise TypeError("unknown signal name %r" % name)
 

@@ -35,6 +35,12 @@ def typeinfo_to_ctypes(info):
     else:
         if tag == GITypeTag.BOOLEAN:
             return gboolean
+        elif tag == GITypeTag.INTERFACE:
+            iface = info.get_interface()
+            iface_type = iface.get_type().value
+            iface.unref()
+            if iface_type == GIInfoType.ENUM:
+                return guint32
         elif tag == GITypeTag.UINT32:
             return guint32
         elif tag == GITypeTag.INT32:
