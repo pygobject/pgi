@@ -7,7 +7,7 @@
 
 import keyword
 import re
-from ctypes import cast, POINTER, c_void_p
+from ctypes import cast, POINTER, c_void_p, c_int
 
 from pgi import const
 from pgi.gir import GITypeTag, GIInfoType
@@ -30,6 +30,8 @@ def typeinfo_to_ctypes(info):
             return gpointer
         elif tag == GITypeTag.INTERFACE:
             return gpointer
+        elif tag == GITypeTag.INT32:
+            return POINTER(gint32)
     else:
         if tag == GITypeTag.BOOLEAN:
             return gboolean

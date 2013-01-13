@@ -418,7 +418,7 @@ if Gdk._version >= '3.0':
 
 import sys
 
-Gdk.init_check(0, 0)
+Gdk.init_check(sys.argv)
 
 """initialized, argv = Gdk.init_check(sys.argv)
 if not initialized:
