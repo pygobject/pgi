@@ -13,7 +13,7 @@ require_version = require_version
 get_required_version = get_required_version
 
 
-def replace_gi():
+def install_as_gi():
     """Call before the first gi import to redirect gi imports to pgi"""
 
     import sys

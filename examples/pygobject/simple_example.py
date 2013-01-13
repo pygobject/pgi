@@ -10,7 +10,7 @@
 import sys
 sys.path.insert(0, '../..')
 import pgi
-pgi.replace_gi()
+pgi.install_as_gi()
 
 from gi.repository import Gtk
 

@@ -20,7 +20,7 @@ or
 
 ```python
 import pgi
-pgi.replace_gi()
+pgi.install_as_gi()
 from gi.repository import Gtk, GObject
 ```
 

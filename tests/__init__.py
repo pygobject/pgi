@@ -23,7 +23,7 @@ def test(load_gi):
 
     if not load_gi:
         import pgi
-        pgi.replace_gi()
+        pgi.install_as_gi()
 
     import gi
     if load_gi:
