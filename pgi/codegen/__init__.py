@@ -9,6 +9,7 @@ from pgi.codegen.arguments import get_argument_class
 from pgi.codegen.returnvalues import get_return_class
 from pgi.codegen.utils import CodeBlock, CodeGenerator
 from pgi.codegen.ctypes_backend import CTypesBackend
+from pgi.codegen.cffi_backend import CFFIBackend
 
 
 def generate_function(info, namespace, name, method=False):
@@ -46,6 +47,8 @@ def generate_function(info, namespace, name, method=False):
     f = "def %s(%s):" % (name, ", ".join(names))
     main.write_line(f)
 
+    docstring = "%s(%s)" % (name, ", ".join(names))
+
     for arg in args:
         if arg.is_aux:
             continue
@@ -56,7 +59,9 @@ def generate_function(info, namespace, name, method=False):
     # generate call
     lib = backend.get_library_object(namespace)
     symbol = info.get_symbol()
-    func = backend.get_function_object(lib, symbol, args, return_value)
+    block, func = backend.get_function_object(lib, symbol, args,
+                                              return_value, method)
+    block.write_into(main, 1)
 
     call_vars = [a.call_var for a in args if a.call_var]
     if method:
@@ -92,4 +97,8 @@ def generate_function(info, namespace, name, method=False):
     for info in arg_types:
         info.unref()
 
-    return main.compile()[name]
+    func = main.compile()[name]
+    func._code = main
+    func.__doc__ = docstring
+
+    return func

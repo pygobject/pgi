@@ -7,7 +7,7 @@
 
 import keyword
 import re
-from ctypes import cast, POINTER, c_void_p, c_int
+from ctypes import cast, POINTER, c_void_p
 
 from pgi import const
 from pgi.gir import GITypeTag, GIInfoType

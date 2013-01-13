@@ -14,18 +14,29 @@ from pgi.util import typeinfo_to_ctypes
 
 class CTypesBackend(CodeGenBackend):
 
-    def get_library_object(self, namespace):
-        paths = GIRepositoryPtr().get_shared_library(namespace)
-        if not paths:
-            return
-        path = paths.split(",")[0]
-        return getattr(ctypes.cdll, path)
+    def __init__(self, *args, **kwargs):
+        super(CTypesBackend, self).__init__(*args, **kwargs)
+        self._libs = {}
 
-    def get_function_object(self, lib, symbol, args, ret):
+    def get_library_object(self, namespace):
+        if namespace not in self._libs:
+            paths = GIRepositoryPtr().get_shared_library(namespace)
+            if not paths:
+                return
+            path = paths.split(",")[0]
+            lib = getattr(ctypes.cdll, path)
+            self._libs[namespace] = lib
+        return self._libs[namespace]
+
+    def get_function_object(self, lib, symbol, args, ret, method=False):
         h = getattr(lib, symbol)
         h.restype = typeinfo_to_ctypes(ret.type)
 
         arg_types = []
+
+        if method:
+            arg_types.append(ctypes.c_void_p)
+
         for arg in args:
             type_ = typeinfo_to_ctypes(arg.type)
             # FIXME: cover all types..
@@ -34,9 +45,14 @@ class CTypesBackend(CodeGenBackend):
             if arg.is_direction_out() and type_ != ctypes.c_void_p:
                 type_ = ctypes.POINTER(type_)
             arg_types.append(type_)
-
         h.argtypes = arg_types
-        return h
+
+        block, var = self.parse("""
+# args: $args
+# ret: $ret
+""", args=repr([n.__name__ for n in h.argtypes]), ret=repr(h.restype))
+
+        return block, h
 
     def call(self, name, args):
         block, var = self.parse("""
@@ -67,9 +83,9 @@ while $current:
     def pack_interface(self, name):
         block, var = self.parse("""
 $obj = ctypes.cast($iface._obj, ctypes.c_void_p)
-""")
-        block.add_dependency("ctypes", ctypes)
+""", iface=name)
 
+        block.add_dependency("ctypes", ctypes)
         return block, var["obj"]
 
     def pack_array_ptr_fixed_c(self, name):

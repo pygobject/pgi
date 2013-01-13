@@ -7,8 +7,8 @@
 
 from ctypes import cast
 
-from pgi.gir import GIStructInfoPtr, GIFunctionInfoFlags
-from pgi.obj import _ClassMethodAttribute
+from pgi.gir import GIStructInfoPtr
+from pgi.obj import MethodAttribute
 from pgi.gtype import PGType
 
 
@@ -35,16 +35,11 @@ def StructureAttribute(info, namespace, name, lib):
     cls = type(name, _Structure.__bases__, cls_dict)
     cls.__module__ = namespace
 
-    # add methods
-    for i in xrange(struct_info.get_n_methods()):
-        func_info = struct_info.get_method(i)
-        func_flags = func_info.get_flags()
-
-        if func_flags.value == GIFunctionInfoFlags.IS_METHOD:
-            method_name = func_info.get_name()
-            attr = _ClassMethodAttribute(func_info, method_name, lib)
+    # Add methods
+    for method_info in struct_info.get_methods():
+        method_name = method_info.get_name()
+        attr = MethodAttribute(method_info, namespace, method_name, lib)
+        if attr:
             setattr(cls, method_name, attr)
-        else:
-            func_info.unref()
 
     return cls

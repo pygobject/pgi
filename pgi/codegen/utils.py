@@ -5,6 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
+import sys
 import string
 import collections
 
@@ -52,18 +53,29 @@ class CodeBlock(object):
         """Execute the python code and returns the global dict"""
 
         code = compile(str(self), "<string>", "exec")
-        exec code in self._deps
-        return dict(self._deps)
+        global_dict = dict(self._deps)
+        exec code in global_dict
+        return global_dict
 
-    def highlight(self):
-        from pygments import highlight
-        from pygments.lexers import PythonLexer
-        from pygments.formatters import TerminalFormatter
+    def pprint(self):
+        """Print the code block to stdout.
+        Does syntax highlighting if possible.
+        """
 
         code = str(self)
-        formatter = TerminalFormatter(bg="dark")
-        lexer = PythonLexer()
-        return highlight(code, lexer, formatter).strip()
+        if sys.stdout.isatty():
+            try:
+                from pygments import highlight
+                from pygments.lexers import PythonLexer
+                from pygments.formatters import TerminalFormatter
+            except ImportError:
+                pass
+            else:
+                formatter = TerminalFormatter(bg="dark")
+                lexer = PythonLexer()
+                print highlight(code, lexer, formatter).strip()
+                return
+        print code
 
     def __str__(self):
         lines = []
