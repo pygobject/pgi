@@ -52,9 +52,14 @@ class InterfaceReturnValue(ReturnValue):
         iface_namespace = iface.get_namespace()
         iface_name = iface.get_name()
         iface.unref()
+
         if iface_type == GIInfoType.ENUM:
             attr = import_attribute(iface_namespace, iface_name)
             return backend.unpack_enum(name, attr)
+        elif iface_type == GIInfoType.OBJECT:
+            attr = import_attribute(iface_namespace, iface_name)
+            return backend.unpack_object(name, attr)
+
         return None, name
 
 

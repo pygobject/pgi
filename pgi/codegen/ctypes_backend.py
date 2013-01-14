@@ -134,5 +134,19 @@ $enum = $enum_class($value)
 """, enum_class=type_var, value=name)
 
         block.add_dependency(type_var, type_)
-
         return block, var["enum"]
+
+    def unpack_object(self, name, type_):
+        type_var = self.var()
+        # FIXME: find real class at runtime
+        block, var = self.parse("""
+# unpack object
+if $value:
+    $obj = object.__new__($obj_class)
+    $obj._obj = $value
+else:
+    $obj = $value
+""", obj_class=type_var, value=name)
+
+        block.add_dependency(type_var, type_)
+        return block, var["obj"]

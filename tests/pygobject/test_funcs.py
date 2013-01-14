@@ -45,8 +45,33 @@ class FuncsTest(unittest.TestCase):
 
         self.assertTrue(b.get_focus_on_click())
 
-        b.set_alignment(0.3, 0.4)
-
-        b = Gtk.Button()
         b.set_alignment(0.25, 0.75)
         self.assertEqual(b.get_alignment(), (0.25, 0.75))
+
+        b.set_use_stock([])
+        self.assertFalse(b.get_use_stock())
+        b.set_use_stock(3.4)
+        self.assertTrue(b.get_use_stock())
+        b.set_use_stock(b)
+        self.assertTrue(b.get_use_stock())
+
+        b.get_event_window()
+
+    def test_return_object(self):
+        b = Gtk.Button()
+        f = Gtk.Frame()
+        f.set_label_widget(b)
+        self.assertTrue(isinstance(f.get_label_widget(), Gtk.Widget))
+        # FIXME
+        #self.assertTrue(isinstance(f.get_label_widget(), Gtk.Button))
+
+    def test_misc_invalid(self):
+        b = Gtk.Button()
+        self.assertRaises(TypeError, b.set_label, 1)
+        self.assertRaises(TypeError, b.set_label, [])
+        self.assertRaises(TypeError, b.set_label, 3.4)
+        self.assertRaises(TypeError, b.set_label, b)
+
+        self.assertRaises(TypeError, b.set_relief, [])
+        self.assertRaises(TypeError, b.set_relief, 3.4)
+        self.assertRaises(TypeError, b.set_relief, b)
