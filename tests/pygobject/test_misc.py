@@ -35,3 +35,8 @@ class MiscTest(unittest.TestCase):
     def test_import(self):
         self.assertRaises(ImportError, __import__,
                           "gi.repository.FooBar", fromlist=[""])
+
+    def test_module(self):
+        self.assertTrue(Gtk.__path__.endswith(".typelib"))
+        self.assertTrue(Gtk.__loader__)
+        self.assertTrue(Gtk.__file__.endswith(".repository.Gtk>"))
