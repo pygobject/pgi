@@ -8,11 +8,14 @@
 import ctypes
 
 from pgi.codegen.backend import CodeGenBackend
+from pgi.codegen.utils import CodeBlock
 from pgi.gir import GIRepositoryPtr
 from pgi.util import typeinfo_to_ctypes
 
 
 class CTypesBackend(CodeGenBackend):
+
+    NAME = "ctypes"
 
     def __init__(self, *args, **kwargs):
         super(CTypesBackend, self).__init__(*args, **kwargs)
@@ -30,7 +33,8 @@ class CTypesBackend(CodeGenBackend):
 
     def get_function_object(self, lib, symbol, args, ret, method=False):
         h = getattr(lib, symbol)
-        h.restype = typeinfo_to_ctypes(ret.type)
+        if ret:
+            h.restype = typeinfo_to_ctypes(ret.type)
 
         arg_types = []
 
@@ -89,6 +93,8 @@ if not isinstance($var, basestring): # https://bugs.pypy.org/issue466
 
         return block, name
 
+    def unpack_string(self, name):
+        return CodeBlock(), name
 
     def pack_bool(self, name):
         block, var = self.parse("""

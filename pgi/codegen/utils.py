@@ -15,10 +15,12 @@ class CodeBlock(object):
 
     INDENTATION = 4
 
-    def __init__(self):
+    def __init__(self, line=None):
         super(CodeBlock, self).__init__()
         self._lines = []
         self._deps = {}
+        if line:
+            self.write_line(line)
 
     def add_dependency(self, name, obj):
         """Add a code dependency so it gets inserted into globals"""

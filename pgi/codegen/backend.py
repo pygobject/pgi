@@ -5,12 +5,20 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
+from pgi.codegen.utils import CodeGenerator
 
 class CodeGenBackend(object):
 
-    def __init__(self, codegen):
+    NAME = ""
+
+    def __init__(self):
         super(CodeGenBackend, self).__init__()
-        self._gen = codegen
+
+        def var_factory():
+            var_factory.c += 1
+            return "t%d" % var_factory.c
+        var_factory.c = 0
+        self._gen = CodeGenerator(var_factory)
 
     def var(self):
         return self._gen.var()
@@ -18,8 +26,5 @@ class CodeGenBackend(object):
     def parse(self, *args, **kwargs):
         return self._gen.parse(*args, **kwargs)
 
-    def get_library_object(self, namespace):
-        raise NotImplementedError
-
-    def get_function_object(self, lib, symbol, args, ret):
+    def __getattr__(self, value):
         raise NotImplementedError

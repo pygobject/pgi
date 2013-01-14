@@ -6,26 +6,57 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from pgi.codegen.arguments import get_argument_class
-from pgi.codegen.returnvalues import get_return_class
-from pgi.codegen.utils import CodeBlock, CodeGenerator
+from pgi.codegen.returnvalues import get_return_class, VoidReturnValue
+from pgi.codegen.utils import CodeBlock
+
 from pgi.codegen.ctypes_backend import CTypesBackend
-from pgi.codegen.cffi_backend import CFFIBackend
+try:
+    from pgi.codegen.cffi_backend import CFFIBackend
+except ImportError:
+    CFFIBackend = None
 
 
-def generate_function(info, namespace, name, method=False):
+BACKENDS = [CFFIBackend, CTypesBackend]
+BACKENDS = filter(None, BACKENDS)
+ACTIVE_BACKENS = BACKENDS
+
+
+def set_backend(name=None):
+    """Set a prefered ffi backend (cffi, ctypes).
+
+    set_backend() -- default
+    set_backend("cffi") -- cffi first, others as fallback
+    set_backend("ctypes") -- ctypes first, others as fallback
+    """
+
+    possible = list(BACKENDS)
+    if name is None:
+        names = []
+    else:
+        names = name.split(",")
+    for name in reversed(names):
+        for backend in BACKENDS:
+            if backend.NAME == name:
+                possible.remove(backend)
+                possible.insert(0, backend)
+                break
+        else:
+            raise LookupError("Unkown backend: %r" % name)
+
+    ACTIVE_BACKENS[:] = possible
+
+
+def _generate_function(backend, info, namespace, name, method):
     main = CodeBlock()
 
-    def var_factory():
-        var_factory.c += 1
-        return "t%d" % var_factory.c
-    var_factory.c = 0
-
-    parser = CodeGenerator(var_factory)
-    backend = CTypesBackend(parser)
+    main.write_line("# backend: %s" % backend.NAME)
 
     return_type = info.get_return_type()
     cls = get_return_class(return_type)
-    return_value = cls(info, return_type, backend)
+    if cls is VoidReturnValue:
+        return_value = None
+    else:
+        return_value = cls(info, return_type, backend)
 
     args = []
     arg_infos = info.get_args()
@@ -61,7 +92,8 @@ def generate_function(info, namespace, name, method=False):
     symbol = info.get_symbol()
     block, func = backend.get_function_object(lib, symbol, args,
                                               return_value, method)
-    block.write_into(main, 1)
+    if block:
+        block.write_into(main, 1)
 
     call_vars = [a.call_var for a in args if a.call_var]
     if method:
@@ -73,10 +105,10 @@ def generate_function(info, namespace, name, method=False):
     out = []
 
     # process return value
-    block, return_var = return_value.process(ret)
-    if block:
-        block.write_into(main, 1)
-    if return_var:
+    if return_value:
+        block, return_var = return_value.process(ret)
+        if block:
+            block.write_into(main, 1)
         out.append(return_var)
 
     # process out args
@@ -104,3 +136,13 @@ def generate_function(info, namespace, name, method=False):
     func.__doc__ = docstring
 
     return func
+
+
+def generate_function(info, namespace, name, method=False):
+    for backend_type in BACKENDS:
+        try:
+            backend = backend_type()
+            return _generate_function(backend, info, namespace, name, method)
+        except NotImplementedError:
+            continue
+    raise NotImplementedError

@@ -7,10 +7,12 @@
 
 from pgi import const
 from pgi.importer import require_version, get_required_version
+from pgi.codegen import set_backend
 
 version = const.VERSION
 require_version = require_version
 get_required_version = get_required_version
+set_backend = set_backend
 
 
 def install_as_gi():

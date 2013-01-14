@@ -28,9 +28,6 @@ class ReturnValue(object):
 class VoidReturnValue(ReturnValue):
     TAG = GITypeTag.VOID
 
-    def process(self, name):
-        return None, None
-
 
 class ArrayReturnValue(ReturnValue):
     TAG = GITypeTag.ARRAY
@@ -40,6 +37,18 @@ class ArrayReturnValue(ReturnValue):
         if self.is_zero_terminated():
             block, var = backend.unpack_array_zeroterm_c(name)
             return block, var
+
+
+class Utf8ReturnValue(ReturnValue):
+    TAG = GITypeTag.UTF8
+
+    def process(self, name):
+        backend = self.backend
+        return backend.unpack_string(name)
+
+
+class FilenameReturnValue(Utf8ReturnValue):
+    TAG = GITypeTag.FILENAME
 
 
 class InterfaceReturnValue(ReturnValue):
