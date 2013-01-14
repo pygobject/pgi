@@ -5,7 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from pgi.gir import GIDirection, GIArrayType, GITypeTag
+from pgi.gir import GIDirection, GIArrayType, GITypeTag, GIInfoType
 
 
 class Argument(object):
@@ -97,9 +97,15 @@ class InterfaceArgument(Argument):
     TAG = GITypeTag.INTERFACE
 
     def pre_call(self):
-        block, var = self.backend.pack_interface(self.name)
-        self.call_var = var
-        return block
+        iface = self.type.get_interface()
+        iface_type = iface.get_type().value
+
+        if iface_type == GIInfoType.OBJECT:
+            block, var = self.backend.pack_interface(self.name)
+            self.call_var = var
+            return block
+        elif iface_type == GIInfoType.ENUM:
+            return
 
 
 class Int32Argument(Argument):

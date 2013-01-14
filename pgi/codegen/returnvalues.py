@@ -25,6 +25,13 @@ class ReturnValue(object):
         return self.type.is_zero_terminated()
 
 
+class VoidReturnValue(ReturnValue):
+    TAG = GITypeTag.VOID
+
+    def process(self, name):
+        return None, None
+
+
 class ArrayReturnValue(ReturnValue):
     TAG = GITypeTag.ARRAY
 

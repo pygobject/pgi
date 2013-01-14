@@ -11,7 +11,8 @@ from ctypes import cast, POINTER, c_void_p
 
 from pgi import const
 from pgi.gir import GITypeTag, GIInfoType
-from pgi.glib import gchar_p, gpointer, gboolean, guint32, free, gint32
+from pgi.glib import gchar_p, gpointer, gboolean, guint32, free, gint32, gfloat
+from pgi.glib import gpointer
 
 
 def typeinfo_to_ctypes(info):
@@ -32,6 +33,10 @@ def typeinfo_to_ctypes(info):
             return gpointer
         elif tag == GITypeTag.INT32:
             return POINTER(gint32)
+        elif tag == GITypeTag.FLOAT:
+            return POINTER(gfloat)
+        elif tag == GITypeTag.VOID:
+            return gpointer
     else:
         if tag == GITypeTag.BOOLEAN:
             return gboolean
@@ -45,6 +50,8 @@ def typeinfo_to_ctypes(info):
             return guint32
         elif tag == GITypeTag.INT32:
             return gint32
+        elif tag == GITypeTag.FLOAT:
+            return gfloat
         elif tag == GITypeTag.VOID:
             return
 

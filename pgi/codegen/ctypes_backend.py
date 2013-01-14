@@ -60,7 +60,7 @@ class CTypesBackend(CodeGenBackend):
 try:
     $ret = $name($args)
 except ctypes.ArgumentError, $e:
-        raise TypeError($e.message)
+    raise TypeError($e.message)
 """, name=name, args=args)
 
         block.add_dependency("ctypes", ctypes)

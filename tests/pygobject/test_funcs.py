@@ -29,3 +29,20 @@ class FuncsTest(unittest.TestCase):
             isinstance(Gtk.icon_size_register("foo", 1, 2), (int, long)))
         self.assertEqual(Gtk.icon_size_get_name(Gtk.IconSize.MENU),
                          "gtk-menu")
+
+    def test_misc(self):
+        b = Gtk.Button()
+        self.assertEqual(b.get_relief(), Gtk.ReliefStyle.NORMAL)
+        b.set_relief(Gtk.ReliefStyle.HALF)
+        self.assertEqual(b.get_relief(), Gtk.ReliefStyle.HALF)
+
+        b.set_label("foo")
+        self.assertEqual(b.get_label(), "foo")
+
+        self.assertFalse(b.get_use_stock())
+        b.set_use_stock(True)
+        self.assertTrue(b.get_use_stock())
+
+        self.assertTrue(b.get_focus_on_click())
+
+        b.set_alignment(0.3, 0.4)
