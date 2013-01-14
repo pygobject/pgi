@@ -127,21 +127,3 @@ def parse_code(code, var_factory, **kwargs):
 
         block.write_line(string.Template(line).substitute(defdict), level)
     return block, dict(defdict)
-
-
-class CodeGenerator(object):
-    """Helper class that holds a variable factory"""
-
-    def __init__(self, variable_factory):
-        super(CodeGenerator, self).__init__()
-        self._factory = variable_factory
-
-    def var(self):
-        """Generate a new variable name"""
-
-        return self._factory()
-
-    def parse(self, code, **kwargs):
-        """Parse code: see parse_code()"""
-
-        return parse_code(code, self._factory, **kwargs)
