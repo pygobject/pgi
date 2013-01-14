@@ -80,6 +80,23 @@ while $current:
 
         return block, (var["list"],)
 
+    def pack_string(self, name):
+        # https://bugs.pypy.org/issue466
+        block, var = self.parse("""
+if not isinstance($var, basestring): # https://bugs.pypy.org/issue466
+    raise TypeError
+""", var=name)
+
+        return block, name
+
+
+    def pack_bool(self, name):
+        block, var = self.parse("""
+$boolean = bool($var) # https://bugs.pypy.org/issue1367
+""", var=name)
+
+        return block, var["boolean"]
+
     def unpack_basic_ptr(self, name):
         block, var = self.parse("""
 # unpack basic pointer

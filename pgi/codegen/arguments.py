@@ -109,12 +109,26 @@ class InterfaceArgument(Argument):
             return
 
 
+class BoolArgument(Argument):
+    TAG = GITypeTag.BOOLEAN
+
+    def pre_call(self):
+        block, var = self.backend.pack_bool(self.name)
+        self.call_var = var
+        return block
+
+
 class Int32Argument(Argument):
     TAG = GITypeTag.INT32
 
 
 class Utf8Argument(Argument):
     TAG = GITypeTag.UTF8
+
+    def pre_call(self):
+        block, var = self.backend.pack_string(self.name)
+        self.call_var = var
+        return block
 
 
 class FloatArgument(Argument):
