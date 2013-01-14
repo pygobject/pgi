@@ -41,7 +41,7 @@ def generate_function(info, namespace, name, method=False):
         arg.setup()
 
     # generate header
-    names = [a.name for a in args if not a.is_aux]
+    names = [a.name for a in args if not a.is_aux and a.is_in]
     if method:
         names.insert(0, "self")
     f = "def %s(%s):" % (name, ", ".join(names))
@@ -74,22 +74,24 @@ def generate_function(info, namespace, name, method=False):
 
     # process return value
     block, return_var = return_value.process(ret)
-    if return_var:
-        out.append(return_var)
     if block:
         block.write_into(main, 1)
+    if return_var:
+        out.append(return_var)
 
     # process out args
     for arg in args:
         if arg.is_aux:
             continue
-        arg.post_call()
+        block = arg.post_call()
+        if block:
+            block.write_into(main, 1)
         out += arg.out_vars
 
     if len(out) == 1:
         main.write_line("return %s" % out[0], 1)
     elif len(out) > 1:
-        main.write_line("return (%s, %s)" % (ret, ", ".join(out)), 1)
+        main.write_line("return (%s)" % ", ".join(out), 1)
 
     return_type.unref()
     for info in arg_infos:

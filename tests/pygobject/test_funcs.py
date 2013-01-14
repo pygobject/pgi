@@ -46,3 +46,7 @@ class FuncsTest(unittest.TestCase):
         self.assertTrue(b.get_focus_on_click())
 
         b.set_alignment(0.3, 0.4)
+
+        b = Gtk.Button()
+        b.set_alignment(0.25, 0.75)
+        self.assertEqual(b.get_alignment(), (0.25, 0.75))

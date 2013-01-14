@@ -18,6 +18,7 @@ class Argument(object):
 
     TAG = None
 
+    is_in = True
     is_aux = False
     call_var = ""
     out_vars = []
@@ -115,6 +116,26 @@ class Int32Argument(Argument):
 class Utf8Argument(Argument):
     TAG = GITypeTag.UTF8
 
+
+class FloatArgument(Argument):
+    TAG = GITypeTag.FLOAT
+
+    def setup(self):
+        if not self.is_direction_in():
+            self.is_in = False
+
+    def pre_call(self):
+        if self.is_direction_out():
+            block, data, ref = self.backend.pack_float_ptr()
+            self._data = data
+            self.call_var = ref
+            return block
+
+    def post_call(self):
+        if self.is_direction_out():
+            block, var = self.backend.unpack_basic_ptr(self._data)
+            self.out_vars = [var]
+            return block
 
 _classes = {}
 

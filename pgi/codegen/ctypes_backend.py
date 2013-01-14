@@ -80,6 +80,25 @@ while $current:
 
         return block, (var["list"],)
 
+    def unpack_basic_ptr(self, name):
+        block, var = self.parse("""
+# unpack basic pointer
+$value = $ctypes_value.value
+""", ctypes_value=name)
+
+        block.add_dependency("ctypes", ctypes)
+        return block, var["value"]
+
+    def pack_float_ptr(self):
+        block, var = self.parse("""
+# pack float
+$float = ctypes.c_float()
+$float_ref = ctypes.byref($float)
+""")
+
+        block.add_dependency("ctypes", ctypes)
+        return block, var["float"], var["float_ref"]
+
     def pack_interface(self, name):
         block, var = self.parse("""
 $obj = ctypes.cast($iface._obj, ctypes.c_void_p)
