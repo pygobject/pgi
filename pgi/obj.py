@@ -134,35 +134,40 @@ class _Object(object):
         return cast(self._obj, gobject.GObjectPtr).contents.ref_count
 
 
+class MethodAttribute(object):
+    def __init__(self, info, namespace, name, *args):
+        super(MethodAttribute, self).__init__()
+
+        self._info = info
+        self._namespace = namespace
+        self._name = name
+
+    def __get__(self, instance, owner):
+        func_flags = self._info.get_flags().value
+        name = self._name
+        info = self._info
+        namespace = self._namespace
+
+        if func_flags == GIFunctionInfoFlags.IS_METHOD:
+            func = generate_function(info, namespace, name, method=True)
+            setattr(owner, name, func)
+            return getattr(instance or owner, name)
+        elif func_flags == GIFunctionInfoFlags.IS_CONSTRUCTOR:
+            func = generate_function(info, namespace, name, method=False)
+            func = staticmethod(func)
+            setattr(owner, name, func)
+            return getattr(owner, name)
+        elif func_flags == 0:
+            func = generate_function(info, namespace, name, method=False)
+            func = staticmethod(func)
+            setattr(owner, name, func)
+            return getattr(owner, name)
+        else:
+            raise NotImplementedError
+
+
 class _Interface(object):
     pass
-
-
-class _MethodAttribute(object):
-    def __init__(self, info, namespace, name):
-        self._info = info
-        self._namespace = namespace
-        self._name = name
-
-    def __get__(self, instance, owner):
-        name = self._name
-        func = generate_function(self._info, self._namespace, name, True)
-        setattr(owner, name, func)
-        return getattr(instance or owner, name)
-
-
-class _ConstructorAttribute(object):
-    def __init__(self, info, namespace, name):
-        self._info = info
-        self._namespace = namespace
-        self._name = name
-
-    def __get__(self, instance, owner):
-        name = self._name
-        func = generate_function(self._info, self._namespace, name, False)
-        func = staticmethod(func)
-        setattr(owner, name, func)
-        return getattr(owner, name)
 
 
 def InterfaceAttribute(info, namespace, name, lib):
@@ -193,28 +198,6 @@ def InterfaceAttribute(info, namespace, name, lib):
             setattr(cls, method_name, attr)
 
     return cls
-
-
-def MethodAttribute(info, namespace, name, lib):
-    func_flags = info.get_flags().value
-
-    if func_flags == GIFunctionInfoFlags.IS_METHOD:
-        cls_dict = dict(_MethodAttribute.__dict__)
-        cls = type(name, _MethodAttribute.__bases__, cls_dict)
-        instance = cls(info, namespace, name)
-        return instance
-    elif func_flags == GIFunctionInfoFlags.IS_CONSTRUCTOR:
-        cls_dict = dict(_ConstructorAttribute.__dict__)
-        cls = type(name, _ConstructorAttribute.__bases__, cls_dict)
-        instance = cls(info, namespace, name)
-        return instance
-    elif func_flags == 0:
-        cls_dict = dict(_ConstructorAttribute.__dict__)
-        cls = type(name, _ConstructorAttribute.__bases__, cls_dict)
-        instance = cls(info, namespace, name)
-        return instance
-    else:
-        info.unref()
 
 
 def ObjectAttribute(info, namespace, name, lib):
