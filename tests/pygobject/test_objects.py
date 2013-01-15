@@ -77,6 +77,10 @@ class ObjectTest(unittest.TestCase):
         self.assertTrue(isinstance(w, Gtk.Widget))
         self.assertTrue(isinstance(w, Gtk.Label))
 
+    def test_misc(self):
+        dialog = Gtk.Dialog()
+        self.assertTrue(dialog)
+        dialog.destroy()
 
 class GTypeTest(unittest.TestCase):
     def test_repr(self):

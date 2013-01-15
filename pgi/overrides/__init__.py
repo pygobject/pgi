@@ -38,8 +38,17 @@ def load(namespace, module):
         # inject a module copy into the override module that
         # has the original classes for all overriden ones
         # so the classes can access the bases at runtime
-        module_copy = types.ModuleType("")
+
+        # XXX: I guess we need a proxy module here....
+        # I'm not really sure why this works at all :)
+        fake_name = "FakeOverride(%s)" % module.__name__
+        orig_cls = type(module)
+        orig_dict = dict(orig_cls.__dict__)
+        del orig_dict["__init__"]
+        new_cls = type(fake_name, orig_cls.__bases__, orig_dict)
+        module_copy = new_cls("")
         module_copy.__dict__.update(module.__dict__)
+
         for name, klass in _overrides[-1].iteritems():
             setattr(module_copy, name, klass)
         vars(override_module)[namespace] = module_copy
