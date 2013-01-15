@@ -7,7 +7,7 @@
 
 import unittest
 
-from gi.repository import Gtk, GObject, Atk
+from gi.repository import Gtk, GObject, Atk, Gdk
 
 
 class ObjectTest(unittest.TestCase):
@@ -81,6 +81,14 @@ class ObjectTest(unittest.TestCase):
         dialog = Gtk.Dialog()
         self.assertTrue(dialog)
         dialog.destroy()
+
+        table = Gtk.Table(3, 2)
+        self.assertTrue(table)
+        table.destroy()
+
+        cb = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+        self.assertTrue(isinstance(cb, Gtk.Clipboard))
+
 
 class GTypeTest(unittest.TestCase):
     def test_repr(self):

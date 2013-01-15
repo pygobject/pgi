@@ -202,7 +202,12 @@ def MethodAttribute(info, namespace, name, lib):
         cls = type(name, _MethodAttribute.__bases__, cls_dict)
         instance = cls(info, namespace, name)
         return instance
-    if func_flags == GIFunctionInfoFlags.IS_CONSTRUCTOR:
+    elif func_flags == GIFunctionInfoFlags.IS_CONSTRUCTOR:
+        cls_dict = dict(_ConstructorAttribute.__dict__)
+        cls = type(name, _ConstructorAttribute.__bases__, cls_dict)
+        instance = cls(info, namespace, name)
+        return instance
+    elif func_flags == 0:
         cls_dict = dict(_ConstructorAttribute.__dict__)
         cls = type(name, _ConstructorAttribute.__bases__, cls_dict)
         instance = cls(info, namespace, name)

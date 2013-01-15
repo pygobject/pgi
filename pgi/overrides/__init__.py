@@ -35,6 +35,14 @@ def load(namespace, module):
             print exc
             raise ImportError("Failed to load overrides for %r" % namespace)
     else:
+        # add all objects referenced in __all__ to the original module
+        override_vars = vars(override_module)
+        override_all = override_vars.get("__all__") or []
+        for var in override_all:
+            item = override_vars.get(var)
+            if item:
+                setattr(module, var, item)
+
         # inject a module copy into the override module that
         # has the original classes for all overriden ones
         # so the classes can access the bases at runtime
@@ -52,6 +60,7 @@ def load(namespace, module):
         for name, klass in _overrides[-1].iteritems():
             setattr(module_copy, name, klass)
         vars(override_module)[namespace] = module_copy
+
 
     _active_module.pop(-1)
     _overrides.pop(-1)

@@ -67,6 +67,8 @@ def set_gvalue_from_py(ptr, is_interface, tag, value):
             ptr.set_boolean(value)
         elif tag == GITypeTag.INT32:
             ptr.set_int(value)
+        elif tag == GITypeTag.UINT32:
+            ptr.set_uint(value)
         elif tag == GITypeTag.UTF8:
             if isinstance(value, unicode):
                 value = value.encode("utf-8")
