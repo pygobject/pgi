@@ -55,14 +55,15 @@ def _generate_function(backend, info, namespace, name, method):
     # generate call
     lib = backend.get_library_object(namespace)
     symbol = info.get_symbol()
-    block, func = backend.get_function_object(lib, symbol, args,
-                                              return_value, method)
+    block, svar, func = backend.get_function_object(lib, symbol, args,
+                                                    return_value, method,
+                                                    "self")
     if block:
         block.write_into(main, 1)
 
     call_vars = [a.call_var for a in args if a.call_var]
     if method:
-        call_vars.insert(0, "self._obj")
+        call_vars.insert(0, svar)
     block, ret = backend.call("func", ", ".join(call_vars))
     block.add_dependency("func", func)
     block.write_into(main, 1)

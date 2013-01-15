@@ -33,7 +33,7 @@ class CTypesBackend(CodeGenBackend):
             self._libs[namespace] = lib
         return self._libs[namespace]
 
-    def get_function_object(self, lib, symbol, args, ret, method=False):
+    def get_function_object(self, lib, symbol, args, ret, method=False, self_name=""):
         h = getattr(lib, symbol)
         if ret:
             h.restype = typeinfo_to_ctypes(ret.type)
@@ -58,7 +58,13 @@ class CTypesBackend(CodeGenBackend):
 # ret: $ret
 """, args=repr([n.__name__ for n in h.argtypes]), ret=repr(h.restype))
 
-        return block, h
+        if method:
+            self_block, var = self.parse("""
+$new_self = $sself._obj
+""", sself=self_name)
+            self_block.write_into(block)
+
+        return block, method and var["new_self"], h
 
     def call(self, name, args):
         block, var = self.parse("""

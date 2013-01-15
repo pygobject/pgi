@@ -49,16 +49,31 @@ class CFFIBackend(CodeGenBackend):
             self._libs[namespace] = self._ffi.dlopen(path)
         return self._libs[namespace]
 
-    def get_function_object(self, lib, symbol, args, ret, method=False):
-        if not args and not method:
-            if ret:
-                cffi_ret = typeinfo_to_cffi(ret.type)
-                cdef = "%s %s();" % (cffi_ret, symbol)
-            else:
-                cdef = "void %s();" % symbol
-            self._ffi.cdef(cdef)
-            return CodeBlock("# " + cdef), getattr(lib, symbol)
-        raise NotImplementedError
+    def get_function_object(self, lib, symbol, args, ret, method=False, self_name=""):
+        if args:
+            raise NotImplementedError
+
+        block = CodeBlock()
+        cdef_types = []
+
+        if method:
+            cdef_types.append("void*")
+            self_block, var = self.parse("""
+$new_self = ffi.cast('void *', $sself._obj)
+""", sself=self_name)
+            block.add_dependency("ffi", self._ffi)
+            self_block.write_into(block)
+
+        if ret:
+            cffi_ret = typeinfo_to_cffi(ret.type)
+        else:
+            cffi_ret = "void"
+
+        cdef = "%s %s(%s);" % (cffi_ret, symbol, ", ".join(cdef_types))
+        self._ffi.cdef(cdef, override=True)
+        block.write_line("# " + cdef)
+
+        return block, method and var["new_self"], getattr(lib, symbol)
 
     def call(self, name, args):
         block, var = self.parse("""
