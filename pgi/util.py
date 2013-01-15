@@ -15,6 +15,96 @@ from pgi.glib import gchar_p, gpointer, gboolean, guint32, free, gint32, gfloat
 from pgi.glib import gpointer
 
 
+class InfoIterWrapper(object):
+    """Allow fast name lookup for gi structs.
+
+    Most GIBaseInfo struct define an interface to iterate sub structs.
+    Those are usually sorted by name, so we can do a binary search.
+    Since they aren't guaranteed to be sorted we have to look through all
+    of them in case of a miss.
+
+    Slow/fast paths are separated since we need to check all fast paths
+    of multiple sources before falling back to the slow ones.
+    """
+
+    def __init__(self, source, namespace):
+        super(InfoIterWrapper, self).__init__()
+        self._source = source
+        self._namespace = namespace
+        self.__infos = {}
+        self.__names = {}
+        self.__count = -1
+
+    def _get_count(self, source):
+        raise NotImplementedError
+
+    def _get_info(self, source, index):
+        raise NotImplementedError
+
+    def _get_name(self, info):
+        raise NotImplementedError
+
+    def __get_name_cached(self, index):
+        if index not in self.__names:
+            info = self.__get_info_cached(index)
+            self.__names[index] = self._get_name(info)
+        return self.__names[index]
+
+    def __get_info_cached(self, index):
+        if index not in self.__infos:
+            self.__infos[index] = self._get_info(self._source, index)
+        return self.__infos[index]
+
+    def __get_count_cached(self):
+        if self.__count == -1:
+            self.__count = self._get_count(self._source)
+        return self.__count
+
+    def lookup_name_fast(self, name):
+        """Might return a struct"""
+        count = self.__get_count_cached()
+        lo = 0
+        hi = count
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if self.__get_name_cached(mid) < name:
+                lo = mid + 1
+            else:
+                hi = mid
+
+        if lo != count and self.__get_name_cached(lo) == name:
+            return self.__get_info_cached(lo)
+
+    def lookup_name_slow(self, name):
+        """Returns a struct if one exists"""
+
+        for index in xrange(self.__get_count_cached()):
+            if self.__get_name_cached(index) == name:
+                return self.__get_info_cached(index)
+
+    def lookup_name(self, name):
+        """Returns a struct if one exists"""
+
+        info = self.lookup_name_fast(name)
+        if info:
+            return info
+        return self.lookup_name_slow(name)
+
+    def iternames(self):
+        """Iterate over all struct names in no defined order"""
+
+        for index in xrange(self.__get_count_cached()):
+            yield self.__get_name_cached(index)
+
+    def clear(self):
+        """Unref all structs and clear cache"""
+
+        for info in self.__infos.itervalues():
+            info.unref()
+        self.__infos.clear()
+        self.__names.clear()
+
+
 def typeinfo_to_ctypes(info):
     """Get a ctypes type for defining arguments and return types"""
     tag = info.get_tag().value

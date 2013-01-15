@@ -13,6 +13,7 @@ from pgi.function import FunctionAttribute
 from pgi.structure import StructureAttribute
 from pgi.obj import ObjectAttribute, InterfaceAttribute
 from pgi.union import UnionAttribute
+from pgi.util import InfoIterWrapper
 
 
 _attr_list = [None, FunctionAttribute, None, StructureAttribute, None,
@@ -21,60 +22,15 @@ _attr_list = [None, FunctionAttribute, None, StructureAttribute, None,
               None, None, None, None, None, None, None, None]
 
 
-class RepositoryWrapper(object):
-    """Allows iteration over all infos and fast access by name.
+class RepositoryWrapper(InfoIterWrapper):
+    def _get_count(self, source):
+        return source.get_n_infos(self._namespace)
 
-    Infos are usually sorted by name but I'm not sure that's guaranteed,
-    so try and fall back to search all infos.
-    """
+    def _get_info(self, source, index):
+        return source.get_info(self._namespace, index)
 
-    def __init__(self, repository, namespace):
-        super(RepositoryWrapper, self).__init__()
-        self._count = repository.get_n_infos(namespace)
-        self._namespace = namespace
-        self._repository = repository
-        self._infos = [None] * self._count
-        self._name = {}
-
-    def __len__(self):
-        return self._count
-
-    def iternames(self):
-        for index in xrange(self._count):
-            yield self._get_name(index)
-
-    def _get_name(self, index):
-        pair = self._infos[index]
-        if not pair:
-            info = self._repository.get_info(self._namespace, index)
-            name = info.get_name()
-            self._name[name] = info
-            pair = (name, info)
-            self._infos[index] = pair
-        return pair[0]
-
-    def get_for_name(self, name):
-        if name in self._name:
-            return self._name[name]
-
-        lo = 0
-        hi = self._count
-        while lo < hi:
-            mid = (lo + hi) // 2
-            if self._get_name(mid) < name:
-                lo = mid + 1
-            else:
-                hi = mid
-
-        if lo != self._count and self._get_name(lo) == name:
-            return self._infos[lo][1]
-
-        # fallback
-        for index in xrange(self._count):
-            if self._get_name(index) == name:
-                return self._infos[index][1]
-
-        raise KeyError
+    def _get_name(self, info):
+        return info.get_name()
 
 
 class _Module(types.ModuleType):
@@ -97,9 +53,8 @@ class _Module(types.ModuleType):
         if self._namespace == "GObject" and name == "GObject":
             raise AttributeError
 
-        try:
-            info = self._wrapper.get_for_name(name)
-        except KeyError:
+        info = self._wrapper.lookup_name(name)
+        if not info:
             raise AttributeError
 
         cls = _attr_list[info.get_type().value]
