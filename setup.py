@@ -105,18 +105,19 @@ class TestCommand(Command):
         import platform
 
         is_cpython = platform.python_implementation() == "CPython"
+        runs = [(False, "ctypes"), (False, "cffi"), (True, None)]
 
-        # Run with both bindings, PGI first
-        # Skip the second run if the first one fails
-        if not is_cpython or self.pgi_only:
-            pid = 0
-        else:
+        for is_gi, backend in runs:
+            if is_gi and (self.pgi_only or not is_cpython):
+                continue
+
             pid = os.fork()
-        if pid != 0:
-            pid, status = os.waitpid(pid, 0)
-            if status:
-                exit(status)
-        exit(tests.test(pid != 0))
+            if pid != 0:
+                pid, status = os.waitpid(pid, 0)
+                if status:
+                    exit(status)
+            else:
+                exit(tests.test(is_gi, backend))
 
 
 class BenchmarkCommand(Command):
@@ -137,18 +138,19 @@ class BenchmarkCommand(Command):
         import platform
 
         is_cpython = platform.python_implementation() == "CPython"
+        runs = [(False, "ctypes"), (False, "cffi"), (True, None)]
 
-        # Run with both bindings, PGI first
-        # Skip the second run if the first one fails
-        if not is_cpython or self.pgi_only:
-            pid = 0
-        else:
+        for is_gi, backend in runs:
+            if is_gi and (self.pgi_only or not is_cpython):
+                continue
+
             pid = os.fork()
-        if pid != 0:
-            pid, status = os.waitpid(pid, 0)
-            if status:
-                exit(status)
-        exit(benchmarks.run(pid != 0))
+            if pid != 0:
+                pid, status = os.waitpid(pid, 0)
+                if status:
+                    exit(status)
+            else:
+                exit(benchmarks.run(is_gi, backend))
 
 
 setup(name='pgi',

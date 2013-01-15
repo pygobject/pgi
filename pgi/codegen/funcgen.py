@@ -5,7 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from pgi.codegen import BACKENDS
+from pgi.codegen import ACTIVE_BACKENDS
 from pgi.codegen.utils import CodeBlock
 from pgi.codegen.arguments import get_argument_class
 from pgi.codegen.returnvalues import get_return_class, VoidReturnValue
@@ -104,7 +104,7 @@ def _generate_function(backend, info, namespace, name, method):
 
 
 def generate_function(info, namespace, name, method=False):
-    for backend in BACKENDS:
+    for backend in ACTIVE_BACKENDS:
         try:
             return _generate_function(backend, info, namespace, name, method)
         except NotImplementedError:

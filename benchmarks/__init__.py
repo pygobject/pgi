@@ -10,19 +10,28 @@ import sys
 import time
 
 
-def run(load_gi):
+def run(load_gi, backend=None):
     if not load_gi:
         import pgi
         pgi.install_as_gi()
+        try:
+            pgi.set_backend(backend)
+        except LookupError:
+            print "Couldn't load backend: %r" % backend
+            return
 
     import gi
 
     if load_gi:
         assert gi.__name__ == "gi"
-        print "### GI " + "#" * 61
+        hl = "### GI " + "#" * 100
     else:
         assert gi.__name__ == "pgi"
-        print "### PGI " + "#" * 60
+        if backend:
+            hl = "### PGI (%s) " % backend + "#" * 100
+        else:
+            hl = "### PGI " + "#" * 100
+    print hl[:80]
 
     t = time.time()
     from gi.repository import Gtk, GObject, GLib, Gio, Pango, Gdk

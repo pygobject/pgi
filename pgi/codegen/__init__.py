@@ -54,5 +54,5 @@ def set_backend(name=None):
         else:
             raise LookupError("Unkown backend: %r" % name)
 
-    ACTIVE_BACKENS[:] = possible
+    ACTIVE_BACKENDS[:] = possible
 
