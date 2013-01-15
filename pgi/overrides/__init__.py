@@ -14,6 +14,17 @@ _overrides = []
 _active_module = []
 
 
+class ProxyModule(object):
+    def __init__(self, module):
+        super(ProxyModule, self).__init__()
+        self._module = module
+
+    def __getattr__(self, name):
+        attr = getattr(self._module, name)
+        setattr(self, name, attr)
+        return attr
+
+
 def load(namespace, module):
     global _active_module, _overrides
 
@@ -43,23 +54,13 @@ def load(namespace, module):
             if item:
                 setattr(module, var, item)
 
-        # inject a module copy into the override module that
-        # has the original classes for all overriden ones
-        # so the classes can access the bases at runtime
-
-        # XXX: I guess we need a proxy module here....
-        # I'm not really sure why this works at all :)
-        fake_name = "FakeOverride(%s)" % module.__name__
-        orig_cls = type(module)
-        orig_dict = dict(orig_cls.__dict__)
-        del orig_dict["__init__"]
-        new_cls = type(fake_name, orig_cls.__bases__, orig_dict)
-        module_copy = new_cls("")
-        module_copy.__dict__.update(module.__dict__)
-
+        # Inject a fake namespace module in the overrides module.
+        # It will contain all original classes that were overridden
+        # and will pull in any other attribute from the real one if needed.
+        proxy = ProxyModule(module)
         for name, klass in _overrides[-1].iteritems():
-            setattr(module_copy, name, klass)
-        vars(override_module)[namespace] = module_copy
+            setattr(proxy, name, klass)
+        vars(override_module)[namespace] = proxy
 
 
     _active_module.pop(-1)
@@ -78,8 +79,7 @@ def override(klass):
     global _active_module, _overrides
     module = _active_module[-1]
 
-    # FIXME: hack
-    if hasattr(klass, "_is_function"):
+    if isinstance(klass, types.FunctionType):
         def wrap(wrapped):
             setattr(module, klass.__name__, wrapped)
             return wrapped

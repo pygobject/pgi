@@ -14,5 +14,4 @@ from pgi.codegen.funcgen import generate_function
 def FunctionAttribute(info, namespace, name, lib):
     func_info = cast(info, GIFunctionInfoPtr)
     func = generate_function(func_info, namespace, name)
-    func._is_function = True
     return func
