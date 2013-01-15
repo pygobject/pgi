@@ -12,16 +12,40 @@ from pgi.codegen.backend import CodeGenBackend
 from pgi.codegen.utils import CodeBlock
 
 
+_glib_defs = """
+typedef char gchar;
+typedef const void * gconstpointer;
+typedef double gdouble;
+typedef float gfloat;
+typedef int gboolean;
+typedef int16_t gint16;
+typedef int32_t gint32;
+typedef int64_t gint64;
+typedef int8_t gint8;
+typedef int gint;
+typedef long glong;
+typedef short gshort;
+typedef size_t gsize;
+typedef uint16_t guint16;
+typedef uint32_t guint32;
+typedef uint64_t guint64;
+typedef uint8_t guint8;
+typedef unsigned int guint;
+typedef unsigned long gulong;
+typedef unsigned short gushort;
+typedef void* gpointer;"""
+
+
 def typeinfo_to_cffi(info):
     tag = info.get_tag().value
     ptr = info.is_pointer()
 
     if not ptr:
         if tag == GITypeTag.UINT32:
-            return "uint32_t"
+            return "guint32"
     else:
         if tag == GITypeTag.UTF8 or tag == GITypeTag.FILENAME:
-            return "char*"
+            return "gchar*"
 
     raise NotImplementedError
 
@@ -37,6 +61,8 @@ class CFFIBackend(CodeGenBackend):
             self._ffi = FFI()
         except ImportError:
             raise NotImplementedError
+        else:
+            self._ffi.cdef(_glib_defs)
 
     def get_library_object(self, namespace):
         if namespace not in self._libs:
@@ -57,9 +83,9 @@ class CFFIBackend(CodeGenBackend):
         cdef_types = []
 
         if method:
-            cdef_types.append("void*")
+            cdef_types.append("gpointer")
             self_block, var = self.parse("""
-$new_self = ffi.cast('void *', $sself._obj)
+$new_self = ffi.cast('gpointer', $sself._obj)
 """, sself=self_name)
             block.add_dependency("ffi", self._ffi)
             self_block.write_into(block)
