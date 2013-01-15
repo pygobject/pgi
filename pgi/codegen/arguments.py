@@ -18,7 +18,6 @@ class Argument(object):
 
     TAG = None
 
-    is_in = True
     is_aux = False
     call_var = ""
     out_vars = []
@@ -133,10 +132,6 @@ class Utf8Argument(Argument):
 
 class FloatArgument(Argument):
     TAG = GITypeTag.FLOAT
-
-    def setup(self):
-        if not self.is_direction_in():
-            self.is_in = False
 
     def pre_call(self):
         if self.is_direction_out():

@@ -37,7 +37,7 @@ def _generate_function(backend, info, namespace, name, method):
         arg.setup()
 
     # generate header
-    names = [a.name for a in args if not a.is_aux and a.is_in]
+    names = [a.name for a in args if not a.is_aux and a.is_direction_in()]
     if method:
         names.insert(0, "self")
     f = "def %s(%s):" % (name, ", ".join(names))
