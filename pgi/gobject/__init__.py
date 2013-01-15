@@ -15,19 +15,16 @@ from pgi.ctypesutil import find_library, wrap_class, wrap_setup
 _gobject = find_library("gobject-2.0")
 
 
-class GSignalFlags(Flags):
-    RUN_FIRST = 1 << 0
-    RUN_LAST = 1 << 1
-    RUN_CLEANUP = 1 << 2
-    NO_RECURSE = 1 << 3
-    DETAILED = 1 << 4
-    ACTION = 1 << 5
-    NO_HOOKS = 1 << 6
-    MUST_COLLECT = 1 << 7
-
-g_type_init = _gobject.g_type_init
-g_type_init.argtypes = []
-g_type_init.resttype = None
+class GParamFlags(Flags):
+    READABLE = 1 << 0
+    WRITABLE = 1 << 1
+    CONSTRUCT = 1 << 2
+    CONSTRUCT_ONLY = 1 << 3
+    LAX_VALIDATION = 1 << 4
+    STATIC_NAME = 1 << 5
+    STATIC_NICK = 1 << 6
+    STATIC_BLURB = 1 << 7
+    DEPRECATED = 1 << 31
 
 
 class GTypeFundamentalFlags(Flags):
@@ -46,6 +43,16 @@ class GType(gulong):
     def __repr__(self):
         return "<GType %r>" % repr(self.value)
 
+class GTypeInterface(Structure):
+    _fields_ = [
+        ("g_type", GType),
+        ("g_instance_type", GType),
+    ]
+
+class GTypeInterfacePtr(POINTER(GTypeInterface)):
+    _type_ = GTypeInterface
+
+
 _methods = [
     ("name", gchar_p, [GType]),
     ("depth", guint, [GType]),
@@ -62,6 +69,9 @@ _methods = [
     ("class_ref", gpointer, [GType]),
     ("class_unref", None, [gpointer]),
     ("class_peek_parent", gpointer, [gpointer]),
+    ("default_interface_ref", GTypeInterfacePtr, [GType]),
+    ("default_interface_peek", GTypeInterfacePtr, [GType]),
+    ("default_interface_unref", None, [GTypeInterfacePtr]),
 ]
 
 wrap_class(_gobject, GType, GType, "g_type_", _methods)
@@ -77,6 +87,8 @@ class GTypeClassPtr(POINTER(GTypeClass)):
     _type_ = GTypeClass
 
 
+
+
 class GTypeInstance(Structure):
     _fields_ = [
         ("g_class", GTypeClassPtr),
@@ -85,6 +97,55 @@ class GTypeInstance(Structure):
 
 class GTypeInstancePtr(POINTER(GTypeInstance)):
     _type_ = GTypeInstance
+
+
+class GParamSpec(Structure):
+    _fields_ = [
+        ("g_type_instance", GTypeInstance),
+        ("name", gchar_p),
+        ("flags", GParamFlags),
+        ("value_type", GType),
+        ("owner_type", GType),
+    ]
+
+
+class GParamSpecPtr(POINTER(GParamSpec)):
+    _type_ = GParamSpec
+
+
+_methods = [
+    ("get_name", gchar_p, [GParamSpecPtr]),
+    ("get_nick", gchar_p, [GParamSpecPtr]),
+    ("get_blurb", gchar_p, [GParamSpecPtr]),
+    ("ref", GParamSpecPtr, [GParamSpecPtr]),
+    ("unref", None, [GParamSpecPtr]),
+]
+
+wrap_class(_gobject, GParamSpec, GParamSpecPtr, "g_param_spec_", _methods)
+
+
+_methods = [
+    ("find_property", GParamSpecPtr, [GTypeInterfacePtr, gchar_p]),
+    ("install_property", None, [GTypeInterfacePtr, GParamSpecPtr]),
+    ("list_properties ", POINTER(GParamSpecPtr), [GTypeInterfacePtr, POINTER(guint)]),
+]
+
+wrap_class(_gobject, GTypeInterface, GTypeInterfacePtr, "g_object_interface_", _methods)
+
+
+class GSignalFlags(Flags):
+    RUN_FIRST = 1 << 0
+    RUN_LAST = 1 << 1
+    RUN_CLEANUP = 1 << 2
+    NO_RECURSE = 1 << 3
+    DETAILED = 1 << 4
+    ACTION = 1 << 5
+    NO_HOOKS = 1 << 6
+    MUST_COLLECT = 1 << 7
+
+g_type_init = _gobject.g_type_init
+g_type_init.argtypes = []
+g_type_init.resttype = None
 
 
 class GObject(Structure):
@@ -153,43 +214,6 @@ set_property.resttype = None
 get_property = _gobject.g_object_get_property
 get_property.argtypes = [gpointer, gchar_p, GValuePtr]
 get_property.resttype = None
-
-
-class GParamFlags(Flags):
-    READABLE = 1 << 0
-    WRITABLE = 1 << 1
-    CONSTRUCT = 1 << 2
-    CONSTRUCT_ONLY = 1 << 3
-    LAX_VALIDATION = 1 << 4
-    STATIC_NAME = 1 << 5
-    STATIC_NICK = 1 << 6
-    STATIC_BLURB = 1 << 7
-    DEPRECATED = 1 << 31
-
-
-class GParamSpec(Structure):
-    _fields_ = [
-        ("g_type_instance", GTypeInstance),
-        ("name", gchar_p),
-        ("flags", GParamFlags),
-        ("value_type", GType),
-        ("owner_type", GType),
-    ]
-
-
-class GParamSpecPtr(POINTER(GParamSpec)):
-    _type_ = GParamSpec
-
-
-_methods = [
-    ("get_name", gchar_p, [GParamSpecPtr]),
-    ("get_nick", gchar_p, [GParamSpecPtr]),
-    ("get_blurb", gchar_p, [GParamSpecPtr]),
-    ("ref", GParamSpecPtr, [GParamSpecPtr]),
-    ("unref", None, [GParamSpecPtr]),
-]
-
-wrap_class(_gobject, GParamSpec, GParamSpecPtr, "g_param_spec_", _methods)
 
 
 class GParameter(Structure):
@@ -275,5 +299,6 @@ __all__ = ["GType", "g_type_init", "GParamFlags", "GValue", "GValuePtr",
            "GParamSpecPtr", "GObjectClassPtr", "G_TYPE_FROM_INSTANCE",
            "GParameterPtr", "signal_connect_data", "GCallback",
            "GClosureNotify", "signal_handler_disconnect", "GConnectFlags",
-           "signal_handler_unblock", "signal_handler_block", "signal_lookup"
+           "signal_handler_unblock", "signal_handler_block", "signal_lookup",
+           "GTypeInterface", "GTypeInterfacePtr",
 ]

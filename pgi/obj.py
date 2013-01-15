@@ -157,7 +157,10 @@ def InterfaceAttribute(info, namespace, name, lib):
 
     # Create a new class with a corresponding gtype
     cls_dict = dict(_Interface.__dict__)
-    cls_dict["__gtype__"] = PGType(iface_info.get_g_type())
+    g_type = iface_info.get_g_type()
+    cls_dict["__gtype__"] = PGType(g_type)
+    cls_dict["props"] = PropertyAttribute(iface_info, namespace, name, g_type)
+
     cls = type(name, _Interface.__bases__, cls_dict)
 
     # Add constants

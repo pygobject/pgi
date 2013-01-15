@@ -70,3 +70,9 @@ class PropertiesTest(unittest.TestCase):
         w2 = Gtk.Window()
         w2.props.title = "b"
         self.assertEqual(w.props.title, "a")
+
+    def test_interface_props(self):
+        b = Gtk.Box()
+        self.assertEqual(b.props.orientation, Gtk.Orientation.HORIZONTAL)
+        b.props.orientation = Gtk.Orientation.VERTICAL
+        self.assertEqual(b.props.orientation, Gtk.Orientation.VERTICAL)

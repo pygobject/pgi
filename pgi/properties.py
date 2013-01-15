@@ -137,17 +137,6 @@ class _Props(object):
             return self.__cache
 
         namespace, name = self.__namespace, self.__name
-
-        # get the base info. props won't be used that frequently, so no reason
-        # to keep it arround
-        repo = GIRepositoryPtr()
-        base_info = repo.find_by_name(namespace, name)
-        type_ = base_info.get_type().value
-        if type_ == GIInfoType.OBJECT:
-            info = cast(base_info, GIObjectInfoPtr)
-        else:
-            info = cast(base_info, GIInterfaceInfoPtr)
-
         cls = _GProps
         cls_dict = dict(cls.__dict__)
 
@@ -158,15 +147,32 @@ class _Props(object):
                 prop_bases.append(base.props.__class__)
         prop_bases = tuple(prop_bases) or cls.__bases__
 
-        klass = self.__gtype.class_ref()
-        obj_class = cast(klass, GObjectClassPtr)
-        for prop_info in info.get_properties():
-            real_name = prop_info.get_name()
-            spec = obj_class.find_property(real_name)
-            attr_name = escape_name(real_name)
-            cls_dict[attr_name] = GParamSpec(spec, real_name, prop_info)
+        # get the base info. props won't be used that frequently, so no reason
+        # to keep it arround
+        repo = GIRepositoryPtr()
+        base_info = repo.find_by_name(namespace, name)
+        type_ = base_info.get_type().value
 
-        self.__gtype.class_unref(klass)
+        if type_ == GIInfoType.OBJECT:
+            info = cast(base_info, GIObjectInfoPtr)
+            klass = self.__gtype.class_ref()
+            obj_class = cast(klass, GObjectClassPtr)
+            for prop_info in info.get_properties():
+                real_name = prop_info.get_name()
+                spec = obj_class.find_property(real_name)
+                attr_name = escape_name(real_name)
+                cls_dict[attr_name] = GParamSpec(spec, real_name, prop_info)
+            self.__gtype.class_unref(klass)
+        else:
+            info = cast(base_info, GIInterfaceInfoPtr)
+            iface = self.__gtype.default_interface_ref()
+            for prop_info in info.get_properties():
+                real_name = prop_info.get_name()
+                spec = iface.find_property(real_name)
+                attr_name = escape_name(real_name)
+                cls_dict[attr_name] = GParamSpec(spec, real_name, prop_info)
+            self.__gtype.default_interface_unref(iface)
+
         base_info.unref()
 
         attr = type("GProps", tuple(prop_bases), cls_dict)(name, False)
