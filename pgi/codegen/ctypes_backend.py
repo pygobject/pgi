@@ -10,7 +10,9 @@ import ctypes
 from pgi.codegen.backend import CodeGenBackend
 from pgi.codegen.utils import CodeBlock
 from pgi.gir import GIRepositoryPtr
+from pgi.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr
 from pgi.util import typeinfo_to_ctypes
+from pgi.gtype import PGType
 
 
 class CTypesBackend(CodeGenBackend):
@@ -159,17 +161,23 @@ $enum = $enum_class($value)
         block.add_dependency(type_var, type_)
         return block, var["enum"]
 
-    def unpack_object(self, name, type_):
-        type_var = self.var()
+    def unpack_object(self, name):
+        get_class = self.var()
         # FIXME: find real class at runtime
         block, var = self.parse("""
 # unpack object
 if $value:
-    $obj = object.__new__($obj_class)
+    $pyclass = $get_class($value)
+    $obj = object.__new__($pyclass)
     $obj._obj = $value
 else:
     $obj = $value
-""", obj_class=type_var, value=name)
+""", value=name, get_class=get_class)
 
-        block.add_dependency(type_var, type_)
+        def get_class_func(pointer):
+            instance = ctypes.cast(pointer, GTypeInstancePtr)
+            gtype = G_TYPE_FROM_INSTANCE(instance.contents)
+            return PGType(gtype).pytype
+
+        block.add_dependency(get_class, get_class_func)
         return block, var["obj"]

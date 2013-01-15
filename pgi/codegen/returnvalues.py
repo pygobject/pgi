@@ -66,8 +66,7 @@ class InterfaceReturnValue(ReturnValue):
             attr = import_attribute(iface_namespace, iface_name)
             return backend.unpack_enum(name, attr)
         elif iface_type == GIInfoType.OBJECT:
-            attr = import_attribute(iface_namespace, iface_name)
-            return backend.unpack_object(name, attr)
+            return backend.unpack_object(name)
 
         return None, name
 

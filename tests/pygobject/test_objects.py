@@ -75,8 +75,7 @@ class ObjectTest(unittest.TestCase):
         w = Gtk.Label.new_with_mnemonic("foobar")
         self.assertTrue(w)
         self.assertTrue(isinstance(w, Gtk.Widget))
-        # FIXME
-        # self.assertTrue(isinstance(w, Gtk.Label))
+        self.assertTrue(isinstance(w, Gtk.Label))
 
 
 class GTypeTest(unittest.TestCase):

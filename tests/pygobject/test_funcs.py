@@ -62,8 +62,7 @@ class FuncsTest(unittest.TestCase):
         f = Gtk.Frame()
         f.set_label_widget(b)
         self.assertTrue(isinstance(f.get_label_widget(), Gtk.Widget))
-        # FIXME
-        #self.assertTrue(isinstance(f.get_label_widget(), Gtk.Button))
+        self.assertTrue(isinstance(f.get_label_widget(), Gtk.Button))
 
     def test_misc_invalid(self):
         b = Gtk.Button()
