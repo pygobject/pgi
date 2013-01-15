@@ -150,6 +150,20 @@ class _MethodAttribute(object):
         return getattr(instance or owner, name)
 
 
+class _ConstructorAttribute(object):
+    def __init__(self, info, namespace, name):
+        self._info = info
+        self._namespace = namespace
+        self._name = name
+
+    def __get__(self, instance, owner):
+        name = self._name
+        func = generate_function(self._info, self._namespace, name, False)
+        func = staticmethod(func)
+        setattr(owner, name, func)
+        return getattr(owner, name)
+
+
 def InterfaceAttribute(info, namespace, name, lib):
     """Creates a GInterface class"""
 
@@ -186,6 +200,11 @@ def MethodAttribute(info, namespace, name, lib):
     if func_flags == GIFunctionInfoFlags.IS_METHOD:
         cls_dict = dict(_MethodAttribute.__dict__)
         cls = type(name, _MethodAttribute.__bases__, cls_dict)
+        instance = cls(info, namespace, name)
+        return instance
+    if func_flags == GIFunctionInfoFlags.IS_CONSTRUCTOR:
+        cls_dict = dict(_ConstructorAttribute.__dict__)
+        cls = type(name, _ConstructorAttribute.__bases__, cls_dict)
         instance = cls(info, namespace, name)
         return instance
     else:

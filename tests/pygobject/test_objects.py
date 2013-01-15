@@ -70,6 +70,14 @@ class ObjectTest(unittest.TestCase):
         self.assertTrue(isinstance(w.props.title, str))
         self.assertEqual(w.props.title, "test123")
 
+    def test_construcor(self):
+        self.assertTrue(Gtk.Label.new("foo"))
+        w = Gtk.Label.new_with_mnemonic("foobar")
+        self.assertTrue(w)
+        self.assertTrue(isinstance(w, Gtk.Widget))
+        # FIXME
+        # self.assertTrue(isinstance(w, Gtk.Label))
+
 
 class GTypeTest(unittest.TestCase):
     def test_repr(self):
