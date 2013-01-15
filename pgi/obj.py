@@ -21,7 +21,7 @@ from pgi.util import import_attribute, set_gvalue_from_py
 from pgi.gtype import PGType
 from pgi.properties import PropertyAttribute
 from pgi.constant import ConstantAttribute
-from pgi.codegen import generate_function
+from pgi.codegen.funcgen import generate_function
 
 
 def gparamspec_to_gvalue_ptr(spec, value):

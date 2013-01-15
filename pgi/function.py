@@ -8,7 +8,7 @@
 from ctypes import cast
 
 from pgi.gir import GIFunctionInfoPtr
-from pgi.codegen import generate_function
+from pgi.codegen.funcgen import generate_function
 
 
 def FunctionAttribute(info, namespace, name, lib):
