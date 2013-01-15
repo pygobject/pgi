@@ -81,10 +81,11 @@ class CodeBlock(object):
 
     def __str__(self):
         lines = []
+
         if self._deps:
-            lines.append("# dependencies: %s" % ", ".join(self._deps.keys()))
-        else:
-            lines.append("# no dependencies")
+            lines.append("# dependencies:")
+        for k, v in self._deps.iteritems():
+            lines.append("#   %s: %r" % (k, v))
 
         for line, level in self._lines:
             lines.append(" " * self.INDENTATION * level + line)
