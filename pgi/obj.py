@@ -5,7 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from ctypes import cast, sizeof
+from ctypes import cast
 import weakref
 
 from pgi import gobject
@@ -13,7 +13,6 @@ from pgi.gobject import GValuePtr, GValue, GParameterPtr, GParameter
 from pgi.gobject import GCallback, GClosureNotify, signal_connect_data
 from pgi.gobject import signal_handler_unblock, signal_handler_block
 from pgi.gobject import GConnectFlags, signal_handler_disconnect, signal_lookup
-from pgi.glib import g_malloc0
 from pgi.gir import GIInterfaceInfoPtr, GIFunctionInfoFlags
 from pgi.gir import GITypeTag, GIObjectInfoPtr
 
@@ -68,18 +67,16 @@ class _Object(object):
             return 0, None
 
         specs = type(self).props
-        array_size = sizeof(GParameter) * len(kwargs)
-        array = cast(g_malloc0(array_size), GParameterPtr)
-
+        nums = len(kwargs)
+        array = (GParameter * nums)()
         for i, (key, value) in enumerate(kwargs.iteritems()):
             spec = getattr(specs, key)
             gvalue_ptr = gparamspec_to_gvalue_ptr(spec, value)
-            if not gvalue_ptr:
-                raise TypeError
-            array[i].name = spec.name
-            array[i].value = gvalue_ptr.contents
+            param = array[i]
+            param.name = spec.name
+            param.value = gvalue_ptr.contents
 
-        return i + 1, array
+        return nums, array
 
     def __repr__(self):
         form = "<%s object at 0x%x (%s at 0x%x)>"
