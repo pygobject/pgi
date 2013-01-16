@@ -45,12 +45,23 @@ def gparamspec_to_gvalue_ptr(spec, value):
 
 
 class _Object(object):
-    _obj = None
+    _obj = 0
     __gtype__ = None
     __signal_cb_ref = {}
     __weak = {}
+    __cls = None
 
     def __init__(self, *args, **kwargs):
+        # HACK: no __class__, no super
+        # traverse manually in mro until object is reached
+        self.__cls = self.__cls or type(self)
+        next_cls = self.__cls.__mro__[1]
+        if next_cls is not object:
+            self.__cls = next_cls
+            next_cls.__init__(self, *args, **kwargs)
+            return
+        del self.__cls
+
         num_params, params = self.__get_gparam_array(**kwargs)
         obj = gobject.newv(self.__gtype__._type, num_params, params)
         gobject.ref_sink(obj)

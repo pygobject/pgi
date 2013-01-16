@@ -90,9 +90,10 @@ class ObjectTest(unittest.TestCase):
         self.assertTrue(isinstance(cb, Gtk.Clipboard))
 
         Gtk.Adjustment(0, 0, 100, 1, 10, 0)
+
+    def test_init_propagate(self):
         b = Gtk.CheckButton("foo")
-        # FIXME: pass args/kwargs to bases (in this case a override)
-        # self.assertEqual(b.get_label(), "foo")
+        self.assertEqual(b.get_label(), "foo")
 
 
 class GTypeTest(unittest.TestCase):
