@@ -6,6 +6,7 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from pgi.repository import GObject
-from pgi.overrides import duplicate
 
-duplicate(GObject.Object, "GObject")
+
+GObject = GObject.Object
+__all__ = ["GObject"]

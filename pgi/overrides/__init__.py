@@ -77,14 +77,6 @@ def load(namespace, module):
     _overrides.pop(-1)
 
 
-def duplicate(klass, name):
-    global _active_module
-    module = _active_module[-1]
-
-    assert not hasattr(module, name)
-    setattr(module, name, klass)
-
-
 def override(klass):
     global _active_module, _overrides
     module = _active_module[-1]
