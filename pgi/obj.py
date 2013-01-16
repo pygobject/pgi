@@ -52,7 +52,6 @@ class _Object(object):
     __weak = {}
 
     def __init__(self, *args, **kwargs):
-        # FIXME: pass args, kwargs to bases
         num_params, params = self.__get_gparam_array(**kwargs)
         obj = gobject.newv(self.__gtype__._type, num_params, params)
         gobject.ref_sink(obj)
