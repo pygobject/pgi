@@ -70,7 +70,9 @@ class _Object(object):
         nums = len(kwargs)
         array = (GParameter * nums)()
         for i, (key, value) in enumerate(kwargs.iteritems()):
-            spec = getattr(specs, key)
+            spec = getattr(specs, key, None)
+            if not spec:
+                raise TypeError("Property %r not supported" % key)
             gvalue_ptr = gparamspec_to_gvalue_ptr(spec, value)
             param = array[i]
             param.name = spec.name

@@ -76,3 +76,7 @@ class PropertiesTest(unittest.TestCase):
         self.assertEqual(b.props.orientation, Gtk.Orientation.HORIZONTAL)
         b.props.orientation = Gtk.Orientation.VERTICAL
         self.assertEqual(b.props.orientation, Gtk.Orientation.VERTICAL)
+
+    def test_invalid(self):
+        self.assertRaises(TypeError, Gtk.Box, foo=3)
+        self.assertRaises(TypeError, Gtk.Box, 1, "")
