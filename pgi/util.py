@@ -207,6 +207,11 @@ def import_attribute(namespace, name):
     return getattr(mod, name)
 
 
+def import_module(namespace):
+    mod = __import__(const.PREFIX[-1], fromlist=[namespace])
+    return getattr(mod, namespace)
+
+
 def escape_name(text, reg=re.compile("^(%s)$" % "|".join(keyword.kwlist))):
     """Escape identifiers and keywords by changing them in a defined way
      - '-' will be replaced by '_'

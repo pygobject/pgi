@@ -10,8 +10,10 @@ import types
 import imp
 import traceback
 
+
 _overrides = []
 _active_module = []
+_proxies = {}
 
 
 class ProxyModule(object):
@@ -23,6 +25,16 @@ class ProxyModule(object):
         attr = getattr(self._module, name)
         setattr(self, name, attr)
         return attr
+
+
+def get_introspection_module(namespace):
+    global _proxies
+
+    if namespace not in _proxies:
+        from pgi.util import import_module
+        module = import_module(namespace)
+        _proxies[namespace] = ProxyModule(module)
+    return _proxies[namespace]
 
 
 def load(namespace, module):
@@ -57,11 +69,9 @@ def load(namespace, module):
         # Inject a fake namespace module in the overrides module.
         # It will contain all original classes that were overridden
         # and will pull in any other attribute from the real one if needed.
-        proxy = ProxyModule(module)
+        proxy = get_introspection_module(namespace)
         for name, klass in _overrides[-1].iteritems():
             setattr(proxy, name, klass)
-        vars(override_module)[namespace] = proxy
-
 
     _active_module.pop(-1)
     _overrides.pop(-1)

@@ -20,8 +20,11 @@
 
 import sys
 
-from pgi.overrides import override
+from pgi.overrides import override, get_introspection_module
 from pgi.repository import Gio, GLib
+
+
+Gio = get_introspection_module('Gio')
 
 __all__ = []
 

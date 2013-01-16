@@ -20,7 +20,7 @@
 # USA
 
 from pgi.repository import Gdk
-from pgi.overrides import override
+from pgi.overrides import override, get_introspection_module
 
 import sys
 

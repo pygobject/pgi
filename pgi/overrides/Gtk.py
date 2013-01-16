@@ -23,7 +23,7 @@ import sys
 
 from pgi.repository import Gtk, GObject
 from pgi import PGIDeprecationWarning as PyGIDeprecationWarning
-from pgi.overrides import override
+from pgi.overrides import override, get_introspection_module
 
 if sys.version_info >= (3, 0):
     _basestring = str
@@ -31,6 +31,8 @@ if sys.version_info >= (3, 0):
 else:
     _basestring = basestring
     _callable = callable
+
+Gtk = get_introspection_module('Gtk')
 
 __all__ = []
 
@@ -292,7 +294,7 @@ class UIManager(Gtk.UIManager):
         if not isinstance(buffer, _basestring):
             raise TypeError('buffer must be a string')
 
-        length = len(buffer)
+        length = len(buffer.encode('UTF-8'))
 
         return Gtk.UIManager.add_ui_from_string(self, buffer, length)
 
@@ -778,6 +780,12 @@ class TreeModel(Gtk.TreeModel):
                 raise IndexError("could not find tree path '%s'" % key)
             return aiter
 
+    def _coerce_path(self, path):
+        if isinstance(path, Gtk.TreePath):
+            return path
+        else:
+            return TreePath(path)
+
     def __getitem__(self, key):
         aiter = self._getiter(key)
         return TreeModelRow(self, aiter)
@@ -794,9 +802,7 @@ class TreeModel(Gtk.TreeModel):
         return TreeModelRowIter(self, self.get_iter_first())
 
     def get_iter(self, path):
-        if not isinstance(path, Gtk.TreePath):
-            path = TreePath(path)
-
+        path = self._coerce_path(path)
         success, aiter = super(TreeModel, self).get_iter(path)
         if not success:
             raise ValueError("invalid tree path '%s'" % path)
@@ -870,84 +876,11 @@ class TreeModel(Gtk.TreeModel):
             self.set_value(treeiter, column, value)
 
     def _convert_value(self, column, value):
-        if value is None:
-            return None
+        '''Convert value to a GObject.Value of the expected type'''
 
-        # we may need to convert to a basic type
-        type_ = self.get_column_type(column)
-        if type_ == GObject.TYPE_STRING:
-            if isinstance(value, str):
-                value = str(value)
-            elif sys.version_info < (3, 0):
-                if isinstance(value, unicode):
-                    value = value.encode('UTF-8')
-                else:
-                    raise ValueError('Expected string or unicode for column %i but got %s%s' % (column, value, type(value)))
-            else:
-                raise ValueError('Expected a string for column %i but got %s' % (column, type(value)))
-        elif type_ == GObject.TYPE_FLOAT or type_ == GObject.TYPE_DOUBLE:
-            if isinstance(value, float):
-                value = float(value)
-            else:
-                raise ValueError('Expected a float for column %i but got %s' % (column, type(value)))
-        elif type_ == GObject.TYPE_LONG or type_ == GObject.TYPE_INT:
-            if isinstance(value, int):
-                value = int(value)
-            elif sys.version_info < (3, 0):
-                if isinstance(value, long):
-                    value = long(value)
-                else:
-                    raise ValueError('Expected an long for column %i but got %s' % (column, type(value)))
-            else:
-                raise ValueError('Expected an integer for column %i but got %s' % (column, type(value)))
-        elif type_ == GObject.TYPE_BOOLEAN:
-            cmp_classes = [int]
-            if sys.version_info < (3, 0):
-                cmp_classes.append(long)
-
-            if isinstance(value, tuple(cmp_classes)):
-                value = bool(value)
-            else:
-                raise ValueError('Expected a bool for column %i but got %s' % (column, type(value)))
-        else:
-            # use GValues directly to marshal to the correct type
-            # standard object checks should take care of validation
-            # so we don't have to do it here
-            value_container = GObject.Value()
-            value_container.init(type_)
-            if type_ == GObject.TYPE_CHAR:
-                value_container.set_char(value)
-                value = value_container
-            elif type_ == GObject.TYPE_UCHAR:
-                value_container.set_uchar(value)
-                value = value_container
-            elif type_ == GObject.TYPE_UNICHAR:
-                cmp_classes = [str]
-                if sys.version_info < (3, 0):
-                    cmp_classes.append(unicode)
-
-                if isinstance(value, tuple(cmp_classes)):
-                    value = ord(value[0])
-
-                value_container.set_uint(value)
-                value = value_container
-            elif type_ == GObject.TYPE_UINT:
-                value_container.set_uint(value)
-                value = value_container
-            elif type_ == GObject.TYPE_ULONG:
-                value_container.set_ulong(value)
-                value = value_container
-            elif type_ == GObject.TYPE_INT64:
-                value_container.set_int64(value)
-                value = value_container
-            elif type_ == GObject.TYPE_UINT64:
-                value_container.set_uint64(value)
-                value = value_container
-            elif type_ == GObject.TYPE_PYOBJECT:
-                value_container.set_boxed(value)
-                value = value_container
-
-        return value
+        if isinstance(value, GObject.Value):
+            return value
+        return GObject.Value(self.get_column_type(column), value)
 
     def get(self, treeiter, *columns):
         n_columns = self.get_n_columns()
@@ -966,6 +899,27 @@ class TreeModel(Gtk.TreeModel):
 
     def filter_new(self, root=None):
         return super(TreeModel, self).filter_new(root)
+
+    #
+    # Signals supporting python iterables as tree paths
+    #
+    def row_changed(self, path, iter):
+        return super(TreeModel, self).row_changed(self._coerce_path(path), iter)
+
+    def row_inserted(self, path, iter):
+        return super(TreeModel, self).row_inserted(self._coerce_path(path), iter)
+
+    def row_has_child_toggled(self, path, iter):
+        return super(TreeModel, self).row_has_child_toggled(self._coerce_path(path),
+                                                            iter)
+
+    def row_deleted(self, path):
+        return super(TreeModel, self).row_deleted(self._coerce_path(path))
+
+    def rows_reordered(self, path, iter, new_order):
+        return super(TreeModel, self).rows_reordered(self._coerce_path(path),
+                                                     iter, new_order)
+
 
 TreeModel = override(TreeModel)
 __all__.append('TreeModel')
@@ -1590,6 +1544,11 @@ class TreeModelFilter(Gtk.TreeModelFilter):
     def set_visible_func(self, func, data=None):
         super(TreeModelFilter, self).set_visible_func(func, data)
 
+    def set_value(self, iter, column, value):
+        # Delegate to child model
+        iter = self.convert_iter_to_child_iter(iter)
+        self.get_model().set_value(iter, column, value)
+
 TreeModelFilter = override(TreeModelFilter)
 __all__.append('TreeModelFilter')
 
@@ -1617,7 +1576,6 @@ def stock_lookup(*args):
         return None
 
     return item
-
 
 initialized, argv = Gtk.init_check(sys.argv)
 sys.argv = list(argv)
