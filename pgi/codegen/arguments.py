@@ -41,6 +41,9 @@ class Argument(object):
     def post_call(self):
         pass
 
+    def may_be_null(self):
+        return self.info.may_be_null()
+
     def is_pointer(self):
         return self.type.is_pointer()
 
@@ -160,7 +163,10 @@ class Utf8Argument(Argument):
     TAG = GITypeTag.UTF8
 
     def pre_call(self):
-        block, var = self.backend.pack_string(self.name)
+        if self.may_be_null():
+            block, var = self.backend.pack_string_null(self.name)
+        else:
+            block, var = self.backend.pack_string(self.name)
         self.call_var = var
         return block
 

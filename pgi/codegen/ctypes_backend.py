@@ -105,7 +105,16 @@ while $current:
         # https://bugs.pypy.org/issue466
         block, var = self.parse("""
 if not isinstance($var, basestring): # https://bugs.pypy.org/issue466
-    raise TypeError
+    raise TypeError("$var must be a string")
+""", var=name)
+
+        return block, name
+
+    def pack_string_null(self, name):
+        # https://bugs.pypy.org/issue466
+        block, var = self.parse("""
+if $var is not None and not isinstance($var, basestring): # https://bugs.pypy.org/issue466
+    raise TypeError("$var must be a string or None")
 """, var=name)
 
         return block, name

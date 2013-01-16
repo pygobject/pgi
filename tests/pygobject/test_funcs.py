@@ -78,3 +78,12 @@ class FuncsTest(unittest.TestCase):
     def test_func_throws(self):
         builder = Gtk.Builder()
         self.assertRaises(RuntimeError, builder.add_from_file, "")
+
+    def test_func_string_null(self):
+        ag = Gtk.ActionGroup("foo")
+        a = Gtk.Action("foo2", "bar", "blah", Gtk.STOCK_NEW)
+        self.assertRaises(TypeError, ag.add_action_with_accel, a, 0)
+        self.assertRaises(TypeError, ag.add_action_with_accel, a, [])
+        ag.add_action_with_accel(a, None)
+        b = Gtk.Action("foo3", "bar", "blah", Gtk.STOCK_NEW)
+        ag.add_action_with_accel(b, "<ctrl>a")
