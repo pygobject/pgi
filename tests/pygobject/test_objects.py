@@ -7,7 +7,7 @@
 
 import unittest
 
-from gi.repository import Gtk, GObject, Atk, Gdk
+from gi.repository import Gtk, GObject, Atk, Gdk, Gio
 
 
 class ObjectTest(unittest.TestCase):
@@ -94,6 +94,24 @@ class ObjectTest(unittest.TestCase):
     def test_init_propagate(self):
         b = Gtk.CheckButton("foo")
         self.assertEqual(b.get_label(), "foo")
+
+    def test_refs(self):
+        button = Gtk.Button.new()
+        self.assertEqual(button.__grefcount__, 1)
+        button = Gtk.Button()
+        self.assertEqual(button.__grefcount__, 1)
+        box = Gtk.HBox()
+        box.add(button)
+        self.assertEqual(button.__grefcount__, 2)
+        box.remove(button)
+        self.assertEqual(button.__grefcount__, 1)
+        box.add(button)
+        self.assertEqual(button.__grefcount__, 2)
+        box.destroy()
+        self.assertEqual(button.__grefcount__, 1)
+
+        a = Gio.FilenameCompleter()
+        self.assertEqual(a.__grefcount__, 1)
 
 
 class GTypeTest(unittest.TestCase):

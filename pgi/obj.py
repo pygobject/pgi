@@ -64,7 +64,11 @@ class _Object(object):
 
         num_params, params = self.__get_gparam_array(**kwargs)
         obj = gobject.newv(self.__gtype__._type, num_params, params)
-        gobject.ref_sink(obj)
+
+        # sink unowned objects
+        unowned = import_attribute("GObject", "InitiallyUnowned")
+        if isinstance(self, unowned):
+            gobject.ref_sink(obj)
 
         self.__weak[weakref.ref(self, self.__destroy)] = obj
         self._obj = obj
