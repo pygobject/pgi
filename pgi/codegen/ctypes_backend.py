@@ -156,6 +156,17 @@ $array_ref = ctypes.byref($array_ptr)
         return (block, var["array_ptr"], var["array_ref"],
                 var["length_c"], var["length_ref"])
 
+    def unpack_array_ptr_fixed_c(self, array, length):
+        block, var = self.parse("""
+# unpack fixed array
+$out = []
+$array = $array.contents
+for $i in xrange($length.value):
+    $out.append($array[$i])
+""", array=array, length=length)
+
+        return block, var["out"]
+
     def unpack_enum(self, name, type_):
         type_var = self.var()
 

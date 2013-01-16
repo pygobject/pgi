@@ -285,7 +285,6 @@ for event_class in event_member_classes:
 
 class DragContext(Gdk.DragContext):
     def finish(self, success, del_, time):
-        Gtk = get_introspection_module('Gtk')
         Gtk.drag_finish(self, success, del_, time)
 
 DragContext = override(DragContext)
@@ -418,8 +417,7 @@ if Gdk._version >= '3.0':
 
 import sys
 
-Gdk.init_check(sys.argv)
 
-"""initialized, argv = Gdk.init_check(sys.argv)
+initialized, argv = Gdk.init_check(sys.argv)
 if not initialized:
-    raise RuntimeError("Gdk couldn't be initialized")"""
+    raise RuntimeError("Gdk couldn't be initialized")

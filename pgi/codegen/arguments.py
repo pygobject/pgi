@@ -75,12 +75,15 @@ class ArrayArgument(Argument):
         array_type = self._array_type
 
         if array_type == GIArrayType.C:
-            if self.is_direction_in() and self.is_direction_out():
+            if self.is_direction_in():
                 if not self.is_zero_terminated() and self.is_pointer():
                     block, data, data_ref, length, lref = \
                         backend.pack_array_ptr_fixed_c(self.name)
                     self.call_var = data_ref
                     self._aux.call_var = lref
+                    # vars for out
+                    self._data = data
+                    self._length = length
                     return block
         elif array_type == GIArrayType.ARRAY:
             pass
@@ -89,8 +92,19 @@ class ArrayArgument(Argument):
         elif array_type == GIArrayType.BYTE_ARRAY:
             pass
 
+    def _post_c(self):
+        b = self.backend
+        if self.is_direction_out():
+            if not self.is_zero_terminated() and self.is_pointer():
+                block, out = b.unpack_array_ptr_fixed_c(self._data, self._length)
+                self.out_vars = [out]
+                return block
+
     def post_call(self):
-        pass
+        array_type = self._array_type
+
+        if array_type == GIArrayType.C:
+            return self._post_c()
 
 
 class InterfaceArgument(Argument):

@@ -1618,9 +1618,8 @@ def stock_lookup(*args):
 
     return item
 
-Gtk.init_check(sys.argv)
 
-"""initialized, argv = Gtk.init_check(sys.argv)
+initialized, argv = Gtk.init_check(sys.argv)
 sys.argv = list(argv)
 if not initialized:
-    raise RuntimeError("Gtk couldn't be initialized")"""
+    raise RuntimeError("Gtk couldn't be initialized")
