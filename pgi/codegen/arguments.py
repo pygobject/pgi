@@ -27,7 +27,7 @@ class Argument(object):
 
         self.args = args
         self.info = info
-        self.name = info.get_name()
+        self.name = info and info.get_name()
         self.type = type_
         self.backend = backend
         self.call_var = self.name
@@ -52,11 +52,29 @@ class Argument(object):
         direction = self.info.get_direction().value
         return direction in (GIDirection.INOUT, GIDirection.OUT)
 
-    def is_zero_terminated(self):
-        return self.type.is_zero_terminated()
-
     def __repr__(self):
         return "<%s name=%r>" % (self.__class__.__name__, self.name)
+
+
+class ErrorArgument(Argument):
+
+    def is_pointer(self):
+        return False
+
+    def is_direction_in(self):
+        return False
+
+    def is_direction_out(self):
+        return False
+
+    def pre_call(self):
+        block, error, ref = self.backend.setup_gerror()
+        self.call_var = ref
+        self._error = error
+        return block
+
+    def post_call(self):
+        return self.backend.check_gerror(self._error)
 
 
 class ArrayArgument(Argument):
@@ -69,6 +87,9 @@ class ArrayArgument(Argument):
         aux.is_aux = True
         self._aux = aux
         self._array_type = self.type.get_array_type().value
+
+    def is_zero_terminated(self):
+        return self.type.is_zero_terminated()
 
     def pre_call(self):
         backend = self.backend

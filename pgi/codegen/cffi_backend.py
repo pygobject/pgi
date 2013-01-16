@@ -75,7 +75,8 @@ class CFFIBackend(CodeGenBackend):
             self._libs[namespace] = self._ffi.dlopen(path)
         return self._libs[namespace]
 
-    def get_function_object(self, lib, symbol, args, ret, method=False, self_name=""):
+    def get_function_object(self, lib, symbol, args, ret,
+                            method=False, self_name="", throws=False):
         if args:
             raise NotImplementedError
 

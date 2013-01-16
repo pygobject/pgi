@@ -7,7 +7,7 @@
 
 from ctypes import c_char_p, POINTER, c_int
 
-from pgi.glib import gint, Enum, gboolean, gchar_p, GError
+from pgi.glib import gint, Enum, gboolean, gchar_p, GError, Flags
 from pgi.gobject import GSignalFlags
 from gibaseinfo import GIBaseInfo, GIBaseInfoPtr
 from gibaseinfo import GIAttributeIterPtr, GIInfoType
@@ -55,7 +55,7 @@ def gi_is_function_info(base_info):
     return base_info.get_type().value == GIInfoType.FUNCTION
 
 
-class GIFunctionInfoFlags(Enum):
+class GIFunctionInfoFlags(Flags):
     IS_METHOD = 1 << 0
     IS_CONSTRUCTOR = 1 << 1
     IS_GETTER = 1 << 2

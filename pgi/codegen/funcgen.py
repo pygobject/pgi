@@ -7,11 +7,11 @@
 
 from pgi.codegen import ACTIVE_BACKENDS
 from pgi.codegen.utils import CodeBlock
-from pgi.codegen.arguments import get_argument_class
+from pgi.codegen.arguments import get_argument_class, ErrorArgument
 from pgi.codegen.returnvalues import get_return_class, VoidReturnValue
 
 
-def _generate_function(backend, info, namespace, name, method):
+def _generate_function(backend, info, namespace, name, method, throws):
     main = CodeBlock()
 
     main.write_line("# backend: %s" % backend.NAME)
@@ -25,12 +25,16 @@ def _generate_function(backend, info, namespace, name, method):
 
     args = []
     arg_infos = info.get_args()
+
     arg_types = []
     for arg_info in arg_infos:
         arg_type = arg_info.get_type()
         arg_types.append(arg_type)
         cls = get_argument_class(arg_type)
         args.append(cls(arg_info, arg_type, args, backend))
+
+    if throws:
+        args.append(ErrorArgument(None, None, args, backend))
 
     # setup
     for arg in args:
@@ -57,7 +61,7 @@ def _generate_function(backend, info, namespace, name, method):
     symbol = info.get_symbol()
     block, svar, func = backend.get_function_object(lib, symbol, args,
                                                     return_value, method,
-                                                    "self")
+                                                    "self", throws)
     if block:
         block.write_into(main, 1)
 
@@ -69,6 +73,13 @@ def _generate_function(backend, info, namespace, name, method):
     block.write_into(main, 1)
 
     out = []
+
+    # handle errors first
+    if throws:
+        error_arg = args.pop()
+        block = error_arg.post_call()
+        if block:
+            block.write_into(main, 1)
 
     # process return value
     if return_value:
@@ -104,10 +115,11 @@ def _generate_function(backend, info, namespace, name, method):
     return func
 
 
-def generate_function(info, namespace, name, method=False):
+def generate_function(info, namespace, name, method=False, throws=False):
     for backend in ACTIVE_BACKENDS:
         try:
-            return _generate_function(backend, info, namespace, name, method)
+            return _generate_function(backend, info, namespace,
+                                      name, method, throws)
         except NotImplementedError:
             continue
     raise NotImplementedError

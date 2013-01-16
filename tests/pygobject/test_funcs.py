@@ -74,3 +74,7 @@ class FuncsTest(unittest.TestCase):
         self.assertRaises(TypeError, b.set_relief, [])
         self.assertRaises(TypeError, b.set_relief, 3.4)
         self.assertRaises(TypeError, b.set_relief, b)
+
+    def test_func_throws(self):
+        builder = Gtk.Builder()
+        self.assertRaises(RuntimeError, builder.add_from_file, "")

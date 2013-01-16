@@ -10,6 +10,7 @@ import ctypes
 from pgi.codegen.backend import CodeGenBackend
 from pgi.codegen.utils import CodeBlock
 from pgi.gir import GIRepositoryPtr
+from pgi.glib import GErrorPtr
 from pgi.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr
 from pgi.util import typeinfo_to_ctypes
 from pgi.gtype import PGType
@@ -33,7 +34,8 @@ class CTypesBackend(CodeGenBackend):
             self._libs[namespace] = lib
         return self._libs[namespace]
 
-    def get_function_object(self, lib, symbol, args, ret, method=False, self_name=""):
+    def get_function_object(self, lib, symbol, args, ret,
+                            method=False, self_name="", throws=False):
         h = getattr(lib, symbol)
         if ret:
             h.restype = typeinfo_to_ctypes(ret.type)
@@ -43,6 +45,9 @@ class CTypesBackend(CodeGenBackend):
         if method:
             arg_types.append(ctypes.c_void_p)
 
+        if throws:
+            args = args[:-1]
+
         for arg in args:
             type_ = typeinfo_to_ctypes(arg.type)
             # FIXME: cover all types..
@@ -51,6 +56,10 @@ class CTypesBackend(CodeGenBackend):
             if arg.is_direction_out() and type_ != ctypes.c_void_p:
                 type_ = ctypes.POINTER(type_)
             arg_types.append(type_)
+
+        if throws:
+            arg_types.append(ctypes.c_void_p)
+
         h.argtypes = arg_types
 
         block, var = self.parse("""
@@ -177,6 +186,25 @@ $enum = $enum_class($value)
 
         block.add_dependency(type_var, type_)
         return block, var["enum"]
+
+    def setup_gerror(self):
+        gerror_var = self.var()
+        block, var = self.parse("""
+$ptr = $gerror_ptr()
+$ptr_ref = ctypes.byref($ptr)
+""", gerror_ptr=gerror_var)
+
+        block.add_dependency("ctypes", ctypes)
+        block.add_dependency(gerror_var, GErrorPtr)
+        return block, var["ptr"], var["ptr_ref"]
+
+    def check_gerror(self, gerror_ptr):
+        block, var = self.parse("""
+if $gerror_ptr:
+    raise RuntimeError($gerror_ptr.contents.message)
+""", gerror_ptr=gerror_ptr)
+
+        return block
 
     def unpack_object(self, name):
         get_class = self.var()

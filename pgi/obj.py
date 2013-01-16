@@ -152,27 +152,27 @@ class MethodAttribute(object):
         self._name = name
 
     def __get__(self, instance, owner):
-        func_flags = self._info.get_flags().value
-        name = self._name
         info = self._info
+        flags = info.get_flags()
+        func_flags = flags.value
+        name = self._name
         namespace = self._namespace
 
-        if func_flags == GIFunctionInfoFlags.IS_METHOD:
-            func = generate_function(info, namespace, name, method=True)
+        throws = func_flags & GIFunctionInfoFlags.THROWS
+
+        if func_flags & GIFunctionInfoFlags.IS_METHOD:
+            func = generate_function(info, namespace, name,
+                                     method=True, throws=throws)
             setattr(owner, name, func)
             return getattr(instance or owner, name)
-        elif func_flags == GIFunctionInfoFlags.IS_CONSTRUCTOR:
-            func = generate_function(info, namespace, name, method=False)
-            func = staticmethod(func)
-            setattr(owner, name, func)
-            return getattr(owner, name)
-        elif func_flags == 0:
-            func = generate_function(info, namespace, name, method=False)
+        elif not func_flags or func_flags & GIFunctionInfoFlags.IS_CONSTRUCTOR:
+            func = generate_function(info, namespace, name,
+                                     method=False, throws=throws)
             func = staticmethod(func)
             setattr(owner, name, func)
             return getattr(owner, name)
         else:
-            raise NotImplementedError
+            raise NotImplementedError("%r not supported" % flags)
 
 
 class _Interface(object):
