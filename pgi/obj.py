@@ -120,7 +120,7 @@ class _Object(object):
     def connect(self, name, callback, *args):
         return self.__connect(0, name, callback, *args)
 
-    def connect_after(self, name, callback):
+    def connect_after(self, name, callback, *args):
         flags = GConnectFlags.CONNECT_AFTER
         return self.__connect(flags, name, callback, *args)
 
