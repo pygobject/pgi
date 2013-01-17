@@ -261,7 +261,7 @@ def G_TYPE_FROM_INSTANCE(instance):
     return instance.g_class.contents.g_type
 
 
-class GConnectFlags(Enum):
+class GConnectFlags(Flags):
     CONNECT_AFTER = 1 << 0
     CONNECT_SWAPPED = 1 << 1
 
