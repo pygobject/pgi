@@ -10,7 +10,7 @@ from ctypes import cast
 import weakref
 
 from pgi import gobject
-from pgi.gobject import GValuePtr, GValue, GParameterPtr, GParameter
+from pgi.gobject import GValuePtr, GValue, GParameter
 from pgi.gobject import GCallback, GClosureNotify, signal_connect_data
 from pgi.gobject import signal_handler_unblock, signal_handler_block
 from pgi.gobject import GConnectFlags, signal_handler_disconnect, signal_lookup

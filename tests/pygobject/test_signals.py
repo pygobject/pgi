@@ -7,7 +7,7 @@
 
 import unittest
 
-from gi.repository import Gtk, GObject, Atk, Gdk, Gio
+from gi.repository import Gtk
 
 
 class SignalTest(unittest.TestCase):

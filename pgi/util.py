@@ -12,7 +12,6 @@ from ctypes import cast, POINTER, c_void_p
 from pgi import const
 from pgi.gir import GITypeTag, GIInfoType
 from pgi.glib import gchar_p, gpointer, gboolean, guint32, free, gint32, gfloat
-from pgi.glib import gpointer
 
 
 class InfoIterWrapper(object):

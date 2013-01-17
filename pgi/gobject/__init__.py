@@ -9,7 +9,7 @@ from ctypes import POINTER, Structure, CFUNCTYPE
 
 from pgi.glib import Flags, gulong, gchar_p, guint, gboolean, gpointer, guint32
 from pgi.glib import guint64, gchar, guchar, gint, glong, gint64, gfloat
-from pgi.glib import Enum, gdouble
+from pgi.glib import gdouble
 from pgi.ctypesutil import find_library, wrap_class, wrap_setup
 
 _gobject = find_library("gobject-2.0")
