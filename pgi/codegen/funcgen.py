@@ -11,12 +11,11 @@ from pgi.codegen.arguments import get_argument_class, ErrorArgument
 from pgi.codegen.returnvalues import get_return_class, VoidReturnValue
 
 
-def _generate_function(backend, info, namespace, name, method, throws):
+def _generate_function(backend, info, arg_infos, arg_types, return_type, method, throws):
     main = CodeBlock()
 
     main.write_line("# backend: %s" % backend.NAME)
 
-    return_type = info.get_return_type()
     cls = get_return_class(return_type)
     if cls is VoidReturnValue:
         return_value = None
@@ -24,12 +23,7 @@ def _generate_function(backend, info, namespace, name, method, throws):
         return_value = cls(info, return_type, backend)
 
     args = []
-    arg_infos = info.get_args()
-
-    arg_types = []
-    for arg_info in arg_infos:
-        arg_type = arg_info.get_type()
-        arg_types.append(arg_type)
+    for arg_info, arg_type in zip(arg_infos, arg_types):
         cls = get_argument_class(arg_type)
         args.append(cls(arg_info, arg_type, args, backend))
 
@@ -44,10 +38,10 @@ def _generate_function(backend, info, namespace, name, method, throws):
     names = [a.name for a in args if not a.is_aux and a.is_direction_in()]
     if method:
         names.insert(0, "self")
-    f = "def %s(%s):" % (name, ", ".join(names))
+    f = "def %s(%s):" % (info.name, ", ".join(names))
     main.write_line(f)
 
-    docstring = "%s(%s)" % (name, ", ".join(names))
+    docstring = "%s(%s)" % (info.name, ", ".join(names))
 
     for arg in args:
         if arg.is_aux:
@@ -57,7 +51,7 @@ def _generate_function(backend, info, namespace, name, method, throws):
             block.write_into(main, 1)
 
     # generate call
-    lib = backend.get_library_object(namespace)
+    lib = backend.get_library_object(info.namespace)
     symbol = info.symbol
     block, svar, func = backend.get_function_object(lib, symbol, args,
                                                     return_value, method,
@@ -102,24 +96,29 @@ def _generate_function(backend, info, namespace, name, method, throws):
     elif len(out) > 1:
         main.write_line("return (%s)" % ", ".join(out), 1)
 
-    return_type.unref()
-    for info in arg_infos:
-        info.unref()
-    for info in arg_types:
-        info.unref()
-
-    func = main.compile()[name]
+    func = main.compile()[info.name]
     func._code = main
     func.__doc__ = docstring
 
     return func
 
 
-def generate_function(info, namespace, name, method=False, throws=False):
+def generate_function(info, method=False, throws=False):
+    arg_infos = info.get_args()
+    arg_types = [a.get_type() for a in arg_infos]
+    return_type = info.get_return_type()
+
     for backend in ACTIVE_BACKENDS:
         try:
-            return _generate_function(backend, info, namespace,
-                                      name, method, throws)
+            return _generate_function(backend, info, arg_infos, arg_types,
+                                      return_type, method, throws)
         except NotImplementedError:
             continue
+
+    return_type.unref()
+    for info in arg_infos:
+        info.unref()
+    for info in arg_types:
+        info.unref()
+
     raise NotImplementedError

@@ -153,18 +153,15 @@ class MethodAttribute(object):
         flags = info.flags
         func_flags = flags.value
         name = self._name
-        namespace = self._namespace
 
         throws = func_flags & GIFunctionInfoFlags.THROWS
 
         if func_flags & GIFunctionInfoFlags.IS_METHOD:
-            func = generate_function(info, namespace, name,
-                                     method=True, throws=throws)
+            func = generate_function(info, method=True, throws=throws)
             setattr(owner, name, func)
             return getattr(instance or owner, name)
         elif not func_flags or func_flags & GIFunctionInfoFlags.IS_CONSTRUCTOR:
-            func = generate_function(info, namespace, name,
-                                     method=False, throws=throws)
+            func = generate_function(info, method=False, throws=throws)
             func = staticmethod(func)
             setattr(owner, name, func)
             return getattr(owner, name)
