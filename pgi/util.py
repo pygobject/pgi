@@ -12,6 +12,7 @@ from ctypes import cast, POINTER, c_void_p
 from pgi import const
 from pgi.gir import GITypeTag, GIInfoType
 from pgi.glib import gchar_p, gpointer, gboolean, guint32, free, gint32, gfloat
+from pgi.gobject import GValuePtr, GValue
 
 
 class InfoIterWrapper(object):
@@ -26,10 +27,9 @@ class InfoIterWrapper(object):
     of multiple sources before falling back to the slow ones.
     """
 
-    def __init__(self, source, namespace):
+    def __init__(self, source):
         super(InfoIterWrapper, self).__init__()
         self._source = source
-        self._namespace = namespace
         self.__infos = {}
         self.__names = {}
         self.__count = -1
@@ -157,6 +157,26 @@ def typeinfo_to_ctypes(info):
         elif tag == GITypeTag.VOID:
             return
 
+def gparamspec_to_gvalue_ptr(spec, value):
+    type_ = spec._info.get_type()
+    tag = type_.tag.value
+
+    ptr = GValuePtr(GValue())
+    ptr.init(spec.value_type._type.value)
+
+    is_interface = False
+    if tag == GITypeTag.INTERFACE:
+        iface_info = type_.get_interface()
+        tag = iface_info.type.value
+        iface_info.unref()
+        is_interface = True
+
+    if not set_gvalue_from_py(ptr, is_interface, tag, value):
+        ptr.unset()
+        return None
+
+    return ptr
+
 
 def set_gvalue_from_py(ptr, is_interface, tag, value):
     if is_interface:
@@ -232,6 +252,8 @@ def escape_name(text, reg=re.compile("^(%s)$" % "|".join(keyword.kwlist))):
     text = text.replace("-", "_")
     return reg.sub(r"\1_", text)
 
+def unescape_name(text):
+    return text.rstrip("_").replace("_", "-")
 
 try:
     import pypyjit

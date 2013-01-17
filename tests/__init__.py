@@ -55,7 +55,7 @@ def test(load_gi, backend=None):
 
     if not load_gi and backend == "ctypes":
         loader = unittest.TestLoader()
-        suites.append(loader.discover(os.path.join(current_dir, "gir")))
+        suites.append(loader.discover(os.path.join(current_dir, "pgi")))
 
     run = unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite(suites))
     return len(run.failures) + len(run.errors)

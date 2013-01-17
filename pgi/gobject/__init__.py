@@ -1,4 +1,4 @@
-# Copyright 2012 Christoph Reiter
+# Copyright 2012,2013 Christoph Reiter
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -53,6 +53,14 @@ class GTypeInterfacePtr(POINTER(GTypeInterface)):
     _type_ = GTypeInterface
 
 
+class GObjectClass(Structure):
+    pass
+
+
+class GObjectClassPtr(POINTER(GObjectClass)):
+    _type_ = GObjectClass
+
+
 _methods = [
     ("name", gchar_p, [GType]),
     ("depth", guint, [GType]),
@@ -65,9 +73,9 @@ _methods = [
     ("fundamental", GType, [GType]),
     ("children", POINTER(GType), [GType, POINTER(guint)]),
     ("interfaces", POINTER(GType), [GType, POINTER(guint)]),
-    ("class_peek", gpointer, [GType]),
-    ("class_ref", gpointer, [GType]),
-    ("class_unref", None, [gpointer]),
+    ("class_peek", GObjectClassPtr, [GType]),
+    ("class_ref", GObjectClassPtr, [GType]),
+    ("class_unref", None, [GObjectClassPtr]),
     ("class_peek_parent", gpointer, [gpointer]),
     ("default_interface_ref", GTypeInterfacePtr, [GType]),
     ("default_interface_peek", GTypeInterfacePtr, [GType]),
@@ -242,12 +250,7 @@ for (name, ret, args) in _methods:
     globals()[name] = h
 
 
-class GObjectClass(Structure):
-    pass
 
-
-class GObjectClassPtr(POINTER(GObjectClass)):
-    _type_ = GObjectClass
 
 _methods = [
     ("find_property", GParamSpecPtr, [GObjectClassPtr, gchar_p]),

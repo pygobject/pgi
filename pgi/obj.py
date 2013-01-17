@@ -10,7 +10,7 @@ from ctypes import cast
 import weakref
 
 from pgi import gobject
-from pgi.gobject import GValuePtr, GValue, GParameter
+from pgi.gobject import GParameter
 from pgi.gobject import GCallback, GClosureNotify, signal_connect_data
 from pgi.gobject import signal_handler_unblock, signal_handler_block
 from pgi.gobject import GConnectFlags, signal_handler_disconnect, signal_lookup
@@ -18,31 +18,11 @@ from pgi.gir import GIInterfaceInfoPtr, GIFunctionInfoFlags
 from pgi.gir import GITypeTag, GIObjectInfoPtr
 
 from pgi.util import import_attribute, set_gvalue_from_py
+from pgi.util import gparamspec_to_gvalue_ptr
 from pgi.gtype import PGType
 from pgi.properties import PropertyAttribute
 from pgi.constant import ConstantAttribute
 from pgi.codegen.funcgen import generate_function
-
-
-def gparamspec_to_gvalue_ptr(spec, value):
-    type_ = spec._info.get_type()
-    tag = type_.tag.value
-
-    ptr = GValuePtr(GValue())
-    ptr.init(spec.value_type._type.value)
-
-    is_interface = False
-    if tag == GITypeTag.INTERFACE:
-        iface_info = type_.get_interface()
-        tag = iface_info.type.value
-        iface_info.unref()
-        is_interface = True
-
-    if not set_gvalue_from_py(ptr, is_interface, tag, value):
-        ptr.unset()
-        return None
-
-    return ptr
 
 
 class _Object(object):
@@ -143,7 +123,7 @@ class _Object(object):
 class MethodAttribute(object):
     def __init__(self, info):
         super(MethodAttribute, self).__init__()
-
+        info.ref()
         self._info = info
 
     def __get__(self, instance, owner):
@@ -157,11 +137,13 @@ class MethodAttribute(object):
         if func_flags & GIFunctionInfoFlags.IS_METHOD:
             func = generate_function(info, method=True, throws=throws)
             setattr(owner, name, func)
+            info.unref()
             return getattr(instance or owner, name)
         elif not func_flags or func_flags & GIFunctionInfoFlags.IS_CONSTRUCTOR:
             func = generate_function(info, method=False, throws=throws)
             func = staticmethod(func)
             setattr(owner, name, func)
+            info.unref()
             return getattr(owner, name)
         else:
             raise NotImplementedError("%r not supported" % flags)
@@ -176,13 +158,15 @@ def InterfaceAttribute(info):
 
     iface_info = cast(info, GIInterfaceInfoPtr)
 
-    # Create a new class with a corresponding gtype
-    cls_dict = dict(_Interface.__dict__)
-    cls_dict["__gtype__"] = PGType(iface_info.g_type)
-    cls_dict["props"] = PropertyAttribute(iface_info)
-    iface_info.ref()
+    # Create a new class
+    cls = type(info.name, _Interface.__bases__, dict(_Interface.__dict__))
+    cls.__module__ = iface_info.namespace
 
-    cls = type(info.name, _Interface.__bases__, cls_dict)
+    # GType
+    cls.__gtype__ = PGType(iface_info.g_type)
+
+    # Properties
+    cls.props = PropertyAttribute(iface_info)
 
     # Add constants
     for constant in iface_info.get_constants():
@@ -193,10 +177,9 @@ def InterfaceAttribute(info):
 
     # Add methods
     for method_info in iface_info.get_methods():
-        method_name = method_info.name
         attr = MethodAttribute(method_info)
-        if attr:
-            setattr(cls, method_name, attr)
+        setattr(cls, method_info.name, attr)
+        method_info.unref()
 
     return cls
 
@@ -212,11 +195,8 @@ def ObjectAttribute(info):
     # Get the parent class
     parent_obj = obj_info.get_parent()
     if parent_obj:
-        parent_namespace = parent_obj.namespace
-        parent_name = parent_obj.name
+        attr = import_attribute(parent_obj.namespace, parent_obj.name)
         parent_obj.unref()
-
-        attr = import_attribute(parent_namespace, parent_name)
         bases = (attr,)
     else:
         bases = _Object.__bases__
@@ -224,26 +204,23 @@ def ObjectAttribute(info):
     # Get all object interfaces
     ifaces = []
     for interface in obj_info.get_interfaces():
-        interface_namespace = interface.namespace
-        interface_name = interface.name
-        interface.unref()
-
-        attr = import_attribute(interface_namespace, interface_name)
+        attr = import_attribute(interface.namespace, interface.name)
         ifaces.append(attr)
+        interface.unref()
 
     # Combine them to a base class list
     if ifaces:
         bases = tuple(list(bases) + ifaces)
 
-    # Copy template and add gtype, properties
-    cls_dict = dict(_Object.__dict__)
-    cls_dict["__gtype__"] = PGType(obj_info.g_type)
-    cls_dict["props"] = PropertyAttribute(obj_info)
-    obj_info.ref()
-
     # Create a new class
-    cls = type(info.name, bases, cls_dict)
-    cls.__module__ = info.namespace
+    cls = type(info.name, bases, dict(_Object.__dict__))
+    cls.__module__ = obj_info.namespace
+
+    # GType
+    cls.__gtype__ = PGType(obj_info.g_type)
+
+    # Properties
+    cls.props = PropertyAttribute(obj_info)
 
     # Add constants
     for constant in obj_info.get_constants():

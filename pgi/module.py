@@ -1,4 +1,4 @@
-# Copyright 2012 Christoph Reiter
+# Copyright 2012,2013 Christoph Reiter
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -23,6 +23,11 @@ _attr_list = [None, FunctionAttribute, None, StructureAttribute, None,
 
 
 class RepositoryWrapper(InfoIterWrapper):
+
+    def __init__(self, namespace, *args, **kwargs):
+        super(RepositoryWrapper, self).__init__(*args, **kwargs)
+        self._namespace = namespace
+
     def _get_count(self, source):
         return source.get_n_infos(self._namespace)
 
@@ -66,5 +71,5 @@ class _Module(types.ModuleType):
 
 def Module(repo, namespace):
     cls = type(namespace, _Module.__bases__, dict(_Module.__dict__))
-    wrapper = RepositoryWrapper(repo, namespace)
+    wrapper = RepositoryWrapper(namespace, repo)
     return cls(namespace, wrapper)

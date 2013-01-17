@@ -1,4 +1,4 @@
-# Copyright 2012 Christoph Reiter
+# Copyright 2012,2013 Christoph Reiter
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -129,6 +129,7 @@ class _Props(object):
     __cls_cache = None
 
     def __init__(self, info):
+        info.ref()
         self.__info = info
 
     def __get_gparam_spec(self, owner):
@@ -136,9 +137,6 @@ class _Props(object):
             return self.__cache
 
         info = self.__info
-        name = info.name
-        gtype = info.g_type
-
         cls = _GProps
         cls_dict = dict(cls.__dict__)
 
@@ -149,24 +147,16 @@ class _Props(object):
                 prop_bases.append(base.props.__class__)
         prop_bases = tuple(prop_bases) or cls.__bases__
 
-        # get the base info. props won't be used that frequently, so no reason
-        # to keep it arround
-        repo = GIRepositoryPtr()
-        base_info = repo.find_by_name(info.namespace, name)
-        type_ = base_info.type.value
-
-        if type_ == GIInfoType.OBJECT:
-            info = cast(base_info, GIObjectInfoPtr)
+        gtype = info.g_type
+        if info.type.value == GIInfoType.OBJECT:
             klass = gtype.class_ref()
-            obj_class = cast(klass, GObjectClassPtr)
             for prop_info in info.get_properties():
                 real_name = prop_info.name
-                spec = obj_class.find_property(real_name)
+                spec = klass.find_property(real_name)
                 attr_name = escape_name(real_name)
                 cls_dict[attr_name] = GParamSpec(spec, real_name, prop_info)
             gtype.class_unref(klass)
         else:
-            info = cast(base_info, GIInterfaceInfoPtr)
             iface = gtype.default_interface_ref()
             for prop_info in info.get_properties():
                 real_name = prop_info.name
@@ -175,9 +165,7 @@ class _Props(object):
                 cls_dict[attr_name] = GParamSpec(spec, real_name, prop_info)
             gtype.default_interface_unref(iface)
 
-        base_info.unref()
-
-        attr = type("GProps", tuple(prop_bases), cls_dict)(name, False)
+        attr = type("GProps", tuple(prop_bases), cls_dict)(info.name, False)
         self.__cache = attr
         return attr
 
