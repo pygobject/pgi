@@ -20,13 +20,13 @@ class _Union(object):
     __info__ = _DummyInfo()
 
 
-def UnionAttribute(info, namespace, name, lib):
+def UnionAttribute(info):
     struct_info = cast(info, GIUnionInfoPtr)
 
     cls_dict = dict(_Union.__dict__)
     g_type = struct_info.g_type
     cls_dict["__gtype__"] = PGType(g_type)
-    cls = type(name, _Union.__bases__, cls_dict)
-    cls.__module__ = namespace
+    cls = type(info.name, _Union.__bases__, cls_dict)
+    cls.__module__ = info.name
 
     return cls

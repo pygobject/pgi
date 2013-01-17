@@ -141,18 +141,16 @@ class _Object(object):
 
 
 class MethodAttribute(object):
-    def __init__(self, info, namespace, name, *args):
+    def __init__(self, info):
         super(MethodAttribute, self).__init__()
 
         self._info = info
-        self._namespace = namespace
-        self._name = name
 
     def __get__(self, instance, owner):
         info = self._info
         flags = info.flags
         func_flags = flags.value
-        name = self._name
+        name = info.name
 
         throws = func_flags & GIFunctionInfoFlags.THROWS
 
@@ -173,37 +171,37 @@ class _Interface(object):
     pass
 
 
-def InterfaceAttribute(info, namespace, name, lib):
+def InterfaceAttribute(info):
     """Creates a GInterface class"""
 
     iface_info = cast(info, GIInterfaceInfoPtr)
 
     # Create a new class with a corresponding gtype
     cls_dict = dict(_Interface.__dict__)
-    g_type = iface_info.g_type
-    cls_dict["__gtype__"] = PGType(g_type)
-    cls_dict["props"] = PropertyAttribute(iface_info, namespace, name, g_type)
+    cls_dict["__gtype__"] = PGType(iface_info.g_type)
+    cls_dict["props"] = PropertyAttribute(iface_info)
+    iface_info.ref()
 
-    cls = type(name, _Interface.__bases__, cls_dict)
+    cls = type(info.name, _Interface.__bases__, cls_dict)
 
     # Add constants
     for constant in iface_info.get_constants():
         constant_name = constant.name
-        attr = ConstantAttribute(constant, namespace, constant_name, lib)
+        attr = ConstantAttribute(constant)
         setattr(cls, constant_name, attr)
         constant.unref()
 
     # Add methods
     for method_info in iface_info.get_methods():
         method_name = method_info.name
-        attr = MethodAttribute(method_info, namespace, method_name, lib)
+        attr = MethodAttribute(method_info)
         if attr:
             setattr(cls, method_name, attr)
 
     return cls
 
 
-def ObjectAttribute(info, namespace, name, lib):
+def ObjectAttribute(info):
     """Creates a GObject class.
 
     It inherits from the base class and all interfaces it implements.
@@ -239,25 +237,25 @@ def ObjectAttribute(info, namespace, name, lib):
 
     # Copy template and add gtype, properties
     cls_dict = dict(_Object.__dict__)
-    g_type = obj_info.g_type
-    cls_dict["__gtype__"] = PGType(g_type)
-    cls_dict["props"] = PropertyAttribute(obj_info, namespace, name, g_type)
+    cls_dict["__gtype__"] = PGType(obj_info.g_type)
+    cls_dict["props"] = PropertyAttribute(obj_info)
+    obj_info.ref()
 
     # Create a new class
-    cls = type(name, bases, cls_dict)
-    cls.__module__ = namespace
+    cls = type(info.name, bases, cls_dict)
+    cls.__module__ = info.namespace
 
     # Add constants
     for constant in obj_info.get_constants():
         constant_name = constant.get_name()
-        attr = ConstantAttribute(constant, namespace, constant_name, lib)
+        attr = ConstantAttribute(constant)
         setattr(cls, constant_name, attr)
         constant.unref()
 
     # Add methods
     for method_info in obj_info.get_methods():
         method_name = method_info.name
-        attr = MethodAttribute(method_info, namespace, method_name, lib)
+        attr = MethodAttribute(method_info)
         if attr:
             setattr(cls, method_name, attr)
 

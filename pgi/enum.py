@@ -60,7 +60,7 @@ def _get_values(enum):
     return values
 
 
-def FlagsAttribute(info, namespace, name, lib):
+def FlagsAttribute(info):
     enum = cast(info, GIEnumInfoPtr)
     enum_name = enum.type_name
 
@@ -86,7 +86,7 @@ class _EnumMethod(object):
         raise NotImplementedError("%r not supported" % self._name)
 
 
-def EnumAttribute(info, namespace, name, lib):
+def EnumAttribute(info):
     enum = cast(info, GIEnumInfoPtr)
     enum_name = enum.type_name
 

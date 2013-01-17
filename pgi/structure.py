@@ -22,7 +22,7 @@ class _Structure(object):
         raise TypeError
 
 
-def StructureAttribute(info, namespace, name, lib):
+def StructureAttribute(info):
     """Creates a new struct class."""
 
     struct_info = cast(info, GIStructInfoPtr)
@@ -32,13 +32,13 @@ def StructureAttribute(info, namespace, name, lib):
     cls_dict["__gtype__"] = PGType(struct_info.g_type)
 
     # create a new class
-    cls = type(name, _Structure.__bases__, cls_dict)
-    cls.__module__ = namespace
+    cls = type(info.name, _Structure.__bases__, cls_dict)
+    cls.__module__ = info.namespace
 
     # Add methods
     for method_info in struct_info.get_methods():
         method_name = method_info.name
-        attr = MethodAttribute(method_info, namespace, method_name, lib)
+        attr = MethodAttribute(method_info)
         if attr:
             setattr(cls, method_name, attr)
 

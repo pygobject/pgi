@@ -17,7 +17,7 @@ _union_access = [None, "v_boolean", "v_int8", "v_uint8", "v_int16",
                  None, None, None, None, None, None, None]
 
 
-def ConstantAttribute(info, namespace, name, lib):
+def ConstantAttribute(info):
     const = cast(info, GIConstantInfoPtr)
 
     arg = GIArgument()

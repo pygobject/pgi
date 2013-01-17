@@ -108,18 +108,8 @@ class Importer(object):
             finally:
                 error.free()
 
-        library_name = repository.get_shared_library(namespace)
-        if not library_name:
-            raise ImportError("No shared library found for %r" % namespace)
-        library_name = library_name.split(",")[0]
-
-        try:
-            library = CDLL(library_name)
-        except OSError:
-            raise ImportError("Couldn't load %r" % library)
-
         # Generate bindings, set up lazy attributes
-        instance = module.Module(repository, namespace, library)
+        instance = module.Module(repository, namespace)
         instance.__path__ = repository.get_typelib_path(namespace)
         instance.__loader__ = self
         instance.__package__ = const.PREFIX[0]

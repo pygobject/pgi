@@ -39,11 +39,9 @@ class RepositoryWrapper(InfoIterWrapper):
 class _Module(types.ModuleType):
     """Template class for gi modules (Gtk, ...)"""
 
-    def __init__(self, namespace, wrapper, lib):
+    def __init__(self, namespace, wrapper):
         types.ModuleType.__init__(self, namespace)
         self._wrapper = wrapper
-        self._namespace = namespace
-        self._lib = lib
 
     def __dir__(self):
         names = list(self._wrapper.iternames())
@@ -57,7 +55,7 @@ class _Module(types.ModuleType):
 
         cls = _attr_list[info.type.value]
         if cls:
-            attr = cls(info, self._namespace, name, self._lib)
+            attr = cls(info)
             setattr(self, name, attr)
         else:
             raise AttributeError
@@ -66,7 +64,7 @@ class _Module(types.ModuleType):
         return attr
 
 
-def Module(repo, namespace, lib):
+def Module(repo, namespace):
     cls = type(namespace, _Module.__bases__, dict(_Module.__dict__))
     wrapper = RepositoryWrapper(repo, namespace)
-    return cls(namespace, wrapper, lib)
+    return cls(namespace, wrapper)

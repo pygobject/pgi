@@ -11,7 +11,7 @@ from pgi.gir import GIFunctionInfoPtr
 from pgi.codegen.funcgen import generate_function
 
 
-def FunctionAttribute(info, namespace, name, lib):
+def FunctionAttribute(info):
     func_info = cast(info, GIFunctionInfoPtr)
     func = generate_function(func_info)
     return func

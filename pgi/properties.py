@@ -128,16 +128,17 @@ class _Props(object):
     __cache = None
     __cls_cache = None
 
-    def __init__(self, namespace, name, gtype):
-        self.__namespace = namespace
-        self.__name = name
-        self.__gtype = gtype
+    def __init__(self, info):
+        self.__info = info
 
     def __get_gparam_spec(self, owner):
         if self.__cache:
             return self.__cache
 
-        namespace, name = self.__namespace, self.__name
+        info = self.__info
+        name = info.name
+        gtype = info.g_type
+
         cls = _GProps
         cls_dict = dict(cls.__dict__)
 
@@ -151,28 +152,28 @@ class _Props(object):
         # get the base info. props won't be used that frequently, so no reason
         # to keep it arround
         repo = GIRepositoryPtr()
-        base_info = repo.find_by_name(namespace, name)
+        base_info = repo.find_by_name(info.namespace, name)
         type_ = base_info.type.value
 
         if type_ == GIInfoType.OBJECT:
             info = cast(base_info, GIObjectInfoPtr)
-            klass = self.__gtype.class_ref()
+            klass = gtype.class_ref()
             obj_class = cast(klass, GObjectClassPtr)
             for prop_info in info.get_properties():
                 real_name = prop_info.name
                 spec = obj_class.find_property(real_name)
                 attr_name = escape_name(real_name)
                 cls_dict[attr_name] = GParamSpec(spec, real_name, prop_info)
-            self.__gtype.class_unref(klass)
+            gtype.class_unref(klass)
         else:
             info = cast(base_info, GIInterfaceInfoPtr)
-            iface = self.__gtype.default_interface_ref()
+            iface = gtype.default_interface_ref()
             for prop_info in info.get_properties():
                 real_name = prop_info.name
                 spec = iface.find_property(real_name)
                 attr_name = escape_name(real_name)
                 cls_dict[attr_name] = GParamSpec(spec, real_name, prop_info)
-            self.__gtype.default_interface_unref(iface)
+            gtype.default_interface_unref(iface)
 
         base_info.unref()
 
@@ -198,12 +199,12 @@ class _Props(object):
 
             self.__cls_cache = type("GProps", cls.__bases__, cls_dict)
 
-        attr = self.__cls_cache(self.__name, instance)
+        attr = self.__cls_cache(self.__info.name, instance)
         setattr(instance, "props", attr)
         return attr
 
 
-def PropertyAttribute(info, namespace, name, gtype):
+def PropertyAttribute(obj_info):
     cls = _Props
     cls_dict = dict(cls.__dict__)
-    return type("props", cls.__bases__, cls_dict)(namespace, name, gtype)
+    return type("props", cls.__bases__, cls_dict)(obj_info)
