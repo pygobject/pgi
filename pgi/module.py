@@ -32,6 +32,9 @@ class RepositoryWrapper(InfoIterWrapper):
     def _get_name(self, info):
         return info.get_name()
 
+    def _get_by_name(self, source, name):
+        return source.find_by_name(self._namespace, name)
+
 
 class _Module(types.ModuleType):
     """Template class for gi modules (Gtk, ...)"""
@@ -48,11 +51,6 @@ class _Module(types.ModuleType):
         return list(set(base + names))
 
     def __getattr__(self, name):
-        # XXX: This is the only invalid access (why?) on import which forces
-        # us to search all infos.. ignore it for now
-        if self._namespace == "GObject" and name == "GObject":
-            raise AttributeError
-
         info = self._wrapper.lookup_name(name)
         if not info:
             raise AttributeError
