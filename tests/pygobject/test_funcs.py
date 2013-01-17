@@ -87,3 +87,15 @@ class FuncsTest(unittest.TestCase):
         ag.add_action_with_accel(a, None)
         b = Gtk.Action("foo3", "bar", "blah", Gtk.STOCK_NEW)
         ag.add_action_with_accel(b, "<ctrl>a")
+
+    def test_pass_object(self):
+        action = Gtk.RadioAction("", "", None, None, 0)
+        self.assertRaises(TypeError, action.join_group, 1)
+        self.assertRaises(TypeError, action.join_group, [])
+        self.assertRaises(TypeError, action.join_group, 0)
+        action.join_group(None)
+
+        button = Gtk.Button()
+        box = Gtk.Box()
+        box.add(button)
+        self.assertRaises(TypeError, box.add, None)

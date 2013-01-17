@@ -12,7 +12,7 @@ from pgi.codegen.utils import CodeBlock
 from pgi.gir import GIRepositoryPtr
 from pgi.glib import GErrorPtr
 from pgi.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr
-from pgi.util import typeinfo_to_ctypes
+from pgi.util import typeinfo_to_ctypes, import_attribute
 from pgi.gtype import PGType
 
 
@@ -148,11 +148,32 @@ $float_ref = ctypes.byref($float)
         block.add_dependency("ctypes", ctypes)
         return block, var["float"], var["float_ref"]
 
-    def pack_interface(self, name):
-        block, var = self.parse("""
-$obj = ctypes.cast($iface._obj, ctypes.c_void_p)
-""", iface=name)
+    def pack_object(self, obj_name):
+        gobj_class = import_attribute("GObject", "Object")
+        gobj_var = self.var()
 
+        block, var = self.parse("""
+if not isinstance($obj, $gobject):
+    raise TypeError("%r not a GObject.Object" % $obj)
+$obj = ctypes.cast($obj._obj, ctypes.c_void_p)
+""", obj=obj_name, gobject=gobj_var)
+
+        block.add_dependency(gobj_var, gobj_class)
+        block.add_dependency("ctypes", ctypes)
+        return block, var["obj"]
+
+    def pack_object_null(self, obj_name):
+        gobj_class = import_attribute("GObject", "Object")
+        gobj_var = self.var()
+
+        block, var = self.parse("""
+if $obj is not None:
+    if not isinstance($obj, $gobject):
+        raise TypeError("%r not a GObject.Object or None" % $obj)
+    $obj = ctypes.cast($obj._obj, ctypes.c_void_p)
+""", obj=obj_name, gobject=gobj_var)
+
+        block.add_dependency(gobj_var, gobj_class)
         block.add_dependency("ctypes", ctypes)
         return block, var["obj"]
 

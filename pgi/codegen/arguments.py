@@ -139,7 +139,10 @@ class InterfaceArgument(Argument):
         iface_type = iface.get_type().value
 
         if iface_type == GIInfoType.OBJECT:
-            block, var = self.backend.pack_interface(self.name)
+            if self.may_be_null():
+                block, var = self.backend.pack_object_null(self.name)
+            else:
+                block, var = self.backend.pack_object(self.name)
             self.call_var = var
             return block
         elif iface_type == GIInfoType.ENUM:
