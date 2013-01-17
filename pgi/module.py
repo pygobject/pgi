@@ -30,7 +30,7 @@ class RepositoryWrapper(InfoIterWrapper):
         return source.get_info(self._namespace, index)
 
     def _get_name(self, info):
-        return info.get_name()
+        return info.name
 
     def _get_by_name(self, source, name):
         return source.find_by_name(self._namespace, name)
@@ -55,7 +55,7 @@ class _Module(types.ModuleType):
         if not info:
             raise AttributeError
 
-        cls = _attr_list[info.get_type().value]
+        cls = _attr_list[info.type.value]
         if cls:
             attr = cls(info, self._namespace, name, self._lib)
             setattr(self, name, attr)

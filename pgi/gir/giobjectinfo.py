@@ -23,7 +23,7 @@ _gir = find_library("girepository-1.0")
 
 
 def gi_is_object_info(base_info, _type=GIInfoType.OBJECT):
-    return base_info.get_type().value == _type
+    return base_info.type.value == _type
 
 
 class GIObjectInfo(GIRegisteredTypeInfo):
@@ -34,55 +34,55 @@ class GIObjectInfoPtr(GIRegisteredTypeInfoPtr):
     _type_ = GIObjectInfo
 
     def get_methods(self):
-        return map(self.get_method, xrange(self.get_n_methods()))
+        return map(self.get_method, xrange(self.n_methods))
 
     def get_interfaces(self):
-        return map(self.get_interface, xrange(self.get_n_interfaces()))
+        return map(self.get_interface, xrange(self.n_interfaces))
 
     def get_properties(self):
-        return map(self.get_property, xrange(self.get_n_properties()))
+        return map(self.get_property, xrange(self.n_properties))
 
     def get_signals(self):
-        return map(self.get_signal, xrange(self.get_n_signals()))
+        return map(self.get_signal, xrange(self.n_signals))
 
     def get_vfuncs(self):
-        return map(self.get_vfunc, xrange(self.get_n_vfuncs()))
+        return map(self.get_vfunc, xrange(self.n_vfuncs))
 
     def get_fields(self):
-        return map(self.get_field, xrange(self.get_n_fields()))
+        return map(self.get_field, xrange(self.n_fields))
 
     def get_constants(self):
-        return map(self.get_constant, xrange(self.get_n_constants()))
+        return map(self.get_constant, xrange(self.n_constants))
 
     def _get_repr(self):
         values = super(GIObjectInfoPtr, self)._get_repr()
-        values["type_name"] = repr(self.get_type_name())
-        values["type_init"] = repr(self.get_type_init())
-        values["abstract"] = repr(self.get_abstract())
-        values["fundamental"] = repr(self.get_fundamental())
+        values["type_name"] = repr(self.type_name)
+        values["type_init"] = repr(self.type_init)
+        values["abstract"] = repr(self.abstract)
+        values["fundamental"] = repr(self.fundamental)
         parent = self.get_parent()
         if parent:
-            values["parent"] = repr(parent.get_name())
+            values["parent"] = repr(parent.name)
             parent.unref()
-        values["n_interfaces"] = repr(self.get_n_interfaces())
-        values["n_fields"] = repr(self.get_n_fields())
-        values["n_properties"] = repr(self.get_n_properties())
-        values["n_methods"] = repr(self.get_n_methods())
-        values["n_signals"] = repr(self.get_n_signals())
-        values["n_vfuncs"] = repr(self.get_n_vfuncs())
+        values["n_interfaces"] = repr(self.n_interfaces)
+        values["n_fields"] = repr(self.n_fields)
+        values["n_properties"] = repr(self.n_properties)
+        values["n_methods"] = repr(self.n_methods)
+        values["n_signals"] = repr(self.n_signals)
+        values["n_vfuncs"] = repr(self.n_vfuncs)
         class_struct = self.get_class_struct()
-        values["class_struct"] = repr(class_struct.get_name())
+        values["class_struct"] = repr(class_struct.name)
         class_struct.unref()
-        unref_function = self.get_unref_function()
+        unref_function = self.unref_function
         if unref_function:
             values["unref_function"] = repr(unref_function)
-        ref_function = self.get_ref_function()
+        ref_function = self.ref_function
         if ref_function:
             values["ref_function"] = repr(ref_function)
-        set_value_function =  self.get_set_value_function()
+        set_value_function =  self.set_value_function
         if set_value_function:
             values["set_value_function"] = repr(set_value_function)
-        get_value_function = self.get_get_value_function()
+        get_value_function = self.get_value_function
         if get_value_function:
             values["get_value_function"] = repr(get_value_function)
         return values

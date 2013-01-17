@@ -26,7 +26,7 @@ from pgi.codegen.funcgen import generate_function
 
 def gparamspec_to_gvalue_ptr(spec, value):
     type_ = spec._info.get_type()
-    tag = type_.get_tag().value
+    tag = type_.tag.value
 
     ptr = GValuePtr(GValue())
     ptr.init(spec.value_type._type.value)
@@ -34,7 +34,7 @@ def gparamspec_to_gvalue_ptr(spec, value):
     is_interface = False
     if tag == GITypeTag.INTERFACE:
         iface_info = type_.get_interface()
-        tag = iface_info.get_type().value
+        tag = iface_info.type.value
         iface_info.unref()
         is_interface = True
 
@@ -150,7 +150,7 @@ class MethodAttribute(object):
 
     def __get__(self, instance, owner):
         info = self._info
-        flags = info.get_flags()
+        flags = info.flags
         func_flags = flags.value
         name = self._name
         namespace = self._namespace
@@ -183,7 +183,7 @@ def InterfaceAttribute(info, namespace, name, lib):
 
     # Create a new class with a corresponding gtype
     cls_dict = dict(_Interface.__dict__)
-    g_type = iface_info.get_g_type()
+    g_type = iface_info.g_type
     cls_dict["__gtype__"] = PGType(g_type)
     cls_dict["props"] = PropertyAttribute(iface_info, namespace, name, g_type)
 
@@ -191,14 +191,14 @@ def InterfaceAttribute(info, namespace, name, lib):
 
     # Add constants
     for constant in iface_info.get_constants():
-        constant_name = constant.get_name()
+        constant_name = constant.name
         attr = ConstantAttribute(constant, namespace, constant_name, lib)
         setattr(cls, constant_name, attr)
         constant.unref()
 
     # Add methods
     for method_info in iface_info.get_methods():
-        method_name = method_info.get_name()
+        method_name = method_info.name
         attr = MethodAttribute(method_info, namespace, method_name, lib)
         if attr:
             setattr(cls, method_name, attr)
@@ -217,8 +217,8 @@ def ObjectAttribute(info, namespace, name, lib):
     # Get the parent class
     parent_obj = obj_info.get_parent()
     if parent_obj:
-        parent_namespace = parent_obj.get_namespace()
-        parent_name = parent_obj.get_name()
+        parent_namespace = parent_obj.namespace
+        parent_name = parent_obj.name
         parent_obj.unref()
 
         attr = import_attribute(parent_namespace, parent_name)
@@ -229,8 +229,8 @@ def ObjectAttribute(info, namespace, name, lib):
     # Get all object interfaces
     ifaces = []
     for interface in obj_info.get_interfaces():
-        interface_namespace = interface.get_namespace()
-        interface_name = interface.get_name()
+        interface_namespace = interface.namespace
+        interface_name = interface.name
         interface.unref()
 
         attr = import_attribute(interface_namespace, interface_name)
@@ -242,7 +242,7 @@ def ObjectAttribute(info, namespace, name, lib):
 
     # Copy template and add gtype, properties
     cls_dict = dict(_Object.__dict__)
-    g_type = obj_info.get_g_type()
+    g_type = obj_info.g_type
     cls_dict["__gtype__"] = PGType(g_type)
     cls_dict["props"] = PropertyAttribute(obj_info, namespace, name, g_type)
 
@@ -259,7 +259,7 @@ def ObjectAttribute(info, namespace, name, lib):
 
     # Add methods
     for method_info in obj_info.get_methods():
-        method_name = method_info.get_name()
+        method_name = method_info.name
         attr = MethodAttribute(method_info, namespace, method_name, lib)
         if attr:
             setattr(cls, method_name, attr)

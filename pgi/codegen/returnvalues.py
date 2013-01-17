@@ -22,7 +22,7 @@ class ReturnValue(object):
         return None, name
 
     def is_zero_terminated(self):
-        return self.type.is_zero_terminated()
+        return self.type.is_zero_terminated
 
 
 class VoidReturnValue(ReturnValue):
@@ -57,9 +57,9 @@ class InterfaceReturnValue(ReturnValue):
     def process(self, name):
         backend = self.backend
         iface = self.type.get_interface()
-        iface_type = iface.get_type().value
-        iface_namespace = iface.get_namespace()
-        iface_name = iface.get_name()
+        iface_type = iface.type.value
+        iface_namespace = iface.namespace
+        iface_name = iface.name
         iface.unref()
 
         if iface_type == GIInfoType.ENUM:
@@ -85,5 +85,5 @@ _find_return_values()
 
 def get_return_class(type_):
     global _classes
-    tag_value = type_.get_tag().value
+    tag_value = type_.tag.value
     return _classes.get(tag_value, ReturnValue)

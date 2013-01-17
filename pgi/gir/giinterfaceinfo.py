@@ -18,7 +18,7 @@ _gir = find_library("girepository-1.0")
 
 
 def gi_is_interface_info(base_info, _type=GIInfoType.INTERFACE):
-    return base_info.get_type().value == _type
+    return base_info.type.value == _type
 
 
 class GIInterfaceInfo(GIRegisteredTypeInfo):
@@ -29,27 +29,27 @@ class GIInterfaceInfoPtr(GIRegisteredTypeInfoPtr):
     _type_ = GIInterfaceInfo
 
     def get_methods(self):
-        return map(self.get_method, xrange(self.get_n_methods()))
+        return map(self.get_method, xrange(self.n_methods))
 
     def get_properties(self):
-        return map(self.get_property, xrange(self.get_n_properties()))
+        return map(self.get_property, xrange(self.n_properties))
 
     def get_signals(self):
-        return map(self.get_signal, xrange(self.get_n_signals()))
+        return map(self.get_signal, xrange(self.n_signals))
 
     def get_constants(self):
-        return map(self.get_constant, xrange(self.get_n_constants()))
+        return map(self.get_constant, xrange(self.n_constants))
 
     def get_prerequisites(self):
-        return map(self.get_prerequisite, xrange(self.get_n_prerequisites()))
+        return map(self.get_prerequisite, xrange(self.n_prerequisites))
 
     def _get_repr(self):
         values = super(GIInterfaceInfoPtr, self)._get_repr()
-        values["n_constants"] = repr(self.get_n_constants())
-        values["n_signals"] = repr(self.get_n_signals())
-        values["n_methods"] = repr(self.get_n_methods())
-        values["n_properties"] = repr(self.get_n_properties())
-        values["n_prerequisites"] = repr(self.get_n_prerequisites())
+        values["n_constants"] = repr(self.n_constants)
+        values["n_signals"] = repr(self.n_signals)
+        values["n_methods"] = repr(self.n_methods)
+        values["n_properties"] = repr(self.n_properties)
+        values["n_prerequisites"] = repr(self.n_prerequisites)
         return values
 
 _methods = [

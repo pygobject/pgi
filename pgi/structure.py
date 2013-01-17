@@ -29,7 +29,7 @@ def StructureAttribute(info, namespace, name, lib):
 
     # copy the template and add the gtype
     cls_dict = dict(_Structure.__dict__)
-    cls_dict["__gtype__"] = PGType(struct_info.get_g_type())
+    cls_dict["__gtype__"] = PGType(struct_info.g_type)
 
     # create a new class
     cls = type(name, _Structure.__bases__, cls_dict)
@@ -37,7 +37,7 @@ def StructureAttribute(info, namespace, name, lib):
 
     # Add methods
     for method_info in struct_info.get_methods():
-        method_name = method_info.get_name()
+        method_name = method_info.name
         attr = MethodAttribute(method_info, namespace, method_name, lib)
         if attr:
             setattr(cls, method_name, attr)

@@ -21,7 +21,7 @@ class GITypesTest(unittest.TestCase):
         infos = {}
         for i in xrange(repo.get_n_infos("Gtk")):
             info = repo.get_info("Gtk", i)
-            infos[info.get_name()] = info
+            infos[info.name] = info
 
         self.infos = infos
 
@@ -35,18 +35,18 @@ class GITypesTest(unittest.TestCase):
         repr(b)
         b.ref()
         b.unref()
-        self.failUnlessEqual(b.get_name(), "Button")
-        self.failUnlessEqual(b.get_namespace(), "Gtk")
-        self.failUnlessEqual(b.is_deprecated(), False)
+        self.failUnlessEqual(b.name, "Button")
+        self.failUnlessEqual(b.namespace, "Gtk")
+        self.failUnlessEqual(b.is_deprecated, False)
         self.failIf(b.get_container())
-        self.failUnlessEqual(b.get_type().value, GIInfoType.OBJECT)
+        self.failUnlessEqual(b.type.value, GIInfoType.OBJECT)
         repr(b.get_typelib())
 
     def test_typelib(self):
         w = self.infos["Window"]
         t = w.get_typelib()
         repr(t)
-        self.failUnlessEqual(t.get_namespace(), "Gtk")
+        self.failUnlessEqual(t.namespace, "Gtk")
 
     def test_objectinfo(self):
         e = self.infos["Expander"]
@@ -54,8 +54,8 @@ class GITypesTest(unittest.TestCase):
         self.failUnless(gi_is_object_info(e))
         e = cast(e, GIObjectInfoPtr)
         repr(e)
-        self.failUnlessEqual(e.get_type_name(), "GtkExpander")
-        self.failUnlessEqual(e.get_type_init(), "gtk_expander_get_type")
+        self.failUnlessEqual(e.type_name, "GtkExpander")
+        self.failUnlessEqual(e.type_init, "gtk_expander_get_type")
 
         map(lambda x: x.unref(), e.get_methods())
         map(lambda x: x.unref(), e.get_fields())
@@ -71,9 +71,9 @@ class GITypesTest(unittest.TestCase):
         self.failUnless(gi_is_registered_type_info(t))
         t = cast(t, GIEnumInfoPtr)
         repr(t)
-        self.failUnlessEqual(t.get_n_methods(), 0)
-        self.failUnlessEqual(t.get_storage_type().value, GITypeTag.UINT32)
-        self.failUnlessEqual(t.get_value(0).get_value(), 0)
+        self.failUnlessEqual(t.n_methods, 0)
+        self.failUnlessEqual(t.storage_type.value, GITypeTag.UINT32)
+        self.failUnlessEqual(t.get_value(0).value, 0)
 
         map(lambda x: x.unref(), t.get_values())
         map(lambda x: x.unref(), t.get_methods())
@@ -92,14 +92,14 @@ class GITypesTest(unittest.TestCase):
         fi = e.get_method(10)
         self.failUnless(gi_is_function_info(cast(fi, GIBaseInfoPtr)))
         repr(fi)
-        self.failUnlessEqual(fi.get_symbol(), "gtk_expander_set_expanded")
-        self.failUnlessEqual(fi.get_flags().value,
+        self.failUnlessEqual(fi.symbol, "gtk_expander_set_expanded")
+        self.failUnlessEqual(fi.flags.value,
                              GIFunctionInfoFlags.IS_METHOD)
         fi.unref()
 
         w = self.infos["Window"]
         w = cast(w, GIObjectInfoPtr)
-        for i in xrange(w.get_n_methods()):
+        for i in xrange(w.n_methods):
             fi = w.get_method(i)
             repr(fi)
             fi.unref()
@@ -110,7 +110,6 @@ class GITypesTest(unittest.TestCase):
         self.failUnless(gi_is_registered_type_info(s))
         s = cast(s, GIStructInfoPtr)
         repr(s)
-        s.unref()
 
     def test_fieldinfo(self):
         s = self.infos["TargetEntry"]
@@ -145,7 +144,7 @@ class GITypesTest(unittest.TestCase):
     def test_vfuncinfo(self):
         i = self.infos["Editable"]
         i = cast(i, GIInterfaceInfoPtr)
-        for x in xrange(i.get_n_vfuncs()):
+        for x in xrange(i.n_vfuncs):
             v = i.get_vfunc(x)
             self.failUnless(gi_is_vfunc_info(cast(v, GIBaseInfoPtr)))
             repr(v)
@@ -154,7 +153,7 @@ class GITypesTest(unittest.TestCase):
     def test_signalinfo(self):
         i = self.infos["Editable"]
         i = cast(i, GIInterfaceInfoPtr)
-        for x in xrange(i.get_n_signals()):
+        for x in xrange(i.n_signals):
             v = i.get_signal(x)
             self.failUnless(gi_is_signal_info(cast(v, GIBaseInfoPtr)))
             repr(v)

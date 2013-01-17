@@ -52,8 +52,8 @@ def _get_values(enum):
     values = []
 
     for value in enum.get_values():
-        num = value.get_value()
-        vname = value.get_name().upper()
+        num = value.value
+        vname = value.name.upper()
         value.unref()
         values.append((num, vname))
 
@@ -62,7 +62,7 @@ def _get_values(enum):
 
 def FlagsAttribute(info, namespace, name, lib):
     enum = cast(info, GIEnumInfoPtr)
-    enum_name = enum.get_type_name()
+    enum_name = enum.type_name
 
     values = _get_values(enum)
 
@@ -88,7 +88,7 @@ class _EnumMethod(object):
 
 def EnumAttribute(info, namespace, name, lib):
     enum = cast(info, GIEnumInfoPtr)
-    enum_name = enum.get_type_name()
+    enum_name = enum.type_name
 
     values = _get_values(enum)
 
@@ -98,7 +98,7 @@ def EnumAttribute(info, namespace, name, lib):
     cls = type(enum_name, _EnumClass.__bases__, cls_dict)
 
     for method in enum.get_methods():
-        name = method.get_name()
+        name = method.name
         setattr(cls, name, _EnumMethod(name))
         method.unref()
 

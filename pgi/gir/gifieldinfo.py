@@ -17,7 +17,7 @@ _gir = find_library("girepository-1.0")
 
 
 def gi_is_field_info(base_info, _type=GIInfoType.FIELD):
-    return base_info.get_type().value == _type
+    return base_info.type.value == _type
 
 
 class GIFieldInfoFlags(Enum):
@@ -34,9 +34,9 @@ class GIFieldInfoPtr(GIBaseInfoPtr):
 
     def _get_repr(self):
         values = super(GIFieldInfoPtr, self)._get_repr()
-        values["flags"] = repr(self.get_flags())
-        values["size"] = repr(self.get_size())
-        values["offset"] = repr(self.get_offset())
+        values["flags"] = repr(self.flags)
+        values["size"] = repr(self.size)
+        values["offset"] = repr(self.offset)
         type_ = self.get_type()
         values["type"] = repr(type_)
         type_.unref()

@@ -13,7 +13,7 @@ _gir = find_library("girepository-1.0")
 
 
 def gi_is_type_info(base_info, _type=GIInfoType.TYPE):
-    return base_info.get_type().value == _type
+    return base_info.type.value == _type
 
 
 class GIArrayType(Enum):
@@ -63,18 +63,18 @@ class GITypeInfoPtr(GIBaseInfoPtr):
 
     def _get_repr(self):
         values = super(GITypeInfoPtr, self)._get_repr()
-        values["is_pointer"] = repr(self.is_pointer())
-        tag = self.get_tag()
+        values["is_pointer"] = repr(self.is_pointer)
+        tag = self.tag
         values["tag"] = repr(tag)
         if tag.value == GITypeTag.INTERFACE:
             interface = self.get_interface()
             values["interface"] = repr(interface)
             interface.unref()
         elif tag.value == GITypeTag.ARRAY:
-            values["array_length"] = repr(self.get_array_length())
-            values["array_fixed_size"] = repr(self.get_array_fixed_size())
-            values["zero_terminated"] = repr(self.is_zero_terminated())
-            values["array_type"] = repr(self.get_array_type())
+            values["array_length"] = repr(self.array_length)
+            values["array_fixed_size"] = repr(self.array_fixed_size)
+            values["zero_terminated"] = repr(self.is_zero_terminated)
+            values["array_type"] = repr(self.array_type)
         return values
 
 

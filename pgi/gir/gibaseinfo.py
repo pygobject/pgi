@@ -5,7 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from ctypes import POINTER, Structure, c_char_p
+from ctypes import POINTER, Structure, c_char_p, cast
 
 from pgi.glib import gchar_p, Enum, gboolean
 from pgi.ctypesutil import wrap_class, find_library
@@ -43,14 +43,14 @@ class GIBaseInfoPtr(POINTER(GIBaseInfo)):
 
     def _get_repr(self):
         values = {}
-        values["type"] = repr(self.get_type())
-        real_type = GIBaseInfoPtr.get_type(self).value
-        if real_type != GIInfoType.TYPE and self.get_name():
-            values["name"] = repr(self.get_name())
-        values["namespace"] = repr(self.get_namespace())
-        values["deprecated"] = repr(self.is_deprecated())
+        values["type"] = repr(self.type)
+        real_type = cast(self, GIBaseInfoPtr).type.value
+        if real_type != GIInfoType.TYPE and self.name:
+            values["name"] = repr(self.name)
+        values["namespace"] = repr(self.namespace)
+        values["deprecated"] = repr(self.is_deprecated)
         if self.get_container():
-            values["container"] = repr(self.get_container().get_name())
+            values["container"] = repr(self.get_container().name)
 
         return values
 

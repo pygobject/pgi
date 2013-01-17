@@ -23,7 +23,7 @@ class GITypelibPtr(POINTER(GITypelib)):
 
     def __repr__(self):
         values = {}
-        values["namespace"] = self.get_namespace()
+        values["namespace"] = self.namespace
         l = ", ".join(("%s=%r" % (k, v) for (k, v) in sorted(values.items())))
         return "<%s %s>" % (self._type_.__name__, l)
 

@@ -15,7 +15,7 @@ _gir = find_library("girepository-1.0")
 
 
 def gi_is_property_info(base_info, _type=GIInfoType.PROPERTY):
-    return base_info.get_type().value == _type
+    return base_info.type.value == _type
 
 
 class GIPropertyInfo(GIBaseInfo):
@@ -27,11 +27,11 @@ class GIPropertyInfoPtr(GIBaseInfoPtr):
 
     def _get_repr(self):
         values = super(GIPropertyInfoPtr, self)._get_repr()
-        values["flags"] = repr(self.get_flags())
+        values["flags"] = repr(self.flags)
         type_ = self.get_type()
         values["type"] = repr(type_)
         type_.unref()
-        values["ownership_transfer"] = repr(self.get_ownership_transfer())
+        values["ownership_transfer"] = repr(self.ownership_transfer)
         return values
 
 _methods = [

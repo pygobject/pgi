@@ -21,7 +21,7 @@ _gir = find_library("girepository-1.0")
 
 
 def gi_is_callable_info(base_info, _it=GIInfoType):
-    type_ = base_info.get_type().value
+    type_ = base_info.type.value
     return (type_ in (_it.FUNCTION, _it.CALLBACK, _it.SIGNAL, _it.VFUNC))
 
 
@@ -33,7 +33,7 @@ class GICallableInfoPtr(GIBaseInfoPtr):
     _type_ = GICallableInfo
 
     def get_args(self):
-        return map(self.get_arg, xrange(self.get_n_args()))
+        return map(self.get_arg, xrange(self.n_args))
 
     def _get_repr(self):
         values = super(GICallableInfoPtr, self)._get_repr()
@@ -41,8 +41,8 @@ class GICallableInfoPtr(GIBaseInfoPtr):
         return_type = self.get_return_type()
         values["return_type"] = repr(return_type)
         return_type.unref()
-        values["caller_owns"] = repr(self.get_caller_owns())
-        values["may_return_null"] = repr(self.may_return_null())
+        values["caller_owns"] = repr(self.caller_owns)
+        values["may_return_null"] = repr(self.may_return_null)
         args = self.get_args()
         values["args"] = repr(args)
         for arg in args:
@@ -52,7 +52,7 @@ class GICallableInfoPtr(GIBaseInfoPtr):
 
 
 def gi_is_function_info(base_info):
-    return base_info.get_type().value == GIInfoType.FUNCTION
+    return base_info.type.value == GIInfoType.FUNCTION
 
 
 class GIFunctionInfoFlags(Flags):
@@ -78,14 +78,14 @@ class GIFunctionInfoPtr(GICallableInfoPtr):
     def _get_repr(self):
         values = super(GIFunctionInfoPtr, self)._get_repr()
 
-        values["symbol"] = repr(self.get_symbol())
-        values["flags"] = repr(self.get_flags())
-        if self.get_flags().value & (GIFunctionInfoFlags.IS_GETTER |
+        values["symbol"] = repr(self.symbol)
+        values["flags"] = repr(self.flags)
+        if self.flags.value & (GIFunctionInfoFlags.IS_GETTER |
                                      GIFunctionInfoFlags.IS_SETTER):
             prop = self.get_property()
             values["property"] = repr(prop)
             prop.unref()
-        elif self.get_flags().value & GIFunctionInfoFlags.WRAPS_VFUNC:
+        elif self.flags.value & GIFunctionInfoFlags.WRAPS_VFUNC:
             vfunc = self.get_vfunc()
             values["vfunc"] = repr(vfunc)
             vfunc.unref()
@@ -94,7 +94,7 @@ class GIFunctionInfoPtr(GICallableInfoPtr):
 
 
 def gi_is_vfunc_info(base_info):
-    return base_info.get_type().value == GIInfoType.VFUNC
+    return base_info.type.value == GIInfoType.VFUNC
 
 
 class GIVFuncInfoFlags(Enum):
@@ -112,8 +112,8 @@ class GIVFuncInfoPtr(GICallableInfoPtr):
 
     def _get_repr(self):
         values = super(GIVFuncInfoPtr, self)._get_repr()
-        values["flags"] = repr(self.get_flags())
-        values["offset"] = repr(self.get_offset())
+        values["flags"] = repr(self.flags)
+        values["offset"] = repr(self.offset)
         signal = self.get_signal()
         if signal:
             values["signal"] = repr(signal)
@@ -125,7 +125,7 @@ class GIVFuncInfoPtr(GICallableInfoPtr):
         return values
 
 def gi_is_signal_info(base_info):
-    return base_info.get_type().value == GIInfoType.SIGNAL
+    return base_info.type.value == GIInfoType.SIGNAL
 
 
 class GISignalInfo(GICallableInfo):

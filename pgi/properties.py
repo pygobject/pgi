@@ -35,7 +35,7 @@ class GParamSpec(object):
 
     @property
     def nick(self):
-        return self._spec.get_nick()
+        return self._spec.nick
 
     @property
     def owner_type(self):
@@ -53,14 +53,14 @@ class Property(object):
     def __init__(self, spec):
         self.__spec = spec
         type_ = spec._info.get_type()
-        self.__tag = type_.get_tag().value
+        self.__tag = type_.tag.value
 
         self.__interface = False
         if self.__tag == GITypeTag.INTERFACE:
             iface_info = type_.get_interface()
-            self.__tag = iface_info.get_type().value
-            name = iface_info.get_name()
-            namespace = iface_info.get_namespace()
+            self.__tag = iface_info.type.value
+            name = iface_info.name
+            namespace = iface_info.namespace
             self.__iclass = import_attribute(namespace, name)
             iface_info.unref()
             self.__interface = True
@@ -73,19 +73,20 @@ class Property(object):
         ptr.init(self.__value_type)
 
         tag = self.__tag
+
         func = None
         if not self.__interface:
             if tag == GITypeTag.UTF8:
-                func = ptr.get_string
+                func = lambda: ptr.string
             elif tag == GITypeTag.INT32:
-                func = ptr.get_int
+                func = lambda: ptr.int
             elif tag == GITypeTag.BOOLEAN:
-                func = ptr.get_boolean
+                func = lambda: ptr.boolean
         else:
             if tag == GIInfoType.ENUM:
-                func = lambda: self.__iclass(ptr.get_enum())
+                func = lambda: self.__iclass(ptr.enum)
 
-        if not func:
+        if func is None:
             ptr.unset()
             name = self.__spec.name
             warn("Property %r unhandled. Type not supported" % name, Warning)
@@ -151,14 +152,14 @@ class _Props(object):
         # to keep it arround
         repo = GIRepositoryPtr()
         base_info = repo.find_by_name(namespace, name)
-        type_ = base_info.get_type().value
+        type_ = base_info.type.value
 
         if type_ == GIInfoType.OBJECT:
             info = cast(base_info, GIObjectInfoPtr)
             klass = self.__gtype.class_ref()
             obj_class = cast(klass, GObjectClassPtr)
             for prop_info in info.get_properties():
-                real_name = prop_info.get_name()
+                real_name = prop_info.name
                 spec = obj_class.find_property(real_name)
                 attr_name = escape_name(real_name)
                 cls_dict[attr_name] = GParamSpec(spec, real_name, prop_info)
@@ -167,7 +168,7 @@ class _Props(object):
             info = cast(base_info, GIInterfaceInfoPtr)
             iface = self.__gtype.default_interface_ref()
             for prop_info in info.get_properties():
-                real_name = prop_info.get_name()
+                real_name = prop_info.name
                 spec = iface.find_property(real_name)
                 attr_name = escape_name(real_name)
                 cls_dict[attr_name] = GParamSpec(spec, real_name, prop_info)

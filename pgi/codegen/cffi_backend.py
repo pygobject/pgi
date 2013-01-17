@@ -37,8 +37,8 @@ typedef void* gpointer;"""
 
 
 def typeinfo_to_cffi(info):
-    tag = info.get_tag().value
-    ptr = info.is_pointer()
+    tag = info.tag.value
+    ptr = info.is_pointer
 
     if not ptr:
         if tag == GITypeTag.UINT32:

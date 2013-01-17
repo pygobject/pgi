@@ -14,7 +14,7 @@ _gir = find_library("girepository-1.0")
 
 
 def gi_is_arg_info(base_info, _type=GIInfoType.ARG):
-    return base_info.get_type().value == _type
+    return base_info.type.value == _type
 
 
 class GITransfer(Enum):
@@ -38,15 +38,15 @@ class GIArgInfoPtr(GIBaseInfoPtr):
 
     def _get_repr(self):
         values = super(GIArgInfoPtr, self)._get_repr()
-        values["direction"] = repr(self.get_direction())
-        values["is_caller_allocates"] = repr(self.is_caller_allocates())
-        values["is_return_value"] = repr(self.is_return_value())
-        values["is_optional"] = repr(self.is_optional())
-        values["may_be_null"] = repr(self.may_be_null())
-        values["ownership_transfer"] = repr(self.get_ownership_transfer())
-        values["scope"] = repr(self.get_scope())
-        values["closure"] = repr(self.get_closure())
-        values["destroy"] = repr(self.get_destroy())
+        values["direction"] = repr(self.direction)
+        values["is_caller_allocates"] = repr(self.is_caller_allocates)
+        values["is_return_value"] = repr(self.is_return_value)
+        values["is_optional"] = repr(self.is_optional)
+        values["may_be_null"] = repr(self.may_be_null)
+        values["ownership_transfer"] = repr(self.ownership_transfer)
+        values["scope"] = repr(self.scope)
+        values["closure"] = repr(self.closure)
+        values["destroy"] = repr(self.destroy)
         type_ = self.get_type()
         values["type"] = repr(type_)
         type_.unref()

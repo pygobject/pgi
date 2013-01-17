@@ -58,7 +58,7 @@ def _generate_function(backend, info, namespace, name, method, throws):
 
     # generate call
     lib = backend.get_library_object(namespace)
-    symbol = info.get_symbol()
+    symbol = info.symbol
     block, svar, func = backend.get_function_object(lib, symbol, args,
                                                     return_value, method,
                                                     "self", throws)

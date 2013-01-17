@@ -24,7 +24,7 @@ def ConstantAttribute(info, namespace, name, lib):
     const.get_value(byref(arg))
 
     const_type = const.get_type()
-    tag_type = const_type.get_tag().value
+    tag_type = const_type.tag.value
     const_type.unref()
 
     value_member = _union_access[tag_type]

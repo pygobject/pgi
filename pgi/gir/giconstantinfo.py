@@ -17,7 +17,7 @@ _gir = find_library("girepository-1.0")
 
 
 def gi_is_constant_info(base_info, _type=GIInfoType.CONSTANT):
-    return base_info.get_type().value == _type
+    return base_info.type.value == _type
 
 
 class GIConstantInfo(GIBaseInfo):

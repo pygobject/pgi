@@ -16,7 +16,7 @@ _gir = find_library("girepository-1.0")
 
 
 def gi_is_value_info(base_info, _type=GIInfoType.VALUE):
-    return base_info.get_type().value == _type
+    return base_info.type.value == _type
 
 
 class GIValueInfo(GIBaseInfo):
@@ -28,7 +28,7 @@ class GIValueInfoPtr(GIBaseInfoPtr):
 
     def _get_repr(self):
         values = super(GIValueInfoPtr, self)._get_repr()
-        values["value"] = repr(self.get_value())
+        values["value"] = repr(self.value)
         return values
 
 _methods = [
@@ -39,8 +39,7 @@ wrap_class(_gir, GIValueInfo, GIValueInfoPtr, "g_value_info_", _methods)
 
 
 def gi_is_enum_info(base_info):
-    it = GIInfoType
-    return base_info.get_type().value in (it.ENUM, it.FLAGS)
+    return base_info.type.value in (GIInfoType.ENUM, GIInfoType.FLAGS)
 
 
 class GIEnumInfo(GIRegisteredTypeInfo):
@@ -51,16 +50,16 @@ class GIEnumInfoPtr(GIRegisteredTypeInfoPtr):
     _type_ = GIEnumInfo
 
     def get_values(self):
-        return map(self.get_value, xrange(self.get_n_values()))
+        return map(self.get_value, xrange(self.n_values))
 
     def get_methods(self):
-        return map(self.get_method, xrange(self.get_n_methods()))
+        return map(self.get_method, xrange(self.n_methods))
 
     def _get_repr(self):
         values = super(GIEnumInfoPtr, self)._get_repr()
-        values["n_values"] = repr(self.get_n_values())
-        values["n_methods"] = repr(self.get_n_methods())
-        values["storage_type"] = repr(self.get_storage_type())
+        values["n_values"] = repr(self.n_values)
+        values["n_methods"] = repr(self.n_methods)
+        values["storage_type"] = repr(self.storage_type)
         return values
 
 _methods = [

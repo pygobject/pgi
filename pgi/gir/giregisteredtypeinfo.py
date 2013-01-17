@@ -14,7 +14,7 @@ _gir = find_library("girepository-1.0")
 
 
 def gi_is_registered_type_info(base_info, _it=GIInfoType):
-    type_ = base_info.get_type().value
+    type_ = base_info.type.value
     return type_ in (_it.BOXED, _it.ENUM, _it.FLAGS, _it.INTERFACE, _it.OBJECT,
                      _it.STRUCT, _it.UNION)
 
@@ -28,9 +28,9 @@ class GIRegisteredTypeInfoPtr(GIBaseInfoPtr):
 
     def _get_repr(self):
         values = super(GIRegisteredTypeInfoPtr, self)._get_repr()
-        values["type_name"] = self.get_type_name()
-        values["type_init"] = self.get_type_init()
-        values["g_type"] = self.get_g_type()
+        values["type_name"] = repr(self.type_name)
+        values["type_init"] = repr(self.type_init)
+        values["g_type"] = repr(self.g_type)
         return values
 
 _methods = [

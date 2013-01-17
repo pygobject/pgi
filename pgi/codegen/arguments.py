@@ -27,7 +27,7 @@ class Argument(object):
 
         self.args = args
         self.info = info
-        self.name = info and info.get_name()
+        self.name = info and info.name
         self.type = type_
         self.backend = backend
         self.call_var = self.name
@@ -42,17 +42,17 @@ class Argument(object):
         pass
 
     def may_be_null(self):
-        return self.info.may_be_null()
+        return self.info.may_be_null
 
     def is_pointer(self):
-        return self.type.is_pointer()
+        return self.type.is_pointer
 
     def is_direction_in(self):
-        direction = self.info.get_direction().value
+        direction = self.info.direction.value
         return direction in (GIDirection.INOUT, GIDirection.IN)
 
     def is_direction_out(self):
-        direction = self.info.get_direction().value
+        direction = self.info.direction.value
         return direction in (GIDirection.INOUT, GIDirection.OUT)
 
     def __repr__(self):
@@ -85,14 +85,14 @@ class ArrayArgument(Argument):
 
     def setup(self):
         type_ = self.info.get_type()
-        length_arg_index = type_.get_array_length()
+        length_arg_index = type_.array_length
         aux = self.args[length_arg_index]
         aux.is_aux = True
         self._aux = aux
-        self._array_type = self.type.get_array_type().value
+        self._array_type = self.type.array_type.value
 
     def is_zero_terminated(self):
-        return self.type.is_zero_terminated()
+        return self.type.is_zero_terminated
 
     def pre_call(self):
         backend = self.backend
@@ -136,7 +136,7 @@ class InterfaceArgument(Argument):
 
     def pre_call(self):
         iface = self.type.get_interface()
-        iface_type = iface.get_type().value
+        iface_type = iface.type.value
 
         if iface_type == GIInfoType.OBJECT:
             if self.may_be_null():
@@ -203,5 +203,5 @@ _find_arguments()
 
 def get_argument_class(arg_type):
     global _classes
-    tag_value = arg_type.get_tag().value
+    tag_value = arg_type.tag.value
     return _classes.get(tag_value, Argument)

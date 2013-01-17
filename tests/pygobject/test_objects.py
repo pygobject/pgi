@@ -83,6 +83,7 @@ class ObjectTest(unittest.TestCase):
         dialog.destroy()
 
         table = Gtk.Table(3, 2)
+        self.assertEqual(table.__grefcount__, 1)
         self.assertTrue(table)
         table.destroy()
 

@@ -120,8 +120,8 @@ class InfoIterWrapper(object):
 
 def typeinfo_to_ctypes(info):
     """Get a ctypes type for defining arguments and return types"""
-    tag = info.get_tag().value
-    ptr = info.is_pointer()
+    tag = info.tag.value
+    ptr = info.is_pointer
 
     if ptr:
         if tag == GITypeTag.UTF8:
@@ -145,7 +145,7 @@ def typeinfo_to_ctypes(info):
             return gboolean
         elif tag == GITypeTag.INTERFACE:
             iface = info.get_interface()
-            iface_type = iface.get_type().value
+            iface_type = iface.type.value
             iface.unref()
             if iface_type == GIInfoType.ENUM:
                 return guint32

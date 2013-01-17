@@ -52,10 +52,10 @@ class PGType(object):
 
     @cached_property
     def fundamental(self):
-        return PGType(self._type.fundamental())
+        return PGType(self._type.fundamental)
 
     def has_value_table(self):
-        return bool(self._type.value_table_peek())
+        return bool(self._type.value_table_peek)
 
     def is_a(self, type_):
         return self._type.is_a(type_._type)
@@ -82,19 +82,19 @@ class PGType(object):
         return self._type.test_flags(GTypeFlags.VALUE_ABSTRACT)
 
     def is_value_type(self):
-        return self._type.check_is_value_type()
+        return self._type.check_is_value_type
 
     @cached_property
     def parent(self):
-        return PGType(self._type.parent())
+        return PGType(self._type.parent)
 
     @cached_property
     def name(self):
-        return self._type.name() or "invalid"
+        return self._type.name or "invalid"
 
     @cached_property
     def depth(self):
-        return self._type.depth()
+        return self._type.depth
 
     @cached_property
     def pytype(self):
@@ -105,8 +105,8 @@ class PGType(object):
         base_info = repo.find_by_gtype(self._type)
         if not base_info:
             return None
-        name = base_info.get_name()
-        namespace = base_info.get_namespace()
+        name = base_info.name
+        namespace = base_info.namespace
         base_info.unref()
 
         return import_attribute(namespace, name)

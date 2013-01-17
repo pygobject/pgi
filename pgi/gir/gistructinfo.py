@@ -16,7 +16,7 @@ _gir = find_library("girepository-1.0")
 
 
 def gi_is_struct_info(base_info, _type=GIInfoType.STRUCT):
-    return base_info.get_type().value == _type
+    return base_info.type.value == _type
 
 
 class GIStructInfo(GIRegisteredTypeInfo):
@@ -29,10 +29,10 @@ class GIStructInfoPtr(GIRegisteredTypeInfoPtr):
     def _get_repr(self):
         values = super(GIStructInfoPtr, self)._get_repr()
         values = {}
-        values["size"] = repr(self.get_size())
-        values["alignment"] = repr(self.get_alignment())
-        values["is_gtype_struct"] = repr(self.is_gtype_struct())
-        values["is_foreign"] = repr(self.is_foreign())
+        values["size"] = repr(self.size)
+        values["alignment"] = repr(self.alignment)
+        values["is_gtype_struct"] = repr(self.is_gtype_struct)
+        values["is_foreign"] = repr(self.is_foreign)
         methods = self.get_methods()
         values["methods"] = repr(methods)
         for method in methods:
@@ -44,10 +44,10 @@ class GIStructInfoPtr(GIRegisteredTypeInfoPtr):
         return values
 
     def get_fields(self):
-        return map(self.get_field, xrange(self.get_n_fields()))
+        return map(self.get_field, xrange(self.n_fields))
 
     def get_methods(self):
-        return map(self.get_method, xrange(self.get_n_methods()))
+        return map(self.get_method, xrange(self.n_methods))
 
 _methods = [
     ("get_n_fields", gint, [GIStructInfoPtr]),
