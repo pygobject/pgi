@@ -5,6 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
+import itertools
 from ctypes import cast
 import weakref
 
@@ -100,7 +101,7 @@ class _Object(object):
         name = type(self).__name__
         return form % (name, id(self), self.__gtype__.name, self._obj)
 
-    def connect(self, name, callback):
+    def __connect(self, flags, name, callback, *user_args):
         if not callable(callback):
             raise TypeError("second argument must be callable")
 
@@ -108,28 +109,20 @@ class _Object(object):
             raise TypeError("unknown signal name %r" % name)
 
         def _add_self(*args):
-            return callback(self, *args)
+            return callback(self, *itertools.chain(args, user_args))
         cb = GCallback(_add_self)
         destroy = GClosureNotify()
-        id_ = signal_connect_data(self._obj, name, cb, None, destroy, 0)
-        self.__signal_cb_ref[id_] = (cb, destroy)
-        return id_
-
-    def connect_after(self, name, callback):
-        if not callable(callback):
-            raise TypeError("second argument must be callable")
-
-        if not signal_lookup(name, self.__gtype__._type):
-            raise TypeError("unknown signal name %r" % name)
-
-        def _add_self(*args):
-            return callback(self, *args)
-        cb = GCallback(_add_self)
-        destroy = GClosureNotify()
-        flags = GConnectFlags.CONNECT_AFTER
         id_ = signal_connect_data(self._obj, name, cb, None, destroy, flags)
         self.__signal_cb_ref[id_] = (cb, destroy)
         return id_
+
+
+    def connect(self, name, callback, *args):
+        return self.__connect(0, name, callback, *args)
+
+    def connect_after(self, name, callback):
+        flags = GConnectFlags.CONNECT_AFTER
+        return self.__connect(flags, name, callback, *args)
 
     def disconnect(self, id_):
         if id_ in self.__signal_cb_ref:
