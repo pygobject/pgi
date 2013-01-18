@@ -5,11 +5,15 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
+import ctypes
 from cffi import FFI
 
+from pgi.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr
 from pgi.gir import GIRepositoryPtr, GITypeTag
+from pgi.gtype import PGType
 from pgi.codegen.backend import CodeGenBackend
 from pgi.codegen.utils import CodeBlock
+
 
 
 _glib_defs = """
@@ -48,6 +52,8 @@ def typeinfo_to_cffi(info):
     else:
         if tag == GITypeTag.UTF8 or tag == GITypeTag.FILENAME:
             return "gchar*"
+        elif tag == GITypeTag.INTERFACE:
+            return "gpointer"
 
     raise NotImplementedError
 
@@ -71,7 +77,33 @@ $bool = bool($name)
         return block, var["bool"]
 
 
-class CFFIBackend(CodeGenBackend, BasicTypes):
+class InterfaceTypes(object):
+
+    def unpack_object(self, name):
+        get_class = self.var()
+
+        block, var = self.parse("""
+# unpack object
+$address = int(ffi.cast("size_t", $value))
+if $address:
+    $pyclass = $get_class($address)
+    $obj = object.__new__($pyclass)
+    $obj._obj = $address
+else:
+    $obj = None
+""", value=name, get_class=get_class)
+
+
+        def get_class_func(pointer):
+            instance = ctypes.cast(pointer, GTypeInstancePtr)
+            gtype = G_TYPE_FROM_INSTANCE(instance.contents)
+            return PGType(gtype).pytype
+
+        block.add_dependency(get_class, get_class_func)
+        block.add_dependency("ffi", self._ffi)
+        return block, var["obj"]
+
+class CFFIBackend(CodeGenBackend, BasicTypes, InterfaceTypes):
 
     NAME = "cffi"
 
