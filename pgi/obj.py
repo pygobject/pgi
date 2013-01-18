@@ -17,7 +17,7 @@ from pgi.gobject import GConnectFlags, signal_handler_disconnect, signal_lookup
 from pgi.gir import GIInterfaceInfoPtr, GIFunctionInfoFlags
 from pgi.gir import GITypeTag, GIObjectInfoPtr
 
-from pgi.util import import_attribute, set_gvalue_from_py
+from pgi.util import import_attribute, set_gvalue_from_py, Super
 from pgi.util import gparamspec_to_gvalue_ptr
 from pgi.gtype import PGType
 from pgi.properties import PropertyAttribute
@@ -32,16 +32,11 @@ class _Object(object):
     __weak = {}
     __cls = None
 
+    super = Super("__init__")
+
     def __init__(self, *args, **kwargs):
-        # HACK: no __class__, no super
-        # traverse manually in mro until object is reached
-        self.__cls = self.__cls or type(self)
-        next_cls = self.__cls.__mro__[1]
-        if next_cls is not object:
-            self.__cls = next_cls
-            next_cls.__init__(self, *args, **kwargs)
+        if not self.super(*args, **kwargs):
             return
-        del self.__cls
 
         num_params, params = self.__get_gparam_array(**kwargs)
         obj = gobject.newv(self.__gtype__._type, num_params, params)

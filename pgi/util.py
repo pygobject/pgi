@@ -15,6 +15,29 @@ from pgi.glib import gchar_p, gpointer, gboolean, guint32, free, gint32, gfloat
 from pgi.gobject import GValuePtr, GValue
 
 
+class Super(object):
+    """Biggest hack ever?"""
+
+    def __init__(self, name):
+        self.__name = name
+        self.__instances = {}
+
+    def __get__(self, instance, owner):
+        cls = self.__instances.setdefault(instance, owner)
+        next_cls = cls.__mro__[1]
+        f = None
+        while not f:
+            f = next_cls.__dict__.get(self.__name)
+            if f:
+                if next_cls is not object:
+                    self.__instances[instance] = next_cls
+                    return lambda *args, **kwargs: f(instance, *args, **kwargs)
+                break
+            next_cls = next_cls.__mro__[1]
+        del self.__instances[instance]
+        return lambda *args, **kwargs: True
+
+
 class InfoIterWrapper(object):
     """Allow fast name lookup for gi structs.
 
