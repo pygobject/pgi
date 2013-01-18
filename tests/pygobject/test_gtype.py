@@ -19,4 +19,7 @@ class GTypeTest(unittest.TestCase):
         self.assertEqual(GObject.type_from_name("glong"), GObject.TYPE_LONG)
         self.assertEqual(GObject.type_from_name("GObject"), GObject.TYPE_OBJECT)
         # gi fails..
-        #self.assertEqual(GObject.type_from_name("invalid"), GObject.TYPE_INVALID)
+        try:
+            self.assertEqual(GObject.type_from_name("invalid"), GObject.TYPE_INVALID)
+        except RuntimeError:
+            pass
