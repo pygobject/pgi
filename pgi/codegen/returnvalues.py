@@ -25,6 +25,13 @@ class ReturnValue(object):
         return self.type.is_zero_terminated
 
 
+class BooleanReturnValue(ReturnValue):
+    TAG = GITypeTag.BOOLEAN
+
+    def process(self, name):
+        return self.backend.unpack_bool(name)
+
+
 class VoidReturnValue(ReturnValue):
     TAG = GITypeTag.VOID
 

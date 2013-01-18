@@ -43,6 +43,8 @@ def typeinfo_to_cffi(info):
     if not ptr:
         if tag == GITypeTag.UINT32:
             return "guint32"
+        elif tag == GITypeTag.BOOLEAN:
+            return "gboolean"
     else:
         if tag == GITypeTag.UTF8 or tag == GITypeTag.FILENAME:
             return "gchar*"
@@ -60,6 +62,13 @@ $string = $to_string($cdata)
 
         block.add_dependency(to_string, self._ffi.string)
         return block, var["string"]
+
+    def unpack_bool(self, name):
+        block, var = self.parse("""
+$bool = bool($name)
+""", name=name)
+
+        return block, var["bool"]
 
 
 class CFFIBackend(CodeGenBackend, BasicTypes):

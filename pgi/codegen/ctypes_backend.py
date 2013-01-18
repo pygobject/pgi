@@ -48,6 +48,9 @@ $boolean = bool($var) # https://bugs.pypy.org/issue1367
 
         return block, var["boolean"]
 
+    def unpack_bool(self, name):
+        return None, name
+
     def unpack_basic_ptr(self, name):
         block, var = self.parse("""
 # unpack basic pointer
