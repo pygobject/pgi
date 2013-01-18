@@ -25,15 +25,10 @@ class Super(object):
     def __get__(self, instance, owner):
         cls = self.__instances.setdefault(instance, owner)
         next_cls = cls.__mro__[1]
-        f = None
-        while not f:
-            f = next_cls.__dict__.get(self.__name)
-            if f:
-                if next_cls is not object:
-                    self.__instances[instance] = next_cls
-                    return lambda *args, **kwargs: f(instance, *args, **kwargs)
-                break
-            next_cls = next_cls.__mro__[1]
+        if next_cls is not object:
+            func = getattr(next_cls, self.__name)
+            self.__instances[instance] = next_cls
+            return lambda *args, **kwargs: func(instance, *args, **kwargs)
         del self.__instances[instance]
         return lambda *args, **kwargs: True
 
