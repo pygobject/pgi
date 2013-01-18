@@ -190,6 +190,16 @@ class FloatArgument(Argument):
             self.out_vars = [var]
             return block
 
+
+class GTypeArgument(Argument):
+    TAG = GITypeTag.GTYPE
+
+    def pre_call(self):
+        block, out = self.backend.pack_gtype(self.name)
+        self.call_var = out
+        return block
+
+
 _classes = {}
 
 

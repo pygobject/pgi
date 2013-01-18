@@ -71,6 +71,13 @@ class InterfaceReturnValue(ReturnValue):
         return None, name
 
 
+class GTypeReturnValue(ReturnValue):
+    TAG = GITypeTag.GTYPE
+
+    def process(self, name):
+        return self.backend.unpack_gtype(name)
+
+
 _classes = {}
 
 

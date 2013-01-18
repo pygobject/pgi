@@ -256,3 +256,19 @@ else:
 
         block.add_dependency(get_class, get_class_func)
         return block, var["obj"]
+
+    def unpack_gtype(self, name):
+        block, var = self.parse("""
+$pgtype = PGType($gtype)
+""", gtype=name)
+
+        from pgi.gtype import PGType
+        block.add_dependency("PGType", PGType)
+        return block, var["pgtype"]
+
+    def pack_gtype(self, name):
+        block, var = self.parse("""
+$gtype = $pgtype._type
+""", pgtype=name)
+
+        return block, var["gtype"]

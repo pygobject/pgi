@@ -12,7 +12,8 @@ from ctypes import cast, POINTER, c_void_p
 from pgi import const
 from pgi.gir import GITypeTag, GIInfoType
 from pgi.glib import gchar_p, gpointer, gboolean, guint32, free, gint32, gfloat
-from pgi.gobject import GValuePtr, GValue
+from pgi.glib import gulong
+from pgi.gobject import GValuePtr, GValue, GType
 
 
 class Super(object):
@@ -177,6 +178,8 @@ def typeinfo_to_ctypes(info):
             return gfloat
         elif tag == GITypeTag.VOID:
             return
+        elif tag == GITypeTag.GTYPE:
+            return GType
 
 def gparamspec_to_gvalue_ptr(spec, value):
     type_ = spec._info.get_type()
