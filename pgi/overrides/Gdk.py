@@ -131,7 +131,7 @@ if Gdk._version == '2.0':
     Rectangle = override(Rectangle)
     __all__.append('Rectangle')
 else:
-    from gi.repository import cairo as _cairo
+    from pgi.repository import cairo as _cairo
     Rectangle = _cairo.RectangleInt
 
     __all__.append('Rectangle')
