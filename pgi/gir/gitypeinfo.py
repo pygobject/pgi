@@ -75,6 +75,11 @@ class GITypeInfoPtr(GIBaseInfoPtr):
             values["array_fixed_size"] = repr(self.array_fixed_size)
             values["zero_terminated"] = repr(self.is_zero_terminated)
             values["array_type"] = repr(self.array_type)
+            values["param_type"] = repr(self.get_param_type(0))
+        elif tag.value == GITypeTag.GHASH:
+            values["key_type"] = repr(self.get_param_type(0))
+            values["value_type"] = repr(self.get_param_type(1))
+
         return values
 
 

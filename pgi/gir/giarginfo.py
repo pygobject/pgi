@@ -48,7 +48,7 @@ class GIArgInfoPtr(GIBaseInfoPtr):
         values["closure"] = repr(self.closure)
         values["destroy"] = repr(self.destroy)
         type_ = self.get_type()
-        values["type"] = repr(type_)
+        values["arg_type"] = repr(type_)
         type_.unref()
 
         return values

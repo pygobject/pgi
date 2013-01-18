@@ -43,14 +43,15 @@ class GIBaseInfoPtr(POINTER(GIBaseInfo)):
 
     def _get_repr(self):
         values = {}
-        values["type"] = repr(self.type)
+        values["info_type"] = repr(self.type)
         real_type = cast(self, GIBaseInfoPtr).type.value
         if real_type != GIInfoType.TYPE and self.name:
             values["name"] = repr(self.name)
         values["namespace"] = repr(self.namespace)
         values["deprecated"] = repr(self.is_deprecated)
-        if self.get_container():
-            values["container"] = repr(self.get_container().name)
+        container = self.get_container()
+        if container and container.type.value != GIInfoType.TYPE :
+            values["container"] = repr(container.name)
 
         return values
 
