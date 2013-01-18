@@ -6,15 +6,13 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from warnings import warn
-from ctypes import cast
 
 from pgi import gobject
-from pgi.gobject import GValue, GValuePtr, GObjectClassPtr
-from pgi.gobject import G_TYPE_FROM_INSTANCE
-from pgi.gir import GIRepositoryPtr, GIInfoType, GIObjectInfoPtr
-from pgi.gir import GIInterfaceInfoPtr, GITypeTag
+from pgi.gobject import GValue, GValuePtr, G_TYPE_FROM_INSTANCE
+from pgi.gir import GIInfoType, GITypeTag
 
-from pgi.util import escape_name, import_attribute, set_gvalue_from_py
+from pgi.util import escape_name, unescape_name, InfoIterWrapper
+from pgi.util import import_attribute, set_gvalue_from_py
 from pgi.gtype import PGType
 
 
@@ -124,75 +122,103 @@ class _GProps(object):
         return "<GProps of %s%r>" % (text, self.__name)
 
 
-class _Props(object):
+class PropertyIterWrapper(InfoIterWrapper):
+    def _get_count(self, source):
+        return source.n_properties
+
+    def _get_info(self, source, index):
+        return source.get_property(index)
+
+    def _get_name(self, info):
+        return info.name
+
+
+class _ObjectClassProp(object):
+    def __init__(self, info, owner):
+        self._info = info
+        self._wrapper = PropertyIterWrapper(info)
+        self._owner = owner
+
+    def __get_base_props(self):
+        for base in self._owner.__mro__:
+            props = getattr(base, "props", None)
+            if not props or props is self:
+                continue
+            yield props
+
+    def __dir__(self):
+        names = [escape_name(n) for n in self._wrapper.iternames()]
+        for props in self.__get_base_props():
+            names.extend([escape_name(n) for n in props._wrapper.iternames()])
+
+        base = dir(self.__class__)
+        return list(set(base + names))
+
+    def __getattr__(self, name):
+        for props in self.__get_base_props():
+            try:
+                return getattr(props, name)
+            except AttributeError:
+                pass
+
+        info = self._info
+        gname = unescape_name(name)
+        prop_info = self._wrapper.lookup_name(gname)
+        if prop_info:
+            gtype = info.g_type
+            if info.type.value == GIInfoType.OBJECT:
+                klass = gtype.class_ref()
+                spec = klass.find_property(gname)
+                gtype.class_unref(klass)
+            else:
+                iface = gtype.default_interface_ref()
+                spec = iface.find_property(gname)
+                gtype.default_interface_unref(iface)
+            gspec = GParamSpec(spec, gname, prop_info)
+            setattr(self, name, gspec)
+            return gspec
+
+        raise AttributeError
+
+
+class _PropsDescriptor(object):
     __cache = None
     __cls_cache = None
 
     def __init__(self, info):
         info.ref()
-        self.__info = info
+        self._info = info
 
     def __get_gparam_spec(self, owner):
-        if self.__cache:
-            return self.__cache
+        if not self.__cache:
+            cls_dict = dict(_ObjectClassProp.__dict__)
+            self.__cache = type("prop", (object,), cls_dict)(self._info, owner)
+        return self.__cache
 
-        info = self.__info
-        cls = _GProps
-        cls_dict = dict(cls.__dict__)
+    def __get_gprops_class(self, specs):
+        if not self.__cls_cache:
+            cls = _GProps
+            cls_dict = dict(cls.__dict__)
 
-        # get the prop classes of all base classes, so we inherit all specs
-        prop_bases = []
-        for base in owner.__bases__:
-            if hasattr(base, "props"):
-                prop_bases.append(base.props.__class__)
-        prop_bases = tuple(prop_bases) or cls.__bases__
+            for key in (p for p in dir(specs) if not p.startswith("_")):
+                spec = getattr(specs, key)
+                cls_dict[key] = Property(spec)
 
-        gtype = info.g_type
-        if info.type.value == GIInfoType.OBJECT:
-            klass = gtype.class_ref()
-            for prop_info in info.get_properties():
-                real_name = prop_info.name
-                spec = klass.find_property(real_name)
-                attr_name = escape_name(real_name)
-                cls_dict[attr_name] = GParamSpec(spec, real_name, prop_info)
-            gtype.class_unref(klass)
-        else:
-            iface = gtype.default_interface_ref()
-            for prop_info in info.get_properties():
-                real_name = prop_info.name
-                spec = iface.find_property(real_name)
-                attr_name = escape_name(real_name)
-                cls_dict[attr_name] = GParamSpec(spec, real_name, prop_info)
-            gtype.default_interface_unref(iface)
-
-        attr = type("GProps", tuple(prop_bases), cls_dict)(info.name, False)
-        self.__cache = attr
-        return attr
+            self.__cls_cache = type("GProps", cls.__bases__, cls_dict)
+        return self.__cls_cache
 
     def __get__(self, instance, owner):
         specs = self.__get_gparam_spec(owner)
         if not instance:
             return specs
 
-        # get all the property names of the specs and build properties
-        if not self.__cls_cache:
-            props = {}
-            for key in (p for p in dir(specs) if not p.startswith("_")):
-                spec = getattr(specs, key)
-                props[key] = Property(spec)
-
-            cls = _GProps
-            cls_dict = dict(cls.__dict__)
-            cls_dict.update(props)
-
-            self.__cls_cache = type("GProps", cls.__bases__, cls_dict)
-
-        attr = self.__cls_cache(self.__info.name, instance)
+        gprops = self.__get_gprops_class(specs)
+        attr = gprops(self._info.name, instance)
         setattr(instance, "props", attr)
         return attr
 
 
 def PropertyAttribute(obj_info):
-    cls = _Props
+    cls = _PropsDescriptor
     cls_dict = dict(cls.__dict__)
     return type("props", cls.__bases__, cls_dict)(obj_info)

@@ -65,10 +65,10 @@ class InfoIterWrapper(object):
         raise NotImplementedError
 
     def __get_name_cached(self, index):
-        if index not in self.__names:
-            info = self.__get_info_cached(index)
-            self.__names[index] = self._get_name(info)
-        return self.__names[index]
+        info = self.__get_info_cached(index)
+        name = self._get_name(info)
+        self.__names[name] = info
+        return name
 
     def __get_info_cached(self, index):
         if index not in self.__infos:
@@ -82,6 +82,9 @@ class InfoIterWrapper(object):
 
     def lookup_name_fast(self, name):
         """Might return a struct"""
+
+        if name in self.__names:
+            return self.__names[name]
 
         count = self.__get_count_cached()
         lo = 0
