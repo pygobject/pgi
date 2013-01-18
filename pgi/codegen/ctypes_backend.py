@@ -39,6 +39,8 @@ class CTypesBackend(CodeGenBackend):
         h = getattr(lib, symbol)
         if ret:
             h.restype = typeinfo_to_ctypes(ret.type)
+        else:
+            h.restype = None
 
         arg_types = []
 
@@ -137,6 +139,28 @@ $value = $ctypes_value.value
 
         block.add_dependency("ctypes", ctypes)
         return block, var["value"]
+
+    def pack_uint32(self, name):
+        block, var = self.parse("""
+$cuint = ctypes.c_uint32($uint)
+# overflow check for uint32
+if not 0 <= $uint < 4294967296:
+    raise ValueError("Value '$uint' not in range")
+""", uint=name)
+
+        block.add_dependency("ctypes", ctypes)
+        return block, var["cuint"]
+
+    def pack_uint32_ptr(self):
+        block, var = self.parse("""
+# pack uint32
+$uint = ctypes.c_uint32()
+$uint_ref = ctypes.byref($uint)
+""")
+
+        block.add_dependency("ctypes", ctypes)
+        return block, var["uint"], var["uint_ref"]
+
 
     def pack_float_ptr(self):
         block, var = self.parse("""

@@ -83,6 +83,8 @@ class Property(object):
                 func = lambda: ptr.int
             elif tag == GITypeTag.BOOLEAN:
                 func = lambda: ptr.boolean
+            elif tag == GITypeTag.FLOAT:
+                func = lambda: ptr.float
         else:
             if tag == GIInfoType.ENUM:
                 func = lambda: self.__iclass(ptr.enum)

@@ -88,3 +88,10 @@ class PropertiesTest(unittest.TestCase):
         self.assertTrue("GProps" in repr(type(Gtk.Box.props)))
         self.assertTrue("GParamSpec" in repr(type(Gtk.Box.props.name)))
         self.assertTrue("GParamString" in repr(Gtk.Box.props.name))
+
+    def test_float(self):
+        a = Gtk.Alignment()
+        a.props.xalign = 0.25
+        self.assertEqual(a.props.xalign, 0.25)
+        a.props.xalign = 0.5
+        self.assertEqual(a.props.xalign, 0.5)

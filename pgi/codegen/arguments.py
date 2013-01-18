@@ -162,6 +162,27 @@ class Int32Argument(Argument):
     TAG = GITypeTag.INT32
 
 
+class UINT32Argument(Argument):
+    TAG = GITypeTag.UINT32
+
+    def pre_call(self):
+        if self.is_direction_out():
+            block, data, ref = self.backend.pack_uint32_ptr()
+            self._data = data
+            self.call_var = ref
+            return block
+        else:
+            block, out = self.backend.pack_uint32(self.name)
+            self.call_var = out
+            return block
+
+    def post_call(self):
+        if self.is_direction_out():
+            block, var = self.backend.unpack_basic_ptr(self._data)
+            self.out_vars = [var]
+            return block
+
+
 class Utf8Argument(Argument):
     TAG = GITypeTag.UTF8
 

@@ -157,6 +157,8 @@ def typeinfo_to_ctypes(info):
             return gpointer
         elif tag == GITypeTag.INT32:
             return POINTER(gint32)
+        elif tag == GITypeTag.UINT32:
+            return POINTER(gint32)
         elif tag == GITypeTag.FLOAT:
             return POINTER(gfloat)
         elif tag == GITypeTag.VOID:
@@ -217,6 +219,8 @@ def set_gvalue_from_py(ptr, is_interface, tag, value):
             ptr.set_uint(value)
         elif tag == GITypeTag.DOUBLE:
             ptr.set_double(value)
+        elif tag == GITypeTag.FLOAT:
+            ptr.set_float(value)
         elif tag == GITypeTag.UTF8:
             if isinstance(value, unicode):
                 value = value.encode("utf-8")

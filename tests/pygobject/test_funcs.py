@@ -99,3 +99,14 @@ class FuncsTest(unittest.TestCase):
         box = Gtk.Box()
         box.add(button)
         self.assertRaises(TypeError, box.add, None)
+
+    def test_uint32_in_out(self):
+        a = Gtk.Alignment()
+        self.assertEqual(a.get_padding(), (0, 0, 0, 0))
+        a.set_padding(1, 2, 3, 4)
+        self.assertEqual(a.get_padding(), (1, 2, 3, 4))
+        a.set_padding(1, 2, 3, 2**32-1)
+        self.assertRaises(TypeError, a.set_padding, 1, 2, 3, "")
+        self.assertRaises(TypeError, a.set_padding, 1, 2, 3, None)
+        self.assertRaises(ValueError, a.set_padding, 1, 2, 3, -1)
+        self.assertRaises(ValueError, a.set_padding, 1, 2, 3, 2**32)
