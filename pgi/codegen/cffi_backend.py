@@ -50,12 +50,24 @@ def typeinfo_to_cffi(info):
     raise NotImplementedError
 
 
-class CFFIBackend(CodeGenBackend):
+class BasicTypes(object):
+
+    def unpack_string(self, name):
+        to_string = self.var()
+        block, var = self.parse("""
+$string = $to_string($cdata)
+""", to_string=to_string, cdata=name)
+
+        block.add_dependency(to_string, self._ffi.string)
+        return block, var["string"]
+
+
+class CFFIBackend(CodeGenBackend, BasicTypes):
 
     NAME = "cffi"
 
     def __init__(self, *args, **kwargs):
-        super(CFFIBackend, self).__init__(*args, **kwargs)
+        CodeGenBackend.__init__(self, *args, **kwargs)
         self._libs = {}
         try:
             self._ffi = FFI()
@@ -109,12 +121,3 @@ $ret = $name($args)
 """, name=name, args=args)
 
         return block, var["ret"]
-
-    def unpack_string(self, name):
-        to_string = self.var()
-        block, var = self.parse("""
-$string = $to_string($cdata)
-""", to_string=to_string, cdata=name)
-
-        block.add_dependency(to_string, self._ffi.string)
-        return block, var["string"]

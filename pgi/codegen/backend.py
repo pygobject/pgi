@@ -7,9 +7,19 @@
 
 from pgi.codegen.utils import parse_code
 
-class CodeGenBackend(object):
 
-    NAME = ""
+class CodeGenBackend(object):
+    """Backends provide methods that produce python code. They take
+    input variable nams and return a CodeBlock + output variables. If one
+    method is not implemented the consumer will fall back to another backend
+    if possible.
+
+    get_library_object  - init the backend and do caching with the namespace
+    get_function_object - should return something callable
+    call                - code surrounding the function call (exceptions..)
+    """
+
+    NAME = "base"
 
     def __init__(self):
         super(CodeGenBackend, self).__init__()
@@ -25,4 +35,14 @@ class CodeGenBackend(object):
         return parse_code(code, self.var, **kwargs)
 
     def __getattr__(self, value):
+        raise NotImplementedError
+
+    def get_library_object(self, namespace):
+        raise NotImplementedError
+
+    def get_function_object(self, lib, symbol, args, ret,
+                            method=False, self_name="", throws=False):
+        raise NotImplementedError
+
+    def call(self, name, args):
         raise NotImplementedError
