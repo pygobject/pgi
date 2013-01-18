@@ -22,6 +22,9 @@ class CodeBlock(object):
         if line:
             self.write_line(line)
 
+    def get_dependencies(self):
+        return self._deps
+
     def add_dependency(self, name, obj):
         """Add a code dependency so it gets inserted into globals"""
 
@@ -64,7 +67,14 @@ class CodeBlock(object):
         Does syntax highlighting if possible.
         """
 
-        code = str(self)
+        code = []
+        if self._deps:
+            code.append("# dependencies:")
+        for k, v in self._deps.iteritems():
+            code.append("#   %s: %r" % (k, v))
+        code.append(str(self))
+        code = "\n".join(code)
+
         if file_.isatty():
             try:
                 from pygments import highlight
@@ -82,10 +92,7 @@ class CodeBlock(object):
     def __str__(self):
         lines = []
 
-        if self._deps:
-            lines.append("# dependencies:")
-        for k, v in self._deps.iteritems():
-            lines.append("#   %s: %r" % (k, v))
+
 
         for line, level in self._lines:
             lines.append(" " * self.INDENTATION * level + line)
@@ -125,6 +132,14 @@ def parse_code(code, var_factory, **kwargs):
                 level = spaces / indent
         else:
             level = 0
+
+        # if there is a single variable and the to be inserted object
+        # is a code block, insert the block with the current indentation level
+        if line.startswith("$") and line.count("$") == 1:
+            name = line[1:]
+            if name in kwargs and isinstance(kwargs[name], CodeBlock):
+                kwargs[name].write_into(block, level)
+                continue
 
         block.write_line(string.Template(line).substitute(defdict), level)
     return block, dict(defdict)

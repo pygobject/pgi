@@ -9,7 +9,7 @@ import unittest
 import StringIO
 
 from pgi.util import escape_name, unescape_name
-from pgi.codegen.utils import CodeBlock
+from pgi.codegen.utils import CodeBlock, parse_code
 
 
 class PGIMisc(unittest.TestCase):
@@ -38,3 +38,16 @@ class PGIMisc(unittest.TestCase):
         a.write_line("abc")
         a.pprint(f)
         self.assertEqual(f.getvalue(), "abc")
+
+    def test_parse_codeblock(self):
+        b = CodeBlock()
+        b.add_dependency("test", "blah")
+        b.write_line("if 1:")
+        b.write_line("do()", 1)
+        n, v = parse_code("""
+if 2:
+    $doit
+""", None, doit = b)
+
+        self.assertEqual(str(n), "if 2:\n    if 1:\n        do()")
+        self.assertTrue("test" in n.get_dependencies())
