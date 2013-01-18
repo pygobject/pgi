@@ -42,8 +42,7 @@ class _Object(object):
         obj = gobject.newv(self.__gtype__._type, num_params, params)
 
         # sink unowned objects
-        unowned = import_attribute("GObject", "InitiallyUnowned")
-        if isinstance(self, unowned):
+        if self._unowned:
             gobject.ref_sink(obj)
 
         self.__weak[weakref.ref(self, self.__destroy)] = obj
@@ -210,6 +209,13 @@ def ObjectAttribute(info):
     # Create a new class
     cls = type(info.name, bases, dict(_Object.__dict__))
     cls.__module__ = obj_info.namespace
+
+    # Set root to unowned= False and InitiallyUnowned=True
+    if obj_info.namespace == "GObject":
+        if obj_info.name == "InitiallyUnowned":
+            cls._unowned = True
+        elif obj_info.name == "Object":
+            cls._unowned = False
 
     # GType
     cls.__gtype__ = PGType(obj_info.g_type)
