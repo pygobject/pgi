@@ -109,6 +109,7 @@ class GITypesTest(unittest.TestCase):
         self.failUnless(gi_is_struct_info(s))
         self.failUnless(gi_is_registered_type_info(s))
         s = cast(s, GIStructInfoPtr)
+        map(lambda x: x.unref(), s.get_fields())
         repr(s)
 
     def test_fieldinfo(self):

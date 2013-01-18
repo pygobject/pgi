@@ -36,14 +36,8 @@ class CoverageCommand(Command):
             ignoredirs=[sys.prefix, sys.exec_prefix])
 
         def run_tests():
-            try:
-                 # we don't want to fork and use PyGObject
-                cmd = self.reinitialize_command("test")
-                cmd.pgi_only = True
-                cmd.ensure_finalized()
-                cmd.run()
-            except:
-                pass
+            import tests
+            tests.test(False, "cffi")
 
         tracer.runfunc(run_tests)
         results = tracer.results()

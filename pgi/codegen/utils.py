@@ -59,13 +59,13 @@ class CodeBlock(object):
         exec code in global_dict
         return global_dict
 
-    def pprint(self):
+    def pprint(self, file_=sys.stdout):
         """Print the code block to stdout.
         Does syntax highlighting if possible.
         """
 
         code = str(self)
-        if sys.stdout.isatty():
+        if file_.isatty():
             try:
                 from pygments import highlight
                 from pygments.lexers import PythonLexer
@@ -75,9 +75,9 @@ class CodeBlock(object):
             else:
                 formatter = TerminalFormatter(bg="dark")
                 lexer = PythonLexer()
-                print highlight(code, lexer, formatter).strip()
+                file_.write(highlight(code, lexer, formatter))
                 return
-        print code
+        file_.write(code)
 
     def __str__(self):
         lines = []
