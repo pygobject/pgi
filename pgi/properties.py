@@ -16,6 +16,9 @@ from pgi.util import import_attribute, set_gvalue_from_py
 from pgi.gtype import PGType
 
 
+PROPS_NAME = "props"
+
+
 class GParamSpec(object):
     _spec = None
     _info = None
@@ -141,7 +144,7 @@ class _ObjectClassProp(object):
 
     def __get_base_props(self):
         for base in self._owner.__mro__:
-            props = getattr(base, "props", None)
+            props = getattr(base, PROPS_NAME, None)
             if not props or props is self:
                 continue
             yield props
@@ -192,7 +195,8 @@ class _PropsDescriptor(object):
     def __get_gparam_spec(self, owner):
         if not self.__cache:
             cls_dict = dict(_ObjectClassProp.__dict__)
-            self.__cache = type("prop", (object,), cls_dict)(self._info, owner)
+            bases = (object,)
+            self.__cache = type("GProps", bases, cls_dict)(self._info, owner)
         return self.__cache
 
     def __get_gprops_class(self, specs):
@@ -214,11 +218,11 @@ class _PropsDescriptor(object):
 
         gprops = self.__get_gprops_class(specs)
         attr = gprops(self._info.name, instance)
-        setattr(instance, "props", attr)
+        setattr(instance, PROPS_NAME, attr)
         return attr
 
 
 def PropertyAttribute(obj_info):
     cls = _PropsDescriptor
     cls_dict = dict(cls.__dict__)
-    return type("props", cls.__bases__, cls_dict)(obj_info)
+    return type(obj_info.name + "Props", cls.__bases__, cls_dict)(obj_info)

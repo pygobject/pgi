@@ -19,7 +19,7 @@ from pgi.gir import GIInterfaceInfoPtr, GIFunctionInfoFlags, GIObjectInfoPtr
 from pgi.util import import_attribute, Super
 from pgi.util import gparamspec_to_gvalue_ptr
 from pgi.gtype import PGType
-from pgi.properties import PropertyAttribute
+from pgi.properties import PropertyAttribute, PROPS_NAME
 from pgi.constant import ConstantAttribute
 from pgi.codegen.funcgen import generate_function
 
@@ -220,7 +220,7 @@ def ObjectAttribute(info):
     cls.__gtype__ = PGType(obj_info.g_type)
 
     # Properties
-    cls.props = PropertyAttribute(obj_info)
+    setattr(cls, PROPS_NAME, PropertyAttribute(obj_info))
 
     # Add constants
     for constant in obj_info.get_constants():

@@ -80,3 +80,11 @@ class PropertiesTest(unittest.TestCase):
     def test_invalid(self):
         self.assertRaises(TypeError, Gtk.Box, foo=3)
         self.assertRaises(TypeError, Gtk.Box, 1, "")
+
+    def test_naming(self):
+        self.assertTrue("GProps" in repr(Gtk.Box().props))
+        self.assertTrue("GProps" in repr(Gtk.Box.props))
+        self.assertTrue("GProps" in repr(type(Gtk.Box().props)))
+        self.assertTrue("GProps" in repr(type(Gtk.Box.props)))
+        self.assertTrue("GParamSpec" in repr(type(Gtk.Box.props.name)))
+        self.assertTrue("GParamString" in repr(Gtk.Box.props.name))
