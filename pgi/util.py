@@ -11,9 +11,8 @@ from ctypes import cast, POINTER, c_void_p
 
 from pgi import const
 from pgi.gir import GITypeTag, GIInfoType
-from pgi.glib import gchar_p, gpointer, gboolean, guint32, free, gint32, gfloat
-from pgi.glib import gulong
-from pgi.gobject import GValuePtr, GValue, GType
+from pgi.glib import free
+from pgi.gobject import GValuePtr, GValue
 
 
 class Super(object):
@@ -138,50 +137,6 @@ class InfoIterWrapper(object):
         self.__infos.clear()
         self.__names.clear()
 
-
-def typeinfo_to_ctypes(info):
-    """Get a ctypes type for defining arguments and return types"""
-    tag = info.tag.value
-    ptr = info.is_pointer
-
-    if ptr:
-        if tag == GITypeTag.UTF8:
-            return gchar_p
-        elif tag == GITypeTag.VOID:
-            return gpointer
-        elif tag == GITypeTag.UTF8 or tag == GITypeTag.FILENAME:
-            return gchar_p
-        elif tag == GITypeTag.ARRAY:
-            return gpointer
-        elif tag == GITypeTag.INTERFACE:
-            return gpointer
-        elif tag == GITypeTag.INT32:
-            return POINTER(gint32)
-        elif tag == GITypeTag.UINT32:
-            return POINTER(gint32)
-        elif tag == GITypeTag.FLOAT:
-            return POINTER(gfloat)
-        elif tag == GITypeTag.VOID:
-            return gpointer
-    else:
-        if tag == GITypeTag.BOOLEAN:
-            return gboolean
-        elif tag == GITypeTag.INTERFACE:
-            iface = info.get_interface()
-            iface_type = iface.type.value
-            iface.unref()
-            if iface_type == GIInfoType.ENUM:
-                return guint32
-        elif tag == GITypeTag.UINT32:
-            return guint32
-        elif tag == GITypeTag.INT32:
-            return gint32
-        elif tag == GITypeTag.FLOAT:
-            return gfloat
-        elif tag == GITypeTag.VOID:
-            return
-        elif tag == GITypeTag.GTYPE:
-            return GType
 
 def gparamspec_to_gvalue_ptr(spec, value):
     type_ = spec._info.get_type()

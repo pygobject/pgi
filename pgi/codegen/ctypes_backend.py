@@ -6,14 +6,61 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 import ctypes
+from ctypes import POINTER
 
 from pgi.codegen.backend import CodeGenBackend
 from pgi.codegen.utils import CodeBlock
-from pgi.gir import GIRepositoryPtr
-from pgi.glib import GErrorPtr
-from pgi.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr
-from pgi.util import typeinfo_to_ctypes, import_attribute
+from pgi.gir import GIRepositoryPtr, GITypeTag, GIInfoType
+from pgi.glib import gboolean, gfloat
+from pgi.glib import GErrorPtr, gchar_p, guint32, gint32, gpointer
+from pgi.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr, GType
 from pgi.gtype import PGType
+from pgi.util import import_attribute
+
+
+def typeinfo_to_ctypes(info):
+
+    tag = info.tag.value
+    ptr = info.is_pointer
+
+    if ptr:
+        if tag == GITypeTag.UTF8:
+            return gchar_p
+        elif tag == GITypeTag.VOID:
+            return gpointer
+        elif tag == GITypeTag.UTF8 or tag == GITypeTag.FILENAME:
+            return gchar_p
+        elif tag == GITypeTag.ARRAY:
+            return gpointer
+        elif tag == GITypeTag.INTERFACE:
+            return gpointer
+        elif tag == GITypeTag.INT32:
+            return POINTER(gint32)
+        elif tag == GITypeTag.UINT32:
+            return POINTER(gint32)
+        elif tag == GITypeTag.FLOAT:
+            return POINTER(gfloat)
+        elif tag == GITypeTag.VOID:
+            return gpointer
+    else:
+        if tag == GITypeTag.BOOLEAN:
+            return gboolean
+        elif tag == GITypeTag.INTERFACE:
+            iface = info.get_interface()
+            iface_type = iface.type.value
+            iface.unref()
+            if iface_type == GIInfoType.ENUM:
+                return guint32
+        elif tag == GITypeTag.UINT32:
+            return guint32
+        elif tag == GITypeTag.INT32:
+            return gint32
+        elif tag == GITypeTag.FLOAT:
+            return gfloat
+        elif tag == GITypeTag.VOID:
+            return
+        elif tag == GITypeTag.GTYPE:
+            return GType
 
 
 class BasicTypes(object):
