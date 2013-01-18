@@ -8,7 +8,7 @@
 """Provides a custom PEP-302 import hook to load GI libraries"""
 
 import sys
-from ctypes import c_char_p, byref, CDLL
+from ctypes import c_char_p, byref
 
 from pgi.gir import GIRepositoryPtr
 from pgi.glib import GErrorPtr

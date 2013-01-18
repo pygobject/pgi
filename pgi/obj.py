@@ -14,10 +14,9 @@ from pgi.gobject import GParameter
 from pgi.gobject import GCallback, GClosureNotify, signal_connect_data
 from pgi.gobject import signal_handler_unblock, signal_handler_block
 from pgi.gobject import GConnectFlags, signal_handler_disconnect, signal_lookup
-from pgi.gir import GIInterfaceInfoPtr, GIFunctionInfoFlags
-from pgi.gir import GITypeTag, GIObjectInfoPtr
+from pgi.gir import GIInterfaceInfoPtr, GIFunctionInfoFlags, GIObjectInfoPtr
 
-from pgi.util import import_attribute, set_gvalue_from_py, Super
+from pgi.util import import_attribute, Super
 from pgi.util import gparamspec_to_gvalue_ptr
 from pgi.gtype import PGType
 from pgi.properties import PropertyAttribute
