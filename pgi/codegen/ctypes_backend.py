@@ -142,14 +142,15 @@ $value = $ctypes_value.value
 
     def pack_uint32(self, name):
         block, var = self.parse("""
-$cuint = ctypes.c_uint32($uint)
+if not isinstance($uint, (float, int, long)):
+    raise TypeError("Value '$uint' not a number")
+$uint = int($uint)
 # overflow check for uint32
 if not 0 <= $uint < 4294967296:
     raise ValueError("Value '$uint' not in range")
 """, uint=name)
 
-        block.add_dependency("ctypes", ctypes)
-        return block, var["cuint"]
+        return block, var["uint"]
 
     def pack_uint32_ptr(self):
         block, var = self.parse("""
