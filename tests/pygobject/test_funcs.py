@@ -119,3 +119,8 @@ class FuncsTest(unittest.TestCase):
 
     def test_array_c_in(self):
         Gtk.ListStore().set_column_types([])
+
+    def test_bool_return(self):
+        a = Gtk.Action("", "", "", "")
+        v = a.get_always_show_image()
+        self.assertTrue(isinstance(v, bool))
