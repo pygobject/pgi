@@ -99,15 +99,22 @@ class ArrayArgument(Argument):
         array_type = self._array_type
 
         if array_type == GIArrayType.C:
-            if self.is_direction_in():
-                if not self.is_zero_terminated() and self.is_pointer():
+            if self.is_direction_in() and self.is_direction_out():
+                if not self.is_zero_terminated():
                     block, data, data_ref, length, lref = \
-                        backend.pack_array_ptr_fixed_c(self.name)
+                        backend.pack_array_ptr_fixed_c_in_out(self.name)
                     self.call_var = data_ref
                     self._aux.call_var = lref
                     # vars for out
                     self._data = data
                     self._length = length
+                    return block
+            elif self.is_direction_in():
+                if not self.is_zero_terminated():
+                    block, data_ref, length = \
+                        backend.pack_array_ptr_fixed_c_in(self.name)
+                    self.call_var = data_ref
+                    self._aux.call_var = length
                     return block
         elif array_type == GIArrayType.ARRAY:
             pass

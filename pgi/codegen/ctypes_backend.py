@@ -202,9 +202,9 @@ if $obj is not None:
         block.add_dependency("ctypes", ctypes)
         return block, var["obj"]
 
-    def pack_array_ptr_fixed_c(self, name):
+    def pack_array_ptr_fixed_c_in_out(self, name):
         block, var = self.parse("""
-# pack char array
+# pack c array
 $length = len($name)
 $length_c = ctypes.c_int($length)
 $length_ref = ctypes.byref($length_c)
@@ -219,6 +219,20 @@ $array_ref = ctypes.byref($array_ptr)
 
         return (block, var["array_ptr"], var["array_ref"],
                 var["length_c"], var["length_ref"])
+
+    def pack_array_ptr_fixed_c_in(self, name):
+        block, var = self.parse("""
+# pack c array
+$length = len($name)
+$array = (ctypes.c_char_p * $length)()
+for $i, $item in enumerate($name):
+    $array[$i] = $item
+$array_ref = ctypes.byref($array)
+""", name=name)
+
+        block.add_dependency("ctypes", ctypes)
+
+        return block, var["array_ref"], var["length"]
 
     def unpack_array_ptr_fixed_c(self, array, length):
         block, var = self.parse("""

@@ -116,3 +116,6 @@ class FuncsTest(unittest.TestCase):
         self.assertRaises(ValueError, a.set_padding, 1, 2, 3, -1)
         self.assertRaises(TypeError, a.set_padding, 1, 2, 3, 2+1j)
         self.assertRaises(ValueError, a.set_padding, 1, 2, 3, 2**32)
+
+    def test_array_c_in(self):
+        Gtk.ListStore().set_column_types([])
