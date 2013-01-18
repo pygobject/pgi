@@ -110,14 +110,15 @@ class CFFIBackend(CodeGenBackend, BasicTypes, InterfaceTypes):
     def __init__(self, *args, **kwargs):
         CodeGenBackend.__init__(self, *args, **kwargs)
         self._libs = {}
-        try:
+        self._ffi = None
+
+    def __init_ffi(self):
+        if self._ffi is None:
             self._ffi = FFI()
-        except ImportError:
-            raise NotImplementedError
-        else:
             self._ffi.cdef(_glib_defs)
 
     def get_library_object(self, namespace):
+        self.__init_ffi()
         if namespace not in self._libs:
             paths = GIRepositoryPtr().get_shared_library(namespace)
             if not paths:

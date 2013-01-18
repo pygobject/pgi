@@ -17,18 +17,8 @@ ACTIVE_BACKENDS = []
 
 
 def _init_backends():
-    inited = []
-    for b in BACKENDS:
-        if not b:
-            continue
-
-        try:
-            inited.append(b())
-        except NotImplementedError:
-            continue
-
-    BACKENDS[:] = inited
-    ACTIVE_BACKENDS[:] = inited
+    BACKENDS[:] = [b() for b in BACKENDS if b]
+    ACTIVE_BACKENDS[:] = BACKENDS
 _init_backends()
 
 
