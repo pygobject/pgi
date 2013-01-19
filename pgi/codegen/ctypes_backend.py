@@ -11,7 +11,7 @@ from ctypes import POINTER
 from pgi.codegen.backend import CodeGenBackend
 from pgi.codegen.utils import CodeBlock
 from pgi.gir import GIRepositoryPtr, GITypeTag, GIInfoType
-from pgi.glib import gboolean, gfloat, gdouble, gint64, guint64
+from pgi.glib import gboolean, gfloat, gdouble, gint64, guint64, gint
 from pgi.glib import GErrorPtr, gchar_p, guint32, gint32, gpointer
 from pgi.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr, GType
 from pgi.gtype import PGType
@@ -55,6 +55,14 @@ def typeinfo_to_ctypes(info):
             iface.unref()
             if iface_type == GIInfoType.ENUM:
                 return guint32
+            elif iface_type == GIInfoType.OBJECT:
+                return gpointer
+            elif iface_type == GIInfoType.STRUCT:
+                return gpointer
+            elif iface_type == GIInfoType.FLAGS:
+                return gint
+            raise NotImplementedError(
+                "Could not convert interface: %r to ctypes type" % iface.type)
         elif tag == GITypeTag.UINT32:
             return guint32
         elif tag == GITypeTag.UINT64:
@@ -72,8 +80,7 @@ def typeinfo_to_ctypes(info):
         elif tag == GITypeTag.GTYPE:
             return GType
 
-    # FIXME: make sure at least all override stuff is handled
-    # raise NotImplementedError("Could not convert %r to ctypes type" % info.tag)
+    raise NotImplementedError("Could not convert %r to ctypes type" % info.tag)
 
 
 class BasicTypes(object):
@@ -103,7 +110,8 @@ if $var is not None and not isinstance($var, basestring):
 
     def pack_bool(self, name):
         block, var = self.parse("""
-$boolean = bool($var) # https://bugs.pypy.org/issue1367
+# https://bugs.pypy.org/issue1367
+$boolean = bool($var)
 """, var=name)
 
         return block, var["boolean"]
@@ -233,6 +241,35 @@ else:
             return PGType(gtype).pytype
 
         block.add_dependency(get_class, get_class_func)
+        return block, var["obj"]
+
+    def unpack_struct(self, name, type_):
+        struct_type = self.var()
+
+        block, var = self.parse("""
+# unpack struct
+if $value:
+    $obj = object.__new__($type)
+    $obj._obj = $value
+else:
+    $obj = None
+""", value=name, type=struct_type)
+
+        block.add_dependency(struct_type, type_)
+        return block, var["obj"]
+
+    def pack_struct(self, name):
+        base_var = self.var()
+
+        block, var = self.parse("""
+if not isinstance($obj, $base_struct_class):
+    raise TypeError("%r is not a structure object" % $obj)
+$obj = ctypes.cast($obj._obj, ctypes.c_void_p)
+""", obj=name, base_struct_class=base_var)
+
+        from pgi.structure import BaseStructure
+        block.add_dependency(base_var, BaseStructure)
+        block.add_dependency("ctypes", ctypes)
         return block, var["obj"]
 
     def unpack_enum(self, name, type_):

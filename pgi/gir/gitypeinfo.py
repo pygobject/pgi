@@ -71,8 +71,10 @@ class GITypeInfoPtr(GIBaseInfoPtr):
             values["interface"] = repr(interface)
             interface.unref()
         elif tag.value == GITypeTag.ARRAY:
-            values["array_length"] = repr(self.array_length)
-            values["array_fixed_size"] = repr(self.array_fixed_size)
+            if self.array_length != -1:
+                values["array_length"] = repr(self.array_length)
+            if self.array_fixed_size != -1:
+                values["array_fixed_size"] = repr(self.array_fixed_size)
             values["zero_terminated"] = repr(self.is_zero_terminated)
             values["array_type"] = repr(self.array_type)
             values["param_type"] = repr(self.get_param_type(0))

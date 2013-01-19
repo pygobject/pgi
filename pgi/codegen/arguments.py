@@ -164,6 +164,10 @@ class InterfaceArgument(GIArgument):
             return block
         elif iface_type == GIInfoType.ENUM:
             return
+        elif iface_type == GIInfoType.STRUCT:
+            block, var = self.backend.pack_struct(self.name)
+            self.call_var = var
+            return block
 
 
 class BoolArgument(GIArgument):

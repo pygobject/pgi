@@ -9,7 +9,7 @@ import unittest
 import sys
 
 from gi import get_required_version, require_version
-from gi.repository import Gtk, GObject, GLib
+from gi.repository import Gtk, GObject, GLib, Gdk
 
 
 class MiscTest(unittest.TestCase):
@@ -40,3 +40,12 @@ class MiscTest(unittest.TestCase):
         self.assertTrue(Gtk.__path__.endswith(".typelib"))
         self.assertTrue(Gtk.__loader__)
         self.assertTrue(Gtk.__file__.endswith(".repository.Gtk>"))
+
+    def test_structure(self):
+        a = Gdk.atom_intern('CLIPBOARD', True)
+        self.assertTrue(isinstance(a, Gdk.Atom))
+        self.assertTrue(isinstance(Gtk.Clipboard.get(a), Gtk.Clipboard))
+        self.assertRaises(TypeError, Gtk.Clipboard.get, None)
+        self.assertRaises(TypeError, Gtk.Clipboard.get, 0)
+        self.assertRaises(TypeError, Gtk.Clipboard.get, Gdk.Atom)
+        self.assertRaises(TypeError, Gdk.Atom, "baz")

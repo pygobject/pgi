@@ -45,8 +45,10 @@ class GIArgInfoPtr(GIBaseInfoPtr):
         values["may_be_null"] = repr(self.may_be_null)
         values["ownership_transfer"] = repr(self.ownership_transfer)
         values["scope"] = repr(self.scope)
-        values["closure"] = repr(self.closure)
-        values["destroy"] = repr(self.destroy)
+        if self.closure != -1:
+            values["closure"] = repr(self.closure)
+        if self.destroy != -1:
+            values["destroy"] = repr(self.destroy)
         type_ = self.get_type()
         values["arg_type"] = repr(type_)
         type_.unref()

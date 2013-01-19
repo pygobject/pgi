@@ -8,18 +8,35 @@
 from ctypes import cast
 
 from pgi.gir import GIStructInfoPtr
+from pgi.glib import g_try_malloc0
 from pgi.obj import MethodAttribute
 from pgi.gtype import PGType
 
 
-class _Structure(object):
+class BaseStructure(object):
+    """A base class for all structs (for type checking..)"""
+
+
+class _Structure(BaseStructure):
     """Class template for structures."""
 
     _obj = None  # the address of the struct
+    _size = 0 # size fo the struct in bytes
     __gtype__ = None  # the gtype
 
-    def __init__(self, *args, **kwargs):
-        raise TypeError
+    def __init__(self):
+        obj = g_try_malloc0(self._size)
+        if not obj and self._size:
+            raise MemoryError(
+                "Could not allocate structure %r" % self.__class__.__name__)
+        self._obj = obj
+
+    def __repr__(self):
+        form = "<%s structure at 0x%x (%s at 0x%x)>"
+        name = type(self).__name__
+        return form % (name, id(self), self.__gtype__.name, self._obj)
+
+    __str__ = __repr__
 
 
 def StructureAttribute(info):
@@ -27,13 +44,12 @@ def StructureAttribute(info):
 
     struct_info = cast(info, GIStructInfoPtr)
 
-    # copy the template and add the gtype
+    # Copy the template and add the gtype
     cls_dict = dict(_Structure.__dict__)
-    cls_dict["__gtype__"] = PGType(struct_info.g_type)
-
-    # create a new class
     cls = type(info.name, _Structure.__bases__, cls_dict)
     cls.__module__ = info.namespace
+    cls.__gtype__ = PGType(struct_info.g_type)
+    cls._size = struct_info.size
 
     # Add methods
     for method_info in struct_info.get_methods():
