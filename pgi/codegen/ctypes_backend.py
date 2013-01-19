@@ -24,11 +24,12 @@ def typeinfo_to_ctypes(info):
     ptr = info.is_pointer
 
     if ptr:
-        if tag == GITypeTag.UTF8:
-            return gchar_p
-        elif tag == GITypeTag.VOID:
+        if tag == GITypeTag.VOID:
             return gpointer
         elif tag == GITypeTag.UTF8 or tag == GITypeTag.FILENAME:
+            # FIXME: We should use c_void_p here, since ctypes does
+            # auto conversion to str and gives us no chance to free
+            # the pointer if transfer=everything
             return gchar_p
         elif tag == GITypeTag.ARRAY:
             return gpointer
