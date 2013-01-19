@@ -11,7 +11,7 @@ from ctypes import POINTER
 from pgi.codegen.backend import CodeGenBackend
 from pgi.codegen.utils import CodeBlock
 from pgi.gir import GIRepositoryPtr, GITypeTag, GIInfoType
-from pgi.glib import gboolean, gfloat, gdouble
+from pgi.glib import gboolean, gfloat, gdouble, gint64, guint64
 from pgi.glib import GErrorPtr, gchar_p, guint32, gint32, gpointer
 from pgi.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr, GType
 from pgi.gtype import PGType
@@ -37,7 +37,11 @@ def typeinfo_to_ctypes(info):
         elif tag == GITypeTag.INT32:
             return POINTER(gint32)
         elif tag == GITypeTag.UINT32:
-            return POINTER(gint32)
+            return POINTER(guint32)
+        elif tag == GITypeTag.INT64:
+            return POINTER(gint64)
+        elif tag == GITypeTag.UINT64:
+            return POINTER(guint64)
         elif tag == GITypeTag.FLOAT:
             return POINTER(gfloat)
         elif tag == GITypeTag.VOID:
@@ -53,8 +57,12 @@ def typeinfo_to_ctypes(info):
                 return guint32
         elif tag == GITypeTag.UINT32:
             return guint32
+        elif tag == GITypeTag.UINT64:
+            return guint64
         elif tag == GITypeTag.INT32:
             return gint32
+        elif tag == GITypeTag.INT64:
+            return gint64
         elif tag == GITypeTag.FLOAT:
             return gfloat
         elif tag == GITypeTag.DOUBLE:

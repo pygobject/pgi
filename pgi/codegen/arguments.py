@@ -179,6 +179,10 @@ class Int32Argument(GIArgument):
     TAG = GITypeTag.INT32
 
 
+class Int64Argument(GIArgument):
+    TAG = GITypeTag.INT64
+
+
 class UINT32Argument(GIArgument):
     TAG = GITypeTag.UINT32
 
