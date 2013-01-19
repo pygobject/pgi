@@ -67,12 +67,16 @@ def typeinfo_to_cffi(info):
 class BasicTypes(object):
 
     def unpack_string(self, name):
-        to_string = self.var()
+        # most annotations don't specify if the return value for gchar*
+        # can be NULL... so check for all strings
         block, var = self.parse("""
-$string = $to_string($cdata)
-""", to_string=to_string, cdata=name)
+if $cdata != ffi.NULL:
+    $string = ffi.string($cdata)
+else:
+    $string = None
+""", cdata=name)
 
-        block.add_dependency(to_string, self._ffi.string)
+        block.add_dependency("ffi", self._ffi)
         return block, var["string"]
 
     def unpack_bool(self, name):
