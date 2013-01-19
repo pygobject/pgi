@@ -109,12 +109,15 @@ def generate_function(info, method=False, throws=False):
     arg_types = [a.get_type() for a in arg_infos]
     return_type = info.get_return_type()
 
+    func = None
     for backend in ACTIVE_BACKENDS:
         try:
-            return _generate_function(backend, info, arg_infos, arg_types,
+            func = _generate_function(backend, info, arg_infos, arg_types,
                                       return_type, method, throws)
         except NotImplementedError:
             continue
+        else:
+            break
 
     return_type.unref()
     for info in arg_infos:
@@ -122,4 +125,6 @@ def generate_function(info, method=False, throws=False):
     for info in arg_types:
         info.unref()
 
+    if func:
+        return func
     raise NotImplementedError

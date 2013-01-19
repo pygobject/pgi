@@ -72,6 +72,9 @@ def typeinfo_to_ctypes(info):
         elif tag == GITypeTag.GTYPE:
             return GType
 
+    # FIXME: make sure at least all override stuff is handled
+    # raise NotImplementedError("Could not convert %r to ctypes type" % info.tag)
+
 
 class BasicTypes(object):
 

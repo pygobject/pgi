@@ -9,7 +9,7 @@ import ctypes
 from cffi import FFI
 
 from pgi.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr
-from pgi.gir import GIRepositoryPtr, GITypeTag
+from pgi.gir import GIRepositoryPtr, GITypeTag, GIInfoType
 from pgi.gtype import PGType
 from pgi.codegen.backend import CodeGenBackend
 from pgi.codegen.utils import CodeBlock
@@ -53,9 +53,15 @@ def typeinfo_to_cffi(info):
         if tag == GITypeTag.UTF8 or tag == GITypeTag.FILENAME:
             return "gchar*"
         elif tag == GITypeTag.INTERFACE:
-            return "gpointer"
+            iface = info.get_interface()
+            iface_type = iface.type.value
+            iface.unref()
+            if iface_type == GIInfoType.ENUM:
+                return "guint32"
+            elif iface_type == GIInfoType.OBJECT:
+                return "gpointer"
 
-    raise NotImplementedError
+    raise NotImplementedError("Couldn't convert %r to cffi type" % info.tag)
 
 
 class BasicTypes(object):
@@ -75,6 +81,18 @@ $bool = bool($name)
 """, name=name)
 
         return block, var["bool"]
+
+    def pack_uint32(self, name):
+        block, var = self.parse("""
+if not isinstance($uint, (float, int, long)):
+    raise TypeError("Value '$uint' not a number")
+$uint = int($uint)
+# overflow check for uint32
+if not 0 <= $uint < 4294967296:
+    raise ValueError("Value '$uint' not in range")
+""", uint=name)
+
+        return block, var["uint"]
 
 
 class InterfaceTypes(object):
@@ -131,8 +149,6 @@ class CFFIBackend(CodeGenBackend, BasicTypes, InterfaceTypes):
 
     def get_function_object(self, lib, symbol, args, ret,
                             method=False, self_name="", throws=False):
-        if args:
-            raise NotImplementedError
 
         block = CodeBlock()
         cdef_types = []
@@ -144,6 +160,9 @@ $new_self = ffi.cast('gpointer', $sself._obj)
 """, sself=self_name)
             block.add_dependency("ffi", self._ffi)
             self_block.write_into(block)
+
+        for arg in args:
+            cdef_types.append(typeinfo_to_cffi(arg.type))
 
         if ret:
             cffi_ret = typeinfo_to_cffi(ret.type)

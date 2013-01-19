@@ -34,8 +34,9 @@ class CodeGenBackend(object):
     def parse(self, code, **kwargs):
         return parse_code(code, self.var, **kwargs)
 
-    def __getattr__(self, value):
-        raise NotImplementedError
+    def __getattr__(self, name):
+        raise NotImplementedError(
+            "method %r not implemented in backend %r" % (name, self.NAME))
 
     def get_library_object(self, namespace):
         raise NotImplementedError
