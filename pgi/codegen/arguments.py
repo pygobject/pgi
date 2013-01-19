@@ -179,6 +179,14 @@ class BoolArgument(GIArgument):
         return block
 
 
+class UInt8Argument(GIArgument):
+    TAG = GITypeTag.UINT8
+
+
+class VoidArgument(GIArgument):
+    TAG = GITypeTag.VOID
+
+
 class Int32Argument(GIArgument):
     TAG = GITypeTag.INT32
 
@@ -277,4 +285,5 @@ _find_arguments()
 def get_argument_class(arg_type):
     global _classes
     tag_value = arg_type.tag.value
+    print arg_type.tag
     return _classes[tag_value]
