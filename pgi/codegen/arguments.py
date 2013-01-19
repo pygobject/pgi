@@ -285,5 +285,4 @@ _find_arguments()
 def get_argument_class(arg_type):
     global _classes
     tag_value = arg_type.tag.value
-    print arg_type.tag
     return _classes[tag_value]
