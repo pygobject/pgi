@@ -11,7 +11,7 @@ from ctypes import POINTER
 from pgi.codegen.backend import CodeGenBackend
 from pgi.codegen.utils import CodeBlock
 from pgi.gir import GIRepositoryPtr, GITypeTag, GIInfoType
-from pgi.glib import gboolean, gfloat
+from pgi.glib import gboolean, gfloat, gdouble
 from pgi.glib import GErrorPtr, gchar_p, guint32, gint32, gpointer
 from pgi.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr, GType
 from pgi.gtype import PGType
@@ -57,6 +57,8 @@ def typeinfo_to_ctypes(info):
             return gint32
         elif tag == GITypeTag.FLOAT:
             return gfloat
+        elif tag == GITypeTag.DOUBLE:
+            return gdouble
         elif tag == GITypeTag.VOID:
             return
         elif tag == GITypeTag.GTYPE:
@@ -129,15 +131,25 @@ $uint_ref = ctypes.byref($uint)
         block.add_dependency("ctypes", ctypes)
         return block, var["uint"], var["uint_ref"]
 
-    def pack_float_ptr(self):
+    def setup_float_ptr(self):
         block, var = self.parse("""
-# pack float
+# new float
 $float = ctypes.c_float()
 $float_ref = ctypes.byref($float)
 """)
 
         block.add_dependency("ctypes", ctypes)
         return block, var["float"], var["float_ref"]
+
+    def setup_double_ptr(self):
+        block, var = self.parse("""
+# new double
+$value = ctypes.c_double()
+$value_ref = ctypes.byref($value)
+""")
+
+        block.add_dependency("ctypes", ctypes)
+        return block, var["value"], var["value_ref"]
 
     def unpack_gtype(self, name):
         block, var = self.parse("""

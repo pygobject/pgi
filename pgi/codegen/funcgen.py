@@ -25,17 +25,17 @@ def _generate_function(backend, info, arg_infos, arg_types, return_type, method,
     args = []
     for arg_info, arg_type in zip(arg_infos, arg_types):
         cls = get_argument_class(arg_type)
-        args.append(cls(arg_info, arg_type, args, backend))
+        args.append(cls(args, backend, arg_info, arg_type))
 
     if throws:
-        args.append(ErrorArgument(None, None, args, backend))
+        args.append(ErrorArgument(args, backend))
 
     # setup
     for arg in args:
         arg.setup()
 
     # generate header
-    names = [a.name for a in args if not a.is_aux and a.is_direction_in()]
+    names = [a.in_var for a in args if not a.is_aux and a.in_var]
     if method:
         names.insert(0, "self")
     f = "def %s(%s):" % (info.name, ", ".join(names))
@@ -89,7 +89,8 @@ def _generate_function(backend, info, arg_infos, arg_types, return_type, method,
         block = arg.post_call()
         if block:
             block.write_into(main, 1)
-        out += arg.out_vars
+        if arg.out_var:
+            out.append(arg.out_var)
 
     if len(out) == 1:
         main.write_line("return %s" % out[0], 1)

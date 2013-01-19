@@ -1,4 +1,4 @@
-# Copyright 2012 Christoph Reiter
+# Copyright 2012,2013 Christoph Reiter
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -11,26 +11,22 @@ from pgi.gir import GIDirection, GIArrayType, GITypeTag, GIInfoType
 class Argument(object):
     """Base class for argument types
 
-    is_aux -- if the arg is handled by another arg
-    out_vars -- a list of variables to return
+    is_aux   -- if the arg is handled by another arg
+    in_var   -- variable name in the function def
+    out_var  -- variable name to return
     call_var -- variable name passed to the function
     """
 
     TAG = None
 
     is_aux = False
+    in_var = ""
     call_var = ""
-    out_vars = []
+    out_var = ""
 
-    def __init__(self, info, type_, args, backend):
-        super(Argument, self).__init__()
-
-        self.args = args
-        self.info = info
-        self.name = info and info.name
-        self.type = type_
+    def __init__(self, arguments, backend):
+        self.args = arguments
         self.backend = backend
-        self.call_var = self.name
 
     def setup(self):
         pass
@@ -41,34 +37,8 @@ class Argument(object):
     def post_call(self):
         pass
 
-    def may_be_null(self):
-        return self.info.may_be_null
-
-    def is_pointer(self):
-        return self.type.is_pointer
-
-    def is_direction_in(self):
-        direction = self.info.direction.value
-        return direction in (GIDirection.INOUT, GIDirection.IN)
-
-    def is_direction_out(self):
-        direction = self.info.direction.value
-        return direction in (GIDirection.INOUT, GIDirection.OUT)
-
-    def __repr__(self):
-        return "<%s name=%r>" % (self.__class__.__name__, self.name)
-
 
 class ErrorArgument(Argument):
-
-    def is_pointer(self):
-        return False
-
-    def is_direction_in(self):
-        return False
-
-    def is_direction_out(self):
-        return False
 
     def pre_call(self):
         block, error, ref = self.backend.setup_gerror()
@@ -80,42 +50,82 @@ class ErrorArgument(Argument):
         return self.backend.check_gerror(self._error)
 
 
-class ArrayArgument(Argument):
+class GIArgument(Argument):
+
+    def __init__(self, arguments, backend, info, type_):
+        Argument.__init__(self, arguments, backend)
+
+        self.info = info
+        self.name = info.name
+        self.type = type_
+        self.call_var = self.name
+        self.direction = self.info.direction.value
+
+        if self.is_direction_in():
+            self.in_var = self.name
+
+    def may_be_null(self):
+        return self.info.may_be_null
+
+    def is_pointer(self):
+        return self.type.is_pointer
+
+    def is_direction_in(self):
+        return self.direction in (GIDirection.INOUT, GIDirection.IN)
+
+    def is_direction_out(self):
+        return self.direction in (GIDirection.INOUT, GIDirection.OUT)
+
+    def is_direction_inout(self):
+        return self.direction == GIDirection.INOUT
+
+    def __repr__(self):
+        return "<%s name=%r>" % (self.__class__.__name__, self.name)
+
+
+class ArrayArgument(GIArgument):
     TAG = GITypeTag.ARRAY
 
     def setup(self):
         type_ = self.info.get_type()
-        length_arg_index = type_.array_length
-        aux = self.args[length_arg_index]
+
+        # mark other arg as aux so we handle it alone
+        aux = self.args[type_.array_length]
         aux.is_aux = True
         self._aux = aux
+
         self._array_type = self.type.array_type.value
+        self._param_type = self.type.get_param_type(0).tag.value
 
     def is_zero_terminated(self):
         return self.type.is_zero_terminated
 
-    def pre_call(self):
+    def _pre_c(self):
         backend = self.backend
+
+        if self.is_direction_inout():
+            if not self.is_zero_terminated():
+                block, data, data_ref, length, lref = \
+                    backend.pack_array_ptr_fixed_c_in_out(self.name)
+                self.call_var = data_ref
+                self._aux.call_var = lref
+                # vars for out
+                self._data = data
+                self._length = length
+                return block
+        elif self.is_direction_in():
+            if not self.is_zero_terminated():
+                block, data_ref, length = \
+                    backend.pack_array_ptr_fixed_c_in(self.name)
+                self.call_var = data_ref
+                self._aux.call_var = length
+                return block
+
+    def pre_call(self):
         array_type = self._array_type
 
         if array_type == GIArrayType.C:
-            if self.is_direction_in() and self.is_direction_out():
-                if not self.is_zero_terminated():
-                    block, data, data_ref, length, lref = \
-                        backend.pack_array_ptr_fixed_c_in_out(self.name)
-                    self.call_var = data_ref
-                    self._aux.call_var = lref
-                    # vars for out
-                    self._data = data
-                    self._length = length
-                    return block
-            elif self.is_direction_in():
-                if not self.is_zero_terminated():
-                    block, data_ref, length = \
-                        backend.pack_array_ptr_fixed_c_in(self.name)
-                    self.call_var = data_ref
-                    self._aux.call_var = length
-                    return block
+            return self._pre_c()
         elif array_type == GIArrayType.ARRAY:
             pass
         elif array_type == GIArrayType.PTR_ARRAY:
@@ -128,7 +138,7 @@ class ArrayArgument(Argument):
         if self.is_direction_out():
             if not self.is_zero_terminated() and self.is_pointer():
                 block, out = b.unpack_array_ptr_fixed_c(self._data, self._length)
-                self.out_vars = [out]
+                self.out_var = out
                 return block
 
     def post_call(self):
@@ -138,7 +148,7 @@ class ArrayArgument(Argument):
             return self._post_c()
 
 
-class InterfaceArgument(Argument):
+class InterfaceArgument(GIArgument):
     TAG = GITypeTag.INTERFACE
 
     def pre_call(self):
@@ -156,7 +166,7 @@ class InterfaceArgument(Argument):
             return
 
 
-class BoolArgument(Argument):
+class BoolArgument(GIArgument):
     TAG = GITypeTag.BOOLEAN
 
     def pre_call(self):
@@ -165,11 +175,11 @@ class BoolArgument(Argument):
         return block
 
 
-class Int32Argument(Argument):
+class Int32Argument(GIArgument):
     TAG = GITypeTag.INT32
 
 
-class UINT32Argument(Argument):
+class UINT32Argument(GIArgument):
     TAG = GITypeTag.UINT32
 
     def pre_call(self):
@@ -186,11 +196,11 @@ class UINT32Argument(Argument):
     def post_call(self):
         if self.is_direction_out():
             block, var = self.backend.unpack_basic_ptr(self._data)
-            self.out_vars = [var]
+            self.out_var = var
             return block
 
 
-class Utf8Argument(Argument):
+class Utf8Argument(GIArgument):
     TAG = GITypeTag.UTF8
 
     def pre_call(self):
@@ -202,12 +212,12 @@ class Utf8Argument(Argument):
         return block
 
 
-class FloatArgument(Argument):
+class FloatArgument(GIArgument):
     TAG = GITypeTag.FLOAT
 
     def pre_call(self):
         if self.is_direction_out():
-            block, data, ref = self.backend.pack_float_ptr()
+            block, data, ref = self.backend.setup_float_ptr()
             self._data = data
             self.call_var = ref
             return block
@@ -215,11 +225,28 @@ class FloatArgument(Argument):
     def post_call(self):
         if self.is_direction_out():
             block, var = self.backend.unpack_basic_ptr(self._data)
-            self.out_vars = [var]
+            self.out_var = var
             return block
 
 
-class GTypeArgument(Argument):
+class DoubleArgument(GIArgument):
+    TAG = GITypeTag.DOUBLE
+
+    def pre_call(self):
+        if self.is_direction_out():
+            block, data, ref = self.backend.setup_double_ptr()
+            self._data = data
+            self.call_var = ref
+            return block
+
+    def post_call(self):
+        if self.is_direction_out():
+            block, var = self.backend.unpack_basic_ptr(self._data)
+            self.out_var = var
+            return block
+
+
+class GTypeArgument(GIArgument):
     TAG = GITypeTag.GTYPE
 
     def pre_call(self):
@@ -234,7 +261,7 @@ _classes = {}
 def _find_arguments():
     global _classes
     cls = [a for a in globals().values() if isinstance(a, type)]
-    args = [a for a in cls if issubclass(a, Argument) and a is not Argument]
+    args = [a for a in cls if issubclass(a, GIArgument) and a is not GIArgument]
     _classes = dict(((a.TAG, a) for a in args))
 _find_arguments()
 
@@ -242,4 +269,4 @@ _find_arguments()
 def get_argument_class(arg_type):
     global _classes
     tag_value = arg_type.tag.value
-    return _classes.get(tag_value, Argument)
+    return _classes[tag_value]

@@ -124,3 +124,19 @@ class FuncsTest(unittest.TestCase):
         a = Gtk.Action("", "", "", "")
         v = a.get_always_show_image()
         self.assertTrue(isinstance(v, bool))
+
+    def test_double_in_out(self):
+        a = Gtk.HSV()
+        a.set_color(0.25, 0.5, 1)
+        a.set_color(0.25, 0.5, 1L)
+        a.set_color(0.25, 0.5, 0.75)
+        a.set_color(0.25, 0.5, True)
+        self.assertRaises(TypeError, a.set_color, 0, 0, "")
+        self.assertRaises(TypeError, a.set_color, 0, 0, None)
+
+        self.assertEqual(a.get_color(), (0.25, 0.5, 1))
+
+    def test_double_return(self):
+        a = Gtk.Adjustment()
+        a.set_lower(2.25)
+        self.assertEqual(a.get_lower(), 2.25)
