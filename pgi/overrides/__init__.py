@@ -58,20 +58,21 @@ def load(namespace, module):
             print exc
             raise ImportError("Failed to load overrides for %r" % namespace)
     else:
-        # add all objects referenced in __all__ to the original module
-        override_vars = vars(override_module)
-        override_all = override_vars.get("__all__") or []
-        for var in override_all:
-            item = override_vars.get(var)
-            if item:
-                setattr(module, var, item)
+        # FIXME!!! we need a real non-override module somewhere
 
-        # Inject a fake namespace module in the overrides module.
-        # It will contain all original classes that were overridden
-        # and will pull in any other attribute from the real one if needed.
         proxy = get_introspection_module(namespace)
         for name, klass in _overrides[-1].iteritems():
             setattr(proxy, name, klass)
+
+        # add all objects referenced in __all__ to the original module
+        override_vars = vars(override_module)
+        override_all = override_vars.get("__all__") or []
+
+        for var in override_all:
+            getattr(proxy, var, None)
+            item = override_vars.get(var)
+            if item:
+                setattr(module, var, item)
 
     _active_module.pop(-1)
     _overrides.pop(-1)
