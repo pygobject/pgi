@@ -8,7 +8,9 @@
 from ctypes import cast
 
 from pgi.gir import GIUnionInfoPtr
+from pgi.glib import g_try_malloc0
 from pgi.gtype import PGType
+from pgi.obj import MethodAttribute
 
 
 class _DummyInfo(object):
@@ -18,15 +20,31 @@ class _DummyInfo(object):
 
 class _Union(object):
     __info__ = _DummyInfo()
+    __gtype__ = None
+    _obj = 0
+    _size = 0
+
+    def __init_(self):
+        obj = g_try_malloc0(self._size)
+        if not obj and self._size:
+            raise MemoryError(
+                "Could not allocate structure %r" % self.__class__.__name__)
+        self._obj = obj
+
+    def __repr__(self):
+        form = "<%s union at 0x%x (%s at 0x%x)>"
+        name = type(self).__name__
+        return form % (name, id(self), self.__gtype__.name, self._obj)
+
+    __str__ = __repr__
 
 
 def UnionAttribute(info):
-    struct_info = cast(info, GIUnionInfoPtr)
+    union_info = cast(info, GIUnionInfoPtr)
 
-    cls_dict = dict(_Union.__dict__)
-    g_type = struct_info.g_type
-    cls_dict["__gtype__"] = PGType(g_type)
-    cls = type(info.name, _Union.__bases__, cls_dict)
+    cls = type(info.name, _Union.__bases__, dict(_Union.__dict__))
     cls.__module__ = info.name
+    cls.__gtype__ = PGType(union_info.g_type)
+    cls._size = union_info.size
 
     return cls

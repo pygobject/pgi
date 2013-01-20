@@ -24,6 +24,8 @@ from pgi.overrides import override, get_introspection_module
 
 import sys
 
+Gdk = get_introspection_module("Gdk")
+
 __all__ = []
 
 

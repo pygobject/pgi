@@ -77,6 +77,8 @@ class InterfaceReturnValue(ReturnValue):
         elif iface_type == GIInfoType.STRUCT:
             attr = import_attribute(iface_namespace, iface_name)
             return backend.unpack_struct(name, attr)
+        elif iface_type == GIInfoType.UNION:
+            return None, name
 
         return None, name
 

@@ -29,7 +29,33 @@ class GIUnionInfoPtr(GIRegisteredTypeInfoPtr):
     _type_ = GIUnionInfo
 
     def get_methods(self):
-        return map(self.get_method, xrange(self.get_n_methods()))
+        return map(self.get_method, xrange(self.n_methods))
+
+    def get_fields(self):
+        return map(self.get_field, xrange(self.n_fields))
+
+    def _get_repr(self):
+        values = super(GIUnionInfoPtr, self)._get_repr()
+        values = {}
+        fields = self.get_fields()
+        values["fields"] = repr(fields)
+        for field in fields:
+            field.unref()
+
+        values["is_discriminated"] = repr(self.is_discriminated)
+        values["discriminator_offset"] = repr(self.discriminator_offset)
+        type_ = self.get_discriminator_type()
+        values["discriminator_type"] = repr(type_)
+        type_.unref()
+        values["size"] = repr(self.size)
+        values["alignment"] = repr(self.alignment)
+
+        methods = self.get_methods()
+        values["methods"] = repr(methods)
+        for method in methods:
+            method.unref()
+
+        return values
 
 _methods = [
     ("get_n_fields", gint, [GIUnionInfoPtr]),
