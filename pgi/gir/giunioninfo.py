@@ -17,8 +17,8 @@ from pgi.ctypesutil import find_library, wrap_class
 _gir = find_library("girepository-1.0")
 
 
-def gi_is_union_info(base_info, _type=GIInfoType.UNION):
-    return base_info.get_type().value == _type
+def gi_is_union_info(base_info):
+    return base_info.type.value == GIInfoType.UNION
 
 
 class GIUnionInfo(GIRegisteredTypeInfo):
