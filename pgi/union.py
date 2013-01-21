@@ -7,7 +7,8 @@
 
 from ctypes import cast
 
-from pgi.gir import GIUnionInfoPtr
+from pgi.codegen.fieldgen import generate_field_getter
+from pgi.gir import GIUnionInfoPtr, GIFieldInfoFlags
 from pgi.glib import g_try_malloc0
 from pgi.gtype import PGType
 from pgi.obj import MethodAttribute
@@ -44,14 +45,29 @@ class _Union(BaseUnion):
 
 
 class FieldAttribute(object):
+    _getter = None
+    _setter = None
+
     def __init__(self, info):
         self._info = info
 
+
     def __get__(self, instance, owner):
-        return
+        info = self._info
+
+        if not info.flags.value & GIFieldInfoFlags.IS_READABLE:
+            raise AttributeError
+
+        if not self._getter:
+            self._getter = generate_field_getter(info)
+
+        if instance:
+            return self._getter(instance)
+        return self._getter
 
     def __set__(self, instance, value):
-        raise AttributeError
+        if not self._info.flags.value & GIFieldInfoFlags.IS_WRITABLE:
+            raise AttributeError
 
 
 def UnionAttribute(info):

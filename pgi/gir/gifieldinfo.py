@@ -7,7 +7,7 @@
 
 from ctypes import POINTER
 
-from pgi.glib import Enum, gint, gboolean, gpointer
+from pgi.glib import Flags, gint, gboolean, gpointer
 from gibaseinfo import GIBaseInfo, GIBaseInfoPtr, GIInfoType
 from gitypeinfo import GITypeInfoPtr
 from giargument import GIArgument
@@ -20,7 +20,7 @@ def gi_is_field_info(base_info, _type=GIInfoType.FIELD):
     return base_info.type.value == _type
 
 
-class GIFieldInfoFlags(Enum):
+class GIFieldInfoFlags(Flags):
     IS_READABLE = 1 << 0
     IS_WRITABLE = 1 << 1
 
