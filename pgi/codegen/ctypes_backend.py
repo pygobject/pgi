@@ -246,6 +246,20 @@ else:
         block.add_dependency(get_class, get_class_func)
         return block, var["obj"]
 
+    def setup_struct(self, name, type_):
+        struct_type = self.var()
+
+        block, var = self.parse("""
+# unpack struct
+$obj = $type()
+$ptr = ctypes.c_void_p($obj._obj)
+""", value=name, type=struct_type)
+
+        block.add_dependency("ctypes", ctypes)
+        block.add_dependency(struct_type, type_)
+
+        return block, var["obj"], var["ptr"]
+
     def unpack_struct(self, name, type_):
         struct_type = self.var()
 

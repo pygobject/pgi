@@ -6,6 +6,7 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from pgi.gir import GIDirection, GIArrayType, GITypeTag, GIInfoType
+from pgi.util import import_attribute
 
 
 class Argument(object):
@@ -151,23 +152,39 @@ class ArrayArgument(GIArgument):
 class InterfaceArgument(GIArgument):
     TAG = GITypeTag.INTERFACE
 
-    def pre_call(self):
-        iface = self.type.get_interface()
-        iface_type = iface.type.value
+    def _pre_object(self):
+        if self.may_be_null():
+            block, var = self.backend.pack_object_null(self.name)
+        else:
+            block, var = self.backend.pack_object(self.name)
+        self.call_var = var
+        return block
 
-        if iface_type == GIInfoType.OBJECT:
-            if self.may_be_null():
-                block, var = self.backend.pack_object_null(self.name)
-            else:
-                block, var = self.backend.pack_object(self.name)
-            self.call_var = var
-            return block
-        elif iface_type == GIInfoType.ENUM:
-            return
-        elif iface_type == GIInfoType.STRUCT:
+    def _pre_struct(self, namespace, name):
+        if self.is_direction_in():
             block, var = self.backend.pack_struct(self.name)
             self.call_var = var
             return block
+        else:
+            type_ = import_attribute(namespace, name)
+            block, data, ref = self.backend.setup_struct(self.name, type_)
+            self.call_var = ref
+            self.out_var = data
+            return block
+
+    def pre_call(self):
+        iface = self.type.get_interface()
+        iface_name = iface.name
+        iface_namespace = iface.namespace
+        iface_type = iface.type.value
+        iface.unref()
+
+        if iface_type == GIInfoType.OBJECT:
+            return self._pre_object()
+        elif iface_type == GIInfoType.ENUM:
+            return
+        elif iface_type == GIInfoType.STRUCT:
+            return self._pre_struct(iface_namespace, iface_name)
 
 
 class BoolArgument(GIArgument):
