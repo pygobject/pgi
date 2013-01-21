@@ -91,6 +91,7 @@ class FieldAttribute(object):
 
     def __get__(self, instance, owner):
         info = self._info
+        print info
 
         if not info.flags.value & GIFieldInfoFlags.IS_READABLE:
             raise AttributeError

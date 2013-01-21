@@ -10,6 +10,8 @@ import StringIO
 
 from pgi.util import escape_name, unescape_name, escape_builtin
 from pgi.codegen.utils import CodeBlock, parse_code
+from pgi.gtype import PGType
+from pgi.gobject import GType
 
 
 class PGIMisc(unittest.TestCase):
@@ -55,3 +57,6 @@ if 2:
 
         self.assertEqual(str(n), "if 2:\n    if 1:\n        do()")
         self.assertTrue("test" in n.get_dependencies())
+
+    def test_gtype(self):
+        self.assertEqual(PGType(0), PGType(GType(0)))

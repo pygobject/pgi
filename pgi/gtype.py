@@ -17,7 +17,10 @@ class PGType(object):
     __types = {}
 
     def __new__(cls, type_):
-        value = type_.value
+        if isinstance(type_, (int, long)):
+            value = type_
+        else:
+            value = type_.value
         if value in cls.__types:
             return cls.__types[value]
         obj = super(PGType, cls).__new__(cls)
@@ -25,6 +28,8 @@ class PGType(object):
         return obj
 
     def __init__(self, type_):
+        if isinstance(type_, (int, long)):
+            type_ = GType(type_)
         self._type = type_
 
     def __get_gtype_list(self, function):

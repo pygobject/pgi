@@ -7,7 +7,7 @@
 
 import unittest
 
-from gi.repository import Gdk
+from gi.repository import Gdk, Gtk, GObject
 
 
 class UnionTest(unittest.TestCase):
@@ -25,3 +25,8 @@ class UnionTest(unittest.TestCase):
         e = Gdk.Event()
         n = Gdk.Event.new(Gdk.EventType.DELETE)
         self.assertTrue(type(e) is type(n))
+
+    def test_structs(self):
+        a = Gtk.BindingArg()
+        g = a.arg_type
+        self.assertEqual(g, GObject.TYPE_INVALID)
