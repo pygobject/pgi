@@ -456,3 +456,22 @@ except ctypes.ArgumentError, $e:
 
         block.add_dependency("ctypes", ctypes)
         return block, var["ret"]
+
+    def cast_pointer(self, name, type_):
+        type_ = typeinfo_to_ctypes(type_)
+        type_var = self.var()
+        block, var = self.parse("""
+$value = ctypes.cast($value, ctypes.POINTER($type))
+""", value=name, type=type_var)
+
+        block.add_dependency("ctypes", ctypes)
+        block.add_dependency(type_var, type_)
+
+        return block, name
+
+    def deref_pointer(self, name):
+        block, var = self.parse("""
+$value = $value.contents
+""", value=name)
+
+        return block, var["value"]

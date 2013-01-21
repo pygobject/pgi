@@ -41,7 +41,11 @@ class FieldAccess(object):
 
 
 def generate_field_getter(info):
-    backend = ACTIVE_BACKENDS[0]
+    # only ctypes for now
+    for backend in ACTIVE_BACKENDS:
+        if backend.NAME == "ctypes":
+            break
+
     type_ = info.get_type()
 
     if type_.tag.value != FieldAccess.TAG:
@@ -53,10 +57,20 @@ def generate_field_getter(info):
     main = CodeBlock()
     main.write_line("def getter(argument):")
     main.write_line("argument = argument._obj", 1)
+
     # no idea if that works
     if info.offset:
         main.write_line("argument = argument + %d", info.offset / 8, 1)
-    block, var = f.get("argument")
+
+    # uh.. too much logic here..
+    block, var = backend.cast_pointer("argument", type_)
+    block.write_into(main, 1)
+    block, var = backend.deref_pointer(var)
+    block.write_into(main, 1)
+    block, var = backend.unpack_basic_ptr(var)
+    block.write_into(main, 1)
+
+    block, var = f.get(var)
     block.write_into(main, 1)
     main.write_line("return %s" % var, 1)
 

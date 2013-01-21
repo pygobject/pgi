@@ -40,11 +40,11 @@ g_malloc0.restype = gpointer
 
 free = _glib.g_free
 free.argtypes = [gpointer]
-free.resttype = None
+free.restype = None
 
 g_try_malloc0 = _glib.g_try_malloc0
-g_malloc0.argtypes = [gsize]
-g_malloc0.restype = gpointer
+g_try_malloc0.argtypes = [gsize]
+g_try_malloc0.restype = gpointer
 
 
 class Enum(guint):

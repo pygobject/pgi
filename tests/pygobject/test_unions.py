@@ -17,8 +17,11 @@ class UnionTest(unittest.TestCase):
 
     def test_fields(self):
         self.assertTrue("type" in dir(Gdk.Event))
+        a = Gdk.Event.new(Gdk.EventType.PROXIMITY_IN)
+        self.assertEqual(a.type, Gdk.EventType.PROXIMITY_IN)
 
     def test_methods(self):
+        self.assertTrue("new" in dir(Gdk.Event))
         e = Gdk.Event()
         n = Gdk.Event.new(Gdk.EventType.DELETE)
         self.assertTrue(type(e) is type(n))

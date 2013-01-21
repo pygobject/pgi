@@ -8,7 +8,7 @@
 import unittest
 import StringIO
 
-from pgi.util import escape_name, unescape_name
+from pgi.util import escape_name, unescape_name, escape_builtin
 from pgi.codegen.utils import CodeBlock, parse_code
 
 
@@ -22,8 +22,8 @@ class PGIMisc(unittest.TestCase):
         self.assertEqual(unescape_name("fo_oo_"), "fo-oo")
 
     def test_escape_builtin(self):
-        self.assertEqual(unescape_name("type"), "type_")
-        self.assertEqual(unescape_name("all"), "all_")
+        self.assertEqual(escape_builtin("type"), "type_")
+        self.assertEqual(escape_builtin("all"), "all_")
 
     def test_codeblock(self):
         a = CodeBlock("foo")
