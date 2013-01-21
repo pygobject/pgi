@@ -13,3 +13,12 @@ from gi.repository import Gdk
 class UnionTest(unittest.TestCase):
     def test_union(self):
         e = Gdk.Event()
+        repr(e)
+
+    def test_fields(self):
+        self.assertTrue("type" in dir(Gdk.Event))
+
+    def test_methods(self):
+        e = Gdk.Event()
+        n = Gdk.Event.new(Gdk.EventType.DELETE)
+        self.assertTrue(type(e) is type(n))

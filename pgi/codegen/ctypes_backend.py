@@ -261,6 +261,7 @@ else:
         block.add_dependency(struct_type, type_)
         return block, var["obj"]
 
+
     def pack_struct(self, name):
         base_var = self.var()
 
@@ -285,6 +286,18 @@ $enum = $enum_class($value)
 
         block.add_dependency(type_var, type_)
         return block, var["enum"]
+
+    def unpack_union(self, name, type_):
+        type_var = self.var()
+
+        block, var = self.parse("""
+# unpack union
+$union = object.__new__($union_class)
+$union._obj = $value
+""", union_class=type_var, value=name)
+
+        block.add_dependency(type_var, type_)
+        return block, var["union"]
 
 
 class ArrayTypes(object):

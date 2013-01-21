@@ -116,7 +116,6 @@ class _Object(object):
 class MethodAttribute(object):
     def __init__(self, info):
         super(MethodAttribute, self).__init__()
-        info.ref()
         self._info = info
 
     def __get__(self, instance, owner):
@@ -130,13 +129,11 @@ class MethodAttribute(object):
         if func_flags & GIFunctionInfoFlags.IS_METHOD:
             func = generate_function(info, method=True, throws=throws)
             setattr(owner, name, func)
-            info.unref()
             return getattr(instance or owner, name)
         elif not func_flags or func_flags & GIFunctionInfoFlags.IS_CONSTRUCTOR:
             func = generate_function(info, method=False, throws=throws)
             func = staticmethod(func)
             setattr(owner, name, func)
-            info.unref()
             return getattr(owner, name)
         else:
             raise NotImplementedError("%r not supported" % flags)
@@ -233,7 +230,6 @@ def ObjectAttribute(info):
     for method_info in obj_info.get_methods():
         method_name = method_info.name
         attr = MethodAttribute(method_info)
-        if attr:
-            setattr(cls, method_name, attr)
+        setattr(cls, method_name, attr)
 
     return cls

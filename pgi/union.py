@@ -18,7 +18,11 @@ class _DummyInfo(object):
         return []
 
 
-class _Union(object):
+class BaseUnion(object):
+    """A base class for all unions (for type checking..)"""
+
+
+class _Union(BaseUnion):
     __info__ = _DummyInfo()
     __gtype__ = None
     _obj = 0
@@ -39,6 +43,17 @@ class _Union(object):
     __str__ = __repr__
 
 
+class FieldAttribute(object):
+    def __init__(self, info):
+        self._info = info
+
+    def __get__(self, instance, owner):
+        return
+
+    def __set__(self, instance, value):
+        raise AttributeError
+
+
 def UnionAttribute(info):
     union_info = cast(info, GIUnionInfoPtr)
 
@@ -46,5 +61,17 @@ def UnionAttribute(info):
     cls.__module__ = info.name
     cls.__gtype__ = PGType(union_info.g_type)
     cls._size = union_info.size
+
+    # Add methods
+    for method_info in union_info.get_methods():
+        method_name = method_info.name
+        attr = MethodAttribute(method_info)
+        setattr(cls, method_name, attr)
+
+    # Add fields
+    for field_info in union_info.get_fields():
+        field_name = field_info.name
+        attr = FieldAttribute(field_info)
+        setattr(cls, field_name, attr)
 
     return cls
