@@ -9,7 +9,7 @@ from ctypes import cast
 
 from pgi.codegen.fieldgen import generate_field_getter
 from pgi.gir import GIUnionInfoPtr, GIFieldInfoFlags
-from pgi.glib import g_try_malloc0
+from pgi.glib import g_try_malloc0, free
 from pgi.gtype import PGType
 from pgi.obj import MethodAttribute
 
@@ -28,13 +28,15 @@ class _Union(BaseUnion):
     __gtype__ = None
     _obj = 0
     _size = 0
+    _needs_free = False
 
-    def __init_(self):
+    def __init__(self):
         obj = g_try_malloc0(self._size)
         if not obj and self._size:
             raise MemoryError(
                 "Could not allocate structure %r" % self.__class__.__name__)
         self._obj = obj
+        self._needs_free = True
 
     def __repr__(self):
         form = "<%s union at 0x%x (%s at 0x%x)>"
@@ -42,6 +44,10 @@ class _Union(BaseUnion):
         return form % (name, id(self), self.__gtype__.name, self._obj)
 
     __str__ = __repr__
+
+    def __del__(self):
+        if self._needs_free:
+            free(self._obj)
 
 
 class FieldAttribute(object):

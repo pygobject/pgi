@@ -59,6 +59,7 @@ def generate_field_getter(info):
     block, var = f.get("argument")
     block.write_into(main, 1)
     main.write_line("return %s" % var, 1)
+
     func = main.compile()["getter"]
 
     type_.unref()
