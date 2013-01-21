@@ -21,7 +21,7 @@
 import sys
 
 from pgi.overrides import override, get_introspection_module
-from pgi.repository import Gio, GLib
+from pgi.repository import GLib
 
 
 Gio = get_introspection_module('Gio')

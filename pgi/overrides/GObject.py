@@ -22,8 +22,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
-from pgi.repository import GObject as GObjectModule
+from pgi.overrides import override, get_introspection_module
 
+
+GObjectModule = get_introspection_module("GObject")
 
 GObject = GObjectModule.Object
 __all__ = ["GObject"]

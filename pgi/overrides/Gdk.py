@@ -19,7 +19,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
-from pgi.repository import Gdk
 from pgi.overrides import override, get_introspection_module
 
 import sys

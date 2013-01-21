@@ -21,7 +21,7 @@
 
 import sys
 
-from pgi.repository import Gtk, GObject
+from pgi.repository import GObject
 from pgi import PGIDeprecationWarning as PyGIDeprecationWarning
 from pgi.overrides import override, get_introspection_module
 
