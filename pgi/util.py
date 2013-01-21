@@ -227,6 +227,14 @@ def import_module(namespace):
     return getattr(mod, namespace)
 
 
+def escape_builtin(text):
+    """Escape a name so it doesn't shadow a builtin"""
+    import __builtin__
+    while text in dir(__builtin__):
+        text = text + "_"
+    return text
+
+
 def escape_name(text, reg=re.compile("^(%s)$" % "|".join(keyword.kwlist))):
     """Escape identifiers and keywords by changing them in a defined way
      - '-' will be replaced by '_'

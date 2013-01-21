@@ -7,6 +7,7 @@
 
 from pgi.codegen import ACTIVE_BACKENDS
 from pgi.codegen.utils import CodeBlock
+from pgi.util import escape_name, escape_builtin
 from pgi.codegen.arguments import get_argument_class, ErrorArgument
 from pgi.codegen.returnvalues import get_return_class, VoidReturnValue
 
@@ -25,7 +26,8 @@ def _generate_function(backend, info, arg_infos, arg_types, return_type, method,
     args = []
     for arg_info, arg_type in zip(arg_infos, arg_types):
         cls = get_argument_class(arg_type)
-        args.append(cls(args, backend, arg_info, arg_type))
+        name = escape_name(escape_builtin(arg_info.name))
+        args.append(cls(name, args, backend, arg_info, arg_type))
 
     if throws:
         args.append(ErrorArgument(args, backend))

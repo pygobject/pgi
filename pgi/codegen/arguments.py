@@ -52,17 +52,17 @@ class ErrorArgument(Argument):
 
 class GIArgument(Argument):
 
-    def __init__(self, arguments, backend, info, type_):
+    def __init__(self, name, arguments, backend, info, type_):
         Argument.__init__(self, arguments, backend)
 
         self.info = info
-        self.name = info.name
+        self.name = name
         self.type = type_
-        self.call_var = self.name
+        self.call_var = name
         self.direction = self.info.direction.value
 
         if self.is_direction_in():
-            self.in_var = self.name
+            self.in_var = name
 
     def may_be_null(self):
         return self.info.may_be_null

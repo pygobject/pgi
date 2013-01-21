@@ -21,6 +21,10 @@ class PGIMisc(unittest.TestCase):
         self.assertEqual(unescape_name("foo_"), "foo")
         self.assertEqual(unescape_name("fo_oo_"), "fo-oo")
 
+    def test_escape_builtin(self):
+        self.assertEqual(unescape_name("type"), "type_")
+        self.assertEqual(unescape_name("all"), "all_")
+
     def test_codeblock(self):
         a = CodeBlock("foo")
         self.assertEqual(str(a), "foo")
