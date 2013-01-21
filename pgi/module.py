@@ -10,9 +10,8 @@ import types
 from pgi.enum import EnumAttribute, FlagsAttribute
 from pgi.constant import ConstantAttribute
 from pgi.function import FunctionAttribute
-from pgi.structure import StructureAttribute
+from pgi.structure import StructureAttribute, UnionAttribute
 from pgi.obj import ObjectAttribute, InterfaceAttribute
-from pgi.union import UnionAttribute
 from pgi.util import InfoIterWrapper
 
 
