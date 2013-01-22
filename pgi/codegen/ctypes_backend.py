@@ -524,7 +524,7 @@ $value = $value.contents
 
     def assign_pointer(self, ptr, value):
         block, var = self.parse("""
-$ptr.contents = $value
+$ptr[0] = $value
 """, ptr=ptr, value=value)
 
         return block

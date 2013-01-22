@@ -31,7 +31,13 @@ class UnionTest(unittest.TestCase):
         g = a.arg_type
         self.assertEqual(g, GObject.TYPE_INVALID)
 
-    def test_color(self):
+    def test_uint16_field(self):
         color = Gdk.Color(1, 2, 3)
-        # FIXME
-        # self.assertEqual(color.red, 1)
+        self.assertEqual(color.red, 1)
+        self.assertEqual(color.green, 2)
+        self.assertEqual(color.blue, 3)
+
+    def test_uint32_field(self):
+        color = Gdk.Color(1, 2, 3)
+        color.pixel = 42
+        self.assertEqual(color.pixel, 42)

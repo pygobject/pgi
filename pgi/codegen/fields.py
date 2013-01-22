@@ -59,6 +59,16 @@ class DoubleField(Field):
         return None, name
 
 
+class UInt32Field(Field):
+    TAG = GITypeTag.UINT32
+
+    def set(self, name, value_name):
+        return self.backend.pack_uint32(value_name)
+
+    def get(self, name):
+        return None, name
+
+
 class UInt16Field(Field):
     TAG = GITypeTag.UINT16
 
