@@ -80,6 +80,9 @@ class InterfaceReturnValue(ReturnValue):
         elif iface_type == GIInfoType.UNION:
             attr = import_attribute(iface_namespace, iface_name)
             return backend.unpack_union(name, attr)
+        elif iface_type == GIInfoType.FLAGS:
+            attr = import_attribute(iface_namespace, iface_name)
+            return backend.unpack_flags(name, attr)
 
         raise NotImplementedError(
             "Unsuported interface return type %r" % iface.type)

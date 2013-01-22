@@ -7,7 +7,7 @@
 
 import unittest
 
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk, GLib, Gdk
 
 
 class FuncsTest(unittest.TestCase):
@@ -140,3 +140,15 @@ class FuncsTest(unittest.TestCase):
         a = Gtk.Adjustment()
         a.set_lower(2.25)
         self.assertEqual(a.get_lower(), 2.25)
+
+    def test_flags_return(self):
+        b = Gtk.Button()
+        c = b.get_style_context()
+        junction = c.get_junction_sides()
+        self.assertTrue(isinstance(junction, Gtk.JunctionSides))
+
+    def test_enum_return(self):
+        b = Gtk.Button()
+        c = b.get_style_context()
+        direction = c.get_direction()
+        self.assertTrue(isinstance(direction, Gtk.TextDirection))

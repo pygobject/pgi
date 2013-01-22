@@ -228,7 +228,7 @@ class UINT32Argument(GIArgument):
 
     def post_call(self):
         if self.is_direction_out():
-            block, var = self.backend.unpack_basic_ptr(self._data)
+            block, var = self.backend.unpack_basic(self._data)
             self.out_var = var
             return block
 
@@ -257,7 +257,7 @@ class FloatArgument(GIArgument):
 
     def post_call(self):
         if self.is_direction_out():
-            block, var = self.backend.unpack_basic_ptr(self._data)
+            block, var = self.backend.unpack_basic(self._data)
             self.out_var = var
             return block
 
@@ -274,7 +274,7 @@ class DoubleArgument(GIArgument):
 
     def post_call(self):
         if self.is_direction_out():
-            block, var = self.backend.unpack_basic_ptr(self._data)
+            block, var = self.backend.unpack_basic(self._data)
             self.out_var = var
             return block
 

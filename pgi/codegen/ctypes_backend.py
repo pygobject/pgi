@@ -127,9 +127,9 @@ $value = bool($value)
 
         return block, name
 
-    def unpack_basic_ptr(self, name):
+    def unpack_basic(self, name):
         block, var = self.parse("""
-# unpack basic pointer
+# unpack basic ctypes value
 $value = $ctypes_value.value
 """, ctypes_value=name)
 
@@ -250,8 +250,9 @@ else:
         struct_type = self.var()
 
         block, var = self.parse("""
-# unpack struct
+# setup struct
 $obj = $type()
+$obj._needs_free = False
 $ptr = ctypes.c_void_p($obj._obj)
 """, value=name, type=struct_type)
 
@@ -312,6 +313,17 @@ $union._obj = $value
 
         block.add_dependency(type_var, type_)
         return block, var["union"]
+
+    def unpack_flags(self, name, type_):
+        type_var = self.var()
+
+        block, var = self.parse("""
+# unpack flags
+$flags = $flags_class($value)
+""", flags_class=type_var, value=name)
+
+        block.add_dependency(type_var, type_)
+        return block, var["flags"]
 
 
 class ArrayTypes(object):

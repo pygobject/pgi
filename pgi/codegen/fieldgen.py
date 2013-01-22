@@ -26,20 +26,21 @@ def generate_field_getter(info):
     main.write_line("def getter(argument):")
     main.write_line("argument = argument._obj", 1)
 
-    # no idea if that works
     if info.offset:
-        main.write_line("argument = argument + %d", info.offset / 8, 1)
+        # gi docs are lying, offset in bytes
+        main.write_line("argument = argument + %d" % info.offset, 1)
 
     # uh.. too much logic here..
     block, var = backend.cast_pointer("argument", type_)
     block.write_into(main, 1)
     block, var = backend.deref_pointer(var)
     block.write_into(main, 1)
-    block, var = backend.unpack_basic_ptr(var)
+    block, var = backend.unpack_basic(var)
     block.write_into(main, 1)
 
     block, var = f.get(var)
-    block.write_into(main, 1)
+    if block:
+        block.write_into(main, 1)
     main.write_line("return %s" % var, 1)
     func = main.compile()["getter"]
 

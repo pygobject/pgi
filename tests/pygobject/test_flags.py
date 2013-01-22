@@ -8,6 +8,7 @@
 import sys
 import unittest
 
+from tests import is_gi
 from gi.repository import Gtk
 
 
@@ -22,6 +23,10 @@ class FlagsTest(unittest.TestCase):
         self.assertTrue("FG" in repr(Gtk.RcFlags.FG))
         self.assertTrue("0" in repr(Gtk.RcFlags(0)))
         self.assertTrue("GtkRcFlags" in repr(Gtk.RcFlags.BASE))
+
+    @unittest.skipIf(is_gi, "")
+    def test_repr_2(self):
+        self.assertTrue("NONE" in repr(Gtk.JunctionSides.NONE))
 
     def test_inval(self):
         self.assertRaises(TypeError, Gtk.RcFlags, "")

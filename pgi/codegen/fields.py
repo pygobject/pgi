@@ -9,7 +9,7 @@ from pgi.gir import GIInfoType, GITypeTag
 from pgi.util import import_attribute
 
 
-class FieldAccess(object):
+class Field(object):
     TAG = None
 
     def __init__(self, info, type, backend):
@@ -24,7 +24,7 @@ class FieldAccess(object):
         raise NotImplementedError("no setter implemented")
 
 
-class InterfaceFieldAccess(FieldAccess):
+class InterfaceField(Field):
     TAG = GITypeTag.INTERFACE
 
     def get(self, name):
@@ -45,11 +45,18 @@ class InterfaceFieldAccess(FieldAccess):
         raise NotImplementedError("interface type not supported")
 
 
-class TypeFieldAccess(FieldAccess):
+class TypeField(Field):
     TAG = GITypeTag.GTYPE
 
     def get(self, name):
         return self.backend.unpack_gtype(name)
+
+
+class DoubleField(Field):
+    TAG = GITypeTag.DOUBLE
+
+    def get(self, name):
+        return None, name
 
 
 _classes = {}
@@ -58,7 +65,7 @@ _classes = {}
 def _find_fields():
     global _classes
     cls = [a for a in globals().values() if isinstance(a, type)]
-    args = [a for a in cls if issubclass(a, FieldAccess) and a is not FieldAccess]
+    args = [a for a in cls if issubclass(a, Field) and a is not Field]
     _classes = dict(((a.TAG, a) for a in args))
 _find_fields()
 
@@ -66,4 +73,7 @@ _find_fields()
 def get_field_class(arg_type):
     global _classes
     tag_value = arg_type.tag.value
-    return _classes[tag_value]
+    try:
+        return _classes[tag_value]
+    except KeyError:
+        raise NotImplementedError("%r not supported" % arg_type.tag)

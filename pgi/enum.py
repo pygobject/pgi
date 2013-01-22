@@ -39,6 +39,9 @@ class _FlagsClass(int):
     def __repr__(self):
         names = []
         for (num, vname) in self._flags:
+            if not self and not num:
+                names.append(vname)
+                break
             if self & num:
                 names.append(vname)
 
