@@ -12,7 +12,7 @@ from pgi.codegen.backend import CodeGenBackend
 from pgi.codegen.utils import CodeBlock
 from pgi.gir import GIRepositoryPtr, GITypeTag, GIInfoType
 from pgi.glib import gboolean, gfloat, gdouble, gint64, guint64, gint, guint8
-from pgi.glib import GErrorPtr, gchar_p, guint32, gint32, gpointer
+from pgi.glib import GErrorPtr, gchar_p, guint32, gint32, gpointer, guint16
 from pgi.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr, GType
 from pgi.gtype import PGType
 from pgi.util import import_attribute
@@ -70,6 +70,8 @@ def typeinfo_to_ctypes(info):
             return guint64
         elif tag == GITypeTag.INT32:
             return gint32
+        elif tag == GITypeTag.UINT16:
+            return guint16
         elif tag == GITypeTag.UINT8:
             return guint8
         elif tag == GITypeTag.INT64:
@@ -136,16 +138,34 @@ $value = $ctypes_value.value
         block.add_dependency("ctypes", ctypes)
         return block, var["value"]
 
+    def pack_uint16(self, name):
+        block, var = self.parse("""
+# pack uint16
+if not isinstance($uint, (float, int, long)):
+    raise TypeError("Value '$uint' not a number")
+$uint = int($uint)
+# overflow check for uint16
+if not 0 <= $uint < 65536:
+    raise ValueError("Value '$uint' not in range")
+$uint = ctypes.c_uint16($uint)
+""", uint=name)
+
+        block.add_dependency("ctypes", ctypes)
+        return block, var["uint"]
+
     def pack_uint32(self, name):
         block, var = self.parse("""
+# pack uint32
 if not isinstance($uint, (float, int, long)):
     raise TypeError("Value '$uint' not a number")
 $uint = int($uint)
 # overflow check for uint32
 if not 0 <= $uint < 4294967296:
     raise ValueError("Value '$uint' not in range")
+$uint = ctypes.c_uint32($uint)
 """, uint=name)
 
+        block.add_dependency("ctypes", ctypes)
         return block, var["uint"]
 
     def pack_uint32_ptr(self):
@@ -501,3 +521,10 @@ $value = $value.contents
 """, value=name)
 
         return block, var["value"]
+
+    def assign_pointer(self, ptr, value):
+        block, var = self.parse("""
+$ptr.contents = $value
+""", ptr=ptr, value=value)
+
+        return block

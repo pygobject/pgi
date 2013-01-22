@@ -20,7 +20,7 @@ class Field(object):
     def get(self, name):
         raise NotImplementedError("no getter implemented")
 
-    def set(self):
+    def set(self, name, value_name):
         raise NotImplementedError("no setter implemented")
 
 
@@ -58,6 +58,15 @@ class DoubleField(Field):
     def get(self, name):
         return None, name
 
+
+class UInt16Field(Field):
+    TAG = GITypeTag.UINT16
+
+    def set(self, name, value_name):
+        return self.backend.pack_uint16(value_name)
+
+    def get(self, name):
+        return None, name
 
 _classes = {}
 

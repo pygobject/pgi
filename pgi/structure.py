@@ -7,7 +7,7 @@
 
 from ctypes import cast
 
-from pgi.codegen.fieldgen import generate_field_getter
+from pgi.codegen.fieldgen import generate_field_getter, generate_field_setter
 from pgi.gir import GIUnionInfoPtr, GIFieldInfoFlags, GIStructInfoPtr
 from pgi.glib import g_try_malloc0, free
 from pgi.gtype import PGType
@@ -87,24 +87,30 @@ class FieldAttribute(object):
 
     def __init__(self, info):
         self._info = info
-
+        self._readable = info.flags.value & GIFieldInfoFlags.IS_READABLE
+        self._writeable = info.flags.value & GIFieldInfoFlags.IS_WRITABLE
 
     def __get__(self, instance, owner):
-        info = self._info
-
-        if not info.flags.value & GIFieldInfoFlags.IS_READABLE:
+        if not self._readable:
             raise AttributeError
 
         if not self._getter:
-            self._getter = generate_field_getter(info)
+            self._getter = generate_field_getter(self._info)
 
         if instance:
             return self._getter(instance)
-        return self._getter
+        return self
 
     def __set__(self, instance, value):
-        if not self._info.flags.value & GIFieldInfoFlags.IS_WRITABLE:
+        if not self._writeable:
             raise AttributeError
+
+        if not self._setter:
+            self._setter = generate_field_setter(self._info)
+
+        if instance:
+            return self._setter(instance, value)
+        return self
 
 
 def UnionAttribute(info):

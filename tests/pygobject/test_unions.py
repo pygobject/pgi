@@ -30,3 +30,8 @@ class UnionTest(unittest.TestCase):
         a = Gtk.BindingArg()
         g = a.arg_type
         self.assertEqual(g, GObject.TYPE_INVALID)
+
+    def test_color(self):
+        color = Gdk.Color(1, 2, 3)
+        # FIXME
+        # self.assertEqual(color.red, 1)
