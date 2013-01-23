@@ -110,6 +110,14 @@ if $var is not None and not isinstance($var, basestring):
 
         return block, name
 
+    def pack_pointer(self, name):
+        block, var = self.parse("""
+if $ptr is None:
+    raise TypeError("No None allowed")
+""", ptr=name)
+
+        return block, name
+
     def unpack_string(self, name):
         return CodeBlock(), name
 
@@ -138,6 +146,29 @@ $value = $ctypes_value.value
         block.add_dependency("ctypes", ctypes)
         return block, var["value"]
 
+    def pack_uint8(self, name):
+        block, var = self.parse("""
+# uint8: type checking, conversion
+if not isinstance($uint, (float, int, long)):
+    try:
+        $uint = ord($uint)
+    except TypeError:
+        if isinstance($uint, basestring):
+            raise TypeError("'$uint' must be a single character")
+        else:
+            raise TypeError("Value '$uint' not a number or character")
+
+# pack uint8
+$uint = int($uint)
+# overflow check for uint8
+if not 0 <= $uint < 2**8:
+    raise ValueError("Value '$uint' not in range")
+$uint = ctypes.c_uint8($uint)
+""", uint=name)
+
+        block.add_dependency("ctypes", ctypes)
+        return block, var["uint"]
+
     def pack_uint16(self, name):
         block, var = self.parse("""
 # pack uint16
@@ -145,13 +176,43 @@ if not isinstance($uint, (float, int, long)):
     raise TypeError("Value '$uint' not a number")
 $uint = int($uint)
 # overflow check for uint16
-if not 0 <= $uint < 65536:
+if not 0 <= $uint < 2**16:
     raise ValueError("Value '$uint' not in range")
 $uint = ctypes.c_uint16($uint)
 """, uint=name)
 
         block.add_dependency("ctypes", ctypes)
         return block, var["uint"]
+
+    def pack_int32(self, name):
+        block, var = self.parse("""
+# pack int32
+if not isinstance($int, (float, int, long)):
+    raise TypeError("Value '$int' not a number")
+$int = int($int)
+# overflow check for int32
+if not -2**31 <= $int < 2**31:
+    raise ValueError("Value '$int' not in range")
+$int = ctypes.c_int32($int)
+""", int=name)
+
+        block.add_dependency("ctypes", ctypes)
+        return block, var["int"]
+
+    def pack_int64(self, name):
+        block, var = self.parse("""
+# pack int64
+if not isinstance($int, (float, int, long)):
+    raise TypeError("Value '$int' not a number")
+$int = int($int)
+# overflow check for int64
+if not -2**63 <= $int < 2**63:
+    raise ValueError("Value '$int' not in range")
+$int = ctypes.c_int64($int)
+""", int=name)
+
+        block.add_dependency("ctypes", ctypes)
+        return block, var["int"]
 
     def pack_uint32(self, name):
         block, var = self.parse("""
@@ -160,7 +221,7 @@ if not isinstance($uint, (float, int, long)):
     raise TypeError("Value '$uint' not a number")
 $uint = int($uint)
 # overflow check for uint32
-if not 0 <= $uint < 4294967296:
+if not 0 <= $uint < 2**32:
     raise ValueError("Value '$uint' not in range")
 $uint = ctypes.c_uint32($uint)
 """, uint=name)
@@ -168,9 +229,25 @@ $uint = ctypes.c_uint32($uint)
         block.add_dependency("ctypes", ctypes)
         return block, var["uint"]
 
-    def pack_uint32_ptr(self):
+    def pack_uint64(self, name):
         block, var = self.parse("""
-# pack uint32
+# pack uint64
+if not isinstance($uint, (float, int, long)):
+    raise TypeError("Value '$uint' not a number")
+$uint = int($uint)
+# overflow check for uint64
+if not 0 <= $uint < 2**64:
+    raise ValueError("Value '$uint' not in range")
+$uint = ctypes.c_uint64($uint)
+""", uint=name)
+
+        block.add_dependency("ctypes", ctypes)
+        return block, var["uint"]
+
+
+    def setup_uint32_ptr(self):
+        block, var = self.parse("""
+# new uint32
 $uint = ctypes.c_uint32()
 $uint_ref = ctypes.byref($uint)
 """)

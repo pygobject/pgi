@@ -19,10 +19,13 @@ class ReturnValue(object):
         self.backend = backend
 
     def process(self, name):
-        return None, name
+        return None, None
 
     def is_zero_terminated(self):
         return self.type.is_zero_terminated
+
+    def is_pointer(self):
+        return self.type.is_pointer
 
 
 class BooleanReturnValue(ReturnValue):
@@ -35,6 +38,12 @@ class BooleanReturnValue(ReturnValue):
 class VoidReturnValue(ReturnValue):
     TAG = GITypeTag.VOID
 
+    def process(self, name):
+        if self.is_pointer():
+            return None, name
+        else:
+            return None, None
+
 
 class ArrayReturnValue(ReturnValue):
     TAG = GITypeTag.ARRAY
@@ -45,17 +54,77 @@ class ArrayReturnValue(ReturnValue):
             block, var = backend.unpack_array_zeroterm_c(name)
             return block, var
 
+        raise NotImplementedError
+
+
+class UInt8ReturnValue(ReturnValue):
+    TAG = GITypeTag.INT8
+
+    def process(self, name):
+        return None, name
+
+
+class Int32ReturnValue(ReturnValue):
+    TAG = GITypeTag.INT32
+
+    def process(self, name):
+        return None, name
+
+
+class Int64ReturnValue(ReturnValue):
+    TAG = GITypeTag.INT64
+
+    def process(self, name):
+        return None, name
+
+
+class UInt64ReturnValue(ReturnValue):
+    TAG = GITypeTag.UINT64
+
+    def process(self, name):
+        return None, name
+
+
+class UInt32ReturnValue(ReturnValue):
+    TAG = GITypeTag.UINT32
+
+    def process(self, name):
+        return None, name
+
+
+class UInt8ReturnValue(ReturnValue):
+    TAG = GITypeTag.UINT8
+
+    def process(self, name):
+        return None, name
+
+
+class DoubleReturnValue(ReturnValue):
+    TAG = GITypeTag.DOUBLE
+
+    def process(self, name):
+        return None, name
+
+
+class FloatReturnValue(ReturnValue):
+    TAG = GITypeTag.FLOAT
+
+    def process(self, name):
+        return None, name
+
 
 class Utf8ReturnValue(ReturnValue):
     TAG = GITypeTag.UTF8
 
     def process(self, name):
-        backend = self.backend
-        return backend.unpack_string(name)
+        return self.backend.unpack_string(name)
 
 
 class FilenameReturnValue(Utf8ReturnValue):
     TAG = GITypeTag.FILENAME
+
+    def process(self, name):
+        return self.backend.unpack_string(name)
 
 
 class InterfaceReturnValue(ReturnValue):
@@ -110,4 +179,7 @@ _find_return_values()
 def get_return_class(type_):
     global _classes
     tag_value = type_.tag.value
-    return _classes.get(tag_value, ReturnValue)
+    try:
+        return _classes[tag_value]
+    except KeyError:
+        raise NotImplementedError("%r return not implemented" % type_.tag)

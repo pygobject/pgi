@@ -7,7 +7,7 @@
 
 import unittest
 
-from gi.repository import Gtk, GLib, Gdk
+from gi.repository import Gtk, GLib, Gdk, GObject
 
 
 class FuncsTest(unittest.TestCase):
@@ -152,3 +152,117 @@ class FuncsTest(unittest.TestCase):
         c = b.get_style_context()
         direction = c.get_direction()
         self.assertTrue(isinstance(direction, Gtk.TextDirection))
+
+    def test_value_boolean(self):
+        v = GObject.Value()
+        v.init(GObject.TYPE_BOOLEAN)
+        v.set_boolean(True)
+        self.assertEqual(v.get_boolean(), True)
+        v.set_boolean(False)
+        self.assertEqual(v.get_boolean(), False)
+        v.set_boolean([])
+        self.assertEqual(v.get_boolean(), False)
+        v.set_boolean([1])
+        self.assertEqual(v.get_boolean(), True)
+
+    def test_value_char(self):
+        v = GObject.Value()
+        v.init(GObject.TYPE_CHAR)
+        v.set_char("a")
+        self.assertEqual(v.get_char(), 97)
+        self.assertRaises(TypeError, v.set_char, "ab")
+        self.assertRaises(ValueError, v.set_char, 9999)
+        v.set_char(103.5)
+        self.assertEqual(v.get_char(), 103)
+
+    def test_value_double(self):
+        v = GObject.Value()
+        v.init(GObject.TYPE_DOUBLE)
+        v.set_double(42.50)
+        self.assertEqual(v.get_double(), 42.50)
+        self.assertRaises(TypeError, v.set_double, "a")
+
+    def test_value_gtype(self):
+        v = GObject.Value()
+        v.init(GObject.TYPE_GTYPE)
+        v.set_gtype(GObject.TYPE_DOUBLE)
+        self.assertEqual(v.get_gtype(), GObject.TYPE_DOUBLE)
+
+    def test_value_float(self):
+        v = GObject.Value()
+        v.init(GObject.TYPE_FLOAT)
+        v.set_float(42.50)
+        self.assertEqual(v.get_float(), 42.50)
+        self.assertRaises(TypeError, v.set_float, "a")
+
+    def test_value_int32(self):
+        v = GObject.Value()
+        v.init(GObject.TYPE_INT)
+        v.set_int(2**31 - 1)
+        v.set_int(-2**31)
+        v.set_int(42.50)
+        self.assertEqual(v.get_int(), 42)
+        self.assertRaises(TypeError, v.set_int, "a")
+        self.assertRaises(ValueError, v.set_int, 2**31)
+        self.assertRaises(ValueError, v.set_int, -(2**31+1))
+
+    def test_value_int64(self):
+        v = GObject.Value()
+        v.init(GObject.TYPE_INT64)
+        v.set_int64(2**63 - 1)
+        v.set_int64(-2**63)
+        v.set_int64(42.50)
+        self.assertEqual(v.get_int64(), 42)
+        self.assertRaises(TypeError, v.set_int64, "a")
+        self.assertRaises(ValueError, v.set_int64, 2**63)
+        self.assertRaises(ValueError, v.set_int64, -(2**63+1))
+
+    def test_value_long(self):
+        v = GObject.Value()
+        v.init(GObject.TYPE_LONG)
+        v.set_long(2**63 - 1)
+        v.set_long(-2**63)
+        v.set_long(42.50)
+        self.assertEqual(v.get_long(), 42)
+        self.assertRaises(TypeError, v.set_long, "a")
+        self.assertRaises(ValueError, v.set_long, 2**63)
+        self.assertRaises(ValueError, v.set_long, -(2**63+1))
+
+    def test_value_object(self):
+        b = Gtk.Button()
+        v = GObject.Value()
+        v.init(GObject.TYPE_OBJECT)
+        v.set_object(b)
+        v.set_object(None)
+        self.assertTrue(v.get_object() is None)
+        v.set_object(b)
+        self.assertEqual(v.get_object(), b)
+
+    def test_value_uchar(self):
+        v = GObject.Value()
+        v.init(GObject.TYPE_UCHAR)
+        v.set_uchar(2**8-1)
+        v.set_uchar(0)
+        self.assertRaises(ValueError, v.set_uchar, 2**8)
+        self.assertRaises(ValueError, v.set_uchar, -1)
+        v.set_uchar("a")
+        self.assertRaises(TypeError, v.set_uchar, "")
+
+    def test_value_pointer(self):
+        v = GObject.Value()
+        v.init(GObject.TYPE_POINTER)
+        self.assertRaises(TypeError, v.set_pointer, None)
+        v.set_pointer(0)
+        v.set_pointer(0xdeadbeef)
+        self.assertEqual(v.get_pointer(), 0xdeadbeef)
+
+    def test_value_uint64(self):
+        v = GObject.Value()
+        v.init(GObject.TYPE_UINT64)
+        v.set_uint64(2**64 - 1)
+        v.set_uint64(0)
+        v.set_uint64(42.50)
+        self.assertEqual(v.get_uint64(), 42)
+        self.assertRaises(TypeError, v.set_uint64, "a")
+        self.assertRaises(ValueError, v.set_uint64, 2**64)
+        self.assertRaises(ValueError, v.set_uint64, -1)

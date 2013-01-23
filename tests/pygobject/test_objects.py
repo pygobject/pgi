@@ -114,6 +114,15 @@ class ObjectTest(unittest.TestCase):
         a = Gio.FilenameCompleter()
         self.assertEqual(a.__grefcount__, 1)
 
+    def test_hashable(self):
+        b = Gtk.Button()
+        v = GObject.Value()
+        v.init(GObject.TYPE_OBJECT)
+        v.set_object(b)
+        b2 = v.get_object()
+        self.assertEqual(b, b2)
+        self.assertEqual(len(set([b, b2])), 1)
+
 
 class GTypeTest(unittest.TestCase):
     def test_repr(self):

@@ -191,25 +191,73 @@ class BoolArgument(GIArgument):
     TAG = GITypeTag.BOOLEAN
 
     def pre_call(self):
-        block, var = self.backend.pack_bool(self.name)
-        self.call_var = var
-        return block
+        if not self.is_direction_out():
+            block, var = self.backend.pack_bool(self.name)
+            self.call_var = var
+            return block
+
+        raise NotImplementedError
 
 
 class UInt8Argument(GIArgument):
     TAG = GITypeTag.UINT8
 
+    def pre_call(self):
+        if not self.is_direction_out():
+            block, out = self.backend.pack_uint8(self.name)
+            self.call_var = out
+            return block
+
+        raise NotImplementedError
+
 
 class VoidArgument(GIArgument):
     TAG = GITypeTag.VOID
+
+    def pre_call(self):
+        if self.is_pointer():
+            if not self.may_be_null():
+                block, out = self.backend.pack_pointer(self.name)
+                self.call_var = out
+                return block
+
+        raise NotImplementedError
 
 
 class Int32Argument(GIArgument):
     TAG = GITypeTag.INT32
 
+    def pre_call(self):
+        if not self.is_direction_out():
+            block, out = self.backend.pack_int32(self.name)
+            self.call_var = out
+            return block
+
+        raise NotImplementedError
+
 
 class Int64Argument(GIArgument):
     TAG = GITypeTag.INT64
+
+    def pre_call(self):
+        if not self.is_direction_out():
+            block, out = self.backend.pack_int64(self.name)
+            self.call_var = out
+            return block
+
+        raise NotImplementedError
+
+
+class UInt64Argument(GIArgument):
+    TAG = GITypeTag.UINT64
+
+    def pre_call(self):
+        if not self.is_direction_out():
+            block, out = self.backend.pack_uint64(self.name)
+            self.call_var = out
+            return block
+
+        raise NotImplementedError
 
 
 class UINT32Argument(GIArgument):
@@ -217,7 +265,7 @@ class UINT32Argument(GIArgument):
 
     def pre_call(self):
         if self.is_direction_out():
-            block, data, ref = self.backend.pack_uint32_ptr()
+            block, data, ref = self.backend.setup_uint32_ptr()
             self._data = data
             self.call_var = ref
             return block
@@ -302,4 +350,7 @@ _find_arguments()
 def get_argument_class(arg_type):
     global _classes
     tag_value = arg_type.tag.value
-    return _classes[tag_value]
+    try:
+        return _classes[tag_value]
+    except KeyError:
+        raise NotImplementedError("%r argument not implemented" % arg_type.tag)

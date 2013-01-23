@@ -9,7 +9,7 @@ from pgi.codegen import ACTIVE_BACKENDS
 from pgi.codegen.utils import CodeBlock
 from pgi.util import escape_name, escape_builtin
 from pgi.codegen.arguments import get_argument_class, ErrorArgument
-from pgi.codegen.returnvalues import get_return_class, VoidReturnValue
+from pgi.codegen.returnvalues import get_return_class
 
 
 def _generate_function(backend, info, arg_infos, arg_types, return_type, method, throws):
@@ -18,10 +18,7 @@ def _generate_function(backend, info, arg_infos, arg_types, return_type, method,
     main.write_line("# backend: %s" % backend.NAME)
 
     cls = get_return_class(return_type)
-    if cls is VoidReturnValue:
-        return_value = None
-    else:
-        return_value = cls(info, return_type, backend)
+    return_value = cls(info, return_type, backend)
 
     args = []
     for arg_info, arg_type in zip(arg_infos, arg_types):
@@ -78,10 +75,10 @@ def _generate_function(backend, info, arg_infos, arg_types, return_type, method,
             block.write_into(main, 1)
 
     # process return value
-    if return_value:
-        block, return_var = return_value.process(ret)
-        if block:
-            block.write_into(main, 1)
+    block, return_var = return_value.process(ret)
+    if block:
+        block.write_into(main, 1)
+    if return_var:
         out.append(return_var)
 
     # process out args
@@ -112,12 +109,13 @@ def generate_function(info, method=False, throws=False):
     return_type = info.get_return_type()
 
     func = None
+    messages = []
     for backend in ACTIVE_BACKENDS:
         try:
             func = _generate_function(backend, info, arg_infos, arg_types,
                                       return_type, method, throws)
-        except NotImplementedError:
-            continue
+        except NotImplementedError, e:
+            messages.append("%s: %s" % (backend.NAME, e.message))
         else:
             break
 
@@ -129,4 +127,5 @@ def generate_function(info, method=False, throws=False):
 
     if func:
         return func
-    raise NotImplementedError
+
+    raise NotImplementedError("\n".join(messages))

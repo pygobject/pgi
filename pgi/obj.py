@@ -47,6 +47,15 @@ class _Object(object):
         self.__weak[weakref.ref(self, self.__destroy)] = obj
         self._obj = obj
 
+    def __hash__(self):
+        return hash(self._obj)
+
+    def __eq__(self, other):
+        return self._obj == other._obj
+
+    def __cmp__(self, other):
+        return cmp(self._obj, other._obj)
+
     @classmethod
     def __destroy(cls, ref):
         gobject.unref(cls.__weak.pop(ref))
