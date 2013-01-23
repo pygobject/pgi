@@ -6,6 +6,7 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from pgi.codegen.utils import parse_code
+from pgi.gtype import PGType
 
 
 class CodeGenBackend(object):
@@ -47,3 +48,37 @@ class CodeGenBackend(object):
 
     def call(self, name, args):
         raise NotImplementedError
+
+    def unpack_gvalue(self, name):
+        getter_map = {
+            "gboolean": lambda v: v.get_boolean(),
+            "gchar": lambda v: chr(v.get_schar()),
+            "gdouble": lambda v: v.get_double(),
+            "gfloat": lambda v: v.get_float(),
+            "GType": lambda v: v.get_gtype(),
+            "gint64": lambda v: v.get_int64(),
+            "gint": lambda v: v.get_int(),
+            "glong": lambda v: v.get_long(),
+            "GObject": lambda v: v.get_object(),
+            "gpointer": lambda v: v.get_pointer(),
+            "gchararray": lambda v: v.get_string(),
+            "guchar": lambda v: chr(v.get_uchar()),
+            "guint64": lambda v: v.get_uint64(),
+            "guint": lambda v: v.get_uint(),
+            "gulong": lambda v: v.get_ulong(),
+        }
+
+        items = getter_map.items()
+        getter_map = dict((PGType.from_name(k), v) for (k, v) in items)
+
+        map_var = self.var()
+
+        block, var = self.parse("""
+try:
+    $out = $lookup[$value.g_type]($value)
+except KeyError:
+    $out = $value
+""", value=name, lookup=map_var)
+
+        block.add_dependency(map_var, getter_map)
+        return block, var["out"]
