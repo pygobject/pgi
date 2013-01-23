@@ -88,6 +88,17 @@ class UInt16Field(Field):
     def get(self, name):
         return None, name
 
+
+class FloatField(Field):
+    TAG = GITypeTag.FLOAT
+
+    def set(self, name, value_name):
+        return self.backend.pack_float(value_name)
+
+    def get(self, name):
+        return None, name
+
+
 _classes = {}
 
 

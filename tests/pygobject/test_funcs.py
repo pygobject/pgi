@@ -5,8 +5,10 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
+import sys
 import unittest
 
+from tests import is_gi
 from gi.repository import Gtk, GLib, Gdk, GObject
 
 
@@ -193,7 +195,21 @@ class FuncsTest(unittest.TestCase):
         v.init(GObject.TYPE_FLOAT)
         v.set_float(42.50)
         self.assertEqual(v.get_float(), 42.50)
+        v.set_float(42)
+        self.assertEqual(v.get_float(), 42)
         self.assertRaises(TypeError, v.set_float, "a")
+        self.assertRaises(TypeError, v.set_float, [])
+        self.assertRaises(ValueError, v.set_float, 10**39)
+        self.assertRaises(ValueError, v.set_float, -10**39)
+
+    @unittest.skipIf(is_gi, "gi doesn't support +/-inf")
+    def test_value_float_inf(self):
+        v = GObject.Value()
+        v.init(GObject.TYPE_FLOAT)
+        v.set_float(float("inf"))
+        self.assertEqual(v.get_float(), float('inf'))
+        v.set_float(float("-inf"))
+        self.assertEqual(v.get_float(), float('-inf'))
 
     def test_value_int32(self):
         v = GObject.Value()

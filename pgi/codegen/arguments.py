@@ -302,6 +302,11 @@ class FloatArgument(GIArgument):
             self._data = data
             self.call_var = ref
             return block
+        else:
+            block, out = self.backend.pack_float(self.name)
+            self.call_var = out
+            return block
+        raise NotImplementedError
 
     def post_call(self):
         if self.is_direction_out():

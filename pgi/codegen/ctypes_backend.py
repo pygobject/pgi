@@ -169,6 +169,18 @@ $uint = ctypes.c_uint8($uint)
         block.add_dependency("ctypes", ctypes)
         return block, var["uint"]
 
+    def pack_float(self, name):
+        block, var = self.parse("""
+# pack float
+#if not isinstance($float, (float, int, long)):
+#    raise TypeError("Value '$float' not a number")
+$c_float = ctypes.c_float($float)
+if $c_float.value != $float:
+    raise ValueError("$float out of range")
+""", float=name)
+
+        return block, var["c_float"]
+
     def pack_uint16(self, name):
         block, var = self.parse("""
 # pack uint16
@@ -376,15 +388,18 @@ else:
 
     def pack_struct(self, name):
         base_var = self.var()
+        base_obj_var = self.var()
 
         block, var = self.parse("""
-if not isinstance($obj, $base_struct_class):
+if not isinstance($obj, ($base_struct_class, $base_obj_class)):
     raise TypeError("%r is not a structure object" % $obj)
 $obj = ctypes.cast($obj._obj, ctypes.c_void_p)
-""", obj=name, base_struct_class=base_var)
+""", obj=name, base_struct_class=base_var, base_obj_class=base_obj_var)
 
+        base_obj = import_attribute("GObject", "Object")
         from pgi.structure import BaseStructure
         block.add_dependency(base_var, BaseStructure)
+        block.add_dependency(base_obj_var, base_obj)
         block.add_dependency("ctypes", ctypes)
         return block, var["obj"]
 
