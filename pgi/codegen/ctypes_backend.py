@@ -332,35 +332,34 @@ class InterfaceTypes(object):
 
     def pack_object(self, obj_name):
         gobj_class = import_attribute("GObject", "Object")
-        gobj_var = self.var()
 
         block, var = self.parse("""
 if not isinstance($obj, $gobject):
     raise TypeError("%r not a GObject.Object" % $obj)
 $obj = ctypes.cast($obj._obj, ctypes.c_void_p)
-""", obj=obj_name, gobject=gobj_var)
+""", obj=obj_name, gobject=gobj_class)
 
-        block.add_dependency(gobj_var, gobj_class)
         block.add_dependency("ctypes", ctypes)
         return block, var["obj"]
 
     def pack_object_null(self, obj_name):
         gobj_class = import_attribute("GObject", "Object")
-        gobj_var = self.var()
 
         block, var = self.parse("""
 if $obj is not None:
     if not isinstance($obj, $gobject):
         raise TypeError("%r not a GObject.Object or None" % $obj)
     $obj = ctypes.cast($obj._obj, ctypes.c_void_p)
-""", obj=obj_name, gobject=gobj_var)
+""", obj=obj_name, gobject=gobj_class)
 
-        block.add_dependency(gobj_var, gobj_class)
         block.add_dependency("ctypes", ctypes)
         return block, var["obj"]
 
     def unpack_object(self, name):
-        get_class = self.var()
+        def get_class_func(pointer):
+            instance = ctypes.cast(pointer, GTypeInstancePtr)
+            gtype = G_TYPE_FROM_INSTANCE(instance.contents)
+            return PGType(gtype).pytype
 
         block, var = self.parse("""
 # unpack object
@@ -370,34 +369,22 @@ if $value:
     $obj._obj = $value
 else:
     $obj = $value
-""", value=name, get_class=get_class)
+""", value=name, get_class=get_class_func)
 
-        def get_class_func(pointer):
-            instance = ctypes.cast(pointer, GTypeInstancePtr)
-            gtype = G_TYPE_FROM_INSTANCE(instance.contents)
-            return PGType(gtype).pytype
-
-        block.add_dependency(get_class, get_class_func)
         return block, var["obj"]
 
     def setup_struct(self, name, type_):
-        struct_type = self.var()
-
         block, var = self.parse("""
 # setup struct
 $obj = $type()
 $obj._needs_free = False
 $ptr = ctypes.c_void_p($obj._obj)
-""", value=name, type=struct_type)
+""", value=name, type=type_)
 
         block.add_dependency("ctypes", ctypes)
-        block.add_dependency(struct_type, type_)
-
         return block, var["obj"], var["ptr"]
 
     def unpack_struct(self, name, type_):
-        struct_type = self.var()
-
         block, var = self.parse("""
 # unpack struct
 if $value:
@@ -405,61 +392,47 @@ if $value:
     $obj._obj = $value
 else:
     $obj = None
-""", value=name, type=struct_type)
+""", value=name, type=type_)
 
-        block.add_dependency(struct_type, type_)
         return block, var["obj"]
 
 
     def pack_struct(self, name):
-        base_var = self.var()
-        base_obj_var = self.var()
+        base_obj = import_attribute("GObject", "Object")
+        from pgi.structure import BaseStructure
 
         block, var = self.parse("""
 if not isinstance($obj, ($base_struct_class, $base_obj_class)):
     raise TypeError("%r is not a structure object" % $obj)
 $obj = ctypes.cast($obj._obj, ctypes.c_void_p)
-""", obj=name, base_struct_class=base_var, base_obj_class=base_obj_var)
+""", obj=name, base_struct_class=BaseStructure, base_obj_class=base_obj)
 
-        base_obj = import_attribute("GObject", "Object")
-        from pgi.structure import BaseStructure
-        block.add_dependency(base_var, BaseStructure)
-        block.add_dependency(base_obj_var, base_obj)
         block.add_dependency("ctypes", ctypes)
         return block, var["obj"]
 
     def unpack_enum(self, name, type_):
-        type_var = self.var()
-
         block, var = self.parse("""
 # unpack enum
 $enum = $enum_class($value)
-""", enum_class=type_var, value=name)
+""", enum_class=type_, value=name)
 
-        block.add_dependency(type_var, type_)
         return block, var["enum"]
 
     def unpack_union(self, name, type_):
-        type_var = self.var()
-
         block, var = self.parse("""
 # unpack union
 $union = object.__new__($union_class)
 $union._obj = $value
-""", union_class=type_var, value=name)
+""", union_class=type_, value=name)
 
-        block.add_dependency(type_var, type_)
         return block, var["union"]
 
     def unpack_flags(self, name, type_):
-        type_var = self.var()
-
         block, var = self.parse("""
 # unpack flags
 $flags = $flags_class($value)
-""", flags_class=type_var, value=name)
+""", flags_class=type_, value=name)
 
-        block.add_dependency(type_var, type_)
         return block, var["flags"]
 
 
@@ -527,14 +500,12 @@ for $i in xrange($length.value):
 class ErrorTypes(object):
 
     def setup_gerror(self):
-        gerror_var = self.var()
         block, var = self.parse("""
 $ptr = $gerror_ptr()
 $ptr_ref = ctypes.byref($ptr)
-""", gerror_ptr=gerror_var)
+""", gerror_ptr=GErrorPtr)
 
         block.add_dependency("ctypes", ctypes)
-        block.add_dependency(gerror_var, GErrorPtr)
         return block, var["ptr"], var["ptr_ref"]
 
     def check_gerror(self, gerror_ptr):
@@ -621,15 +592,11 @@ except ctypes.ArgumentError, $e:
         return block, var["ret"]
 
     def cast_pointer(self, name, type_):
-        type_ = typeinfo_to_ctypes(type_)
-        type_var = self.var()
         block, var = self.parse("""
 $value = ctypes.cast($value, ctypes.POINTER($type))
-""", value=name, type=type_var)
+""", value=name, type=typeinfo_to_ctypes(type_))
 
         block.add_dependency("ctypes", ctypes)
-        block.add_dependency(type_var, type_)
-
         return block, name
 
     def deref_pointer(self, name):

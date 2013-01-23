@@ -5,7 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from pgi.codegen.utils import parse_code
+from pgi.codegen.utils import parse_code, CodeBlock
 from pgi.gtype import PGType
 
 
@@ -30,10 +30,24 @@ class CodeGenBackend(object):
             return "t%d" % var_factory.c
         var_factory.c = 0
 
-        self.var = var_factory
+        self._var = var_factory
 
     def parse(self, code, **kwargs):
-        return parse_code(code, self.var, **kwargs)
+        # In case the kwarg value is not a code block (which would be
+        # inserted) or a string, we create a new variable, assign the
+        # value to it and add the value as dependency
+        deps = {}
+        for key, value in kwargs.items():
+            if not isinstance(value, (basestring, CodeBlock)):
+                new_var = self._var()
+                deps[new_var] = value
+                kwargs[key] = new_var
+
+        block, var = parse_code(code, self._var, **kwargs)
+        for key, dep in deps.iteritems():
+            block.add_dependency(key, dep)
+
+        return block, var
 
     def __getattr__(self, name):
         raise NotImplementedError(
@@ -71,14 +85,11 @@ class CodeGenBackend(object):
         items = getter_map.items()
         getter_map = dict((PGType.from_name(k), v) for (k, v) in items)
 
-        map_var = self.var()
-
         block, var = self.parse("""
 try:
     $out = $lookup[$value.g_type]($value)
 except KeyError:
     $out = $value
-""", value=name, lookup=map_var)
+""", value=name, lookup=getter_map)
 
-        block.add_dependency(map_var, getter_map)
         return block, var["out"]

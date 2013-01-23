@@ -102,7 +102,10 @@ if not 0 <= $uint < 4294967296:
 class InterfaceTypes(object):
 
     def unpack_object(self, name):
-        get_class = self.var()
+        def get_class_func(pointer):
+            instance = ctypes.cast(pointer, GTypeInstancePtr)
+            gtype = G_TYPE_FROM_INSTANCE(instance.contents)
+            return PGType(gtype).pytype
 
         block, var = self.parse("""
 # unpack object
@@ -113,15 +116,8 @@ if $address:
     $obj._obj = $address
 else:
     $obj = None
-""", value=name, get_class=get_class)
+""", value=name, get_class=get_class_func)
 
-
-        def get_class_func(pointer):
-            instance = ctypes.cast(pointer, GTypeInstancePtr)
-            gtype = G_TYPE_FROM_INSTANCE(instance.contents)
-            return PGType(gtype).pytype
-
-        block.add_dependency(get_class, get_class_func)
         block.add_dependency("ffi", self._ffi)
         return block, var["obj"]
 
