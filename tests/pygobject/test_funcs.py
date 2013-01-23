@@ -282,3 +282,10 @@ class FuncsTest(unittest.TestCase):
         self.assertRaises(TypeError, v.set_uint64, "a")
         self.assertRaises(ValueError, v.set_uint64, 2**64)
         self.assertRaises(ValueError, v.set_uint64, -1)
+
+    def test_value_string(self):
+        v = GObject.Value()
+        v.init(GObject.TYPE_STRING)
+        v.set_string("foo1")
+        self.assertEqual(v.get_string(), "foo1")
+        self.assertEqual(v.dup_string(), "foo1")

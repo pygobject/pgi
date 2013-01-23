@@ -13,12 +13,13 @@ from pgi.codegen.utils import CodeBlock
 from pgi.gir import GIRepositoryPtr, GITypeTag, GIInfoType
 from pgi.glib import gboolean, gfloat, gdouble, gint64, guint64, gint, guint8
 from pgi.glib import GErrorPtr, gchar_p, guint32, gint32, gpointer, guint16
+from pgi.glib import free
 from pgi.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr, GType
 from pgi.gtype import PGType
 from pgi.util import import_attribute
 
 
-def typeinfo_to_ctypes(info):
+def typeinfo_to_ctypes(info, return_value=False):
 
     tag = info.tag.value
     ptr = info.is_pointer
@@ -27,10 +28,12 @@ def typeinfo_to_ctypes(info):
         if tag == GITypeTag.VOID:
             return gpointer
         elif tag == GITypeTag.UTF8 or tag == GITypeTag.FILENAME:
-            # FIXME: We should use c_void_p here, since ctypes does
-            # auto conversion to str and gives us no chance to free
-            # the pointer if transfer=everything
-            return gchar_p
+            if return_value:
+                # ctypes does auto conversion to str and gives us no chance
+                # to free the pointer if transfer=everything
+                return gpointer
+            else:
+                return gchar_p
         elif tag == GITypeTag.ARRAY:
             return gpointer
         elif tag == GITypeTag.INTERFACE:
@@ -119,7 +122,23 @@ if $ptr is None:
         return block, name
 
     def unpack_string(self, name):
-        return CodeBlock(), name
+        block, var = self.parse("""
+$value = ctypes.cast($value, ctypes.c_char_p).value
+""", value=name)
+
+        block.add_dependency("ctypes", ctypes)
+        return block, name
+
+
+    def unpack_string_and_free(self, name):
+        block, var = self.parse("""
+$str_value = ctypes.cast($value, ctypes.c_char_p).value
+free($value)
+""", value=name)
+
+        block.add_dependency("ctypes", ctypes)
+        block.add_dependency("free", free)
+        return block, var["str_value"]
 
     def pack_bool(self, name):
         block, var = self.parse("""
@@ -544,7 +563,7 @@ class CTypesBackend(CodeGenBackend, BasicTypes, InterfaceTypes, ArrayTypes,
                             method=False, self_name="", throws=False):
         h = getattr(lib, symbol)
         if ret:
-            h.restype = typeinfo_to_ctypes(ret.type)
+            h.restype = typeinfo_to_ctypes(ret.type, return_value=True)
         else:
             h.restype = None
 

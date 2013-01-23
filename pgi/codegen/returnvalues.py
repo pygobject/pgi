@@ -5,7 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from pgi.gir import GITypeTag, GIInfoType
+from pgi.gir import GITypeTag, GIInfoType, GITransfer
 from pgi.util import import_attribute
 
 
@@ -26,6 +26,15 @@ class ReturnValue(object):
 
     def is_pointer(self):
         return self.type.is_pointer
+
+    def transfer_nothing(self):
+        return self.info.caller_owns.value == GITransfer.NOTHING
+
+    def transfer_container(self):
+        return self.info.caller_owns.value == GITransfer.CONTAINER
+
+    def transfer_everything(self):
+        return self.info.caller_owns.value == GITransfer.EVERYTHING
 
 
 class BooleanReturnValue(ReturnValue):
@@ -117,7 +126,10 @@ class Utf8ReturnValue(ReturnValue):
     TAG = GITypeTag.UTF8
 
     def process(self, name):
-        return self.backend.unpack_string(name)
+        if self.transfer_everything():
+            return self.backend.unpack_string_and_free(name)
+        else:
+            return self.backend.unpack_string(name)
 
 
 class FilenameReturnValue(Utf8ReturnValue):
