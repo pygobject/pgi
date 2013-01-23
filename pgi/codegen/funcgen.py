@@ -14,9 +14,6 @@ from pgi.codegen.returnvalues import get_return_class
 
 def _generate_function(backend, info, arg_infos, arg_types,
                        return_type, method, throws):
-    main = CodeBlock()
-
-    main.write_line("# backend: %s" % backend.NAME)
 
     cls = get_return_class(return_type)
     return_value = cls(info, return_type, backend)
@@ -34,21 +31,15 @@ def _generate_function(backend, info, arg_infos, arg_types,
     for arg in args:
         arg.setup()
 
-    # generate header
-    names = [a.in_var for a in args if not a.is_aux and a.in_var]
-    if method:
-        names.insert(0, "self")
-    f = "def %s(%s):" % (info.name, ", ".join(names))
-    main.write_line(f)
+    body = CodeBlock()
 
-    docstring = "%s(%s)" % (info.name, ", ".join(names))
-
+    # pre call
     for arg in args:
         if arg.is_aux:
             continue
         block = arg.pre_call()
         if block:
-            block.write_into(main, 1)
+            block.write_into(body)
 
     # generate call
     lib = backend.get_library_object(info.namespace)
@@ -57,14 +48,15 @@ def _generate_function(backend, info, arg_infos, arg_types,
                                                     return_value, method,
                                                     "self", throws)
     if block:
-        block.write_into(main, 1)
+        block.write_into(body)
 
+    # do the call
     call_vars = [a.call_var for a in args if a.call_var]
     if method:
         call_vars.insert(0, svar)
     block, ret = backend.call("func", ", ".join(call_vars))
     block.add_dependency("func", func)
-    block.write_into(main, 1)
+    block.write_into(body)
 
     out = []
 
@@ -73,12 +65,12 @@ def _generate_function(backend, info, arg_infos, arg_types,
         error_arg = args.pop()
         block = error_arg.post_call()
         if block:
-            block.write_into(main, 1)
+            block.write_into(body)
 
     # process return value
     block, return_var = return_value.process(ret)
     if block:
-        block.write_into(main, 1)
+        block.write_into(body)
     if return_var:
         out.append(return_var)
 
@@ -88,14 +80,31 @@ def _generate_function(backend, info, arg_infos, arg_types,
             continue
         block = arg.post_call()
         if block:
-            block.write_into(main, 1)
+            block.write_into(body)
         if arg.out_var:
             out.append(arg.out_var)
 
     if len(out) == 1:
-        main.write_line("return %s" % out[0], 1)
+        body.write_line("return %s" % out[0])
     elif len(out) > 1:
-        main.write_line("return (%s)" % ", ".join(out), 1)
+        body.write_line("return (%s)" % ", ".join(out))
+
+    # build final function block
+
+    names = [a.in_var for a in args if not a.is_aux and a.in_var]
+    if method:
+        names.insert(0, "self")
+    names = ", ".join(names)
+
+    docstring = "%s(%s)" % (info.name, names)
+
+    main, var = backend.parse("""
+# backend: $backend_name
+def $func_name($func_args):
+    '''$docstring'''
+    $func_body
+""", backend_name=backend.NAME, func_args=names, docstring=docstring,
+     func_body=body, func_name=info.name)
 
     func = main.compile()[info.name]
     func._code = main
