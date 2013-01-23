@@ -7,7 +7,7 @@
 
 from pgi.codegen.fields import get_field_class
 from pgi.codegen import ACTIVE_BACKENDS
-from pgi.codegen.utils import CodeBlock, parse_code
+from pgi.codegen.utils import CodeBlock
 
 
 def generate_field_setter(info):

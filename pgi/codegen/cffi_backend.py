@@ -15,7 +15,6 @@ from pgi.codegen.backend import CodeGenBackend
 from pgi.codegen.utils import CodeBlock
 
 
-
 _glib_defs = """
 typedef char gchar;
 typedef const void * gconstpointer;
@@ -120,6 +119,7 @@ else:
 
         block.add_dependency("ffi", self._ffi)
         return block, var["obj"]
+
 
 class CFFIBackend(CodeGenBackend, BasicTypes, InterfaceTypes):
 

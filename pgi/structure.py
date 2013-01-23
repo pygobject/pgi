@@ -57,9 +57,9 @@ class BaseStructure(object):
 class _Structure(BaseStructure):
     """Class template for structures."""
 
-    _obj = None  # the address of the struct
-    _size = 0 # size fo the struct in bytes
-    __gtype__ = None  # the gtype
+    _obj = 0
+    _size = 0
+    __gtype__ = None
     _needs_free = False
 
     def __init__(self):

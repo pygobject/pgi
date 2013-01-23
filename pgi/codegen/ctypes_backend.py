@@ -9,7 +9,6 @@ import ctypes
 from ctypes import POINTER
 
 from pgi.codegen.backend import CodeGenBackend
-from pgi.codegen.utils import CodeBlock
 from pgi.gir import GIRepositoryPtr, GITypeTag, GIInfoType
 from pgi.glib import gboolean, gfloat, gdouble, gint64, guint64, gint, guint8
 from pgi.glib import GErrorPtr, gchar_p, guint32, gint32, gpointer, guint16
@@ -130,7 +129,6 @@ $value = ctypes.cast($value, ctypes.c_char_p).value
 
         block.add_dependency("ctypes", ctypes)
         return block, name
-
 
     def unpack_string_and_free(self, name):
         block, var = self.parse("""
@@ -281,7 +279,6 @@ $uint = ctypes.c_uint64($uint)
         block.add_dependency("ctypes", ctypes)
         return block, var["uint"]
 
-
     def setup_uint32_ptr(self):
         block, var = self.parse("""
 # new uint32
@@ -395,7 +392,6 @@ else:
 """, value=name, type=type_)
 
         return block, var["obj"]
-
 
     def pack_struct(self, name):
         base_obj = import_attribute("GObject", "Object")

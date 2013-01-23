@@ -243,6 +243,7 @@ def escape_name(text, reg=re.compile("^(%s)$" % "|".join(keyword.kwlist))):
     text = text.replace("-", "_")
     return reg.sub(r"\1_", text)
 
+
 def unescape_name(text):
     return text.rstrip("_").replace("_", "-")
 

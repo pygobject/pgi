@@ -98,7 +98,6 @@ class _Object(object):
         self.__signal_cb_ref[id_] = (cb, destroy)
         return id_
 
-
     def connect(self, name, callback, *args):
         return self.__connect(0, name, callback, *args)
 

@@ -22,7 +22,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
-from pgi.overrides import override, get_introspection_module
+from pgi.overrides import get_introspection_module
 
 
 GObjectModule = get_introspection_module("GObject")
@@ -32,6 +32,7 @@ __all__ = ["GObject"]
 
 
 from pgi.gtype import PGType as GType
+GType = GType
 __all__.append("GType")
 
 

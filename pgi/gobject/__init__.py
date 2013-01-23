@@ -43,11 +43,13 @@ class GType(gulong):
     def __repr__(self):
         return "<GType %r>" % repr(self.value)
 
+
 class GTypeInterface(Structure):
     _fields_ = [
         ("g_type", GType),
         ("g_instance_type", GType),
     ]
+
 
 class GTypeInterfacePtr(POINTER(GTypeInterface)):
     _type_ = GTypeInterface
@@ -95,8 +97,6 @@ class GTypeClassPtr(POINTER(GTypeClass)):
     _type_ = GTypeClass
 
 
-
-
 class GTypeInstance(Structure):
     _fields_ = [
         ("g_class", GTypeClassPtr),
@@ -135,10 +135,12 @@ wrap_class(_gobject, GParamSpec, GParamSpecPtr, "g_param_spec_", _methods)
 _methods = [
     ("find_property", GParamSpecPtr, [GTypeInterfacePtr, gchar_p]),
     ("install_property", None, [GTypeInterfacePtr, GParamSpecPtr]),
-    ("list_properties ", POINTER(GParamSpecPtr), [GTypeInterfacePtr, POINTER(guint)]),
+    ("list_properties ", POINTER(GParamSpecPtr),
+     [GTypeInterfacePtr, POINTER(guint)]),
 ]
 
-wrap_class(_gobject, GTypeInterface, GTypeInterfacePtr, "g_object_interface_", _methods)
+wrap_class(_gobject, GTypeInterface, GTypeInterfacePtr,
+           "g_object_interface_", _methods)
 
 
 class GSignalFlags(Flags):
@@ -249,8 +251,6 @@ for (name, ret, args) in _methods:
     h.argtypes = args
     h.restype = ret
     globals()[name] = h
-
-
 
 
 _methods = [

@@ -286,6 +286,7 @@ for event_class in event_member_classes:
 
 class DragContext(Gdk.DragContext):
     def finish(self, success, del_, time):
+        Gtk = get_introspection_module("Gtk")
         Gtk.drag_finish(self, success, del_, time)
 
 DragContext = override(DragContext)

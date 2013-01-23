@@ -138,7 +138,8 @@ class ArrayArgument(GIArgument):
         b = self.backend
         if self.is_direction_out():
             if not self.is_zero_terminated() and self.is_pointer():
-                block, out = b.unpack_array_ptr_fixed_c(self._data, self._length)
+                block, out = b.unpack_array_ptr_fixed_c(self._data,
+                                                        self._length)
                 self.out_var = out
                 return block
 
@@ -346,9 +347,11 @@ _classes = {}
 
 def _find_arguments():
     global _classes
-    cls = [a for a in globals().values() if isinstance(a, type)]
-    args = [a for a in cls if issubclass(a, GIArgument) and a is not GIArgument]
-    _classes = dict(((a.TAG, a) for a in args))
+    for var in globals().values():
+        if not isinstance(var, type):
+            continue
+        if issubclass(var, GIArgument) and var is not GIArgument:
+            _classes[var.TAG] = var
 _find_arguments()
 
 

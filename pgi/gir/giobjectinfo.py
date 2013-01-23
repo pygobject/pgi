@@ -79,7 +79,7 @@ class GIObjectInfoPtr(GIRegisteredTypeInfoPtr):
         ref_function = self.ref_function
         if ref_function:
             values["ref_function"] = repr(ref_function)
-        set_value_function =  self.set_value_function
+        set_value_function = self.set_value_function
         if set_value_function:
             values["set_value_function"] = repr(set_value_function)
         get_value_function = self.get_value_function

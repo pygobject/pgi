@@ -124,6 +124,7 @@ class GIVFuncInfoPtr(GICallableInfoPtr):
             invoker.unref()
         return values
 
+
 def gi_is_signal_info(base_info):
     return base_info.type.value == GIInfoType.SIGNAL
 

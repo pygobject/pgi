@@ -12,7 +12,8 @@ from pgi.codegen.arguments import get_argument_class, ErrorArgument
 from pgi.codegen.returnvalues import get_return_class
 
 
-def _generate_function(backend, info, arg_infos, arg_types, return_type, method, throws):
+def _generate_function(backend, info, arg_infos, arg_types,
+                       return_type, method, throws):
     main = CodeBlock()
 
     main.write_line("# backend: %s" % backend.NAME)

@@ -5,11 +5,10 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-import sys
 import unittest
 
 from tests import is_gi
-from gi.repository import Gtk, GLib, Gdk, GObject
+from gi.repository import Gtk, GLib, GObject
 
 
 class FuncsTest(unittest.TestCase):

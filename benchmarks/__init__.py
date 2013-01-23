@@ -6,7 +6,6 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-import sys
 import time
 
 
@@ -35,6 +34,10 @@ def run(load_gi, backend=None):
 
     t = time.time()
     from gi.repository import Gtk, GObject, GLib, Gio, Pango, Gdk
+    GLib = GLib
+    Gio = Gio
+    Pango = Pango
+    Gdk = Gdk
     t = time.time() - t
     print "%15s: %5.2f ms" % ("import", t * (10 ** 3))
 

@@ -92,8 +92,6 @@ class CodeBlock(object):
     def __str__(self):
         lines = []
 
-
-
         for line, level in self._lines:
             lines.append(" " * self.INDENTATION * level + line)
         return "\n".join(lines)
