@@ -550,9 +550,6 @@ class CTypesBackend(CodeGenBackend, BasicTypes, InterfaceTypes, ArrayTypes,
 
         for arg in args:
             type_ = typeinfo_to_ctypes(arg.type)
-            # FIXME: cover all types..
-            if not type_:
-                continue
             if arg.is_direction_out() and type_ != ctypes.c_void_p:
                 type_ = ctypes.POINTER(type_)
             arg_types.append(type_)
