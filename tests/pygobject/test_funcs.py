@@ -289,3 +289,23 @@ class FuncsTest(unittest.TestCase):
         v.set_string("foo1")
         self.assertEqual(v.get_string(), "foo1")
         self.assertEqual(v.dup_string(), "foo1")
+
+    def test_gvalue_return(self):
+        f = lambda t: GObject.Value().init(t)
+
+        self.assertEqual(f(GObject.TYPE_STRING), None)
+        self.assertEqual(f(GObject.TYPE_UINT64), 0)
+        self.assertEqual(f(GObject.TYPE_POINTER), None)
+        self.assertEqual(f(GObject.TYPE_BOOLEAN), False)
+
+        self.assertEqual(f(GObject.TYPE_DOUBLE), 0)
+        self.assertEqual(f(GObject.TYPE_FLOAT), 0)
+        self.assertEqual(f(GObject.TYPE_GTYPE), GObject.TYPE_INVALID)
+        self.assertEqual(f(GObject.TYPE_INT), 0)
+        self.assertEqual(f(GObject.TYPE_INT64), 0)
+        self.assertEqual(f(GObject.TYPE_LONG), 0)
+        self.assertEqual(f(GObject.TYPE_OBJECT), None)
+        self.assertEqual(f(GObject.TYPE_CHAR), '\x00')
+        self.assertEqual(f(GObject.TYPE_UCHAR), '\x00')
+        self.assertEqual(f(GObject.TYPE_UINT), 0)
+        self.assertEqual(f(GObject.TYPE_ULONG), 0)

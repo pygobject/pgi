@@ -13,7 +13,7 @@ from pgi.codegen.utils import CodeBlock
 from pgi.gir import GIRepositoryPtr, GITypeTag, GIInfoType
 from pgi.glib import gboolean, gfloat, gdouble, gint64, guint64, gint, guint8
 from pgi.glib import GErrorPtr, gchar_p, guint32, gint32, gpointer, guint16
-from pgi.glib import free
+from pgi.glib import free, gint8
 from pgi.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr, GType
 from pgi.gtype import PGType
 from pgi.util import import_attribute
@@ -77,6 +77,8 @@ def typeinfo_to_ctypes(info, return_value=False):
             return guint16
         elif tag == GITypeTag.UINT8:
             return guint8
+        elif tag == GITypeTag.INT8:
+            return gint8
         elif tag == GITypeTag.INT64:
             return gint64
         elif tag == GITypeTag.FLOAT:
@@ -323,6 +325,51 @@ $gtype = $pgtype._type
 
 
 class InterfaceTypes(object):
+
+    def unpack_gvalue(self, name):
+        from pgi.util import import_module
+        gobj = import_module("GObject")
+        gobj_var = self.var()
+
+        block, var = self.parse("""
+$type = $value.g_type
+if $type == $gobj.TYPE_FLOAT:
+    $out = $value.get_float()
+elif $type == $gobj.TYPE_DOUBLE:
+    $out = $value.get_double()
+elif $type == $gobj.TYPE_BOOLEAN:
+    $out = $value.get_boolean()
+elif $type == $gobj.TYPE_GTYPE:
+    $out = $value.get_gtype()
+elif $type == $gobj.TYPE_INT:
+    $out = $value.get_int()
+elif $type == $gobj.TYPE_INT64:
+    $out = $value.get_int64()
+elif $type == $gobj.TYPE_LONG:
+    $out = $value.get_long()
+elif $type == $gobj.TYPE_ULONG:
+    $out = $value.get_ulong()
+elif $type == $gobj.TYPE_OBJECT:
+    $out = $value.get_object()
+elif $type == $gobj.TYPE_CHAR:
+    $out = chr($value.get_schar())
+elif $type == $gobj.TYPE_UCHAR:
+    $out = chr($value.get_uchar())
+elif $type == $gobj.TYPE_UINT:
+    $out = $value.get_uint()
+elif $type == $gobj.TYPE_STRING:
+    $out = $value.get_string()
+elif $type == $gobj.TYPE_UINT64:
+    $out = $value.get_uint64()
+elif $type == $gobj.TYPE_POINTER:
+    $out = $value.get_pointer()
+else:
+    # not implemented, return the gvalue at least
+    $out = $type
+""", gobj=gobj_var, value=name)
+
+        block.add_dependency(gobj_var, gobj)
+        return block, var["out"]
 
     def pack_object(self, obj_name):
         gobj_class = import_attribute("GObject", "Object")

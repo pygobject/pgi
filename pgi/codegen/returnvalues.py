@@ -73,6 +73,13 @@ class UInt8ReturnValue(ReturnValue):
         return None, name
 
 
+class Int8ReturnValue(ReturnValue):
+    TAG = GITypeTag.INT8
+
+    def process(self, name):
+        return None, name
+
+
 class Int32ReturnValue(ReturnValue):
     TAG = GITypeTag.INT32
 
@@ -157,7 +164,15 @@ class InterfaceReturnValue(ReturnValue):
             return backend.unpack_object(name)
         elif iface_type == GIInfoType.STRUCT:
             attr = import_attribute(iface_namespace, iface_name)
-            return backend.unpack_struct(name, attr)
+            # we need to unpack GValues to match pygobject
+            if iface_namespace == "GObject" and iface_name == "Value":
+                #raise NotImplementedError
+                block, out = backend.unpack_struct(name, attr)
+                block2, out = backend.unpack_gvalue(out)
+                block2.write_into(block)
+                return block, out
+            else:
+                return backend.unpack_struct(name, attr)
         elif iface_type == GIInfoType.UNION:
             attr = import_attribute(iface_namespace, iface_name)
             return backend.unpack_union(name, attr)

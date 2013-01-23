@@ -117,10 +117,19 @@ class PGType(object):
         return import_attribute(namespace, name)
 
     def __eq__(self, other):
-        return self._type.value == other._type.value
+        try:
+            return self._type.value == other._type.value
+        except AttributeError:
+            return False
 
     def __neq__(self, other):
         return not self == other
+
+    def __cmp__(self, other):
+        try:
+            return cmp(self._type.value, other._type.value)
+        except AttributeError:
+            return 1
 
     def __repr__(self):
         return "<GType %s (%d)>" % (self.name, self._type.value)
