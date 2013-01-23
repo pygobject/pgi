@@ -153,7 +153,7 @@ class GSignalFlags(Flags):
 
 g_type_init = _gobject.g_type_init
 g_type_init.argtypes = []
-g_type_init.resttype = None
+g_type_init.restype = None
 
 
 class GObject(Structure):
@@ -218,11 +218,11 @@ wrap_class(_gobject, GValue, GValuePtr, "g_value_", _methods)
 
 set_property = _gobject.g_object_set_property
 set_property.argtypes = [gpointer, gchar_p, GValuePtr]
-set_property.resttype = None
+set_property.restype = None
 
 get_property = _gobject.g_object_get_property
 get_property.argtypes = [gpointer, gchar_p, GValuePtr]
-get_property.resttype = None
+get_property.restype = None
 
 
 class GParameter(Structure):
@@ -247,7 +247,7 @@ _methods = [
 for (name, ret, args) in _methods:
     h = getattr(_gobject, "g_object_" + name)
     h.argtypes = args
-    h.resttype = ret
+    h.restype = ret
     globals()[name] = h
 
 
@@ -276,23 +276,29 @@ GClosureNotify = CFUNCTYPE(None, gpointer, gpointer)
 signal_connect_data = _gobject.g_signal_connect_data
 signal_connect_data.argtypes = [gpointer, gchar_p, GCallback, gpointer,
                                 GClosureNotify, GConnectFlags]
-signal_connect_data.resttype = gulong
+signal_connect_data.restype = gulong
 
 signal_handler_disconnect = _gobject.g_signal_handler_disconnect
 signal_handler_disconnect.argtypes = [gpointer, gulong]
-signal_handler_disconnect.resttype = None
+signal_handler_disconnect.restype = None
 
 signal_handler_block = _gobject.g_signal_handler_block
 signal_handler_block.argtypes = [gpointer, gulong]
-signal_handler_block.resttype = None
+signal_handler_block.restype = None
 
 signal_handler_unblock = _gobject.g_signal_handler_unblock
 signal_handler_unblock.argtypes = [gpointer, gulong]
-signal_handler_unblock.resttype = None
+signal_handler_unblock.restype = None
 
 signal_lookup = _gobject.g_signal_lookup
 signal_lookup.argtypes = [gchar_p, GType]
-signal_lookup.resttype = guint
+signal_lookup.restype = guint
+
+GBoxedCopyFunc = CFUNCTYPE(gpointer, gpointer)
+GBoxedFreeFunc = CFUNCTYPE(None, gpointer)
+boxed_type_register_static = _gobject.g_boxed_type_register_static
+boxed_type_register_static.argtypes = [gchar_p, GBoxedCopyFunc, GBoxedFreeFunc]
+boxed_type_register_static.restype = GType
 
 wrap_setup()
 g_type_init()
@@ -304,5 +310,6 @@ __all__ = ["GType", "g_type_init", "GParamFlags", "GValue", "GValuePtr",
            "GParameterPtr", "signal_connect_data", "GCallback",
            "GClosureNotify", "signal_handler_disconnect", "GConnectFlags",
            "signal_handler_unblock", "signal_handler_block", "signal_lookup",
-           "GTypeInterface", "GTypeInterfacePtr",
+           "GTypeInterface", "GTypeInterfacePtr", "boxed_type_register_static",
+           "GBoxedCopyFunc", "GBoxedFreeFunc",
 ]
