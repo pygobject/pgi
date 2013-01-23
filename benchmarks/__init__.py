@@ -38,48 +38,85 @@ def run(load_gi, backend=None):
     t = time.time() - t
     print "%15s: %5.2f ms" % ("import", t * (10 ** 3))
 
-    def bench_constants(n):
-        for i in xrange(n):
-            Gtk.MAJOR_VERSION
-
     def bench_flags(n):
+        times = []
         for i in xrange(n):
+            t = time.time()
             Gtk.RcFlags(1 | 1 << 10)
             Gtk.RcFlags.TEXT - 1
             Gtk.RcFlags.BASE | Gtk.RcFlags.FG
+            t = time.time() - t
+            times.append(t)
+        return times
 
     def bench_func(n):
+        times = []
         for i in xrange(n):
+            t = time.time()
             Gtk.get_current_event_time()
             Gtk.rc_get_theme_dir()[:]
+            t = time.time() - t
+            times.append(t)
+        return times
 
-    def bench_gtype(n):
-        for i in xrange(n):
-            GObject.Object.__gtype__.children
-            GObject.Object.__gtype__.pytype
-
-    def bench_object(n):
-        for i in xrange(n):
-            w = Gtk.Window()
-            w.props.title = "this"
-
-    def bench_method(n):
+    def bench_gvalue(n):
+        times = []
         b = Gtk.Button()
         for i in xrange(n):
+            t = time.time()
+            value = GObject.Value()
+            value.init(GObject.TYPE_INT)
+            value.set_int(42)
+            value.get_int()
+            value.unset()
+            value = GObject.Value()
+            value.init(GObject.TYPE_STRING)
+            value.set_string("foobar")
+            value.get_string()
+            value.unset()
+            value = GObject.Value()
+            value.init(GObject.TYPE_OBJECT)
+            value.set_object(b)
+            value.get_object()
+            value.unset()
+            t = time.time() - t
+            times.append(t)
+        return times
+
+    def bench_object(n):
+        times = []
+        for i in xrange(n):
+            t = time.time()
+            w = Gtk.Window()
+            w.props.title = "this"
+            t = time.time() - t
+            times.append(t)
+        return times
+
+    def bench_method(n):
+        times = []
+        b = Gtk.Button()
+        for i in xrange(n):
+            t = time.time()
             b.set_name("foobar")
             b.get_name()
+            b.set_relief(Gtk.ReliefStyle.NORMAL)
+            b.get_relief()
+            b.set_use_stock(True)
+            b.get_use_stock()
+            b.set_alignment(0.2, 0.4)
+            b.get_alignment()
+            t = time.time() - t
+            times.append(t)
+        return times
 
     bench = [
-        (bench_constants, 100000),
-        (bench_flags, 100000),
-        (bench_func, 100000),
-        (bench_method, 100000),
-        (bench_gtype, 100000),
-        (bench_object, 10000),
+        (bench_func, 10000),
+        (bench_method, 10000),
+        (bench_gvalue, 1000),
+        (bench_object, 1000),
     ]
 
     for b, n in bench:
-        t = time.time()
-        b(n)
-        t = time.time() - t
-        print "%15s: %5.2f µs" % (b.__name__, t * (10 ** 6) / float(n))
+        min_time = min(b(n))
+        print "%15s: %5.2f µs" % (b.__name__, min_time * (10 ** 6))
