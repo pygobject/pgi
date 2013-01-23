@@ -309,3 +309,6 @@ class FuncsTest(unittest.TestCase):
         self.assertEqual(f(GObject.TYPE_UCHAR), '\x00')
         self.assertEqual(f(GObject.TYPE_UINT), 0)
         self.assertEqual(f(GObject.TYPE_ULONG), 0)
+
+    def test_float_misc(self):
+        Gtk.Button().set_alignment(0.2, 0.4)

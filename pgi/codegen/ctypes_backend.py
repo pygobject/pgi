@@ -197,7 +197,11 @@ $uint = ctypes.c_uint8($uint)
 #    raise TypeError("Value '$float' not a number")
 $c_float = ctypes.c_float($float)
 if $c_float.value != $float:
-    raise ValueError("$float out of range")
+    try:
+        # easy check for nan/inf
+        $float.as_integer_ratio()
+    except:
+        raise ValueError("$float(%f) out of range" % $float)
 """, float=name)
 
         return block, var["c_float"]
