@@ -36,7 +36,9 @@ typedef uint8_t guint8;
 typedef unsigned int guint;
 typedef unsigned long gulong;
 typedef unsigned short gushort;
-typedef void* gpointer;"""
+typedef void* gpointer;
+typedef gulong GType;
+"""
 
 
 def typeinfo_to_cffi(info):
@@ -46,8 +48,25 @@ def typeinfo_to_cffi(info):
     if not ptr:
         if tag == GITypeTag.UINT32:
             return "guint32"
+        elif tag == GITypeTag.INT32:
+            return "gint32"
         elif tag == GITypeTag.BOOLEAN:
             return "gboolean"
+        elif tag == GITypeTag.VOID:
+            return "void"
+        elif tag == GITypeTag.GTYPE:
+            return "GType"
+        elif tag == GITypeTag.INTERFACE:
+            iface = info.get_interface()
+            iface_type = iface.type.value
+            iface.unref()
+            if iface_type == GIInfoType.STRUCT:
+                return "gpointer"
+            elif iface_type == GIInfoType.ENUM:
+                return "guint32"
+
+            raise NotImplementedError(
+                "Couldn't convert interface ptr %r to cffi type" % iface.type)
     else:
         if tag == GITypeTag.UTF8 or tag == GITypeTag.FILENAME:
             return "gchar*"
@@ -59,6 +78,11 @@ def typeinfo_to_cffi(info):
                 return "guint32"
             elif iface_type == GIInfoType.OBJECT:
                 return "gpointer"
+            elif iface_type == GIInfoType.STRUCT:
+                return "gpointer"
+
+            raise NotImplementedError(
+                "Couldn't convert interface %r to cffi type" % iface.type)
 
     raise NotImplementedError("Couldn't convert %r to cffi type" % info.tag)
 
@@ -85,20 +109,112 @@ $bool = bool($name)
 
         return block, var["bool"]
 
+    def unpack_basic(self, name):
+        block, var = self.parse("""
+$value = int($value)
+""", value=name)
+
+        return block, name
+
     def pack_uint32(self, name):
         block, var = self.parse("""
 if not isinstance($uint, (float, int, long)):
     raise TypeError("Value '$uint' not a number")
 $uint = int($uint)
 # overflow check for uint32
-if not 0 <= $uint < 4294967296:
+if not 0 <= $uint < 2**32:
     raise ValueError("Value '$uint' not in range")
 """, uint=name)
 
         return block, var["uint"]
 
+    def pack_bool(self, name):
+        block, var = self.parse("""
+$boolean = bool($var)
+""", var=name)
+
+        return block, var["boolean"]
+
+    def pack_int32(self, name):
+        block, var = self.parse("""
+if not isinstance($int, (float, int, long)):
+    raise TypeError("Value '$int' not a number")
+$int = int($int)
+# overflow check for int32
+if not -2**31 <= $int < 2**31:
+    raise ValueError("Value '$int' not in range")
+""", int=name)
+
+        return block, var["int"]
+
+    def pack_string(self, name):
+        block, var = self.parse("""
+if isinstance($var, unicode):
+    $var = $var.encode("utf-8")
+elif not isinstance($var, str):
+    raise TypeError("$var must be a string")
+""", var=name)
+
+        return block, name
+
+    def pack_string_null(self, name):
+        block, var = self.parse("""
+if $var is not None:
+    if isinstance($var, unicode):
+        $var = $var.encode("utf-8")
+    elif not isinstance($var, str):
+        raise TypeError("$var must be a string or None")
+""", var=name)
+
+        return block, name
+
+    def pack_gtype(self, name):
+        block, var = self.parse("""
+$gtype = $pgtype._type.value
+""", pgtype=name)
+
+        return block, var["gtype"]
+
+    def unpack_gtype(self, name):
+        block, var = self.parse("""
+$pgtype = PGType($gtype)
+""", gtype=name)
+
+        block.add_dependency("PGType", PGType)
+        return block, var["pgtype"]
+
 
 class InterfaceTypes(object):
+
+    def pack_struct(self, name):
+        from pgi.util import import_attribute
+        base_obj = import_attribute("GObject", "Object")
+        from pgi.structure import BaseStructure
+
+        block, var = self.parse("""
+if not isinstance($obj, ($base_struct_class, $base_obj_class)):
+    raise TypeError("%r is not a structure object" % $obj)
+$obj = ffi.cast("void*", $obj._obj)
+""", obj=name, base_struct_class=BaseStructure, base_obj_class=base_obj)
+
+        block.add_dependency("ffi", self._ffi)
+        return block, var["obj"]
+
+    def pack_object_null(self, obj_name):
+        from pgi.util import import_attribute
+        gobj_class = import_attribute("GObject", "Object")
+
+        block, var = self.parse("""
+if $obj is not None:
+    if not isinstance($obj, $gobject):
+        raise TypeError("%r not a GObject.Object or None" % $obj)
+    $obj = ffi.cast("void*", $obj._obj)
+else:
+    $obj = ffi.cast("void*", 0)
+""", obj=obj_name, gobject=gobj_class)
+
+        block.add_dependency("ffi", self._ffi)
+        return block, var["obj"]
 
     def unpack_object(self, name):
         def get_class_func(pointer):
@@ -119,6 +235,17 @@ else:
 
         block.add_dependency("ffi", self._ffi)
         return block, var["obj"]
+
+    def setup_struct(self, name, type_):
+        block, var = self.parse("""
+# setup struct
+$obj = $type()
+$obj._needs_free = False
+$ptr = ffi.cast("void*", $obj._obj)
+""", value=name, type=type_)
+
+        block.add_dependency("ffi", self._ffi)
+        return block, var["obj"], var["ptr"]
 
 
 class CFFIBackend(CodeGenBackend, BasicTypes, InterfaceTypes):
@@ -182,3 +309,18 @@ $ret = $name($args)
 """, name=name, args=args)
 
         return block, var["ret"]
+
+    def cast_pointer(self, name, type_):
+        block, var = self.parse("""
+$value = ffi.cast("$type*", $value)
+""", value=name, type=typeinfo_to_cffi(type_))
+
+        block.add_dependency("ffi", self._ffi)
+        return block, name
+
+    def deref_pointer(self, name):
+        block, var = self.parse("""
+$value = $value[0]
+""", value=name)
+
+        return block, var["value"]

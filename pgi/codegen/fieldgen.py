@@ -10,16 +10,9 @@ from pgi.codegen import ACTIVE_BACKENDS
 from pgi.codegen.utils import CodeBlock
 
 
-def generate_field_setter(info):
-    # only ctypes for now
-    for backend in ACTIVE_BACKENDS:
-        if backend.NAME == "ctypes":
-            break
-
-    type_ = info.get_type()
-
-    cls = get_field_class(type_)
-    f = cls(info, type_, backend)
+def _generate_field_setter(info, info_type, backend):
+    cls = get_field_class(info_type)
+    f = cls(info, info_type, backend)
     main = CodeBlock()
     main.write_line("def setter(instance, value):")
 
@@ -28,7 +21,7 @@ def generate_field_setter(info):
     else:
         main.write_line("pointer = instance._obj", 1)
 
-    block, ptr = backend.cast_pointer("pointer", type_)
+    block, ptr = backend.cast_pointer("pointer", info_type)
     block.write_into(main, 1)
 
     block, var = f.set(ptr, "value")
@@ -41,21 +34,12 @@ def generate_field_setter(info):
     func = main.compile()["setter"]
     func._code = main
 
-    type_.unref()
-
     return func
 
 
-def generate_field_getter(info):
-    # only ctypes for now
-    for backend in ACTIVE_BACKENDS:
-        if backend.NAME == "ctypes":
-            break
-
-    type_ = info.get_type()
-
-    cls = get_field_class(type_)
-    f = cls(info, type_, backend)
+def _generate_field_getter(info, info_type, backend):
+    cls = get_field_class(info_type)
+    f = cls(info, info_type, backend)
 
     main = CodeBlock()
     main.write_line("def getter(instance):")
@@ -67,7 +51,7 @@ def generate_field_getter(info):
         main.write_line("pointer = instance._obj", 1)
 
     # uh.. too much logic here..
-    block, var = backend.cast_pointer("pointer", type_)
+    block, var = backend.cast_pointer("pointer", info_type)
     block.write_into(main, 1)
     block, var = backend.deref_pointer(var)
     block.write_into(main, 1)
@@ -81,6 +65,36 @@ def generate_field_getter(info):
     func = main.compile()["getter"]
     func._code = main
 
-    type_.unref()
-
     return func
+
+
+def _generate_field_access(info, setter=True):
+    info_type = info.get_type()
+
+    func = None
+    messages = []
+    for backend in ACTIVE_BACKENDS:
+        try:
+            if setter:
+                func = _generate_field_setter(info, info_type, backend)
+            else:
+                func = _generate_field_getter(info, info_type, backend)
+        except NotImplementedError, e:
+            messages.append("%s: %s" % (backend.NAME, e.message))
+        else:
+            break
+
+    info_type.unref()
+
+    if func:
+        return func
+
+    raise NotImplementedError("\n".join(messages))
+
+
+def generate_field_getter(info):
+    return _generate_field_access(info, setter=False)
+
+
+def generate_field_setter(info):
+    return _generate_field_access(info, setter=True)
