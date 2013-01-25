@@ -116,36 +116,12 @@ $value = int($value)
 
         return block, name
 
-    def pack_uint32(self, name):
-        block, var = self.parse("""
-if not isinstance($uint, (float, int, long)):
-    raise TypeError("Value '$uint' not a number")
-$uint = int($uint)
-# overflow check for uint32
-if not 0 <= $uint < 2**32:
-    raise ValueError("Value '$uint' not in range")
-""", uint=name)
-
-        return block, var["uint"]
-
     def pack_bool(self, name):
         block, var = self.parse("""
 $boolean = bool($var)
 """, var=name)
 
         return block, var["boolean"]
-
-    def pack_int32(self, name):
-        block, var = self.parse("""
-if not isinstance($int, (float, int, long)):
-    raise TypeError("Value '$int' not a number")
-$int = int($int)
-# overflow check for int32
-if not -2**31 <= $int < 2**31:
-    raise ValueError("Value '$int' not in range")
-""", int=name)
-
-        return block, var["int"]
 
     def pack_string(self, name):
         block, var = self.parse("""

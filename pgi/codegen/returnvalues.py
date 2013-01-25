@@ -66,67 +66,49 @@ class ArrayReturnValue(ReturnValue):
         raise NotImplementedError
 
 
-class UInt8ReturnValue(ReturnValue):
-    TAG = GITypeTag.INT8
-
+class BasicReturnValue(ReturnValue):
     def process(self, name):
         return None, name
 
 
-class Int8ReturnValue(ReturnValue):
-    TAG = GITypeTag.INT8
-
-    def process(self, name):
-        return None, name
-
-
-class Int32ReturnValue(ReturnValue):
-    TAG = GITypeTag.INT32
-
-    def process(self, name):
-        return None, name
-
-
-class Int64ReturnValue(ReturnValue):
-    TAG = GITypeTag.INT64
-
-    def process(self, name):
-        return None, name
-
-
-class UInt64ReturnValue(ReturnValue):
-    TAG = GITypeTag.UINT64
-
-    def process(self, name):
-        return None, name
-
-
-class UInt32ReturnValue(ReturnValue):
-    TAG = GITypeTag.UINT32
-
-    def process(self, name):
-        return None, name
-
-
-class UInt8ReturnValue(ReturnValue):
+class UInt8ReturnValue(BasicReturnValue):
     TAG = GITypeTag.UINT8
 
-    def process(self, name):
-        return None, name
+
+class Int8ReturnValue(BasicReturnValue):
+    TAG = GITypeTag.INT8
 
 
-class DoubleReturnValue(ReturnValue):
+class Int16ReturnValue(BasicReturnValue):
+    TAG = GITypeTag.INT16
+
+
+class UInt16ReturnValue(BasicReturnValue):
+    TAG = GITypeTag.UINT16
+
+
+class Int32ReturnValue(BasicReturnValue):
+    TAG = GITypeTag.INT32
+
+
+class UInt32ReturnValue(BasicReturnValue):
+    TAG = GITypeTag.UINT32
+
+
+class Int64ReturnValue(BasicReturnValue):
+    TAG = GITypeTag.INT64
+
+
+class UInt64ReturnValue(BasicReturnValue):
+    TAG = GITypeTag.UINT64
+
+
+class DoubleReturnValue(BasicReturnValue):
     TAG = GITypeTag.DOUBLE
 
-    def process(self, name):
-        return None, name
 
-
-class FloatReturnValue(ReturnValue):
+class FloatReturnValue(BasicReturnValue):
     TAG = GITypeTag.FLOAT
-
-    def process(self, name):
-        return None, name
 
 
 class Utf8ReturnValue(ReturnValue):

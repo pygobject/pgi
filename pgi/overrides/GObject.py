@@ -22,7 +22,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
+import ctypes
+
 from pgi.overrides import get_introspection_module
+from pgi.repository import GLib
 
 
 GObjectModule = get_introspection_module("GObject")
@@ -69,3 +72,46 @@ __all__ += ['TYPE_INVALID', 'TYPE_NONE', 'TYPE_INTERFACE', 'TYPE_CHAR',
             'TYPE_FLOAT', 'TYPE_DOUBLE', 'TYPE_STRING', 'TYPE_POINTER',
             'TYPE_BOXED', 'TYPE_PARAM', 'TYPE_OBJECT', 'TYPE_PYOBJECT',
             'TYPE_GTYPE', 'TYPE_STRV', 'TYPE_VARIANT', 'TYPE_GSTRING', 'TYPE_UNICHAR']
+
+
+G_MININT8 = GLib.MININT8
+G_MAXINT8 = GLib.MAXINT8
+G_MAXUINT8 = GLib.MAXUINT8
+G_MININT16 = GLib.MININT16
+G_MAXINT16 = GLib.MAXINT16
+G_MAXUINT16 = GLib.MAXUINT16
+G_MININT32 = GLib.MININT32
+G_MAXINT32 = GLib.MAXINT32
+G_MAXUINT32 = GLib.MAXUINT32
+G_MININT64 = GLib.MININT64
+G_MAXINT64 = GLib.MAXINT64
+G_MAXUINT64 = GLib.MAXUINT64
+__all__ += ['G_MININT8', 'G_MAXINT8', 'G_MAXUINT8', 'G_MININT16',
+            'G_MAXINT16', 'G_MAXUINT16', 'G_MININT32', 'G_MAXINT32',
+            'G_MAXUINT32', 'G_MININT64', 'G_MAXINT64', 'G_MAXUINT64']
+
+
+G_MAXDOUBLE = 1.7976931348623157e+308
+G_MAXFLOAT = 3.4028234663852886e+38
+G_MINDOUBLE = 2.2250738585072014e-308
+G_MINFLOAT = 1.1754943508222875e-38
+G_MINSHORT = - 2 ** (ctypes.sizeof(ctypes.c_short) * 8 - 1)
+G_MAXSHORT = 2 ** (ctypes.sizeof(ctypes.c_short) * 8 - 1) - 1
+G_MAXUSHORT = 2 ** (ctypes.sizeof(ctypes.c_short) * 8) - 1
+G_MININT = - 2 ** (ctypes.sizeof(ctypes.c_int) * 8 - 1)
+G_MAXINT = 2 ** (ctypes.sizeof(ctypes.c_int) * 8 - 1) - 1
+G_MAXUINT = 2 ** (ctypes.sizeof(ctypes.c_uint) * 8) - 1
+G_MINLONG = - 2 ** (ctypes.sizeof(ctypes.c_long) * 8 - 1)
+G_MAXLONG = 2 ** (ctypes.sizeof(ctypes.c_long) * 8 - 1) - 1
+G_MAXULONG = 2 ** (ctypes.sizeof(ctypes.c_ulong) * 8) - 1
+G_MAXSIZE = 2 ** (ctypes.sizeof(ctypes.c_size_t) * 8) - 1
+G_MINSSIZE = - 2 ** (ctypes.sizeof(ctypes.c_ssize_t) * 8 - 1)
+G_MAXSSIZE = 2 ** (ctypes.sizeof(ctypes.c_ssize_t) * 8 - 1) - 1
+# G_MAXOFFSET
+# G_MINOFFSET
+
+for name in ['G_MINFLOAT', 'G_MAXFLOAT', 'G_MINDOUBLE', 'G_MAXDOUBLE',
+             'G_MINSHORT', 'G_MAXSHORT', 'G_MAXUSHORT', 'G_MININT', 'G_MAXINT',
+             'G_MAXUINT', 'G_MINLONG', 'G_MAXLONG', 'G_MAXULONG', 'G_MAXSIZE',
+             'G_MINSSIZE', 'G_MAXSSIZE', 'G_MINOFFSET', 'G_MAXOFFSET']:
+    __all__.append(name)

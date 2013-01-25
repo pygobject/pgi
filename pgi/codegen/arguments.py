@@ -18,8 +18,6 @@ class Argument(object):
     call_var -- variable name passed to the function
     """
 
-    TAG = None
-
     is_aux = False
     in_var = ""
     call_var = ""
@@ -52,6 +50,8 @@ class ErrorArgument(Argument):
 
 
 class GIArgument(Argument):
+
+    TAG = None
 
     def __init__(self, name, arguments, backend, info, type_):
         Argument.__init__(self, arguments, backend)
@@ -188,28 +188,88 @@ class InterfaceArgument(GIArgument):
             return self._pre_struct(iface_namespace, iface_name)
 
 
-class BoolArgument(GIArgument):
-    TAG = GITypeTag.BOOLEAN
+class BasicTypeArgument(GIArgument):
+    TYPE_NAME = ""
 
     def pre_call(self):
-        if not self.is_direction_out():
-            block, var = self.backend.pack_bool(self.name)
+        if self.is_direction_inout():
+            pack = getattr(self.backend, "pack_%s" % self.TYPE_NAME)
+            block, self._data = pack(self.name)
+            block2, self.call_var = self.backend.get_reference(self._data)
+            block2.write_into(block)
+            return block
+        elif self.is_direction_in():
+            pack = getattr(self.backend, "pack_%s" % self.TYPE_NAME)
+            block, var = pack(self.name)
             self.call_var = var
             return block
-
-        raise NotImplementedError
-
-
-class UInt8Argument(GIArgument):
-    TAG = GITypeTag.UINT8
-
-    def pre_call(self):
-        if not self.is_direction_out():
-            block, out = self.backend.pack_uint8(self.name)
-            self.call_var = out
+        else:
+            setup = getattr(self.backend, "setup_%s" % self.TYPE_NAME)
+            block, self._data = setup()
+            block2, self.call_var = self.backend.get_reference(self._data)
+            block2.write_into(block)
             return block
 
-        raise NotImplementedError
+    def post_call(self):
+        if self.is_direction_out():
+            block, var = self.backend.unpack_basic(self._data)
+            self.out_var = var
+            return block
+
+
+class BoolArgument(BasicTypeArgument):
+    TAG = GITypeTag.BOOLEAN
+    TYPE_NAME = "bool"
+
+
+class Int8Argument(BasicTypeArgument):
+    TAG = GITypeTag.INT8
+    TYPE_NAME = "int8"
+
+
+class UInt8Argument(BasicTypeArgument):
+    TAG = GITypeTag.UINT8
+    TYPE_NAME = "uint8"
+
+
+class Int16Argument(BasicTypeArgument):
+    TAG = GITypeTag.INT16
+    TYPE_NAME = "int16"
+
+
+class UInt16Argument(BasicTypeArgument):
+    TAG = GITypeTag.UINT16
+    TYPE_NAME = "uint16"
+
+
+class Int32Argument(BasicTypeArgument):
+    TAG = GITypeTag.INT32
+    TYPE_NAME = "int32"
+
+
+class Int64Argument(BasicTypeArgument):
+    TAG = GITypeTag.INT64
+    TYPE_NAME = "int64"
+
+
+class UInt64Argument(BasicTypeArgument):
+    TAG = GITypeTag.UINT64
+    TYPE_NAME = "uint64"
+
+
+class UINT32Argument(BasicTypeArgument):
+    TAG = GITypeTag.UINT32
+    TYPE_NAME = "uint32"
+
+
+class FloatArgument(BasicTypeArgument):
+    TAG = GITypeTag.FLOAT
+    TYPE_NAME = "float"
+
+
+class DoubleArgument(BasicTypeArgument):
+    TAG = GITypeTag.DOUBLE
+    TYPE_NAME = "double"
 
 
 class VoidArgument(GIArgument):
@@ -225,63 +285,6 @@ class VoidArgument(GIArgument):
         raise NotImplementedError
 
 
-class Int32Argument(GIArgument):
-    TAG = GITypeTag.INT32
-
-    def pre_call(self):
-        if not self.is_direction_out():
-            block, out = self.backend.pack_int32(self.name)
-            self.call_var = out
-            return block
-
-        raise NotImplementedError
-
-
-class Int64Argument(GIArgument):
-    TAG = GITypeTag.INT64
-
-    def pre_call(self):
-        if not self.is_direction_out():
-            block, out = self.backend.pack_int64(self.name)
-            self.call_var = out
-            return block
-
-        raise NotImplementedError
-
-
-class UInt64Argument(GIArgument):
-    TAG = GITypeTag.UINT64
-
-    def pre_call(self):
-        if not self.is_direction_out():
-            block, out = self.backend.pack_uint64(self.name)
-            self.call_var = out
-            return block
-
-        raise NotImplementedError
-
-
-class UINT32Argument(GIArgument):
-    TAG = GITypeTag.UINT32
-
-    def pre_call(self):
-        if self.is_direction_out():
-            block, data, ref = self.backend.setup_uint32_ptr()
-            self._data = data
-            self.call_var = ref
-            return block
-        else:
-            block, out = self.backend.pack_uint32(self.name)
-            self.call_var = out
-            return block
-
-    def post_call(self):
-        if self.is_direction_out():
-            block, var = self.backend.unpack_basic(self._data)
-            self.out_var = var
-            return block
-
-
 class Utf8Argument(GIArgument):
     TAG = GITypeTag.UTF8
 
@@ -292,45 +295,6 @@ class Utf8Argument(GIArgument):
             block, var = self.backend.pack_string(self.name)
         self.call_var = var
         return block
-
-
-class FloatArgument(GIArgument):
-    TAG = GITypeTag.FLOAT
-
-    def pre_call(self):
-        if self.is_direction_out():
-            block, data, ref = self.backend.setup_float_ptr()
-            self._data = data
-            self.call_var = ref
-            return block
-        else:
-            block, out = self.backend.pack_float(self.name)
-            self.call_var = out
-            return block
-        raise NotImplementedError
-
-    def post_call(self):
-        if self.is_direction_out():
-            block, var = self.backend.unpack_basic(self._data)
-            self.out_var = var
-            return block
-
-
-class DoubleArgument(GIArgument):
-    TAG = GITypeTag.DOUBLE
-
-    def pre_call(self):
-        if self.is_direction_out():
-            block, data, ref = self.backend.setup_double_ptr()
-            self._data = data
-            self.call_var = ref
-            return block
-
-    def post_call(self):
-        if self.is_direction_out():
-            block, var = self.backend.unpack_basic(self._data)
-            self.out_var = var
-            return block
 
 
 class GTypeArgument(GIArgument):

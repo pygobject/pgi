@@ -49,3 +49,11 @@ class MiscTest(unittest.TestCase):
         self.assertRaises(TypeError, Gtk.Clipboard.get, 0)
         self.assertRaises(TypeError, Gtk.Clipboard.get, Gdk.Atom)
         self.assertRaises(TypeError, Gdk.Atom, "baz")
+
+    def test_pygi_atom(self):
+        atom = Gdk.Atom.intern('my_string', False)
+        self.assertEqual(atom.name(), 'my_string')
+        a_selection = Gdk.Atom.intern('test_clipboard', False)
+        clipboard = Gtk.Clipboard.get(a_selection)
+        clipboard.set_text('hello', 5)
+        self.assertRaises(TypeError, Gtk.Clipboard.get, 'CLIPBOARD')

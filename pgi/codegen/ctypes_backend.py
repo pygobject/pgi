@@ -1,4 +1,4 @@
-# Copyright 2012 Christoph Reiter
+# Copyright 2012,2013 Christoph Reiter
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -6,16 +6,12 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 import ctypes
-from ctypes import POINTER
 
 from pgi.codegen.backend import CodeGenBackend
 from pgi.gir import GIRepositoryPtr, GITypeTag, GIInfoType
-from pgi.glib import gboolean, gfloat, gdouble, gint64, guint64, gint, guint8
-from pgi.glib import GErrorPtr, gchar_p, guint32, gint32, gpointer, guint16
-from pgi.glib import free, gint8
+from pgi.glib import *
 from pgi.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr, GType
 from pgi.gtype import PGType
-from pgi.util import import_attribute
 
 
 def typeinfo_to_ctypes(info, return_value=False):
@@ -23,8 +19,24 @@ def typeinfo_to_ctypes(info, return_value=False):
     tag = info.tag.value
     ptr = info.is_pointer
 
+    mapping = {
+        GITypeTag.BOOLEAN: gboolean,
+        GITypeTag.INT8: gint8,
+        GITypeTag.UINT8: guint8,
+        GITypeTag.INT16: gint16,
+        GITypeTag.UINT16: guint16,
+        GITypeTag.INT32: gint32,
+        GITypeTag.UINT32: guint32,
+        GITypeTag.INT64: gint64,
+        GITypeTag.UINT64: guint64,
+        GITypeTag.FLOAT: gfloat,
+        GITypeTag.DOUBLE: gdouble,
+        GITypeTag.VOID: None,
+        GITypeTag.GTYPE: GType,
+    }
+
     if ptr:
-        if tag == GITypeTag.VOID:
+        if tag == GITypeTag.INTERFACE:
             return gpointer
         elif tag == GITypeTag.UTF8 or tag == GITypeTag.FILENAME:
             if return_value:
@@ -35,24 +47,11 @@ def typeinfo_to_ctypes(info, return_value=False):
                 return gchar_p
         elif tag == GITypeTag.ARRAY:
             return gpointer
-        elif tag == GITypeTag.INTERFACE:
-            return gpointer
-        elif tag == GITypeTag.INT32:
-            return POINTER(gint32)
-        elif tag == GITypeTag.UINT32:
-            return POINTER(guint32)
-        elif tag == GITypeTag.INT64:
-            return POINTER(gint64)
-        elif tag == GITypeTag.UINT64:
-            return POINTER(guint64)
-        elif tag == GITypeTag.FLOAT:
-            return POINTER(gfloat)
-        elif tag == GITypeTag.VOID:
-            return gpointer
+        else:
+            if tag in mapping:
+                return ctypes.POINTER(mapping[tag])
     else:
-        if tag == GITypeTag.BOOLEAN:
-            return gboolean
-        elif tag == GITypeTag.INTERFACE:
+        if tag == GITypeTag.INTERFACE:
             iface = info.get_interface()
             iface_type = iface.type.value
             iface.unref()
@@ -66,28 +65,9 @@ def typeinfo_to_ctypes(info, return_value=False):
                 return gint
             raise NotImplementedError(
                 "Could not convert interface: %r to ctypes type" % iface.type)
-        elif tag == GITypeTag.UINT32:
-            return guint32
-        elif tag == GITypeTag.UINT64:
-            return guint64
-        elif tag == GITypeTag.INT32:
-            return gint32
-        elif tag == GITypeTag.UINT16:
-            return guint16
-        elif tag == GITypeTag.UINT8:
-            return guint8
-        elif tag == GITypeTag.INT8:
-            return gint8
-        elif tag == GITypeTag.INT64:
-            return gint64
-        elif tag == GITypeTag.FLOAT:
-            return gfloat
-        elif tag == GITypeTag.DOUBLE:
-            return gdouble
-        elif tag == GITypeTag.VOID:
-            return
-        elif tag == GITypeTag.GTYPE:
-            return GType
+        else:
+            if tag in mapping:
+                return mapping[tag]
 
     raise NotImplementedError("Could not convert %r to ctypes type" % info.tag)
 
@@ -143,9 +123,11 @@ free($value)
     def pack_bool(self, name):
         block, var = self.parse("""
 # https://bugs.pypy.org/issue1367
-$boolean = bool($var)
+$var = bool($var)
+$boolean = ctypes.c_bool($var)
 """, var=name)
 
+        block.add_dependency("ctypes", ctypes)
         return block, var["boolean"]
 
     def unpack_bool(self, name):
@@ -167,18 +149,18 @@ $value = $ctypes_value.value
 
     def pack_uint8(self, name):
         block, var = self.parse("""
-# uint8: type checking, conversion
-if not isinstance($uint, (float, int, long)):
+if isinstance($uint, str):
     try:
         $uint = ord($uint)
     except TypeError:
-        if isinstance($uint, basestring):
-            raise TypeError("'$uint' must be a single character")
-        else:
-            raise TypeError("Value '$uint' not a number or character")
+        raise TypeError("'$uint' must be a single character")
+
+try:
+    $uint = int($uint)
+except (ValueError, TypeError):
+    raise TypeError("Value '$uint' not a number or character")
 
 # pack uint8
-$uint = int($uint)
 # overflow check for uint8
 if not 0 <= $uint < 2**8:
     raise ValueError("Value '$uint' not in range")
@@ -204,110 +186,236 @@ if $c_float.value != $float:
 
         return block, var["c_float"]
 
+    def pack_double(self, name):
+        block, var = self.parse("""
+# pack double
+#if not isinstance($double, (float, int, long)):
+#    raise TypeError("Value '$double' not a number")
+$c_double = ctypes.c_double($double)
+if $c_double.value != $double:
+    try:
+        # easy check for nan/inf
+        $double.as_integer_ratio()
+    except:
+        raise ValueError("$double(%f) out of range" % $double)
+""", double=name)
+
+        return block, var["c_double"]
+
     def pack_uint16(self, name):
         block, var = self.parse("""
 # pack uint16
-if not isinstance($uint, (float, int, long)):
-    raise TypeError("Value '$uint' not a number")
-$uint = int($uint)
+if not isinstance($value, (int, long)):
+    try:
+        $value = $value.__int__()
+    except AttributeError:
+        raise TypeError("Value %r not a number" % $value)
+
 # overflow check for uint16
-if not 0 <= $uint < 2**16:
-    raise ValueError("Value '$uint' not in range")
-$uint = ctypes.c_uint16($uint)
-""", uint=name)
+if not 0 <= $value < 2**16:
+    raise ValueError("Value %r not in range" % $value)
+$value = ctypes.c_uint16($value)
+""", value=name)
 
         block.add_dependency("ctypes", ctypes)
-        return block, var["uint"]
+        return block, var["value"]
+
+    def pack_int8(self, name):
+        block, var = self.parse("""
+# pack int8
+if not isinstance($value, (int, long)):
+    try:
+        $value = $value.__int__()
+    except AttributeError:
+        raise TypeError("Value %r not a number" % $value)
+
+# overflow check for int8
+if not -2**7 <= $value < 2**7:
+    raise ValueError("Value %r not in range" % $value)
+$value = ctypes.c_int8($value)
+""", value=name)
+
+        block.add_dependency("ctypes", ctypes)
+        return block, var["value"]
+
+    def pack_int16(self, name):
+        block, var = self.parse("""
+# pack int16
+if not isinstance($value, (int, long)):
+    try:
+        $value = $value.__int__()
+    except AttributeError:
+        raise TypeError("Value %r not a number" % $value)
+
+# overflow check for int16
+if not -2**15 <= $value < 2**15:
+    raise ValueError("Value %r not in range" % $value)
+$value = ctypes.c_int16($value)
+""", value=name)
+
+        block.add_dependency("ctypes", ctypes)
+        return block, var["value"]
 
     def pack_int32(self, name):
         block, var = self.parse("""
 # pack int32
-if not isinstance($int, (float, int, long)):
-    raise TypeError("Value '$int' not a number")
-$int = int($int)
+if not isinstance($value, (int, long)):
+    try:
+        $value = $value.__int__()
+    except AttributeError:
+        raise TypeError("Value %r not a number" % $value)
+
 # overflow check for int32
-if not -2**31 <= $int < 2**31:
-    raise ValueError("Value '$int' not in range")
-$int = ctypes.c_int32($int)
-""", int=name)
+if not -2**31 <= $value < 2**31:
+    raise ValueError("Value %r not in range" % $value)
+$value = ctypes.c_int32($value)
+""", value=name)
 
         block.add_dependency("ctypes", ctypes)
-        return block, var["int"]
+        return block, var["value"]
 
     def pack_int64(self, name):
         block, var = self.parse("""
 # pack int64
-if not isinstance($int, (float, int, long)):
-    raise TypeError("Value '$int' not a number")
-$int = int($int)
+if not isinstance($value, (int, long)):
+    try:
+        $value = $value.__int__()
+    except AttributeError:
+        raise TypeError("Value %r not a number" % $value)
+
 # overflow check for int64
-if not -2**63 <= $int < 2**63:
-    raise ValueError("Value '$int' not in range")
-$int = ctypes.c_int64($int)
-""", int=name)
+if not -2**63 <= $value < 2**63:
+    raise ValueError("Value %r not in range" % $value)
+$value = ctypes.c_int64($value)
+""", value=name)
 
         block.add_dependency("ctypes", ctypes)
-        return block, var["int"]
+        return block, var["value"]
 
     def pack_uint32(self, name):
         block, var = self.parse("""
 # pack uint32
-if not isinstance($uint, (float, int, long)):
-    raise TypeError("Value '$uint' not a number")
-$uint = int($uint)
+if not isinstance($value, (int, long)):
+    try:
+        $value = $value.__int__()
+    except AttributeError:
+        raise TypeError("Value '$value' not a number")
+
 # overflow check for uint32
-if not 0 <= $uint < 2**32:
-    raise ValueError("Value '$uint' not in range")
-$uint = ctypes.c_uint32($uint)
-""", uint=name)
+if not 0 <= $value < 2**32:
+    raise ValueError("Value '$value' not in range")
+$value = ctypes.c_uint32($value)
+""", value=name)
 
         block.add_dependency("ctypes", ctypes)
-        return block, var["uint"]
+        return block, var["value"]
 
     def pack_uint64(self, name):
         block, var = self.parse("""
 # pack uint64
-if not isinstance($uint, (float, int, long)):
-    raise TypeError("Value '$uint' not a number")
-$uint = int($uint)
+if not isinstance($value, (int, long)):
+    try:
+        $value = $value.__int__()
+    except AttributeError:
+        raise TypeError("Value %r not a number" % $value)
+
 # overflow check for uint64
-if not 0 <= $uint < 2**64:
-    raise ValueError("Value '$uint' not in range")
-$uint = ctypes.c_uint64($uint)
-""", uint=name)
+if not 0 <= $value < 2**64:
+    raise ValueError("Value %r not in range" % $value)
+$value = ctypes.c_uint64($value)
+""", value=name)
 
         block.add_dependency("ctypes", ctypes)
-        return block, var["uint"]
+        return block, var["value"]
 
-    def setup_uint32_ptr(self):
+    def setup_int64(self):
+        block, var = self.parse("""
+# new int64
+$value = ctypes.c_int64()
+""")
+        block.add_dependency("ctypes", ctypes)
+        return block, var["value"]
+
+    def setup_uint64(self):
+        block, var = self.parse("""
+# new uint64
+$value = ctypes.c_uint64()
+""")
+        block.add_dependency("ctypes", ctypes)
+        return block, var["value"]
+
+    def setup_uint32(self):
         block, var = self.parse("""
 # new uint32
-$uint = ctypes.c_uint32()
-$uint_ref = ctypes.byref($uint)
+$value = ctypes.c_uint32()
 """)
-
         block.add_dependency("ctypes", ctypes)
-        return block, var["uint"], var["uint_ref"]
+        return block, var["value"]
 
-    def setup_float_ptr(self):
+    def setup_int32(self):
+        block, var = self.parse("""
+# new int32
+$value = ctypes.c_int32()
+""")
+        block.add_dependency("ctypes", ctypes)
+        return block, var["value"]
+
+    def setup_float(self):
         block, var = self.parse("""
 # new float
-$float = ctypes.c_float()
-$float_ref = ctypes.byref($float)
+$value = ctypes.c_float()
+""")
+        block.add_dependency("ctypes", ctypes)
+        return block, var["value"]
+
+    def setup_bool(self):
+        block, var = self.parse("""
+# new bool
+$value = ctypes.c_bool()
 """)
 
         block.add_dependency("ctypes", ctypes)
-        return block, var["float"], var["float_ref"]
+        return block, var["value"]
 
-    def setup_double_ptr(self):
+    def setup_uint8(self):
+        block, var = self.parse("""
+# new uint8
+$value = ctypes.c_uint8()
+""")
+        block.add_dependency("ctypes", ctypes)
+        return block, var["value"]
+
+    def setup_int8(self):
+        block, var = self.parse("""
+# new int8
+$value = ctypes.c_int8()
+""")
+        block.add_dependency("ctypes", ctypes)
+        return block, var["value"]
+
+    def setup_int16(self):
+        block, var = self.parse("""
+# new int16
+$value = ctypes.c_int16()
+""")
+        block.add_dependency("ctypes", ctypes)
+        return block, var["value"]
+
+    def setup_uint16(self):
+        block, var = self.parse("""
+# new uint16
+$value = ctypes.c_uint16()
+""")
+        block.add_dependency("ctypes", ctypes)
+        return block, var["value"]
+
+    def setup_double(self):
         block, var = self.parse("""
 # new double
 $value = ctypes.c_double()
-$value_ref = ctypes.byref($value)
 """)
-
         block.add_dependency("ctypes", ctypes)
-        return block, var["value"], var["value_ref"]
+        return block, var["value"]
 
     def unpack_gtype(self, name):
         block, var = self.parse("""
@@ -328,6 +436,7 @@ $gtype = $pgtype._type
 class InterfaceTypes(object):
 
     def pack_object(self, obj_name):
+        from pgi.util import import_attribute
         gobj_class = import_attribute("GObject", "Object")
 
         block, var = self.parse("""
@@ -340,6 +449,7 @@ $obj = ctypes.cast($obj._obj, ctypes.c_void_p)
         return block, var["obj"]
 
     def pack_object_null(self, obj_name):
+        from pgi.util import import_attribute
         gobj_class = import_attribute("GObject", "Object")
 
         block, var = self.parse("""
@@ -394,6 +504,7 @@ else:
         return block, var["obj"]
 
     def pack_struct(self, name):
+        from pgi.util import import_attribute
         base_obj = import_attribute("GObject", "Object")
         from pgi.structure import BaseStructure
 
@@ -605,3 +716,11 @@ $ptr[0] = $value
 """, ptr=ptr, value=value)
 
         return block
+
+    def get_reference(self, value):
+        block, var = self.parse("""
+$ptr = ctypes.byref($value)
+""", value=value)
+
+        block.add_dependency("ctypes", ctypes)
+        return block, var["ptr"]
