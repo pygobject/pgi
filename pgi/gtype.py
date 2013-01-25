@@ -116,6 +116,9 @@ class PGType(object):
 
         return import_attribute(namespace, name)
 
+    def __hash__(self):
+        return hash(self._type.value)
+
     def __eq__(self, other):
         try:
             return self._type.value == other._type.value

@@ -623,8 +623,7 @@ class TestDouble(unittest.TestCase):
 class TestGType(unittest.TestCase):
 
     def test_gtype_name(self):
-        # FIXME
-        #self.assertEqual("void", GObject.TYPE_NONE.name)
+        self.assertEqual("void", GObject.TYPE_NONE.name)
         self.assertEqual("gchararray", GObject.TYPE_STRING.name)
 
         def check_readonly(gtype):

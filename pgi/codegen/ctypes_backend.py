@@ -438,10 +438,11 @@ $pgtype = PGType($gtype)
         block, var = self.parse("""
 if not isinstance($pgtype, PGType):
     raise TypeError("%r not a GType" % $pgtype)
-$gtype = $pgtype._type
+$gtype = GType($pgtype._type.value)
 """, pgtype=name)
 
         block.add_dependency("PGType", PGType)
+        block.add_dependency("GType", GType)
         return block, var["gtype"]
 
 
