@@ -15,11 +15,11 @@ search_path = os.path.dirname(__file__)
 GIRepository.prepend_search_path(search_path)
 
 try:
-    from pgi.repository import GIMarshallingTests
+    from gi.repository import GIMarshallingTests
 except ImportError:
     GIMarshallingTests = None
 
-from pgi.repository import GObject, GLib
+from gi.repository import GObject, GLib
 
 
 if sys.version_info < (3, 0):
