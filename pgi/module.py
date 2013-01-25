@@ -43,6 +43,8 @@ class RepositoryWrapper(InfoIterWrapper):
 class _Module(types.ModuleType):
     """Template class for gi modules (Gtk, ...)"""
 
+    __weakref__ = None
+
     def __init__(self, namespace, wrapper):
         types.ModuleType.__init__(self, namespace)
         self._wrapper = wrapper

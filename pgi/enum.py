@@ -65,7 +65,7 @@ def _get_values(enum):
 
 def FlagsAttribute(info):
     enum = cast(info, GIEnumInfoPtr)
-    enum_name = enum.type_name
+    enum_name = enum.type_name or info.name
 
     values = _get_values(enum)
 
@@ -91,7 +91,7 @@ class _EnumMethod(object):
 
 def EnumAttribute(info):
     enum = cast(info, GIEnumInfoPtr)
-    enum_name = enum.type_name
+    enum_name = enum.type_name or info.name
 
     values = _get_values(enum)
 

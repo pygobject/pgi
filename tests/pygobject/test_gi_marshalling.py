@@ -648,3 +648,94 @@ class TestGType(unittest.TestCase):
 
     def test_gtype_inout(self):
         self.assertEqual(GObject.TYPE_INT, GIMarshallingTests.gtype_inout(GObject.TYPE_NONE))
+
+
+@unittest.skipUnless(GIMarshallingTests, "")
+class TestPointer(unittest.TestCase):
+    def test_pointer_in_return(self):
+        self.assertEqual(GIMarshallingTests.pointer_in_return(42), 42)
+
+
+@unittest.skipUnless(GIMarshallingTests, "")
+class TestDir(unittest.TestCase):
+    def test_members_list(self):
+        list = dir(GIMarshallingTests)
+        self.assertTrue('OverridesStruct' in list)
+        self.assertTrue('BoxedStruct' in list)
+        self.assertTrue('OVERRIDES_CONSTANT' in list)
+        self.assertTrue('GEnum' in list)
+        self.assertTrue('int32_return_max' in list)
+
+    def test_modules_list(self):
+        import gi.repository
+        list = dir(gi.repository)
+        self.assertTrue('GIMarshallingTests' in list)
+
+        # FIXME: test to see if a module which was not imported is in the list
+        #        we should be listing every typelib we find, not just the ones
+        #        which are imported
+        #
+        #        to test this I recommend we compile a fake module which
+        #        our tests would never import and check to see if it is
+        #        in the list:
+        #
+        # self.assertTrue('DoNotImportDummyTests' in list)
+
+
+class TestGObject(unittest.TestCase):
+
+    def test_object(self):
+        self.assertTrue(issubclass(GIMarshallingTests.Object, GObject.GObject))
+
+        object_ = GIMarshallingTests.Object()
+        self.assertTrue(isinstance(object_, GIMarshallingTests.Object))
+        self.assertEqual(object_.__grefcount__, 1)
+
+    def test_object_new(self):
+        object_ = GIMarshallingTests.Object.new(42)
+        self.assertTrue(isinstance(object_, GIMarshallingTests.Object))
+        self.assertEqual(object_.__grefcount__, 1)
+
+    def test_object_static_method(self):
+        GIMarshallingTests.Object.static_method()
+
+    def test_object_method(self):
+        GIMarshallingTests.Object(int=42).method()
+        self.assertRaises(TypeError, GIMarshallingTests.Object.method, GObject.GObject())
+        self.assertRaises(TypeError, GIMarshallingTests.Object.method)
+
+    def test_sub_object(self):
+        self.assertTrue(issubclass(GIMarshallingTests.SubObject, GIMarshallingTests.Object))
+
+        object_ = GIMarshallingTests.SubObject()
+        self.assertTrue(isinstance(object_, GIMarshallingTests.SubObject))
+
+    def test_sub_object_static_method(self):
+        object_ = GIMarshallingTests.SubObject()
+        object_.static_method()
+
+    def test_sub_object_method(self):
+        object_ = GIMarshallingTests.SubObject(int=42)
+        object_.method()
+
+    def test_sub_object_sub_method(self):
+        object_ = GIMarshallingTests.SubObject()
+        object_.sub_method()
+
+    def test_object_full_return(self):
+        object_ = GIMarshallingTests.Object.full_return()
+        self.assertTrue(isinstance(object_, GIMarshallingTests.Object))
+        self.assertEqual(object_.__grefcount__, 1)
+
+    def test_object_none_in(self):
+        object_ = GIMarshallingTests.Object(int=42)
+        GIMarshallingTests.Object.none_in(object_)
+        self.assertEqual(object_.__grefcount__, 1)
+
+        object_ = GIMarshallingTests.SubObject(int=42)
+        GIMarshallingTests.Object.none_in(object_)
+
+        object_ = GObject.GObject()
+        self.assertRaises(TypeError, GIMarshallingTests.Object.none_in, object_)
+
+        self.assertRaises(TypeError, GIMarshallingTests.Object.none_in, None)
