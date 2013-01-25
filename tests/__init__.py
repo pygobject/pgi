@@ -53,7 +53,7 @@ def test(load_gi, backend=None):
     loader = unittest.TestLoader()
     suites.append(loader.discover(os.path.join(current_dir, "pygobject")))
 
-    if not load_gi and backend == "cffi":
+    if not load_gi:
         loader = unittest.TestLoader()
         suites.append(loader.discover(os.path.join(current_dir, "pgi")))
 

@@ -301,9 +301,26 @@ class GTypeArgument(GIArgument):
     TAG = GITypeTag.GTYPE
 
     def pre_call(self):
-        block, out = self.backend.pack_gtype(self.name)
-        self.call_var = out
-        return block
+        if self.is_direction_inout():
+            block, self._data = self.backend.pack_gtype(self.name)
+            block2, self.call_var = self.backend.get_reference(self._data)
+            block2.write_into(block)
+            return block
+        elif self.is_direction_in():
+            block, var = self.backend.pack_gtype(self.name)
+            self.call_var = var
+            return block
+        else:
+            block, self._data = self.backend.setup_gtype()
+            block2, self.call_var = self.backend.get_reference(self._data)
+            block2.write_into(block)
+            return block
+
+    def post_call(self):
+        if self.is_direction_out():
+            block, var = self.backend.unpack_gtype(self._data)
+            self.out_var = var
+            return block
 
 
 _classes = {}

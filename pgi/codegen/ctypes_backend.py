@@ -173,13 +173,14 @@ $uint = ctypes.c_uint8($uint)
     def pack_float(self, name):
         block, var = self.parse("""
 # pack float
-#if not isinstance($float, (float, int, long)):
-#    raise TypeError("Value '$float' not a number")
+if isinstance($float, basestring):
+    raise TypeError
+$float = float($float)
 $c_float = ctypes.c_float($float)
 if $c_float.value != $float:
     try:
         # easy check for nan/inf
-        $float.as_integer_ratio()
+        $c_float.value.as_integer_ratio()
     except:
         raise ValueError("$float(%f) out of range" % $float)
 """, float=name)
@@ -189,13 +190,14 @@ if $c_float.value != $float:
     def pack_double(self, name):
         block, var = self.parse("""
 # pack double
-#if not isinstance($double, (float, int, long)):
-#    raise TypeError("Value '$double' not a number")
+if isinstance($double, basestring):
+    raise TypeError
+$double = float($double)
 $c_double = ctypes.c_double($double)
 if $c_double.value != $double:
     try:
         # easy check for nan/inf
-        $double.as_integer_ratio()
+        $c_double.value.as_integer_ratio()
     except:
         raise ValueError("$double(%f) out of range" % $double)
 """, double=name)
@@ -417,6 +419,13 @@ $value = ctypes.c_double()
         block.add_dependency("ctypes", ctypes)
         return block, var["value"]
 
+    def setup_gtype(self):
+        block, var = self.parse("""
+$gtype = GType()
+""")
+        block.add_dependency("GType", GType)
+        return block, var["gtype"]
+
     def unpack_gtype(self, name):
         block, var = self.parse("""
 $pgtype = PGType($gtype)
@@ -427,9 +436,12 @@ $pgtype = PGType($gtype)
 
     def pack_gtype(self, name):
         block, var = self.parse("""
+if not isinstance($pgtype, PGType):
+    raise TypeError("%r not a GType" % $pgtype)
 $gtype = $pgtype._type
 """, pgtype=name)
 
+        block.add_dependency("PGType", PGType)
         return block, var["gtype"]
 
 

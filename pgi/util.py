@@ -279,3 +279,6 @@ class cached_property(object):
             return self
         obj.__dict__[self.__name__] = result = self.fget(obj)
         return result
+
+    def __set__(self, instance, value):
+        raise AttributeError

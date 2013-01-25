@@ -146,9 +146,12 @@ if $var is not None:
 
     def pack_gtype(self, name):
         block, var = self.parse("""
+if not isinstance($pgtype, PGType):
+    raise TypeError("%r not a GType" % $pgtype)
 $gtype = $pgtype._type.value
 """, pgtype=name)
 
+        block.add_dependency("PGType", PGType)
         return block, var["gtype"]
 
     def unpack_gtype(self, name):

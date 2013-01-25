@@ -575,3 +575,77 @@ class TestSize(unittest.TestCase):
 
     def test_size_inout(self):
         self.assertEqual(0, GIMarshallingTests.size_inout(Number(self.MAX)))
+
+
+@unittest.skipUnless(GIMarshallingTests, "")
+class TestFloat(unittest.TestCase):
+
+    MAX = GObject.G_MAXFLOAT
+    MIN = GObject.G_MINFLOAT
+
+    def test_float_return(self):
+        self.assertAlmostEqual(self.MAX, GIMarshallingTests.float_return())
+
+    def test_float_in(self):
+        GIMarshallingTests.float_in(Number(self.MAX))
+
+        self.assertRaises(TypeError, GIMarshallingTests.float_in, "self.MAX")
+
+    def test_float_out(self):
+        self.assertAlmostEqual(self.MAX, GIMarshallingTests.float_out())
+
+    def test_float_inout(self):
+       self.assertAlmostEqual(self.MIN, GIMarshallingTests.float_inout(Number(self.MAX)))
+
+
+@unittest.skipUnless(GIMarshallingTests, "")
+class TestDouble(unittest.TestCase):
+
+    MAX = GObject.G_MAXDOUBLE
+    MIN = GObject.G_MINDOUBLE
+
+    def test_double_return(self):
+        self.assertAlmostEqual(self.MAX, GIMarshallingTests.double_return())
+
+    def test_double_in(self):
+        GIMarshallingTests.double_in(Number(self.MAX))
+
+        self.assertRaises(TypeError, GIMarshallingTests.double_in, "self.MAX")
+
+    def test_double_out(self):
+        self.assertAlmostEqual(self.MAX, GIMarshallingTests.double_out())
+
+    def test_double_inout(self):
+        self.assertAlmostEqual(self.MIN, GIMarshallingTests.double_inout(Number(self.MAX)))
+
+
+@unittest.skipUnless(GIMarshallingTests, "")
+class TestGType(unittest.TestCase):
+
+    def test_gtype_name(self):
+        # FIXME
+        #self.assertEqual("void", GObject.TYPE_NONE.name)
+        self.assertEqual("gchararray", GObject.TYPE_STRING.name)
+
+        def check_readonly(gtype):
+            gtype.name = "foo"
+
+        self.assertRaises(AttributeError, check_readonly, GObject.TYPE_NONE)
+        self.assertRaises(AttributeError, check_readonly, GObject.TYPE_STRING)
+
+    def test_gtype_return(self):
+        self.assertEqual(GObject.TYPE_NONE, GIMarshallingTests.gtype_return())
+        self.assertEqual(GObject.TYPE_STRING, GIMarshallingTests.gtype_string_return())
+
+    def test_gtype_in(self):
+        GIMarshallingTests.gtype_in(GObject.TYPE_NONE)
+        GIMarshallingTests.gtype_string_in(GObject.TYPE_STRING)
+        self.assertRaises(TypeError, GIMarshallingTests.gtype_in, "foo")
+        self.assertRaises(TypeError, GIMarshallingTests.gtype_string_in, "foo")
+
+    def test_gtype_out(self):
+        self.assertEqual(GObject.TYPE_NONE, GIMarshallingTests.gtype_out())
+        self.assertEqual(GObject.TYPE_STRING, GIMarshallingTests.gtype_string_out())
+
+    def test_gtype_inout(self):
+        self.assertEqual(GObject.TYPE_INT, GIMarshallingTests.gtype_inout(GObject.TYPE_NONE))
