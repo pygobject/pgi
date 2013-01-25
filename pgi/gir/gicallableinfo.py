@@ -43,11 +43,7 @@ class GICallableInfoPtr(GIBaseInfoPtr):
         return_type.unref()
         values["caller_owns"] = repr(self.caller_owns)
         values["may_return_null"] = repr(self.may_return_null)
-        args = self.get_args()
-        values["args"] = repr(args)
-        for arg in args:
-            arg.unref()
-
+        values["n_args"] = repr(self.n_args)
         return values
 
 
@@ -135,6 +131,17 @@ class GISignalInfo(GICallableInfo):
 
 class GISignalInfoPtr(GICallableInfoPtr):
     _type_ = GISignalInfo
+
+    def _get_repr(self):
+        values = super(GISignalInfoPtr, self)._get_repr()
+        values["flags"] = repr(self.flags)
+        closure = self.get_class_closure()
+        if closure:
+            values["class_closure"] = repr(closure)
+            closure.unref()
+        values["true_stops_emit"] = repr(self.true_stops_emit)
+        return values
+
 
 _methods = [
     ("get_return_type", GITypeInfoPtr, [GICallableInfoPtr]),
