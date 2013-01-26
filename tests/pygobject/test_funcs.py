@@ -311,3 +311,7 @@ class FuncsTest(unittest.TestCase):
 
     def test_float_misc(self):
         Gtk.Button().set_alignment(0.2, 0.4)
+
+    def test_string_none(self):
+        entry = Gtk.Entry()
+        entry.set_icon_from_stock(Gtk.EntryIconPosition.PRIMARY, None)

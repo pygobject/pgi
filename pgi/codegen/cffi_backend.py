@@ -125,6 +125,7 @@ $boolean = bool($var)
 
     def pack_string(self, name):
         block, var = self.parse("""
+# pack string, no None
 if isinstance($var, unicode):
     $var = $var.encode("utf-8")
 elif not isinstance($var, str):
@@ -135,11 +136,14 @@ elif not isinstance($var, str):
 
     def pack_string_null(self, name):
         block, var = self.parse("""
+# pack string, allow None
 if $var is not None:
     if isinstance($var, unicode):
         $var = $var.encode("utf-8")
     elif not isinstance($var, str):
         raise TypeError("$var must be a string or None")
+else:
+    $var = ffi.cast("char*", 0)
 """, var=name)
 
         return block, name
