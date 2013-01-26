@@ -19,8 +19,7 @@ RUNES = """
 if __name__ == "__main__":
     stage = Clutter.Stage()
 
-    # FIXME
-    #stage.set_color(Clutter.Color.from_string("#000000"))
+    stage.set_color(Clutter.Color.from_string("#ffbb00"))
     stage.set_size(1024, 768)
     stage.set_title("Text Editing")
     stage.connect("destroy", Clutter.main_quit)
