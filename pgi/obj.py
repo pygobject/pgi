@@ -184,7 +184,6 @@ def InterfaceAttribute(info):
     for method_info in iface_info.get_methods():
         attr = MethodAttribute(method_info)
         setattr(cls, method_info.name, attr)
-        method_info.unref()
 
     cls._sigs = {}
 
