@@ -10,8 +10,7 @@ from ctypes import cast
 import weakref
 
 from pgi import gobject
-from pgi.gobject import GParameter
-from pgi.gobject import GCallback, GClosureNotify, signal_connect_data
+from pgi.gobject import GParameter, GClosureNotify, signal_connect_data
 from pgi.gobject import signal_handler_unblock, signal_handler_block
 from pgi.gobject import GConnectFlags, signal_handler_disconnect, signal_lookup
 from pgi.gir import GIInterfaceInfoPtr, GIFunctionInfoFlags, GIObjectInfoPtr
@@ -22,6 +21,7 @@ from pgi.gtype import PGType
 from pgi.properties import PropertyAttribute, PROPS_NAME
 from pgi.constant import ConstantAttribute
 from pgi.codegen.funcgen import generate_function
+from pgi.codegen.siggen import generate_signal_callback
 
 
 class _Object(object):
@@ -83,16 +83,23 @@ class _Object(object):
         name = type(self).__name__
         return form % (name, id(self), self.__gtype__.name, self._obj)
 
+    def __get_signal(self, name):
+        for base in type(self).__mro__[:-1]:
+            if name in base._sigs:
+                return base._sigs[name]
+
     def __connect(self, flags, name, callback, *user_args):
         if not callable(callback):
             raise TypeError("second argument must be callable")
 
-        if not signal_lookup(name, self.__gtype__._type):
+        info = self.__get_signal(name)
+        if not info:
             raise TypeError("unknown signal name %r" % name)
 
         def _add_self(*args):
             return callback(self, *itertools.chain(args, user_args))
-        cb = GCallback(_add_self)
+        cb = generate_signal_callback(info, _add_self)
+
         destroy = GClosureNotify()
         id_ = signal_connect_data(self._obj, name, cb, None, destroy, flags)
         self.__signal_cb_ref[id_] = (cb, destroy)
@@ -179,6 +186,8 @@ def InterfaceAttribute(info):
         setattr(cls, method_info.name, attr)
         method_info.unref()
 
+    cls._sigs = {}
+
     return cls
 
 
@@ -239,5 +248,11 @@ def ObjectAttribute(info):
         method_name = method_info.name
         attr = MethodAttribute(method_info)
         setattr(cls, method_name, attr)
+
+    # Signals
+    cls._sigs = {}
+    for sig_info in obj_info.get_signals():
+        signal_name = sig_info.name
+        cls._sigs[signal_name] = sig_info
 
     return cls

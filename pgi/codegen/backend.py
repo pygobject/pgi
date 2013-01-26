@@ -60,6 +60,9 @@ class CodeGenBackend(object):
                             method=False, self_name="", throws=False):
         raise NotImplementedError
 
+    def get_callback_object(self, func, args):
+        raise NotImplementedError
+
     def call(self, name, args):
         raise NotImplementedError
 

@@ -11,6 +11,7 @@ from pgi.codegen.backend import CodeGenBackend
 from pgi.gir import GIRepositoryPtr, GITypeTag, GIInfoType
 from pgi.glib import *
 from pgi.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr, GType
+from pgi.gobject import GCallback
 from pgi.gtype import PGType
 
 
@@ -60,6 +61,8 @@ def typeinfo_to_ctypes(info, return_value=False):
             elif iface_type == GIInfoType.OBJECT:
                 return gpointer
             elif iface_type == GIInfoType.STRUCT:
+                return gpointer
+            elif iface_type == GIInfoType.UNION:
                 return gpointer
             elif iface_type == GIInfoType.FLAGS:
                 return gint
@@ -737,3 +740,8 @@ $ptr = ctypes.byref($value)
 
         block.add_dependency("ctypes", ctypes)
         return block, var["ptr"]
+
+    def get_callback_object(self, func, args):
+        arg_types = [typeinfo_to_ctypes(a.type) for a in args]
+        cb_object_type = ctypes.CFUNCTYPE(None, *arg_types)
+        return ctypes.cast(cb_object_type(func), GCallback)
