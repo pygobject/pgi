@@ -289,12 +289,17 @@ class Utf8Argument(GIArgument):
     TAG = GITypeTag.UTF8
 
     def pre_call(self):
-        if self.may_be_null():
-            block, var = self.backend.pack_string_null(self.name)
-        else:
-            block, var = self.backend.pack_string(self.name)
-        self.call_var = var
-        return block
+        if self.is_direction_inout():
+            pass
+        elif self.is_direction_in():
+            if self.may_be_null():
+                block, var = self.backend.pack_string_null(self.name)
+            else:
+                block, var = self.backend.pack_string(self.name)
+            self.call_var = var
+            return block
+
+        raise NotImplementedError
 
 
 class GTypeArgument(GIArgument):

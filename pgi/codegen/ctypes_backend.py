@@ -78,21 +78,24 @@ def typeinfo_to_ctypes(info, return_value=False):
 class BasicTypes(object):
 
     def pack_string(self, name):
-        # https://bugs.pypy.org/issue466
         block, var = self.parse("""
 # https://bugs.pypy.org/issue466
-if not isinstance($var, basestring):
+if isinstance($var, unicode):
+    $var = $var.encode("utf-8")
+elif not isinstance($var, str):
     raise TypeError("$var must be a string")
 """, var=name)
 
         return block, name
 
     def pack_string_null(self, name):
-        # https://bugs.pypy.org/issue466
         block, var = self.parse("""
-# https://bugs.pypy.org/issue466
-if $var is not None and not isinstance($var, basestring):
-    raise TypeError("$var must be a string or None")
+if $var is not None:
+    # https://bugs.pypy.org/issue466
+    if isinstance($var, unicode):
+        $var = $var.encode("utf-8")
+    elif not isinstance($var, str):
+        raise TypeError("$var must be a string or None")
 """, var=name)
 
         return block, name

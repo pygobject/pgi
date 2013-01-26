@@ -682,6 +682,7 @@ class TestDir(unittest.TestCase):
         # self.assertTrue('DoNotImportDummyTests' in list)
 
 
+@unittest.skipUnless(GIMarshallingTests, "")
 class TestGObject(unittest.TestCase):
 
     def test_object(self):
@@ -739,3 +740,22 @@ class TestGObject(unittest.TestCase):
         self.assertRaises(TypeError, GIMarshallingTests.Object.none_in, object_)
 
         self.assertRaises(TypeError, GIMarshallingTests.Object.none_in, None)
+
+
+@unittest.skipUnless(GIMarshallingTests, "")
+class TestUtf8(unittest.TestCase):
+
+    def test_utf8_none_return(self):
+        self.assertEqual(CONSTANT_UTF8, GIMarshallingTests.utf8_none_return())
+
+    def test_utf8_full_return(self):
+        self.assertEqual(CONSTANT_UTF8, GIMarshallingTests.utf8_full_return())
+
+    def test_utf8_none_in(self):
+        GIMarshallingTests.utf8_none_in(CONSTANT_UTF8)
+        if sys.version_info < (3, 0):
+            GIMarshallingTests.utf8_none_in(PY2_UNICODE_UTF8)
+
+        self.assertRaises(TypeError, GIMarshallingTests.utf8_none_in, CONSTANT_NUMBER)
+        self.assertRaises(TypeError, GIMarshallingTests.utf8_none_in, None)
+
