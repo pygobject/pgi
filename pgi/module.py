@@ -57,14 +57,15 @@ class _Module(types.ModuleType):
     def __getattr__(self, name):
         info = self._wrapper.lookup_name(name)
         if not info:
-            raise AttributeError
+            raise AttributeError("%r module has not attribute %r" %
+                                 (self.__class__.__name__, name))
 
         cls = _attr_list[info.type.value]
         if cls:
             attr = cls(info)
             setattr(self, name, attr)
         else:
-            raise AttributeError
+            raise NotImplementedError("%r attribute type not supported")
 
         info.unref()
         return attr

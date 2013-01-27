@@ -6,6 +6,8 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
+import tempfile
+import shutil
 import unittest
 import os
 import sys
@@ -21,6 +23,7 @@ except ImportError:
 
 from gi.repository import GObject, GLib
 
+from compathelper import _bytes, _unicode
 
 if sys.version_info < (3, 0):
     CONSTANT_UTF8 = "const \xe2\x99\xa5 utf8"
@@ -759,3 +762,17 @@ class TestUtf8(unittest.TestCase):
         self.assertRaises(TypeError, GIMarshallingTests.utf8_none_in, CONSTANT_NUMBER)
         self.assertRaises(TypeError, GIMarshallingTests.utf8_none_in, None)
 
+    def test_utf8_none_out(self):
+        self.assertEqual(CONSTANT_UTF8, GIMarshallingTests.utf8_none_out())
+
+    def test_utf8_full_out(self):
+        self.assertEqual(CONSTANT_UTF8, GIMarshallingTests.utf8_full_out())
+
+    def test_utf8_dangling_out(self):
+        GIMarshallingTests.utf8_dangling_out()
+
+    def test_utf8_none_inout(self):
+        self.assertEqual("", GIMarshallingTests.utf8_none_inout(CONSTANT_UTF8))
+
+    def test_utf8_full_inout(self):
+        self.assertEqual("", GIMarshallingTests.utf8_full_inout(CONSTANT_UTF8))

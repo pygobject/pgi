@@ -8,10 +8,12 @@
 from ctypes import cast
 
 from pgi.gir import GIEnumInfoPtr
+from pgi.gtype import PGType
 
 
 class _EnumClass(int):
     _allowed = {}
+    __gtype__ = None
 
     def __new__(cls, value):
         if not isinstance(value, (long, int)):
@@ -30,6 +32,7 @@ class _EnumClass(int):
 
 class _FlagsClass(int):
     _flags = []
+    __gtype__ = None
 
     def __new__(cls, value):
         if not isinstance(value, (long, int)):
@@ -74,6 +77,8 @@ def FlagsAttribute(info):
     cls_dict["_flags"] = values
     cls = type(enum_name, _FlagsClass.__bases__, cls_dict)
 
+    cls.__gtype__ = PGType(enum.g_type)
+
     # create instances for all of them and add to the class
     for num, vname in values:
         setattr(cls, vname, cls(num))
@@ -99,6 +104,8 @@ def EnumAttribute(info):
     cls_dict = dict(_EnumClass.__dict__)
     cls_dict["_allowed"] = dict(values)
     cls = type(enum_name, _EnumClass.__bases__, cls_dict)
+
+    cls.__gtype__ = PGType(enum.g_type)
 
     for method in enum.get_methods():
         name = method.name

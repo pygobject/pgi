@@ -5,7 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from pgi.gir import GIDirection, GIArrayType, GITypeTag, GIInfoType
+from pgi.gir import GIDirection, GIArrayType, GITypeTag, GIInfoType, GITransfer
 from pgi.util import import_attribute
 
 
@@ -79,6 +79,15 @@ class GIArgument(Argument):
 
     def is_direction_inout(self):
         return self.direction == GIDirection.INOUT
+
+    def transfer_nothing(self):
+        return self.info.ownership_transfer.value == GITransfer.NOTHING
+
+    def transfer_container(self):
+        return self.info.ownership_transfer.value == GITransfer.CONTAINER
+
+    def transfer_everything(self):
+        return self.info.ownership_transfer.value == GITransfer.EVERYTHING
 
     def __repr__(self):
         return "<%s name=%r>" % (self.__class__.__name__, self.name)
@@ -290,7 +299,15 @@ class Utf8Argument(GIArgument):
 
     def pre_call(self):
         if self.is_direction_inout():
-            pass
+            block, data = self.backend.pack_string(self.name)
+            if self.transfer_everything():
+                block3, data = self.backend.dup_string(data)
+                block3.write_into(block)
+            block2, ref = self.backend.get_reference(data)
+            block2.write_into(block)
+            self.call_var = ref
+            self._data = data
+            return block
         elif self.is_direction_in():
             if self.may_be_null():
                 block, var = self.backend.pack_string_null(self.name)
@@ -298,8 +315,61 @@ class Utf8Argument(GIArgument):
                 block, var = self.backend.pack_string(self.name)
             self.call_var = var
             return block
+        elif self.is_direction_out():
+            block, data = self.backend.setup_string()
+            block2, ref = self.backend.get_reference(data)
+            block2.write_into(block)
+            self.call_var = ref
+            self._data = data
+            return block
 
-        raise NotImplementedError
+    def post_call(self):
+        if self.is_direction_out():
+            if self.transfer_everything():
+                block, var = self.backend.unpack_string_and_free(self._data)
+            else:
+                block, var = self.backend.unpack_string(self._data)
+            self.out_var = var
+            return block
+
+
+class FilenameArgument(GIArgument):
+    TAG = GITypeTag.FILENAME
+
+    def pre_call(self):
+        if self.is_direction_inout():
+            block, data = self.backend.pack_string(self.name)
+            if self.transfer_everything():
+                block3, data = self.backend.dup_string(data)
+                block3.write_into(block)
+            block2, ref = self.backend.get_reference(data)
+            block2.write_into(block)
+            self.call_var = ref
+            self._data = data
+            return block
+        elif self.is_direction_in():
+            if self.may_be_null():
+                block, var = self.backend.pack_string_null(self.name)
+            else:
+                block, var = self.backend.pack_string(self.name)
+            self.call_var = var
+            return block
+        elif self.is_direction_out():
+            block, data = self.backend.setup_string()
+            block2, ref = self.backend.get_reference(data)
+            block2.write_into(block)
+            self.call_var = ref
+            self._data = data
+            return block
+
+    def post_call(self):
+        if self.is_direction_out():
+            if self.transfer_everything():
+                block, var = self.backend.unpack_string_and_free(self._data)
+            else:
+                block, var = self.backend.unpack_string(self._data)
+            self.out_var = var
+            return block
 
 
 class GTypeArgument(GIArgument):

@@ -9,6 +9,7 @@ import ctypes
 
 from pgi.codegen.backend import CodeGenBackend
 from pgi.gir import GIRepositoryPtr, GITypeTag, GIInfoType
+from pgi import glib
 from pgi.glib import *
 from pgi.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr, GType
 from pgi.gobject import GCallback
@@ -77,6 +78,16 @@ def typeinfo_to_ctypes(info, return_value=False):
 
 class BasicTypes(object):
 
+    def dup_string(self, name):
+        block, var = self.parse("""
+$ptr_cpy = glib.g_strdup($ptr)
+$ptr_cpy = ctypes.cast($ptr_cpy, ctypes.c_char_p)
+""", ptr=name)
+
+        block.add_dependency("glib", glib)
+        block.add_dependency("ctypes", ctypes)
+        return block, var["ptr_cpy"]
+
     def pack_string(self, name):
         block, var = self.parse("""
 # https://bugs.pypy.org/issue466
@@ -84,8 +95,10 @@ if isinstance($var, unicode):
     $var = $var.encode("utf-8")
 elif not isinstance($var, str):
     raise TypeError("$var must be a string")
+$var = ctypes.c_char_p($var)
 """, var=name)
 
+        block.add_dependency("ctypes", ctypes)
         return block, name
 
     def pack_string_null(self, name):
@@ -96,8 +109,10 @@ if $var is not None:
         $var = $var.encode("utf-8")
     elif not isinstance($var, str):
         raise TypeError("$var must be a string or None")
+$var = ctypes.c_char_p($var)
 """, var=name)
 
+        block.add_dependency("ctypes", ctypes)
         return block, name
 
     def pack_pointer(self, name):
@@ -413,6 +428,14 @@ $value = ctypes.c_int16()
         block, var = self.parse("""
 # new uint16
 $value = ctypes.c_uint16()
+""")
+        block.add_dependency("ctypes", ctypes)
+        return block, var["value"]
+
+    def setup_string(self):
+        block, var = self.parse("""
+# new string
+$value = ctypes.c_char_p()
 """)
         block.add_dependency("ctypes", ctypes)
         return block, var["value"]
