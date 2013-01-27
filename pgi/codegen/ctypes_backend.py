@@ -391,6 +391,14 @@ $value = ctypes.c_float()
         block.add_dependency("ctypes", ctypes)
         return block, var["value"]
 
+    def setup_pointer(self):
+        block, var = self.parse("""
+# new pointer
+$value = ctypes.c_void_p()
+""")
+        block.add_dependency("ctypes", ctypes)
+        return block, var["value"]
+
     def setup_bool(self):
         block, var = self.parse("""
 # new bool
@@ -476,6 +484,14 @@ $gtype = GType($pgtype._type.value)
 
 
 class InterfaceTypes(object):
+
+    def ref_object(self, name):
+        block, var = self.parse("""
+# take ownership
+if $obj:
+    $obj._ref()
+""", obj=name)
+        return block, name
 
     def pack_object(self, obj_name):
         from pgi.util import import_attribute

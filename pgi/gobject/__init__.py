@@ -243,6 +243,7 @@ _methods = [
     ("new", gpointer, [GType, guint]),
     ("unref", None, [gpointer]),
     ("ref_sink", gpointer, [gpointer]),
+    ("ref", gpointer, [gpointer]),
     ("is_floating", gboolean, [gpointer]),
 ]
 

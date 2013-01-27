@@ -702,6 +702,14 @@ class TestGObject(unittest.TestCase):
         self.assertTrue(isinstance(object_, GIMarshallingTests.Object))
         self.assertEqual(object_.__grefcount__, 1)
 
+    @unittest.skip("FIXME")
+    def test_object_int(self):
+        object_ = GIMarshallingTests.Object(int=42)
+        self.assertEqual(object_.int_, 42)
+# FIXME: Don't work yet.
+#        object_.int_ = 0
+#        self.assertEqual(object_.int_, 0)
+
     def test_object_static_method(self):
         GIMarshallingTests.Object.static_method()
 
@@ -728,6 +736,25 @@ class TestGObject(unittest.TestCase):
         object_ = GIMarshallingTests.SubObject()
         object_.sub_method()
 
+    def test_sub_object_overwritten_method(self):
+        object_ = GIMarshallingTests.SubObject()
+        object_.overwritten_method()
+
+        self.assertRaises(TypeError, GIMarshallingTests.SubObject.overwritten_method, GIMarshallingTests.Object())
+
+    @unittest.skip("FIXME")
+    def test_sub_object_int(self):
+        object_ = GIMarshallingTests.SubObject()
+        self.assertEqual(object_.int_, 0)
+# FIXME: Don't work yet.
+#        object_.int_ = 42
+#        self.assertEqual(object_.int_, 42)
+
+    def test_object_none_return(self):
+        object_ = GIMarshallingTests.Object.none_return()
+        self.assertTrue(isinstance(object_, GIMarshallingTests.Object))
+        self.assertEqual(object_.__grefcount__, 2)
+
     def test_object_full_return(self):
         object_ = GIMarshallingTests.Object.full_return()
         self.assertTrue(isinstance(object_, GIMarshallingTests.Object))
@@ -745,6 +772,50 @@ class TestGObject(unittest.TestCase):
         self.assertRaises(TypeError, GIMarshallingTests.Object.none_in, object_)
 
         self.assertRaises(TypeError, GIMarshallingTests.Object.none_in, None)
+
+    def test_object_none_out(self):
+        object_ = GIMarshallingTests.Object.none_out()
+        self.assertTrue(isinstance(object_, GIMarshallingTests.Object))
+        self.assertEqual(object_.__grefcount__, 2)
+
+        new_object = GIMarshallingTests.Object.none_out()
+        # FIXME?
+        #self.assertTrue(new_object is object_)
+
+    def test_object_full_out(self):
+        object_ = GIMarshallingTests.Object.full_out()
+        self.assertTrue(isinstance(object_, GIMarshallingTests.Object))
+        self.assertEqual(object_.__grefcount__, 1)
+
+    def test_object_none_inout(self):
+        object_ = GIMarshallingTests.Object(int=42)
+        new_object = GIMarshallingTests.Object.none_inout(object_)
+
+        self.assertTrue(isinstance(new_object, GIMarshallingTests.Object))
+
+        self.assertFalse(object_ is new_object)
+
+        self.assertEqual(object_.__grefcount__, 1)
+        self.assertEqual(new_object.__grefcount__, 2)
+
+        new_new_object = GIMarshallingTests.Object.none_inout(object_)
+        # FIXME?
+        #self.assertTrue(new_new_object is new_object)
+
+        GIMarshallingTests.Object.none_inout(GIMarshallingTests.SubObject(int=42))
+
+    def test_object_full_inout(self):
+        object_ = GIMarshallingTests.Object(int=42)
+
+        new_object = GIMarshallingTests.Object.full_inout(object_)
+
+        self.assertTrue(isinstance(new_object, GIMarshallingTests.Object))
+
+        self.assertFalse(object_ is new_object)
+
+        # FIXME?
+        #self.assertEqual(object_.__grefcount__, 2)
+        self.assertEqual(new_object.__grefcount__, 1)
 
 
 @unittest.skipUnless(GIMarshallingTests, "")
@@ -793,3 +864,20 @@ class TestProjectVersion(unittest.TestCase):
         self.assertRaises(ValueError, gi.check_version, "99.0.0")
         gi.check_version((0, 0, 2))
         gi.check_version("0.0.2")
+
+
+@unittest.skipUnless(GIMarshallingTests, "")
+class TestTimet(unittest.TestCase):
+
+    def test_time_t_return(self):
+        self.assertEqual(1234567890, GIMarshallingTests.time_t_return())
+
+    def test_time_t_in(self):
+        GIMarshallingTests.time_t_in(1234567890)
+        self.assertRaises(TypeError, GIMarshallingTests.time_t_in, "hello")
+
+    def test_time_t_out(self):
+        self.assertEqual(1234567890, GIMarshallingTests.time_t_out())
+
+    def test_time_t_inout(self):
+        self.assertEqual(0, GIMarshallingTests.time_t_inout(1234567890))

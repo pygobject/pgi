@@ -143,7 +143,11 @@ class InterfaceReturnValue(ReturnValue):
             attr = import_attribute(iface_namespace, iface_name)
             return backend.unpack_enum(name, attr)
         elif iface_type == GIInfoType.OBJECT:
-            return backend.unpack_object(name)
+            block, out = backend.unpack_object(name)
+            if self.transfer_nothing():
+                block2, out = backend.ref_object(out)
+                block2.write_into(block)
+            return block, out
         elif iface_type == GIInfoType.STRUCT:
             attr = import_attribute(iface_namespace, iface_name)
             # we need to unpack GValues to match pygobject

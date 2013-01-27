@@ -47,6 +47,9 @@ class _Object(object):
         self.__weak[weakref.ref(self, self.__destroy)] = obj
         self._obj = obj
 
+    def _ref(self):
+        gobject.ref_sink(self._obj)
+
     def __hash__(self):
         return hash(self._obj)
 
