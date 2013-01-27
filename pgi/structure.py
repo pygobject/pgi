@@ -5,8 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from ctypes import cast
-
+from pgi.ctypesutil import gicast
 from pgi.codegen.fieldgen import generate_field_getter, generate_field_setter
 from pgi.gir import GIUnionInfoPtr, GIFieldInfoFlags, GIStructInfoPtr
 from pgi.glib import g_try_malloc0, free
@@ -113,11 +112,11 @@ class FieldAttribute(object):
         return self
 
 
-def UnionAttribute(info):
-    union_info = cast(info, GIUnionInfoPtr)
+def UnionAttribute(union_info):
+    union_info = gicast(union_info, GIUnionInfoPtr)
 
-    cls = type(info.name, _Union.__bases__, dict(_Union.__dict__))
-    cls.__module__ = info.name
+    cls = type(union_info.name, _Union.__bases__, dict(_Union.__dict__))
+    cls.__module__ = union_info.name
     cls.__gtype__ = PGType(union_info.g_type)
     cls._size = union_info.size
 
@@ -136,15 +135,15 @@ def UnionAttribute(info):
     return cls
 
 
-def StructureAttribute(info):
+def StructureAttribute(struct_info):
     """Creates a new struct class."""
 
-    struct_info = cast(info, GIStructInfoPtr)
+    struct_info = gicast(struct_info, GIStructInfoPtr)
 
     # Copy the template and add the gtype
     cls_dict = dict(_Structure.__dict__)
-    cls = type(info.name, _Structure.__bases__, cls_dict)
-    cls.__module__ = info.namespace
+    cls = type(struct_info.name, _Structure.__bases__, cls_dict)
+    cls.__module__ = struct_info.namespace
     cls.__gtype__ = PGType(struct_info.g_type)
     cls._size = struct_info.size
 

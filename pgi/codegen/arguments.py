@@ -212,7 +212,6 @@ class InterfaceArgument(GIArgument):
         iface_name = iface.name
         iface_namespace = iface.namespace
         iface_type = iface.type.value
-        iface.unref()
 
         if iface_type == GIInfoType.OBJECT:
             return self._pre_object()
@@ -226,7 +225,6 @@ class InterfaceArgument(GIArgument):
         iface_name = iface.name
         iface_namespace = iface.namespace
         iface_type = iface.type.value
-        iface.unref()
 
         if iface_type == GIInfoType.OBJECT:
             return self._post_object()

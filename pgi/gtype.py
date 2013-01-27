@@ -112,7 +112,6 @@ class PGType(object):
             return None
         name = base_info.name
         namespace = base_info.namespace
-        base_info.unref()
 
         return import_attribute(namespace, name)
 

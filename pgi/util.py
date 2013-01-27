@@ -132,8 +132,6 @@ class InfoIterWrapper(object):
     def clear(self):
         """Unref all structs and clear cache"""
 
-        for info in self.__infos.itervalues():
-            info.unref()
         self.__infos.clear()
         self.__names.clear()
 
@@ -149,7 +147,6 @@ def gparamspec_to_gvalue_ptr(spec, value):
     if tag == GITypeTag.INTERFACE:
         iface_info = type_.get_interface()
         tag = iface_info.type.value
-        iface_info.unref()
         is_interface = True
 
     if not set_gvalue_from_py(ptr, is_interface, tag, value):

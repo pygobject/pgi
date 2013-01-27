@@ -84,8 +84,6 @@ def _generate_field_access(info, setter=True):
         else:
             break
 
-    info_type.unref()
-
     if func:
         return func
 

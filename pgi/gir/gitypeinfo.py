@@ -67,9 +67,7 @@ class GITypeInfoPtr(GIBaseInfoPtr):
         tag = self.tag
         values["tag"] = repr(tag)
         if tag.value == GITypeTag.INTERFACE:
-            interface = self.get_interface()
-            values["interface"] = repr(interface)
-            interface.unref()
+            values["interface"] = repr(self.get_interface())
         elif tag.value == GITypeTag.ARRAY:
             if self.array_length != -1:
                 values["array_length"] = repr(self.array_length)
@@ -88,8 +86,8 @@ class GITypeInfoPtr(GIBaseInfoPtr):
 _methods = [
     ("is_pointer", gboolean, [GITypeInfoPtr]),
     ("get_tag", GITypeTag, [GITypeInfoPtr]),
-    ("get_param_type", GITypeInfoPtr, [GITypeInfoPtr, gint]),
-    ("get_interface", GIBaseInfoPtr, [GITypeInfoPtr]),
+    ("get_param_type", GITypeInfoPtr, [GITypeInfoPtr, gint], True),
+    ("get_interface", GIBaseInfoPtr, [GITypeInfoPtr], True),
     ("get_array_length", gint, [GITypeInfoPtr]),
     ("get_array_fixed_size", gint, [GITypeInfoPtr]),
     ("is_zero_terminated", gboolean, [GITypeInfoPtr]),

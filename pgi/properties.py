@@ -63,10 +63,8 @@ class Property(object):
             name = iface_info.name
             namespace = iface_info.namespace
             self.__iclass = import_attribute(namespace, name)
-            iface_info.unref()
             self.__interface = True
 
-        type_.unref()
         self.__value_type = spec.value_type._type.value
 
     def __get__(self, instance, owner):
@@ -191,7 +189,6 @@ class _PropsDescriptor(object):
     __cls_cache = None
 
     def __init__(self, info):
-        info.ref()
         self._info = info
 
     def __get_gparam_spec(self, owner):

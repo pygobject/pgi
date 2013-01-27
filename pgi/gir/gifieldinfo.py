@@ -37,16 +37,14 @@ class GIFieldInfoPtr(GIBaseInfoPtr):
         values["flags"] = repr(self.flags)
         values["size"] = repr(self.size)
         values["offset"] = repr(self.offset)
-        type_ = self.get_type()
-        values["type"] = repr(type_)
-        type_.unref()
+        values["type"] = repr(self.get_type())
         return values
 
 _methods = [
     ("get_flags", GIFieldInfoFlags, [GIFieldInfoPtr]),
     ("get_size", gint, [GIFieldInfoPtr]),
     ("get_offset", gint, [GIFieldInfoPtr]),
-    ("get_type", GITypeInfoPtr, [GIFieldInfoPtr]),
+    ("get_type", GITypeInfoPtr, [GIFieldInfoPtr], True),
     ("get_field", gboolean, [GIFieldInfoPtr, gpointer, POINTER(GIArgument)]),
     ("set_field", gboolean, [GIFieldInfoPtr, gpointer, POINTER(GIArgument)]),
 ]

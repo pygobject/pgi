@@ -5,13 +5,12 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from ctypes import cast
-
+from pgi.ctypesutil import gicast
 from pgi.gir import GIFunctionInfoPtr
 from pgi.codegen.funcgen import generate_function
 
 
 def FunctionAttribute(info):
-    func_info = cast(info, GIFunctionInfoPtr)
-    func = generate_function(func_info)
+    info = gicast(info, GIFunctionInfoPtr)
+    func = generate_function(info)
     return func

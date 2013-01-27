@@ -40,9 +40,7 @@ class GIUnionInfoPtr(GIRegisteredTypeInfoPtr):
         values["n_fields"] = repr(self.n_fields)
         values["is_discriminated"] = repr(self.is_discriminated)
         values["discriminator_offset"] = repr(self.discriminator_offset)
-        type_ = self.get_discriminator_type()
-        values["discriminator_type"] = repr(type_)
-        type_.unref()
+        values["discriminator_type"] = repr(self.get_discriminator_type())
         values["size"] = repr(self.size)
         values["alignment"] = repr(self.alignment)
         values["n_methods"] = repr(self.n_methods)
@@ -51,14 +49,14 @@ class GIUnionInfoPtr(GIRegisteredTypeInfoPtr):
 
 _methods = [
     ("get_n_fields", gint, [GIUnionInfoPtr]),
-    ("get_field", GIFieldInfoPtr, [GIUnionInfoPtr, gint]),
+    ("get_field", GIFieldInfoPtr, [GIUnionInfoPtr, gint], True),
     ("get_n_methods", gint, [GIUnionInfoPtr]),
-    ("get_method", GIFunctionInfoPtr, [GIUnionInfoPtr, gint]),
+    ("get_method", GIFunctionInfoPtr, [GIUnionInfoPtr, gint], True),
     ("is_discriminated", gboolean, [GIUnionInfoPtr]),
     ("get_discriminator_offset", gint, [GIUnionInfoPtr]),
-    ("get_discriminator_type", GITypeInfoPtr, [GIUnionInfoPtr]),
-    ("get_discriminator", GIConstantInfoPtr, [GIUnionInfoPtr, gint]),
-    ("find_method", GIFunctionInfoPtr, [GIUnionInfoPtr, gchar_p]),
+    ("get_discriminator_type", GITypeInfoPtr, [GIUnionInfoPtr], True),
+    ("get_discriminator", GIConstantInfoPtr, [GIUnionInfoPtr, gint], True),
+    ("find_method", GIFunctionInfoPtr, [GIUnionInfoPtr, gchar_p], True),
     ("get_size", gsize, [GIUnionInfoPtr]),
     ("get_alignment", gsize, [GIUnionInfoPtr]),
 ]

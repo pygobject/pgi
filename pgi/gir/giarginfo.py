@@ -49,9 +49,7 @@ class GIArgInfoPtr(GIBaseInfoPtr):
             values["closure"] = repr(self.closure)
         if self.destroy != -1:
             values["destroy"] = repr(self.destroy)
-        type_ = self.get_type()
-        values["arg_type"] = repr(type_)
-        type_.unref()
+        values["arg_type"] = repr(self.get_type())
 
         return values
 
@@ -65,7 +63,7 @@ _methods = [
     ("get_scope", GIScopeType, [GIArgInfoPtr]),
     ("get_closure", gint, [GIArgInfoPtr]),
     ("get_destroy", gint, [GIArgInfoPtr]),
-    ("get_type", GITypeInfoPtr, [GIArgInfoPtr]),
+    ("get_type", GITypeInfoPtr, [GIArgInfoPtr], True),
     ("load_type", None, [GIArgInfoPtr, GITypeInfoPtr]),
 ]
 

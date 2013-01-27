@@ -5,8 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from ctypes import cast
-
+from pgi.ctypesutil import gicast
 from pgi.gir import GIEnumInfoPtr
 from pgi.gtype import PGType
 
@@ -60,24 +59,23 @@ def _get_values(enum):
     for value in enum.get_values():
         num = value.value
         vname = value.name.upper()
-        value.unref()
         values.append((num, vname))
 
     return values
 
 
 def FlagsAttribute(info):
-    enum = cast(info, GIEnumInfoPtr)
-    enum_name = enum.type_name or info.name
+    info = gicast(info, GIEnumInfoPtr)
+    enum_name = info.type_name or info.name
 
-    values = _get_values(enum)
+    values = _get_values(info)
 
     # add them to the class for init checks
     cls_dict = dict(_FlagsClass.__dict__)
     cls_dict["_flags"] = values
     cls = type(enum_name, _FlagsClass.__bases__, cls_dict)
 
-    cls.__gtype__ = PGType(enum.g_type)
+    cls.__gtype__ = PGType(info.g_type)
 
     # create instances for all of them and add to the class
     for num, vname in values:
@@ -95,22 +93,21 @@ class _EnumMethod(object):
 
 
 def EnumAttribute(info):
-    enum = cast(info, GIEnumInfoPtr)
-    enum_name = enum.type_name or info.name
+    info = gicast(info, GIEnumInfoPtr)
+    enum_name = info.type_name or info.name
 
-    values = _get_values(enum)
+    values = _get_values(info)
 
     # add them to the class for init checks
     cls_dict = dict(_EnumClass.__dict__)
     cls_dict["_allowed"] = dict(values)
     cls = type(enum_name, _EnumClass.__bases__, cls_dict)
 
-    cls.__gtype__ = PGType(enum.g_type)
+    cls.__gtype__ = PGType(info.g_type)
 
-    for method in enum.get_methods():
+    for method in info.get_methods():
         name = method.name
         setattr(cls, name, _EnumMethod(name))
-        method.unref()
 
     # create instances for all of them and add to the class
     for num, vname in values:

@@ -67,7 +67,6 @@ class _Module(types.ModuleType):
         else:
             raise NotImplementedError("%r attribute type not supported")
 
-        info.unref()
         return attr
 
 

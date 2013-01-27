@@ -137,7 +137,6 @@ class InterfaceReturnValue(ReturnValue):
         iface_type = iface.type.value
         iface_namespace = iface.namespace
         iface_name = iface.name
-        iface.unref()
 
         if iface_type == GIInfoType.ENUM:
             attr = import_attribute(iface_namespace, iface_name)

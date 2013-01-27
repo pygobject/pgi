@@ -40,6 +40,7 @@ class GIBaseInfo(Structure):
 
 class GIBaseInfoPtr(POINTER(GIBaseInfo)):
     _type_ = GIBaseInfo
+    _unref = False
 
     def _get_repr(self):
         values = {}
@@ -55,12 +56,16 @@ class GIBaseInfoPtr(POINTER(GIBaseInfo)):
 
         return values
 
+    def __del__(self):
+        if self and self._unref:
+            self.unref()
+
     def __repr__(self):
         l = ", ".join(("%s=%s" % v for v in sorted(self._get_repr().items())))
         return "<%s %s>" % (self._type_.__name__, l)
 
 _methods = [
-    ("ref", GIBaseInfoPtr, [GIBaseInfoPtr]),
+    ("ref", GIBaseInfoPtr, [GIBaseInfoPtr], False),
     ("unref", None, [GIBaseInfoPtr]),
     ("get_type", GIInfoType, [GIBaseInfoPtr]),
     ("get_name", gchar_p, [GIBaseInfoPtr]),

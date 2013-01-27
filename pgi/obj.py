@@ -15,6 +15,7 @@ from pgi.gobject import signal_handler_unblock, signal_handler_block
 from pgi.gobject import GConnectFlags, signal_handler_disconnect, signal_lookup
 from pgi.gir import GIInterfaceInfoPtr, GIFunctionInfoFlags, GIObjectInfoPtr
 
+from pgi.ctypesutil import gicast
 from pgi.util import import_attribute, Super
 from pgi.util import gparamspec_to_gvalue_ptr
 from pgi.gtype import PGType
@@ -164,7 +165,7 @@ class _Interface(object):
 def InterfaceAttribute(info):
     """Creates a GInterface class"""
 
-    iface_info = cast(info, GIInterfaceInfoPtr)
+    iface_info = gicast(info, GIInterfaceInfoPtr)
 
     # Create a new class
     cls = type(info.name, _Interface.__bases__, dict(_Interface.__dict__))
@@ -181,7 +182,6 @@ def InterfaceAttribute(info):
         constant_name = constant.name
         attr = ConstantAttribute(constant)
         setattr(cls, constant_name, attr)
-        constant.unref()
 
     # Add methods
     for method_info in iface_info.get_methods():
@@ -193,19 +193,18 @@ def InterfaceAttribute(info):
     return cls
 
 
-def ObjectAttribute(info):
+def ObjectAttribute(obj_info):
     """Creates a GObject class.
 
     It inherits from the base class and all interfaces it implements.
     """
 
-    obj_info = cast(info, GIObjectInfoPtr)
+    obj_info = gicast(obj_info, GIObjectInfoPtr)
 
     # Get the parent class
     parent_obj = obj_info.get_parent()
     if parent_obj:
         attr = import_attribute(parent_obj.namespace, parent_obj.name)
-        parent_obj.unref()
         bases = (attr,)
     else:
         bases = _Object.__bases__
@@ -215,14 +214,13 @@ def ObjectAttribute(info):
     for interface in obj_info.get_interfaces():
         attr = import_attribute(interface.namespace, interface.name)
         ifaces.append(attr)
-        interface.unref()
 
     # Combine them to a base class list
     if ifaces:
         bases = tuple(list(bases) + ifaces)
 
     # Create a new class
-    cls = type(info.name, bases, dict(_Object.__dict__))
+    cls = type(obj_info.name, bases, dict(_Object.__dict__))
     cls.__module__ = obj_info.namespace
 
     # Set root to unowned= False and InitiallyUnowned=True
@@ -243,7 +241,6 @@ def ObjectAttribute(info):
         constant_name = constant.get_name()
         attr = ConstantAttribute(constant)
         setattr(cls, constant_name, attr)
-        constant.unref()
 
     # Add methods
     for method_info in obj_info.get_methods():

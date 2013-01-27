@@ -59,7 +59,6 @@ def typeinfo_to_cffi(info):
         elif tag == GITypeTag.INTERFACE:
             iface = info.get_interface()
             iface_type = iface.type.value
-            iface.unref()
             if iface_type == GIInfoType.STRUCT:
                 return "gpointer"
             elif iface_type == GIInfoType.ENUM:
@@ -73,7 +72,6 @@ def typeinfo_to_cffi(info):
         elif tag == GITypeTag.INTERFACE:
             iface = info.get_interface()
             iface_type = iface.type.value
-            iface.unref()
             if iface_type == GIInfoType.ENUM:
                 return "guint32"
             elif iface_type == GIInfoType.OBJECT:

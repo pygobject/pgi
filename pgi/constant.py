@@ -6,8 +6,9 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from warnings import warn
-from ctypes import cast, byref
+from ctypes import byref
 
+from pgi.ctypesutil import gicast
 from pgi.gir import GIConstantInfoPtr, GIArgument
 
 
@@ -18,14 +19,13 @@ _union_access = [None, "v_boolean", "v_int8", "v_uint8", "v_int16",
 
 
 def ConstantAttribute(info):
-    const = cast(info, GIConstantInfoPtr)
+    info = gicast(info, GIConstantInfoPtr)
 
     arg = GIArgument()
-    const.get_value(byref(arg))
+    info.get_value(byref(arg))
 
-    const_type = const.get_type()
+    const_type = info.get_type()
     tag_type = const_type.tag.value
-    const_type.unref()
 
     value_member = _union_access[tag_type]
     if not value_member:

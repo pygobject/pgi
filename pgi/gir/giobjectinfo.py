@@ -63,16 +63,13 @@ class GIObjectInfoPtr(GIRegisteredTypeInfoPtr):
         parent = self.get_parent()
         if parent:
             values["parent"] = repr(parent.name)
-            parent.unref()
         values["n_interfaces"] = repr(self.n_interfaces)
         values["n_fields"] = repr(self.n_fields)
         values["n_properties"] = repr(self.n_properties)
         values["n_methods"] = repr(self.n_methods)
         values["n_signals"] = repr(self.n_signals)
         values["n_vfuncs"] = repr(self.n_vfuncs)
-        class_struct = self.get_class_struct()
-        values["class_struct"] = repr(class_struct.name)
-        class_struct.unref()
+        values["class_struct"] = repr(self.get_class_struct().name)
         unref_function = self.unref_function
         if unref_function:
             values["unref_function"] = repr(unref_function)
@@ -98,24 +95,24 @@ _methods = [
     ("get_type_init", gchar_p, [GIObjectInfoPtr]),
     ("get_abstract", gboolean, [GIObjectInfoPtr]),
     ("get_fundamental", gboolean, [GIObjectInfoPtr]),
-    ("get_parent", GIObjectInfoPtr, [GIObjectInfoPtr]),
+    ("get_parent", GIObjectInfoPtr, [GIObjectInfoPtr], True),
     ("get_n_interfaces", gint, [GIObjectInfoPtr]),
-    ("get_interface", GIInterfaceInfoPtr, [GIObjectInfoPtr, gint]),
+    ("get_interface", GIInterfaceInfoPtr, [GIObjectInfoPtr, gint], True),
     ("get_n_fields", gint, [GIObjectInfoPtr]),
-    ("get_field", GIFieldInfoPtr, [GIObjectInfoPtr, gint]),
+    ("get_field", GIFieldInfoPtr, [GIObjectInfoPtr, gint], True),
     ("get_n_properties", gint, [GIObjectInfoPtr]),
-    ("get_property", GIPropertyInfoPtr, [GIObjectInfoPtr, gint]),
+    ("get_property", GIPropertyInfoPtr, [GIObjectInfoPtr, gint], True),
     ("get_n_methods", gint, [GIObjectInfoPtr]),
-    ("get_method", GIFunctionInfoPtr, [GIObjectInfoPtr, gint]),
-    ("find_method", GIFunctionInfoPtr, [GIObjectInfoPtr, gchar_p]),
+    ("get_method", GIFunctionInfoPtr, [GIObjectInfoPtr, gint], True),
+    ("find_method", GIFunctionInfoPtr, [GIObjectInfoPtr, gchar_p], True),
     ("get_n_signals", gint, [GIObjectInfoPtr]),
-    ("get_signal", GISignalInfoPtr, [GIObjectInfoPtr, gint]),
+    ("get_signal", GISignalInfoPtr, [GIObjectInfoPtr, gint], True),
     ("get_n_vfuncs", gint, [GIObjectInfoPtr]),
-    ("get_vfunc", GIVFuncInfoPtr, [GIObjectInfoPtr, gint]),
+    ("get_vfunc", GIVFuncInfoPtr, [GIObjectInfoPtr, gint], True),
     ("get_n_constants", gint, [GIObjectInfoPtr]),
-    ("get_constant", GIConstantInfoPtr, [GIObjectInfoPtr, gint]),
-    ("get_class_struct", GIStructInfoPtr, [GIObjectInfoPtr]),
-    ("find_vfunc", GIVFuncInfoPtr, [GIObjectInfoPtr, gchar_p]),
+    ("get_constant", GIConstantInfoPtr, [GIObjectInfoPtr, gint], True),
+    ("get_class_struct", GIStructInfoPtr, [GIObjectInfoPtr], True),
+    ("find_vfunc", GIVFuncInfoPtr, [GIObjectInfoPtr, gchar_p], True),
     ("get_unref_function", c_char_p, [GIObjectInfoPtr]),
     ("get_unref_function_pointer", GIObjectInfoUnrefFunction,
         [GIObjectInfoPtr]),

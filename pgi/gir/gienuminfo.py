@@ -64,9 +64,9 @@ class GIEnumInfoPtr(GIRegisteredTypeInfoPtr):
 
 _methods = [
     ("get_n_values", gint, [GIEnumInfoPtr]),
-    ("get_value", GIValueInfoPtr, [GIEnumInfoPtr, gint]),
+    ("get_value", GIValueInfoPtr, [GIEnumInfoPtr, gint], True),
     ("get_n_methods", gint, [GIEnumInfoPtr]),
-    ("get_method", GIFunctionInfoPtr, [GIEnumInfoPtr]),
+    ("get_method", GIFunctionInfoPtr, [GIEnumInfoPtr], True),
     ("get_storage_type", GITypeTag, [GIEnumInfoPtr]),
 ]
 

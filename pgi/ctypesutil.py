@@ -5,7 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from ctypes import cdll, c_void_p
+from ctypes import cdll, c_void_p, cast
 
 
 _so_mapping = {
@@ -40,17 +40,34 @@ class _CMethod(object):
         self.args = args
 
     def __get__(self, instance, owner):
-        lib, name, symbol, ret, args, wrap = self.args
+        lib, name, symbol, ret, args, wrap, unref = self.args
         func = getattr(lib, symbol)
         func.argtypes = args
         func.restype = ret
 
+        def unref_func(*x):
+            instance = func(*x)
+            instance._unref = True
+            return instance
+
         if wrap:
-            setattr(owner, name, lambda *x: func(*x))
+            if unref:
+                setattr(owner, name, unref_func)
+            else:
+                setattr(owner, name, lambda *x: func(*x))
             return getattr(instance, name)
         else:
+            # FIXME: handle unref
             setattr(owner, name, staticmethod(func))
-            return getattr(owner, name, func)
+            return getattr(owner, name)
+
+
+def gicast(obj, type_):
+    """cast and transfer ownership to the now object"""
+    new_obj = cast(obj, type_)
+    new_obj._unref = obj._unref
+    obj._unref = False
+    return new_obj
 
 
 _wraps = []
@@ -66,8 +83,14 @@ def wrap_setup():
     global _wraps
 
     wraps = _wraps
-    for (lib, base, ptr, prefix, methods) in wraps:
-        for name, ret, args in methods:
+    for lib, base, ptr, prefix, methods in wraps:
+        for method in methods:
+            unref = False
+            if len(method) == 3:
+                name, ret, args = method
+            else:
+                name, ret, args, unref = method
+
             symbol = prefix + name
             is_method = args and args[0] == ptr
             if is_method:
@@ -85,10 +108,10 @@ def wrap_setup():
                     prop = _CProperty(lib, attr_name, symbol, ret, args)
                     setattr(ptr, attr_name, prop)
                 else:
-                    method = _CMethod(lib, name, symbol, ret, args, True)
+                    method = _CMethod(lib, name, symbol, ret, args, True, unref)
                     setattr(ptr, name, method)
             else:
-                static_method = _CMethod(lib, name, symbol, ret, args, False)
+                static_method = _CMethod(lib, name, symbol, ret, args, False, unref)
                 setattr(base, name, static_method)
 
     _wraps = []

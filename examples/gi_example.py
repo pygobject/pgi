@@ -9,6 +9,7 @@ from ctypes import byref, cast
 import sys
 sys.path.insert(0, '..')
 
+from pgi.ctypesutil import gicast
 from pgi.gir import GIRepository, GIRepositoryLoadFlags, GIFunctionInfoPtr
 from pgi.gir import GIArgument
 from pgi.glib import GErrorPtr
@@ -27,7 +28,7 @@ base_info = repo.find_by_name("GLib", "warn_message")
 if not base_info:
     raise Exception
 
-function_info = cast(base_info, GIFunctionInfoPtr)
+function_info = gicast(base_info, GIFunctionInfoPtr)
 
 in_args_type = GIArgument * 5
 in_args = in_args_type(GIArgument(v_string="GITYPES"),
@@ -42,5 +43,3 @@ error = GErrorPtr()
 function_info.invoke(in_args, 5, None, 0, byref(retval), byref(error))
 if error:
     raise Exception(error.contents.message)
-
-base_info.unref()

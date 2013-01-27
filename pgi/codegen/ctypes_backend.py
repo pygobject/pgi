@@ -56,7 +56,6 @@ def typeinfo_to_ctypes(info, return_value=False):
         if tag == GITypeTag.INTERFACE:
             iface = info.get_interface()
             iface_type = iface.type.value
-            iface.unref()
             if iface_type == GIInfoType.ENUM:
                 return guint32
             elif iface_type == GIInfoType.OBJECT:

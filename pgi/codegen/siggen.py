@@ -38,7 +38,6 @@ class InterfaceArgument(SignalArgument):
         iface_type = iface.type.value
         iface_namespace = iface.namespace
         iface_name = iface.name
-        iface.unref()
 
         if iface_type == GIInfoType.OBJECT:
             return backend.unpack_object(self.name)
@@ -125,11 +124,6 @@ def generate_signal_callback(info, callback):
                                             arg_types, callback)
     except NotImplementedError:
         pass
-
-    for arg in args:
-        arg.unref()
-    for type_ in arg_types:
-        type_.unref()
 
     if not cb_func:
         raise NotImplementedError

@@ -129,12 +129,6 @@ def generate_function(info, method=False, throws=False):
         else:
             break
 
-    return_type.unref()
-    for info in arg_infos:
-        info.unref()
-    for info in arg_types:
-        info.unref()
-
     if func:
         return func
 

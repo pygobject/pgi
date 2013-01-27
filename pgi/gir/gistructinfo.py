@@ -33,14 +33,8 @@ class GIStructInfoPtr(GIRegisteredTypeInfoPtr):
         values["alignment"] = repr(self.alignment)
         values["is_gtype_struct"] = repr(self.is_gtype_struct)
         values["is_foreign"] = repr(self.is_foreign)
-        methods = self.get_methods()
-        values["methods"] = repr(methods)
-        for method in methods:
-            method.unref()
-        fields = self.get_fields()
-        values["fields"] = repr(fields)
-        for field in fields:
-            field.unref()
+        values["methods"] = repr(self.get_methods())
+        values["fields"] = repr(self.get_fields())
         return values
 
     def get_fields(self):
@@ -51,10 +45,10 @@ class GIStructInfoPtr(GIRegisteredTypeInfoPtr):
 
 _methods = [
     ("get_n_fields", gint, [GIStructInfoPtr]),
-    ("get_field", GIFieldInfoPtr, [GIStructInfoPtr, gint]),
+    ("get_field", GIFieldInfoPtr, [GIStructInfoPtr, gint], True),
     ("get_n_methods", gint, [GIStructInfoPtr]),
-    ("get_method", GIFunctionInfoPtr, [GIStructInfoPtr, gint]),
-    ("find_method", GIFunctionInfoPtr, [GIStructInfoPtr, gchar_p]),
+    ("get_method", GIFunctionInfoPtr, [GIStructInfoPtr, gint], True),
+    ("find_method", GIFunctionInfoPtr, [GIStructInfoPtr, gchar_p], True),
     ("get_size", gsize, [GIStructInfoPtr]),
     ("get_alignment", gsize, [GIStructInfoPtr]),
     ("is_gtype_struct", gboolean, [GIStructInfoPtr]),
