@@ -12,6 +12,7 @@ import unittest
 import os
 import sys
 
+from tests import is_gi
 from pgi.gir import *
 search_path = os.path.dirname(__file__)
 GIRepository.prepend_search_path(search_path)
@@ -21,6 +22,7 @@ try:
 except ImportError:
     GIMarshallingTests = None
 
+import gi
 from gi.repository import GObject, GLib
 
 from compathelper import _bytes, _unicode
@@ -776,3 +778,18 @@ class TestUtf8(unittest.TestCase):
 
     def test_utf8_full_inout(self):
         self.assertEqual("", GIMarshallingTests.utf8_full_inout(CONSTANT_UTF8))
+
+
+class TestProjectVersion(unittest.TestCase):
+    def test_version_str(self):
+        self.assertGreaterEqual(gi.__version__, "0.0.2")
+
+    def test_version_info(self):
+        self.assertEqual(len(gi.version_info), 3)
+        self.assertGreaterEqual(gi.version_info, (0, 0, 2))
+
+    def test_check_version(self):
+        self.assertRaises(ValueError, gi.check_version, (99, 0, 0))
+        self.assertRaises(ValueError, gi.check_version, "99.0.0")
+        gi.check_version((0, 0, 2))
+        gi.check_version("0.0.2")

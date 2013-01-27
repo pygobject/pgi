@@ -9,10 +9,20 @@ from pgi import const
 from pgi.importer import require_version, get_required_version
 from pgi.codegen import set_backend
 
-version = const.VERSION
 require_version = require_version
 get_required_version = get_required_version
 set_backend = set_backend
+
+version_info = const.VERSION
+__version__ = ".".join(map(str, version_info))
+
+
+def check_version(version):
+    if isinstance(version, basestring):
+        version = tuple(map(int, version.split(".")))
+
+    if version > version_info:
+        raise ValueError
 
 
 def install_as_gi():

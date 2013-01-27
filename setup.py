@@ -148,7 +148,7 @@ class BenchmarkCommand(Command):
 
 
 setup(name='pgi',
-      version=".".join(map(str, pgi.version)),
+      version=pgi.__version__,
       description='Pure Python GObject Introspection Bindings',
       author='Christoph Reiter',
       author_email='reiter.christoph@gmail.com',
