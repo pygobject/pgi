@@ -79,15 +79,14 @@ class BasicTypes(object):
 
     def dup_string(self, name):
         block, var = self.parse("""
-$ptr_cpy = glib.g_strdup($ptr)
-$ptr_cpy = ctypes.cast($ptr_cpy, ctypes.c_char_p)
+$ptr_cpy = ctypes.c_char_p(glib.g_strdup($ptr))
 """, ptr=name)
 
         block.add_dependency("glib", glib)
         block.add_dependency("ctypes", ctypes)
         return block, var["ptr_cpy"]
 
-    def pack_string(self, name):
+    def pack_utf8(self, name):
         block, var = self.parse("""
 # https://bugs.pypy.org/issue466
 if isinstance($var, unicode):
@@ -100,7 +99,7 @@ $var = ctypes.c_char_p($var)
         block.add_dependency("ctypes", ctypes)
         return block, name
 
-    def pack_string_null(self, name):
+    def pack_utf8_null(self, name):
         block, var = self.parse("""
 if $var is not None:
     # https://bugs.pypy.org/issue466
@@ -122,23 +121,13 @@ if $ptr is None:
 
         return block, name
 
-    def unpack_string(self, name):
+    def unpack_utf8_return(self, name):
         block, var = self.parse("""
-$value = ctypes.cast($value, ctypes.c_char_p).value
+$str_value = ctypes.c_char_p($value).value
 """, value=name)
 
         block.add_dependency("ctypes", ctypes)
-        return block, name
-
-    def unpack_string_and_free(self, name):
-        block, var = self.parse("""
-$str_value = ctypes.cast($value, ctypes.c_char_p).value
-free($value)
-""", value=name)
-
-        block.add_dependency("ctypes", ctypes)
-        block.add_dependency("free", free)
-        return block, var["str_value"]
+        return block, var["str_value"], name
 
     def pack_bool(self, name):
         block, var = self.parse("""
@@ -197,12 +186,9 @@ if isinstance($float, basestring):
     raise TypeError
 $float = float($float)
 $c_float = ctypes.c_float($float)
-if $c_float.value != $float:
-    try:
-        # easy check for nan/inf
-        $c_float.value.as_integer_ratio()
-    except:
-        raise ValueError("$float(%f) out of range" % $float)
+$c_value = $c_float.value
+if $c_value != $float and $c_value in (float('inf'), float('-inf'), float('nan')):
+    raise ValueError("$float(%f) out of range" % $float)
 """, float=name)
 
         return block, var["c_float"]
@@ -214,12 +200,9 @@ if isinstance($double, basestring):
     raise TypeError
 $double = float($double)
 $c_double = ctypes.c_double($double)
-if $c_double.value != $double:
-    try:
-        # easy check for nan/inf
-        $c_double.value.as_integer_ratio()
-    except:
-        raise ValueError("$double(%f) out of range" % $double)
+$c_value = $c_double.value
+if $c_value != $double and $c_value in (float('inf'), float('-inf'), float('nan')):
+    raise ValueError("$double(%f) out of range" % $double)
 """, double=name)
 
         return block, var["c_double"]
@@ -499,7 +482,7 @@ if $obj:
         block, var = self.parse("""
 if not isinstance($obj, $gobject):
     raise TypeError("%r not a GObject.Object" % $obj)
-$obj = ctypes.cast($obj._obj, ctypes.c_void_p)
+$obj = ctypes.c_void_p($obj._obj)
 """, obj=obj_name, gobject=gobj_class)
 
         block.add_dependency("ctypes", ctypes)
@@ -513,7 +496,7 @@ $obj = ctypes.cast($obj._obj, ctypes.c_void_p)
 if $obj is not None:
     if not isinstance($obj, $gobject):
         raise TypeError("%r not a GObject.Object or None" % $obj)
-    $obj = ctypes.cast($obj._obj, ctypes.c_void_p)
+    $obj = ctypes.c_void_p($obj._obj)
 """, obj=obj_name, gobject=gobj_class)
 
         block.add_dependency("ctypes", ctypes)
@@ -568,7 +551,7 @@ else:
         block, var = self.parse("""
 if not isinstance($obj, ($base_struct_class, $base_obj_class)):
     raise TypeError("%r is not a structure object" % $obj)
-$obj = ctypes.cast($obj._obj, ctypes.c_void_p)
+$obj = ctypes.c_void_p($obj._obj)
 """, obj=name, base_struct_class=BaseStructure, base_obj_class=base_obj)
 
         block.add_dependency("ctypes", ctypes)
@@ -759,6 +742,14 @@ $value = ctypes.cast($value, ctypes.POINTER($type))
 
         block.add_dependency("ctypes", ctypes)
         return block, name
+
+    def free_pointer(self, name):
+        block, var = self.parse("""
+glib.free($ptr)
+""", ptr=name)
+
+        block.add_dependency("glib", glib)
+        return block
 
     def deref_pointer(self, name):
         block, var = self.parse("""

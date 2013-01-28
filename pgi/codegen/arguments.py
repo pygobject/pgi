@@ -332,7 +332,7 @@ class Utf8Argument(GIArgument):
 
     def pre_call(self):
         if self.is_direction_inout():
-            block, data = self.backend.pack_string(self.name)
+            block, data = self.backend.pack_utf8(self.name)
             if self.transfer_everything():
                 block3, data = self.backend.dup_string(data)
                 block3.write_into(block)
@@ -343,9 +343,9 @@ class Utf8Argument(GIArgument):
             return block
         elif self.is_direction_in():
             if self.may_be_null():
-                block, var = self.backend.pack_string_null(self.name)
+                block, var = self.backend.pack_utf8_null(self.name)
             else:
-                block, var = self.backend.pack_string(self.name)
+                block, var = self.backend.pack_utf8(self.name)
             self.call_var = var
             return block
         elif self.is_direction_out():
@@ -358,49 +358,10 @@ class Utf8Argument(GIArgument):
 
     def post_call(self):
         if self.is_direction_out():
+            block, var = self.backend.unpack_basic(self._data)
             if self.transfer_everything():
-                block, var = self.backend.unpack_string_and_free(self._data)
-            else:
-                block, var = self.backend.unpack_string(self._data)
-            self.out_var = var
-            return block
-
-
-class FilenameArgument(GIArgument):
-    TAG = GITypeTag.FILENAME
-
-    def pre_call(self):
-        if self.is_direction_inout():
-            block, data = self.backend.pack_string(self.name)
-            if self.transfer_everything():
-                block3, data = self.backend.dup_string(data)
-                block3.write_into(block)
-            block2, ref = self.backend.get_reference(data)
-            block2.write_into(block)
-            self.call_var = ref
-            self._data = data
-            return block
-        elif self.is_direction_in():
-            if self.may_be_null():
-                block, var = self.backend.pack_string_null(self.name)
-            else:
-                block, var = self.backend.pack_string(self.name)
-            self.call_var = var
-            return block
-        elif self.is_direction_out():
-            block, data = self.backend.setup_string()
-            block2, ref = self.backend.get_reference(data)
-            block2.write_into(block)
-            self.call_var = ref
-            self._data = data
-            return block
-
-    def post_call(self):
-        if self.is_direction_out():
-            if self.transfer_everything():
-                block, var = self.backend.unpack_string_and_free(self._data)
-            else:
-                block, var = self.backend.unpack_string(self._data)
+                block2 = self.backend.free_pointer(self._data)
+                block2.write_into(block)
             self.out_var = var
             return block
 

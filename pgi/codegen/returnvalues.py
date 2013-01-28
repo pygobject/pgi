@@ -115,17 +115,18 @@ class Utf8ReturnValue(ReturnValue):
     TAG = GITypeTag.UTF8
 
     def process(self, name):
+        block, var, ref = self.backend.unpack_utf8_return(name)
         if self.transfer_everything():
-            return self.backend.unpack_string_and_free(name)
-        else:
-            return self.backend.unpack_string(name)
+            block2 = self.backend.free_pointer(ref)
+            block2.write_into(block)
+        return block, var
 
 
 class FilenameReturnValue(Utf8ReturnValue):
     TAG = GITypeTag.FILENAME
 
     def process(self, name):
-        return self.backend.unpack_string(name)
+        return self.backend.unpack_utf8_return(name)[:2]
 
 
 class InterfaceReturnValue(ReturnValue):

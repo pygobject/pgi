@@ -121,7 +121,7 @@ $boolean = bool($var)
 
         return block, var["boolean"]
 
-    def pack_string(self, name):
+    def pack_utf8(self, name):
         block, var = self.parse("""
 # pack string, no None
 if isinstance($var, unicode):
@@ -132,7 +132,7 @@ elif not isinstance($var, str):
 
         return block, name
 
-    def pack_string_null(self, name):
+    def pack_utf8_null(self, name):
         block, var = self.parse("""
 # pack string, allow None
 if $var is not None:
