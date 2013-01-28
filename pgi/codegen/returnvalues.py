@@ -145,7 +145,7 @@ class InterfaceReturnValue(ReturnValue):
         elif iface_type == GIInfoType.OBJECT:
             block, out = backend.unpack_object(name)
             if self.transfer_nothing():
-                block2, out = backend.ref_object(out)
+                block2 = backend.ref_object_null(out)
                 block2.write_into(block)
             return block, out
         elif iface_type == GIInfoType.STRUCT:

@@ -813,8 +813,7 @@ class TestGObject(unittest.TestCase):
 
         self.assertFalse(object_ is new_object)
 
-        # FIXME?
-        #self.assertEqual(object_.__grefcount__, 2)
+        self.assertEqual(object_.__grefcount__, 2)
         self.assertEqual(new_object.__grefcount__, 1)
 
 

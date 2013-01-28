@@ -467,13 +467,13 @@ $gtype = GType($pgtype._type.value)
 
 class InterfaceTypes(object):
 
-    def ref_object(self, name):
+    def ref_object_null(self, name):
         block, var = self.parse("""
 # take ownership
 if $obj:
     $obj._ref()
 """, obj=name)
-        return block, name
+        return block
 
     def pack_object(self, obj_name):
         from pgi.util import import_attribute
@@ -482,11 +482,11 @@ if $obj:
         block, var = self.parse("""
 if not isinstance($obj, $gobject):
     raise TypeError("%r not a GObject.Object" % $obj)
-$obj = ctypes.c_void_p($obj._obj)
+$ptr = ctypes.c_void_p($obj._obj)
 """, obj=obj_name, gobject=gobj_class)
 
         block.add_dependency("ctypes", ctypes)
-        return block, var["obj"]
+        return block, var["ptr"]
 
     def pack_object_null(self, obj_name):
         from pgi.util import import_attribute
@@ -496,11 +496,13 @@ $obj = ctypes.c_void_p($obj._obj)
 if $obj is not None:
     if not isinstance($obj, $gobject):
         raise TypeError("%r not a GObject.Object or None" % $obj)
-    $obj = ctypes.c_void_p($obj._obj)
+    $ptr = ctypes.c_void_p($obj._obj)
+else:
+    $ptr = None
 """, obj=obj_name, gobject=gobj_class)
 
         block.add_dependency("ctypes", ctypes)
-        return block, var["obj"]
+        return block, var["ptr"]
 
     def unpack_object(self, name):
         def get_class_func(pointer):

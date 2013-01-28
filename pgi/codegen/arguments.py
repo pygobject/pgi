@@ -163,22 +163,24 @@ class InterfaceArgument(GIArgument):
     TAG = GITypeTag.INTERFACE
 
     def _pre_object(self):
-        if self.is_direction_inout():
+        if self.is_direction_in():
             if self.may_be_null():
                 block, self._data = self.backend.pack_object_null(self.name)
             else:
                 block, self._data = self.backend.pack_object(self.name)
-            block2, self.call_var = self.backend.get_reference(self._data)
-            block2.write_into(block)
-            return block
-        elif self.is_direction_in():
-            if self.may_be_null():
-                block, var = self.backend.pack_object_null(self.name)
+
+            if self.transfer_everything():
+                block2 = self.backend.ref_object_null(self.name)
+                block2.write_into(block)
+
+            if self.is_direction_out():
+                block2, self.call_var = self.backend.get_reference(self._data)
+                block2.write_into(block)
             else:
-                block, var = self.backend.pack_object(self.name)
-            self.call_var = var
+                self.call_var = self._data
+
             return block
-        elif self.is_direction_out():
+        else:
             block, self._data = self.backend.setup_pointer()
             block2, self.call_var = self.backend.get_reference(self._data)
             block2.write_into(block)
@@ -190,7 +192,7 @@ class InterfaceArgument(GIArgument):
             block2, out = self.backend.unpack_object(out)
             block2.write_into(block)
             if self.transfer_nothing():
-                block2, out = self.backend.ref_object(out)
+                block2 = self.backend.ref_object_null(out)
                 block2.write_into(block)
             self.out_var = out
             return block
