@@ -156,6 +156,8 @@ $value = $ctypes_value.value
         block.add_dependency("ctypes", ctypes)
         return block, var["value"]
 
+    unpack_utf8 = unpack_basic
+
     def pack_uint8(self, name):
         block, var = self.parse("""
 if isinstance($uint, str):

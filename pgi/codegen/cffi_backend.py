@@ -87,7 +87,7 @@ def typeinfo_to_cffi(info):
 
 class BasicTypes(object):
 
-    def unpack_string(self, name):
+    def unpack_utf8(self, name):
         # most annotations don't specify if the return value for gchar*
         # can be NULL... so check for all strings
         block, var = self.parse("""

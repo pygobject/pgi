@@ -8,6 +8,7 @@
 import unittest
 import StringIO
 
+from pgi.codegen import ctypes_backend, cffi_backend
 from pgi.util import escape_name, unescape_name, escape_builtin
 from pgi.codegen.utils import CodeBlock, parse_code
 from pgi.gtype import PGType
@@ -60,3 +61,10 @@ if 2:
 
     def test_gtype(self):
         self.assertEqual(PGType(0), PGType(GType(0)))
+
+    def test_backends(self):
+        # to keep things simple the cffi backend should be a subset
+        # of the ctypes one. So check all attributes
+        cffi = [a for a in dir(cffi_backend.CFFIBackend) if a[:1] != "_"]
+        ct = [a for a in dir(ctypes_backend.CTypesBackend) if a[:1] != "_"]
+        self.assertFalse(set(cffi) - set(ct))

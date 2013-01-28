@@ -360,7 +360,7 @@ class Utf8Argument(GIArgument):
 
     def post_call(self):
         if self.is_direction_out():
-            block, var = self.backend.unpack_basic(self._data)
+            block, var = self.backend.unpack_utf8(self._data)
             if self.transfer_everything():
                 block2 = self.backend.free_pointer(self._data)
                 block2.write_into(block)
