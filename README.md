@@ -1,15 +1,15 @@
 PGI - Pure Python GObject Introspection Bindings
 ================================================
 
- GObject Introspection bindings written in pure python using ctypes [1]
- and cffi [2] (optional).
+ GObject Introspection bindings written in pure python using [ctypes] [1]
+ and [cffi] [2] (optional).
 
  See the 'examples' directory for working examples.
 
  License: LGPL 2.1+
 
-[1]: http://docs.python.org/2/library/ctypes.html
-[2]: http://cffi.readthedocs.org/en/latest/
+[1]: http://docs.python.org/2/library/ctypes.html   "ctypes"
+[2]: http://cffi.readthedocs.org/en/latest/         "cffi"
 
 Goals
 -----
