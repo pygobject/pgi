@@ -15,14 +15,14 @@ from pgi.codegen.returnvalues import get_return_class
 def _generate_function(backend, info, arg_infos, arg_types,
                        return_type, method, throws):
 
-    cls = get_return_class(return_type)
-    return_value = cls(info, return_type, backend)
-
     args = []
     for arg_info, arg_type in zip(arg_infos, arg_types):
         cls = get_argument_class(arg_type)
         name = escape_name(escape_builtin(arg_info.name))
         args.append(cls(name, args, backend, arg_info, arg_type))
+
+    cls = get_return_class(return_type)
+    return_value = cls(info, return_type, args, backend)
 
     if throws:
         args.append(ErrorArgument(args, backend))
@@ -30,6 +30,8 @@ def _generate_function(backend, info, arg_infos, arg_types,
     # setup
     for arg in args:
         arg.setup()
+
+    return_value.setup()
 
     body = CodeBlock()
 
@@ -40,6 +42,10 @@ def _generate_function(backend, info, arg_infos, arg_types,
         block = arg.pre_call()
         if block:
             block.write_into(body)
+
+    block = return_value.pre_call()
+    if block:
+        block.write_into(body)
 
     # generate call
     lib = backend.get_library_object(info.namespace)
@@ -68,7 +74,7 @@ def _generate_function(backend, info, arg_infos, arg_types,
             block.write_into(body)
 
     # process return value
-    block, return_var = return_value.process(ret)
+    block, return_var = return_value.post_call(ret)
     if block:
         block.write_into(body)
     if return_var:

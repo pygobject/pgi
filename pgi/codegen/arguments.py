@@ -97,12 +97,13 @@ class ArrayArgument(GIArgument):
     TAG = GITypeTag.ARRAY
 
     def setup(self):
-        type_ = self.info.get_type()
+        array_length = self.type.array_length
 
         # mark other arg as aux so we handle it alone
-        aux = self.args[type_.array_length]
-        aux.is_aux = True
-        self._aux = aux
+        if array_length != -1:
+            aux = self.args[array_length]
+            aux.is_aux = True
+            self._aux = aux
 
         self._array_type = self.type.array_type.value
         self._param_type = self.type.get_param_type(0).tag.value

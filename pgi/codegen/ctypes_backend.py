@@ -590,9 +590,28 @@ $flags = $flags_class($value)
 class ArrayTypes(object):
     # FIXME: these all ignore item types
 
+    def unpack_array_c_fixed(self, array, length):
+        block, var = self.parse("""
+$out = []
+for $i in xrange($length):
+    $value = $array[$i]
+    $out.append($value)
+""", array=array, length=length)
+
+        return block, var["out"]
+
+    def unpack_array_c_length(self, array, length):
+        block, var = self.parse("""
+$out = []
+for $i in xrange($length.value):
+    $value = $array[$i]
+    $out.append($value)
+""", array=array, length=length)
+
+        return block, var["out"]
+
     def unpack_array_zeroterm_c(self, in_name):
         block, var = self.parse("""
-# extract a zeroterm ctypes array '$array' into the list '$list'
 $list = []
 $i = 0
 $current = $array and $array[$i]
@@ -602,7 +621,7 @@ while $current:
     $current = $array[$i]
 """, array=in_name)
 
-        return block, (var["list"],)
+        return block, var["list"]
 
     def pack_array_ptr_fixed_c_in_out(self, name):
         block, var = self.parse("""

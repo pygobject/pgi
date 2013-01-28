@@ -5,20 +5,27 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from pgi.gir import GITypeTag, GIInfoType, GITransfer
+from pgi.gir import GITypeTag, GIInfoType, GITransfer, GIArrayType
 from pgi.util import import_attribute
 
 
 class ReturnValue(object):
     TAG = None
 
-    def __init__(self, info, type_, backend):
+    def __init__(self, info, type_, args, backend):
         super(ReturnValue, self).__init__()
         self.info = info
         self.type = type_
         self.backend = backend
+        self.args = args
 
-    def process(self, name):
+    def setup(self):
+        pass
+
+    def pre_call(self):
+        pass
+
+    def post_call(self, name):
         return None, None
 
     def is_zero_terminated(self):
@@ -40,14 +47,14 @@ class ReturnValue(object):
 class BooleanReturnValue(ReturnValue):
     TAG = GITypeTag.BOOLEAN
 
-    def process(self, name):
+    def post_call(self, name):
         return self.backend.unpack_bool(name)
 
 
 class VoidReturnValue(ReturnValue):
     TAG = GITypeTag.VOID
 
-    def process(self, name):
+    def post_call(self, name):
         if self.is_pointer():
             return None, name
         else:
@@ -57,17 +64,61 @@ class VoidReturnValue(ReturnValue):
 class ArrayReturnValue(ReturnValue):
     TAG = GITypeTag.ARRAY
 
-    def process(self, name):
-        backend = self.backend
-        if self.is_zero_terminated():
-            block, var = backend.unpack_array_zeroterm_c(name)
-            return block, var
+    def setup(self):
+        self.array_length = self.type.array_length
 
-        raise NotImplementedError
+        # mark other arg as aux so we handle it alone
+        if self.array_length != -1:
+            aux = self.args[self.array_length]
+            aux.is_aux = True
+            self._aux = aux
+
+    def pre_call(self):
+        if self.array_length != -1:
+            block, var = self.backend.setup_int32()
+            self._length_var = var
+
+            block2, ref = self.backend.get_reference(var)
+            block2.write_into(block)
+            self._aux.call_var = ref
+            return block
+
+    def post_call(self, name):
+        backend = self.backend
+        array_type = self.type.array_type.value
+        param_type = self.type.get_param_type(0)
+
+        if array_type == GIArrayType.C:
+            param_cls = get_return_class(param_type)
+            param = param_cls(self.info, param_type, [], self.backend)
+
+            if self.is_zero_terminated():
+                block, var = backend.unpack_array_zeroterm_c(name)
+                return block, var
+            else:
+                # cast the gpointer to a pointer to the array type
+                block, var = self.backend.cast_pointer(name, param_type)
+
+                if self.type.array_length == -1:
+                    # array size const
+                    array_size = str(self.type.array_fixed_size)
+                    # unpack array
+                    block2, var = backend.unpack_array_c_fixed(var, array_size)
+                    block2.write_into(block)
+                else:
+                    # filled by the aux
+                    array_size = self._length_var
+                    # unpack array
+                    block2, var = backend.unpack_array_c_length(var, array_size)
+                    block2.write_into(block)
+
+                return block, var
+
+        raise NotImplementedError("array return")
 
 
 class BasicReturnValue(ReturnValue):
-    def process(self, name):
+    def post_call(self, name):
         return None, name
 
 
@@ -114,7 +165,7 @@ class FloatReturnValue(BasicReturnValue):
 class Utf8ReturnValue(ReturnValue):
     TAG = GITypeTag.UTF8
 
-    def process(self, name):
+    def post_call(self, name):
         block, var, ref = self.backend.unpack_utf8_return(name)
         if self.transfer_everything():
             block2 = self.backend.free_pointer(ref)
@@ -125,14 +176,14 @@ class Utf8ReturnValue(ReturnValue):
 class FilenameReturnValue(Utf8ReturnValue):
     TAG = GITypeTag.FILENAME
 
-    def process(self, name):
+    def post_call(self, name):
         return self.backend.unpack_utf8_return(name)[:2]
 
 
 class InterfaceReturnValue(ReturnValue):
     TAG = GITypeTag.INTERFACE
 
-    def process(self, name):
+    def post_call(self, name):
         backend = self.backend
         iface = self.type.get_interface()
         iface_type = iface.type.value
@@ -173,7 +224,7 @@ class InterfaceReturnValue(ReturnValue):
 class GTypeReturnValue(ReturnValue):
     TAG = GITypeTag.GTYPE
 
-    def process(self, name):
+    def post_call(self, name):
         return self.backend.unpack_gtype(name)
 
 

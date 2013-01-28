@@ -850,6 +850,18 @@ class TestUtf8(unittest.TestCase):
         self.assertEqual("", GIMarshallingTests.utf8_full_inout(CONSTANT_UTF8))
 
 
+class TestArray(unittest.TestCase):
+
+    def test_array_fixed_int_return(self):
+        self.assertEqual([-1, 0, 1, 2], GIMarshallingTests.array_fixed_int_return())
+
+    def test_array_fixed_short_return(self):
+        self.assertEqual([-1, 0, 1, 2], GIMarshallingTests.array_fixed_short_return())
+
+    def test_array_return(self):
+        self.assertEqual([-1, 0, 1, 2], GIMarshallingTests.array_return())
+
+
 class TestProjectVersion(unittest.TestCase):
     def test_version_str(self):
         self.assertGreaterEqual(gi.__version__, "0.0.2")
