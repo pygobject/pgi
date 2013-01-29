@@ -131,13 +131,21 @@ class ArrayArgument(GIArgument):
             raise NotImplementedError
 
         elif self.is_direction_in():
-            if not self.is_zero_terminated():
+            if self.is_zero_terminated():
+                block, data_ref, length = \
+                    backend.pack_array_c_basic_fixed_zero(self.name, self._param_type)
+                self.call_var = data_ref
+                if self.type.array_length != -1:
+                    self._aux.call_var = length
+                return block
+            else:
                 block, data_ref, length = \
                     backend.pack_array_c_basic_fixed(self.name, self._param_type)
                 self.call_var = data_ref
                 if self.type.array_length != -1:
                     self._aux.call_var = length
                 return block
+
             raise NotImplementedError
 
     def _post_c(self):

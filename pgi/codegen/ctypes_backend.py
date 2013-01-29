@@ -582,6 +582,21 @@ $flags = $flags_class($value)
 
 class ArrayTypes(object):
 
+    def pack_array_c_basic_fixed_zero(self, name, type_):
+        block, var = self.parse("""
+# pack a basic type array
+$length = len($name)
+$array = ($ctypes_type * ($length + 1))()
+for $i, $item in enumerate($name):
+    $array[$i] = $item
+$array[-1] = $ctypes_type() # inited to zero
+$array_ref = ctypes.byref($array)
+$length = ctypes.c_int($length)
+""", name=name, ctypes_type=typeinfo_to_ctypes(type_))
+
+        block.add_dependency("ctypes", ctypes)
+        return block, var["array_ref"], var["length"]
+
     def pack_array_c_basic_fixed(self, name, type_):
         block, var = self.parse("""
 # pack a basic type array

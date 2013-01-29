@@ -878,11 +878,20 @@ class TestArray(unittest.TestCase):
         self.assertRaises(TypeError, GIMarshallingTests.array_fixed_int_in, 42)
         self.assertRaises(TypeError, GIMarshallingTests.array_fixed_int_in, None)
 
+    def test_array_fixed_short_in(self):
+        GIMarshallingTests.array_fixed_short_in(Sequence([-1, 0, 1, 2]))
+
     def test_array_return(self):
         self.assertEqual([-1, 0, 1, 2], GIMarshallingTests.array_return())
 
     def test_array_return_etc(self):
         self.assertEqual(([5, 0, 1, 9], 14), GIMarshallingTests.array_return_etc(5, 9))
+
+    def test_array_in_len_before(self):
+        GIMarshallingTests.array_in_len_before(Sequence([-1, 0, 1, 2]))
+
+    def test_array_in_len_zero_terminated(self):
+        GIMarshallingTests.array_in_len_zero_terminated(Sequence([-1, 0, 1, 2]))
 
     def test_array_zero_terminated_return_null(self):
         self.assertEqual([], GIMarshallingTests.array_zero_terminated_return_null())
