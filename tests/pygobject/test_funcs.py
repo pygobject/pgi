@@ -171,6 +171,7 @@ class FuncsTest(unittest.TestCase):
         v.init(GObject.TYPE_CHAR)
         v.set_char("a")
         self.assertEqual(v.get_char(), 97)
+        self.assertRaises(TypeError, v.set_char, u"a")
         self.assertRaises(TypeError, v.set_char, "ab")
         self.assertRaises(ValueError, v.set_char, 9999)
         v.set_char(103.5)

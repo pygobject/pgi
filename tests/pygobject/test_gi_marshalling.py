@@ -861,6 +861,9 @@ class TestArray(unittest.TestCase):
     def test_array_return(self):
         self.assertEqual([-1, 0, 1, 2], GIMarshallingTests.array_return())
 
+    def test_array_return_etc(self):
+        self.assertEqual(([5, 0, 1, 9], 14), GIMarshallingTests.array_return_etc(5, 9))
+
 
 class TestProjectVersion(unittest.TestCase):
     def test_version_str(self):
