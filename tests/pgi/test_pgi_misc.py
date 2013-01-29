@@ -13,6 +13,7 @@ from pgi.util import escape_name, unescape_name, escape_builtin
 from pgi.codegen.utils import CodeBlock, parse_code
 from pgi.gtype import PGType
 from pgi.gobject import GType
+from pgi.repository import Gtk
 
 
 class PGIMisc(unittest.TestCase):
@@ -68,3 +69,10 @@ if 2:
         cffi = [a for a in dir(cffi_backend.CFFIBackend) if a[:1] != "_"]
         ct = [a for a in dir(ctypes_backend.CTypesBackend) if a[:1] != "_"]
         self.assertFalse(set(cffi) - set(ct))
+
+    def test_docstring(self):
+        self.assertTrue("get_label" in Gtk.Button.get_label.__doc__)
+        self.assertTrue("-> str" in Gtk.Button.get_label.__doc__)
+        self.assertTrue("set_label" in Gtk.Button.set_label.__doc__)
+        self.assertTrue("-> None" in Gtk.Button.set_label.__doc__)
+        self.assertTrue("label: str" in Gtk.Button.set_label.__doc__)
