@@ -13,8 +13,8 @@ from gi.repository import Gtk, GLib, GObject
 
 class FuncsTest(unittest.TestCase):
     def test_basic(self):
-        self.assertEqual(Gtk.rc_get_theme_dir(), '/usr/share/themes')
-        self.assertTrue(Gtk.rc_get_module_dir().startswith("/"))
+        self.assertTrue("themes" in Gtk.rc_get_theme_dir())
+        self.assertTrue(Gtk.rc_get_module_dir())
         self.assertEqual(Gtk.rc_get_default_files(), [])
         self.assertEqual(Gtk.get_current_event_time(), 0)
 
@@ -236,13 +236,13 @@ class FuncsTest(unittest.TestCase):
     def test_value_long(self):
         v = GObject.Value()
         v.init(GObject.TYPE_LONG)
-        v.set_long(2**63 - 1)
-        v.set_long(-2**63)
+        v.set_long(GObject.G_MAXLONG)
+        v.set_long(GObject.G_MINLONG)
         v.set_long(42.50)
         self.assertEqual(v.get_long(), 42)
         self.assertRaises(TypeError, v.set_long, "a")
-        self.assertRaises(ValueError, v.set_long, 2**63)
-        self.assertRaises(ValueError, v.set_long, -(2**63+1))
+        self.assertRaises(ValueError, v.set_long, GObject.G_MAXLONG + 1)
+        self.assertRaises(ValueError, v.set_long, GObject.G_MINLONG - 1)
 
     def test_value_object(self):
         b = Gtk.Button()

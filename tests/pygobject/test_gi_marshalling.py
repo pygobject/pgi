@@ -862,6 +862,7 @@ class TestUtf8(unittest.TestCase):
         self.assertEqual("", GIMarshallingTests.utf8_full_inout(CONSTANT_UTF8))
 
 
+@unittest.skipUnless(GIMarshallingTests, "")
 class TestArray(unittest.TestCase):
 
     def test_array_fixed_int_return(self):

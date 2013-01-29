@@ -98,6 +98,9 @@ class TestCommand(Command):
         import os
         import platform
 
+        if os.name == "nt":
+            exit(tests.test(False, "ctypes"))
+
         is_cpython = platform.python_implementation() == "CPython"
         runs = [(False, "ctypes"), (False, "cffi"), (True, None)]
 
