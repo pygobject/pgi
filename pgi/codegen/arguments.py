@@ -30,6 +30,10 @@ class Argument(object):
         self.args = arguments
         self.backend = backend
 
+    @classmethod
+    def get_class(cls, type_):
+        return cls
+
     def setup(self):
         pass
 
@@ -100,6 +104,21 @@ class ArrayArgument(GIArgument):
     TAG = GITypeTag.ARRAY
     py_type = list
 
+    @classmethod
+    def get_class(cls, type_):
+        type_ = type_.array_type.value
+
+        if type_ == GIArrayType.C:
+            return CArrayArgument
+
+        raise NotImplementedError("unsupported array type")
+
+    def is_zero_terminated(self):
+        return self.type.is_zero_terminated
+
+
+class CArrayArgument(ArrayArgument):
+
     def setup(self):
         array_length = self.type.array_length
 
@@ -112,10 +131,7 @@ class ArrayArgument(GIArgument):
         self._array_type = self.type.array_type.value
         self._param_type = self.type.get_param_type(0)
 
-    def is_zero_terminated(self):
-        return self.type.is_zero_terminated
-
-    def _pre_c(self):
+    def pre_call(self):
         backend = self.backend
 
         if self.is_direction_inout():
@@ -148,7 +164,7 @@ class ArrayArgument(GIArgument):
 
             raise NotImplementedError
 
-    def _post_c(self):
+    def post_call(self):
         b = self.backend
         if self.is_direction_out():
             if not self.is_zero_terminated() and self.is_pointer():
@@ -157,33 +173,52 @@ class ArrayArgument(GIArgument):
                 self.out_var = out
                 return block
 
-    def pre_call(self):
-        array_type = self._array_type
-
-        if array_type == GIArrayType.C:
-            return self._pre_c()
-        elif array_type == GIArrayType.ARRAY:
-            pass
-        elif array_type == GIArrayType.PTR_ARRAY:
-            pass
-        elif array_type == GIArrayType.BYTE_ARRAY:
-            pass
-
-    def post_call(self):
-        if self.is_direction_out():
-            array_type = self._array_type
-
-            if array_type == GIArrayType.C:
-                return self._post_c()
-
-            raise NotImplementedError
-
 
 class InterfaceArgument(GIArgument):
     TAG = GITypeTag.INTERFACE
     py_type = object
 
-    def _pre_object(self):
+    @classmethod
+    def get_class(cls, type_):
+        iface = type_.get_interface()
+        iface_type = iface.type.value
+
+        if iface_type == GIInfoType.OBJECT:
+            return ObjectArgument
+        elif iface_type == GIInfoType.ENUM:
+            return EnumArgument
+        elif iface_type == GIInfoType.STRUCT:
+            return StructArgument
+
+        raise NotImplementedError("Unsupported interface type")
+
+
+class EnumArgument(InterfaceArgument):
+    pass
+
+
+class StructArgument(InterfaceArgument):
+
+    def pre_call(self):
+        iface = self.type.get_interface()
+        iface_name = iface.name
+        iface_namespace = iface.namespace
+
+        if self.is_direction_in():
+            block, var = self.backend.pack_struct(self.name)
+            self.call_var = var
+            return block
+        else:
+            type_ = import_attribute(iface_namespace, iface_name)
+            block, data, ref = self.backend.setup_struct(self.name, type_)
+            self.call_var = ref
+            self.out_var = data
+            return block
+
+
+class ObjectArgument(InterfaceArgument):
+
+    def pre_call(self):
         if self.is_direction_in():
             if self.may_be_null():
                 block, self._data = self.backend.pack_object_null(self.name)
@@ -207,7 +242,7 @@ class InterfaceArgument(GIArgument):
             block2.write_into(block)
             return block
 
-    def _post_object(self):
+    def post_call(self):
         if self.is_direction_out():
             block, out = self.backend.unpack_basic(self._data)
             block2, out = self.backend.unpack_object(out)
@@ -217,40 +252,6 @@ class InterfaceArgument(GIArgument):
                 block2.write_into(block)
             self.out_var = out
             return block
-
-    def _pre_struct(self, namespace, name):
-        if self.is_direction_in():
-            block, var = self.backend.pack_struct(self.name)
-            self.call_var = var
-            return block
-        else:
-            type_ = import_attribute(namespace, name)
-            block, data, ref = self.backend.setup_struct(self.name, type_)
-            self.call_var = ref
-            self.out_var = data
-            return block
-
-    def pre_call(self):
-        iface = self.type.get_interface()
-        iface_name = iface.name
-        iface_namespace = iface.namespace
-        iface_type = iface.type.value
-
-        if iface_type == GIInfoType.OBJECT:
-            return self._pre_object()
-        elif iface_type == GIInfoType.ENUM:
-            return
-        elif iface_type == GIInfoType.STRUCT:
-            return self._pre_struct(iface_namespace, iface_name)
-
-    def post_call(self):
-        iface = self.type.get_interface()
-        iface_name = iface.name
-        iface_namespace = iface.namespace
-        iface_type = iface.type.value
-
-        if iface_type == GIInfoType.OBJECT:
-            return self._post_object()
 
 
 class BasicTypeArgument(GIArgument):
@@ -449,6 +450,8 @@ def get_argument_class(arg_type):
     global _classes
     tag_value = arg_type.tag.value
     try:
-        return _classes[tag_value]
+        cls = _classes[tag_value]
     except KeyError:
         raise NotImplementedError("%r argument not implemented" % arg_type.tag)
+    else:
+        return cls.get_class(arg_type)
