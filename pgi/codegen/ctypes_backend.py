@@ -83,7 +83,6 @@ $ptr_cpy = ctypes.c_char_p(glib.g_strdup($ptr))
 """, ptr=name)
 
         block.add_dependency("glib", glib)
-        block.add_dependency("ctypes", ctypes)
         return block, var["ptr_cpy"]
 
     def pack_utf8(self, name):
@@ -96,7 +95,6 @@ elif not isinstance($var, str):
 $var = ctypes.c_char_p($var)
 """, var=name)
 
-        block.add_dependency("ctypes", ctypes)
         return block, name
 
     def pack_utf8_null(self, name):
@@ -110,7 +108,6 @@ if $var is not None:
 $var = ctypes.c_char_p($var)
 """, var=name)
 
-        block.add_dependency("ctypes", ctypes)
         return block, name
 
     def pack_pointer(self, name):
@@ -126,7 +123,6 @@ if $ptr is None:
 $str_value = ctypes.c_char_p($value).value
 """, value=name)
 
-        block.add_dependency("ctypes", ctypes)
         return block, var["str_value"], name
 
     def pack_bool(self, name):
@@ -136,7 +132,6 @@ $var = bool($var)
 $boolean = ctypes.c_bool($var)
 """, var=name)
 
-        block.add_dependency("ctypes", ctypes)
         return block, var["boolean"]
 
     def unpack_bool(self, name):
@@ -153,7 +148,6 @@ $value = bool($value)
 $value = $ctypes_value.value
 """, ctypes_value=name)
 
-        block.add_dependency("ctypes", ctypes)
         return block, var["value"]
 
     unpack_utf8 = unpack_basic
@@ -178,7 +172,6 @@ if not 0 <= $uint < 2**8:
 $uint = ctypes.c_uint8($uint)
 """, uint=name)
 
-        block.add_dependency("ctypes", ctypes)
         return block, var["uint"]
 
     def pack_float(self, name):
@@ -223,7 +216,6 @@ if not 0 <= $value < 2**16:
 $value = ctypes.c_uint16($value)
 """, value=name)
 
-        block.add_dependency("ctypes", ctypes)
         return block, var["value"]
 
     def pack_int8(self, name):
@@ -240,7 +232,6 @@ if not -2**7 <= $value < 2**7:
 $value = ctypes.c_int8($value)
 """, value=name)
 
-        block.add_dependency("ctypes", ctypes)
         return block, var["value"]
 
     def pack_int16(self, name):
@@ -257,7 +248,6 @@ if not -2**15 <= $value < 2**15:
 $value = ctypes.c_int16($value)
 """, value=name)
 
-        block.add_dependency("ctypes", ctypes)
         return block, var["value"]
 
     def pack_int32(self, name):
@@ -274,7 +264,6 @@ if not -2**31 <= $value < 2**31:
 $value = ctypes.c_int32($value)
 """, value=name)
 
-        block.add_dependency("ctypes", ctypes)
         return block, var["value"]
 
     def pack_int64(self, name):
@@ -291,7 +280,6 @@ if not -2**63 <= $value < 2**63:
 $value = ctypes.c_int64($value)
 """, value=name)
 
-        block.add_dependency("ctypes", ctypes)
         return block, var["value"]
 
     def pack_uint32(self, name):
@@ -308,7 +296,6 @@ if not 0 <= $value < 2**32:
 $value = ctypes.c_uint32($value)
 """, value=name)
 
-        block.add_dependency("ctypes", ctypes)
         return block, var["value"]
 
     def pack_uint64(self, name):
@@ -325,7 +312,6 @@ if not 0 <= $value < 2**64:
 $value = ctypes.c_uint64($value)
 """, value=name)
 
-        block.add_dependency("ctypes", ctypes)
         return block, var["value"]
 
     def setup_int64(self):
@@ -333,7 +319,6 @@ $value = ctypes.c_uint64($value)
 # new int64
 $value = ctypes.c_int64()
 """)
-        block.add_dependency("ctypes", ctypes)
         return block, var["value"]
 
     def setup_uint64(self):
@@ -341,7 +326,6 @@ $value = ctypes.c_int64()
 # new uint64
 $value = ctypes.c_uint64()
 """)
-        block.add_dependency("ctypes", ctypes)
         return block, var["value"]
 
     def setup_uint32(self):
@@ -349,7 +333,6 @@ $value = ctypes.c_uint64()
 # new uint32
 $value = ctypes.c_uint32()
 """)
-        block.add_dependency("ctypes", ctypes)
         return block, var["value"]
 
     def setup_int32(self):
@@ -357,7 +340,6 @@ $value = ctypes.c_uint32()
 # new int32
 $value = ctypes.c_int32()
 """)
-        block.add_dependency("ctypes", ctypes)
         return block, var["value"]
 
     def setup_float(self):
@@ -365,7 +347,6 @@ $value = ctypes.c_int32()
 # new float
 $value = ctypes.c_float()
 """)
-        block.add_dependency("ctypes", ctypes)
         return block, var["value"]
 
     def setup_pointer(self):
@@ -373,7 +354,6 @@ $value = ctypes.c_float()
 # new pointer
 $value = ctypes.c_void_p()
 """)
-        block.add_dependency("ctypes", ctypes)
         return block, var["value"]
 
     def setup_bool(self):
@@ -381,8 +361,6 @@ $value = ctypes.c_void_p()
 # new bool
 $value = ctypes.c_bool()
 """)
-
-        block.add_dependency("ctypes", ctypes)
         return block, var["value"]
 
     def setup_uint8(self):
@@ -390,7 +368,6 @@ $value = ctypes.c_bool()
 # new uint8
 $value = ctypes.c_uint8()
 """)
-        block.add_dependency("ctypes", ctypes)
         return block, var["value"]
 
     def setup_int8(self):
@@ -398,7 +375,6 @@ $value = ctypes.c_uint8()
 # new int8
 $value = ctypes.c_int8()
 """)
-        block.add_dependency("ctypes", ctypes)
         return block, var["value"]
 
     def setup_int16(self):
@@ -406,7 +382,6 @@ $value = ctypes.c_int8()
 # new int16
 $value = ctypes.c_int16()
 """)
-        block.add_dependency("ctypes", ctypes)
         return block, var["value"]
 
     def setup_uint16(self):
@@ -414,7 +389,6 @@ $value = ctypes.c_int16()
 # new uint16
 $value = ctypes.c_uint16()
 """)
-        block.add_dependency("ctypes", ctypes)
         return block, var["value"]
 
     def setup_string(self):
@@ -422,7 +396,7 @@ $value = ctypes.c_uint16()
 # new string
 $value = ctypes.c_char_p()
 """)
-        block.add_dependency("ctypes", ctypes)
+
         return block, var["value"]
 
     def setup_double(self):
@@ -430,7 +404,7 @@ $value = ctypes.c_char_p()
 # new double
 $value = ctypes.c_double()
 """)
-        block.add_dependency("ctypes", ctypes)
+
         return block, var["value"]
 
     def setup_gtype(self):
@@ -480,7 +454,6 @@ if not isinstance($obj, $gobject):
 $ptr = ctypes.c_void_p($obj._obj)
 """, obj=obj_name, gobject=gobj_class)
 
-        block.add_dependency("ctypes", ctypes)
         return block, var["ptr"]
 
     def pack_object_null(self, obj_name):
@@ -496,7 +469,6 @@ else:
     $ptr = None
 """, obj=obj_name, gobject=gobj_class)
 
-        block.add_dependency("ctypes", ctypes)
         return block, var["ptr"]
 
     def unpack_object(self, name):
@@ -525,7 +497,6 @@ $obj._needs_free = False
 $ptr = ctypes.c_void_p($obj._obj)
 """, value=name, type=type_)
 
-        block.add_dependency("ctypes", ctypes)
         return block, var["obj"], var["ptr"]
 
     def unpack_struct(self, name, type_):
@@ -551,7 +522,6 @@ if not isinstance($obj, ($base_struct_class, $base_obj_class)):
 $obj = ctypes.c_void_p($obj._obj)
 """, obj=name, base_struct_class=BaseStructure, base_obj_class=base_obj)
 
-        block.add_dependency("ctypes", ctypes)
         return block, var["obj"]
 
     def unpack_enum(self, name, type_):
@@ -595,9 +565,7 @@ $array_ref = ctypes.byref($array)
 """, name=name, item_in=item_in, item_out=item_out, type_pack=type_pack,
      ctypes_type=typeinfo_to_ctypes(type_))
 
-        block.add_dependency("ctypes", ctypes)
         return block, var["array_ref"], var["c_length"]
-
 
     def pack_carray_basic_fixed(self, name, item_in, item_out, type_pack, type_):
         block, var = self.parse("""
@@ -611,7 +579,6 @@ $array_ref = ctypes.byref($array)
 """, name=name, item_in=item_in, item_out=item_out, type_pack=type_pack,
      ctypes_type=typeinfo_to_ctypes(type_))
 
-        block.add_dependency("ctypes", ctypes)
         return block, var["array_ref"], var["c_length"]
 
     def setup_array_c_basic_fixed(self, length, type_):
@@ -670,8 +637,6 @@ $array_ptr = ctypes.pointer($array)
 $array_ref = ctypes.byref($array_ptr)
 """, name=name)
 
-        block.add_dependency("ctypes", ctypes)
-
         return (block, var["array_ptr"], var["array_ref"],
                 var["length_c"], var["length_ref"])
 
@@ -684,7 +649,6 @@ $ptr = $gerror_ptr()
 $ptr_ref = ctypes.byref($ptr)
 """, gerror_ptr=GErrorPtr)
 
-        block.add_dependency("ctypes", ctypes)
         return block, var["ptr"], var["ptr_ref"]
 
     def check_gerror(self, gerror_ptr):
@@ -704,6 +668,11 @@ class CTypesBackend(CodeGenBackend, BasicTypes, InterfaceTypes, CArrayTypes,
     def __init__(self, *args, **kwargs):
         CodeGenBackend.__init__(self, *args, **kwargs)
         self._libs = {}
+
+    def parse(self, *args, **kwargs):
+        block, var = CodeGenBackend.parse(self, *args, **kwargs)
+        block.add_dependency("ctypes", ctypes)
+        return block, var
 
     def get_library_object(self, namespace):
         if namespace not in self._libs:
@@ -764,7 +733,6 @@ except ctypes.ArgumentError, $e:
     raise TypeError($e.message)
 """, name=name, args=args)
 
-        block.add_dependency("ctypes", ctypes)
         return block, var["ret"]
 
     def cast_pointer(self, name, type_):
@@ -772,7 +740,6 @@ except ctypes.ArgumentError, $e:
 $value = ctypes.cast($value, ctypes.POINTER($type))
 """, value=name, type=typeinfo_to_ctypes(type_))
 
-        block.add_dependency("ctypes", ctypes)
         return block, name
 
     def free_pointer(self, name):
@@ -802,7 +769,6 @@ $ptr[0] = $value
 $ptr = ctypes.byref($value)
 """, value=value)
 
-        block.add_dependency("ctypes", ctypes)
         return block, var["ptr"]
 
     def get_callback_object(self, func, args):
