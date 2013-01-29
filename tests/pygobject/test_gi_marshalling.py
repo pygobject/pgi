@@ -904,6 +904,9 @@ class TestPGI(unittest.TestCase):
         self.assertRaises(ValueError, GIMarshallingTests.array_in_len_before,
                           [-1, 0, 1, 2 + 2**32])
 
+        self.assertRaises(TypeError, GIMarshallingTests.array_in_len_before,
+                          [-1, 0, None, 2])
+
 
 class TestProjectVersion(unittest.TestCase):
     def test_version_str(self):

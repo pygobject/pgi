@@ -120,22 +120,46 @@ class ArrayArgument(GIArgument):
 class CArrayArgument(ArrayArgument):
 
     def setup(self):
-        array_length = self.type.array_length
-
         # mark other arg as aux so we handle it alone
-        if array_length != -1:
-            aux = self.args[array_length]
+        if self.array_length != -1:
+            aux = self.args[self.array_length]
             aux.is_aux = True
             self._aux = aux
 
-        self._array_type = self.type.array_type.value
         self._param_type = self.type.get_param_type(0)
 
+    @property
+    def array_length(self):
+        return self.type.array_length
+
+    @property
+    def array_fixed_size(self):
+        return self.type.array_fixed_size
+
     def _pack_param(self, type_):
+        # HACK: reuse argument classes of subtypes for packing
+        # ...replace with something sane
+
+        class SubInfo(object):
+            @property
+            def direction(self):
+                class X(object):
+                    value = GIDirection.IN
+                return X()
+
+            @property
+            def ownership_transfer(self):
+                class X(object):
+                    value = GITransfer.EVERYTHING
+                return X()
+
+            @property
+            def may_be_null(self):
+                return False
+
         param_cls = get_argument_class(type_)
         in_name = self.backend._var()
-        # fixme: wrap info, shift owner transfer
-        sub_arg = param_cls(in_name, [], self.backend, self.info, type_)
+        sub_arg = param_cls(in_name, [], self.backend, SubInfo(), type_)
         sub_arg.setup()
         block = sub_arg.pre_call()
         return block, in_name, sub_arg.call_var
@@ -144,40 +168,52 @@ class CArrayArgument(ArrayArgument):
         backend = self.backend
 
         if self.is_direction_inout():
+            param_block, in_var, out_var = self._pack_param(self._param_type)
+
             if not self.is_zero_terminated():
-                block, data, data_ref, length, lref = \
-                    backend.pack_array_ptr_fixed_c_in_out(self.name)
-                self.call_var = data_ref
-                self._aux.call_var = lref
-                # vars for out
+                block, data, length = backend.pack_carray_basic_fixed(
+                    self.name, in_var, out_var, param_block, self._param_type)
+
+                block2, self.call_var = backend.get_reference(data)
+                block2.write_into(block)
+
+                block2, self._aux.call_var = backend.get_reference(length)
+                block2.write_into(block)
+
                 self._data = data
                 self._length = length
+
                 return block
+
             raise NotImplementedError
 
         elif self.is_direction_in():
             param_block, in_var, out_var = self._pack_param(self._param_type)
 
             if self.is_zero_terminated():
-                block, data_ref, length = backend.pack_carray_basic_fixed_zero(
+                block, data, length = backend.pack_carray_basic_fixed_zero(
                     self.name, in_var, out_var, param_block, self._param_type)
             else:
-                block, data_ref, length = backend.pack_carray_basic_fixed(
+                block, data, length = backend.pack_carray_basic_fixed(
                     self.name, in_var, out_var, param_block, self._param_type)
 
-            self.call_var = data_ref
-            if self.type.array_length != -1:
+            self.call_var = data
+            if self.array_length != -1:
                 self._aux.call_var = length
 
             return block
+
         elif self.is_direction_out():
             if not self.is_zero_terminated():
-                if self.type.array_length == -1:
-                    length = str(self.type.array_fixed_size)
-                    block, data, ref = backend.setup_array_c_basic_fixed(length, self._param_type)
-                    self._data = data
-                    self.call_var = ref
+                if self.array_length == -1:
+                    length = str(self.array_fixed_size)
+                    block, data, ptr = backend.setup_carray_basic_fixed(length, self._param_type)
+                    self._data = ptr
+                    block2, self.call_var = backend.get_reference(ptr)
+                    block2.write_into(block)
+                    self.call_var = ptr
                     return block
+
         raise NotImplementedError
 
     def post_call(self):
@@ -185,18 +221,20 @@ class CArrayArgument(ArrayArgument):
             return
 
         if not self.is_zero_terminated():
-            if self.type.array_length == -1:
-                length = str(self.type.array_fixed_size)
-                block, out = self.backend.unpack_array_c_basic_fixed(self._data, length)
-                self.out_var = out
-                return block
+            block, data = self.backend.deref_pointer(self._data)
+
+            if self.array_length == -1:
+                length = str(self.array_fixed_size)
+                block2, out = self.backend.unpack_carray_basic_fixed(data, length)
+                block2.write_into(block)
             else:
-                if self._param_type.tag.value == GITypeTag.UTF8:
-                    block, out = self.backend.unpack_array_c_string_length(self._data, self._length)
-                else:
-                    block, out = self.backend.unpack_array_c_basic_length(self._data, self._length)
-                self.out_var = out
-                return block
+                block2, out = self.backend.unpack_carray_basic_length(data, self._length)
+                block2.write_into(block)
+
+            self.out_var = out
+            return block
+
+        raise NotImplementedError
 
 
 class InterfaceArgument(GIArgument):

@@ -561,11 +561,11 @@ for $i, $item_in in enumerate($name):
     $type_pack
     $array[$i] = $item_out
 $array[-1] = $ctypes_type()
-$array_ref = ctypes.byref($array)
+$array_ptr = ctypes.pointer($array)
 """, name=name, item_in=item_in, item_out=item_out, type_pack=type_pack,
      ctypes_type=typeinfo_to_ctypes(type_))
 
-        return block, var["array_ref"], var["c_length"]
+        return block, var["array_ptr"], var["c_length"]
 
     def pack_carray_basic_fixed(self, name, item_in, item_out, type_pack, type_):
         block, var = self.parse("""
@@ -575,43 +575,35 @@ $array = ($ctypes_type * $length)()
 for $i, $item_in in enumerate($name):
     $type_pack
     $array[$i] = $item_out
-$array_ref = ctypes.byref($array)
+$array_ptr = ctypes.pointer($array)
 """, name=name, item_in=item_in, item_out=item_out, type_pack=type_pack,
      ctypes_type=typeinfo_to_ctypes(type_))
 
-        return block, var["array_ref"], var["c_length"]
+        return block, var["array_ptr"], var["c_length"]
 
-    def setup_array_c_basic_fixed(self, length, type_):
+    def setup_carray_basic_fixed(self, length, type_):
         block, var = self.parse("""
 $array = ($ctypes_type * $length)()
-$array_ref = ctypes.byref($array)
+$array_ptr = ctypes.pointer($array)
 """, ctypes_type=typeinfo_to_ctypes(type_), length=length)
 
-        return block, var["array"], var["array_ref"]
+        return block, var["array"], var["array_ptr"]
 
-    def unpack_array_c_basic_fixed(self, array, length):
+    def unpack_carray_basic_fixed(self, array, length):
         block, var = self.parse("""
 $out = [$array[$i] for $i in xrange($length)]
 """, array=array, length=length)
 
         return block, var["out"]
 
-    def unpack_array_c_string_length(self, array, length):
-        block, var = self.parse("""
-$array = $array.contents
-$out = [$array[$i] for $i in xrange($length.value)]
-""", array=array, length=length)
-
-        return block, var["out"]
-
-    def unpack_array_c_basic_length(self, array, length):
+    def unpack_carray_basic_length(self, array, length):
         block, var = self.parse("""
 $out = [$array[$i] for $i in xrange($length.value)]
 """, array=array, length=length)
 
         return block, var["out"]
 
-    def unpack_array_c_zeroterm(self, in_name):
+    def unpack_carray_zeroterm(self, in_name):
         block, var = self.parse("""
 $list = []
 $i = 0
@@ -623,22 +615,6 @@ while $current:
 """, array=in_name)
 
         return block, var["list"]
-
-    def pack_array_ptr_fixed_c_in_out(self, name):
-        block, var = self.parse("""
-# pack c array
-$length = len($name)
-$length_c = ctypes.c_int($length)
-$length_ref = ctypes.byref($length_c)
-$array = (ctypes.c_char_p * $length)()
-for $i, $item in enumerate($name):
-    $array[$i] = $item
-$array_ptr = ctypes.pointer($array)
-$array_ref = ctypes.byref($array_ptr)
-""", name=name)
-
-        return (block, var["array_ptr"], var["array_ref"],
-                var["length_c"], var["length_ref"])
 
 
 class ErrorTypes(object):
