@@ -1,20 +1,30 @@
-# Copyright 2012 Christoph Reiter
+# Copyright 2012,2013 Christoph Reiter
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
+import os
 from ctypes import cdll, c_void_p, cast
 
 
-_so_mapping = {
-    "glib-2.0": "libglib-2.0.so.0",
-    "gobject-2.0": "libgobject-2.0.so.0",
-    "girepository-1.0": "libgirepository-1.0.so.1",
-}
+if os.name == "nt":
+    _so_mapping = {
+        "glib-2.0": "libglib-2.0-0.dll",
+        "gobject-2.0": "libgobject-2.0-0.dll",
+        "girepository-1.0": "libgirepository-1.0-1.dll",
+    }
+else:
+    _so_mapping = {
+        "glib-2.0": "libglib-2.0.so.0",
+        "gobject-2.0": "libgobject-2.0.so.0",
+        "girepository-1.0": "libgirepository-1.0.so.1",
+    }
 
-find_library = lambda name: getattr(cdll, _so_mapping[name])
+
+def find_library(name):
+    return getattr(cdll, _so_mapping[name])
 
 
 class _CProperty(object):
