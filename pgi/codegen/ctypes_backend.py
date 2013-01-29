@@ -580,7 +580,7 @@ $flags = $flags_class($value)
         return block, var["flags"]
 
 
-class ArrayTypes(object):
+class CArrayTypes(object):
 
     def pack_array_c_basic_fixed_zero(self, name, type_):
         block, var = self.parse("""
@@ -611,12 +611,25 @@ $length = ctypes.c_int($length)
         block.add_dependency("ctypes", ctypes)
         return block, var["array_ref"], var["length"]
 
+    def setup_array_c_basic_fixed(self, length, type_):
+        block, var = self.parse("""
+$array = ($ctypes_type * $length)()
+$array_ref = ctypes.byref($array)
+""", ctypes_type=typeinfo_to_ctypes(type_), length=length)
+
+        return block, var["array"], var["array_ref"]
+
     def unpack_array_c_basic_fixed(self, array, length):
         block, var = self.parse("""
-$out = []
-for $i in xrange($length):
-    $value = $array[$i]
-    $out.append($value)
+$out = [$array[$i] for $i in xrange($length)]
+""", array=array, length=length)
+
+        return block, var["out"]
+
+    def unpack_array_c_string_length(self, array, length):
+        block, var = self.parse("""
+$array = $array.contents
+$out = [$array[$i] for $i in xrange($length.value)]
 """, array=array, length=length)
 
         return block, var["out"]
@@ -628,7 +641,7 @@ $out = [$array[$i] for $i in xrange($length.value)]
 
         return block, var["out"]
 
-    def unpack_array_zeroterm_c(self, in_name):
+    def unpack_array_c_zeroterm(self, in_name):
         block, var = self.parse("""
 $list = []
 $i = 0
@@ -659,17 +672,6 @@ $array_ref = ctypes.byref($array_ptr)
         return (block, var["array_ptr"], var["array_ref"],
                 var["length_c"], var["length_ref"])
 
-    def unpack_array_ptr_fixed_c(self, array, length):
-        block, var = self.parse("""
-# unpack fixed array
-$out = []
-$array = $array.contents
-for $i in xrange($length.value):
-    $out.append($array[$i])
-""", array=array, length=length)
-
-        return block, var["out"]
-
 
 class ErrorTypes(object):
 
@@ -691,7 +693,7 @@ if $gerror_ptr:
         return block
 
 
-class CTypesBackend(CodeGenBackend, BasicTypes, InterfaceTypes, ArrayTypes,
+class CTypesBackend(CodeGenBackend, BasicTypes, InterfaceTypes, CArrayTypes,
                     ErrorTypes):
 
     NAME = "ctypes"

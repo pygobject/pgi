@@ -161,15 +161,31 @@ class CArrayArgument(ArrayArgument):
                 if self.type.array_length != -1:
                     self._aux.call_var = length
                 return block
-
-            raise NotImplementedError
+        elif self.is_direction_out():
+            if not self.is_zero_terminated():
+                if self.type.array_length == -1:
+                    length = str(self.type.array_fixed_size)
+                    block, data, ref = backend.setup_array_c_basic_fixed(length, self._param_type)
+                    self._data = data
+                    self.call_var = ref
+                    return block
+        raise NotImplementedError
 
     def post_call(self):
-        b = self.backend
-        if self.is_direction_out():
-            if not self.is_zero_terminated() and self.is_pointer():
-                block, out = b.unpack_array_ptr_fixed_c(self._data,
-                                                        self._length)
+        if not self.is_direction_out():
+            return
+
+        if not self.is_zero_terminated():
+            if self.type.array_length == -1:
+                length = str(self.type.array_fixed_size)
+                block, out = self.backend.unpack_array_c_basic_fixed(self._data, length)
+                self.out_var = out
+                return block
+            else:
+                if self._param_type.tag.value == GITypeTag.UTF8:
+                    block, out = self.backend.unpack_array_c_string_length(self._data, self._length)
+                else:
+                    block, out = self.backend.unpack_array_c_basic_length(self._data, self._length)
                 self.out_var = out
                 return block
 

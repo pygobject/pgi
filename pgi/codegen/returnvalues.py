@@ -106,7 +106,7 @@ class ArrayReturnValue(ReturnValue):
             param = param_cls(self.info, param_type, [], self.backend)
 
             if self.is_zero_terminated():
-                block, var = backend.unpack_array_zeroterm_c(name)
+                block, var = backend.unpack_array_c_zeroterm(name)
                 return block, var
             else:
                 # cast the gpointer to a pointer to the array type
