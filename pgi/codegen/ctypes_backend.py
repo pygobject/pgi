@@ -582,34 +582,37 @@ $flags = $flags_class($value)
 
 class CArrayTypes(object):
 
-    def pack_array_c_basic_fixed_zero(self, name, type_):
+    def pack_carray_basic_fixed_zero(self, name, item_in, item_out, type_pack, type_):
         block, var = self.parse("""
-# pack a basic type array
 $length = len($name)
+$c_length = ctypes.c_int($length)
 $array = ($ctypes_type * ($length + 1))()
-for $i, $item in enumerate($name):
-    $array[$i] = $item
-$array[-1] = $ctypes_type() # inited to zero
+for $i, $item_in in enumerate($name):
+    $type_pack
+    $array[$i] = $item_out
+$array[-1] = $ctypes_type()
 $array_ref = ctypes.byref($array)
-$length = ctypes.c_int($length)
-""", name=name, ctypes_type=typeinfo_to_ctypes(type_))
+""", name=name, item_in=item_in, item_out=item_out, type_pack=type_pack,
+     ctypes_type=typeinfo_to_ctypes(type_))
 
         block.add_dependency("ctypes", ctypes)
-        return block, var["array_ref"], var["length"]
+        return block, var["array_ref"], var["c_length"]
 
-    def pack_array_c_basic_fixed(self, name, type_):
+
+    def pack_carray_basic_fixed(self, name, item_in, item_out, type_pack, type_):
         block, var = self.parse("""
-# pack a basic type array
 $length = len($name)
+$c_length = ctypes.c_int($length)
 $array = ($ctypes_type * $length)()
-for $i, $item in enumerate($name):
-    $array[$i] = $item
+for $i, $item_in in enumerate($name):
+    $type_pack
+    $array[$i] = $item_out
 $array_ref = ctypes.byref($array)
-$length = ctypes.c_int($length)
-""", name=name, ctypes_type=typeinfo_to_ctypes(type_))
+""", name=name, item_in=item_in, item_out=item_out, type_pack=type_pack,
+     ctypes_type=typeinfo_to_ctypes(type_))
 
         block.add_dependency("ctypes", ctypes)
-        return block, var["array_ref"], var["length"]
+        return block, var["array_ref"], var["c_length"]
 
     def setup_array_c_basic_fixed(self, length, type_):
         block, var = self.parse("""

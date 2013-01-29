@@ -131,6 +131,15 @@ class CArrayArgument(ArrayArgument):
         self._array_type = self.type.array_type.value
         self._param_type = self.type.get_param_type(0)
 
+    def _pack_param(self, type_):
+        param_cls = get_argument_class(type_)
+        in_name = self.backend._var()
+        # fixme: wrap info, shift owner transfer
+        sub_arg = param_cls(in_name, [], self.backend, self.info, type_)
+        sub_arg.setup()
+        block = sub_arg.pre_call()
+        return block, in_name, sub_arg.call_var
+
     def pre_call(self):
         backend = self.backend
 
@@ -147,20 +156,20 @@ class CArrayArgument(ArrayArgument):
             raise NotImplementedError
 
         elif self.is_direction_in():
+            param_block, in_var, out_var = self._pack_param(self._param_type)
+
             if self.is_zero_terminated():
-                block, data_ref, length = \
-                    backend.pack_array_c_basic_fixed_zero(self.name, self._param_type)
-                self.call_var = data_ref
-                if self.type.array_length != -1:
-                    self._aux.call_var = length
-                return block
+                block, data_ref, length = backend.pack_carray_basic_fixed_zero(
+                    self.name, in_var, out_var, param_block, self._param_type)
             else:
-                block, data_ref, length = \
-                    backend.pack_array_c_basic_fixed(self.name, self._param_type)
-                self.call_var = data_ref
-                if self.type.array_length != -1:
-                    self._aux.call_var = length
-                return block
+                block, data_ref, length = backend.pack_carray_basic_fixed(
+                    self.name, in_var, out_var, param_block, self._param_type)
+
+            self.call_var = data_ref
+            if self.type.array_length != -1:
+                self._aux.call_var = length
+
+            return block
         elif self.is_direction_out():
             if not self.is_zero_terminated():
                 if self.type.array_length == -1:

@@ -898,6 +898,13 @@ class TestArray(unittest.TestCase):
         self.assertEqual([], GIMarshallingTests.array_zero_terminated_return_null())
 
 
+@unittest.skipUnless(GIMarshallingTests, "")
+class TestPGI(unittest.TestCase):
+    def test_array_type_checks(self):
+        self.assertRaises(ValueError, GIMarshallingTests.array_in_len_before,
+                          [-1, 0, 1, 2 + 2**32])
+
+
 class TestProjectVersion(unittest.TestCase):
     def test_version_str(self):
         self.assertGreaterEqual(gi.__version__, "0.0.2")
