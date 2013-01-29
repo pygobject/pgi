@@ -171,13 +171,23 @@ class CArrayArgument(ArrayArgument):
             param_block, in_var, out_var = self._pack_param(self._param_type)
 
             if not self.is_zero_terminated():
-                block, data, length = backend.pack_carray_basic_fixed(
-                    self.name, in_var, out_var, param_block, self._param_type)
+                if self.array_length != -1:
+                    length_type = self._aux.type
+
+                    block, data, length = backend.pack_carray_basic_length(
+                        self.name, in_var, out_var, param_block,
+                        self._param_type, length_type)
+
+                    block2, self._aux.call_var = backend.get_reference(length)
+                    block2.write_into(block)
+                else:
+                    length = str(self.array_fixed_size)
+
+                    block, data = backend.pack_carray_basic_fixed(
+                        self.name, in_var, out_var, param_block,
+                        self._param_type, length)
 
                 block2, self.call_var = backend.get_reference(data)
-                block2.write_into(block)
-
-                block2, self._aux.call_var = backend.get_reference(length)
                 block2.write_into(block)
 
                 self._data = data
@@ -190,20 +200,38 @@ class CArrayArgument(ArrayArgument):
         elif self.is_direction_in():
             param_block, in_var, out_var = self._pack_param(self._param_type)
 
-            if self.is_zero_terminated():
-                block, data, length = backend.pack_carray_basic_fixed_zero(
-                    self.name, in_var, out_var, param_block, self._param_type)
-            else:
-                block, data, length = backend.pack_carray_basic_fixed(
-                    self.name, in_var, out_var, param_block, self._param_type)
-
-            self.call_var = data
             if self.array_length != -1:
+                length_type = self._aux.type
+
+                if self.is_zero_terminated():
+                    block, data, length = backend.pack_carray_basic_length_zero(
+                        self.name, in_var, out_var, param_block,
+                        self._param_type, length_type)
+                else:
+                    block, data, length = backend.pack_carray_basic_length(
+                        self.name, in_var, out_var, param_block,
+                        self._param_type, length_type)
+
                 self._aux.call_var = length
+                self.call_var = data
+    
+                return block
+            else:
+                length = str(self.array_fixed_size)
 
-            return block
+                if self.is_zero_terminated():
+                    block, data = backend.pack_carray_basic_fixed_zero(
+                        self.name, in_var, out_var, param_block,
+                        self._param_type, length)
+                else:
+                    block, data = backend.pack_carray_basic_fixed(
+                        self.name, in_var, out_var, param_block,
+                        self._param_type, length)
 
-        elif self.is_direction_out():
+                self.call_var = data
+                return block
+
+        else:
             if not self.is_zero_terminated():
                 if self.array_length == -1:
                     length = str(self.array_fixed_size)
@@ -213,8 +241,18 @@ class CArrayArgument(ArrayArgument):
                     block2.write_into(block)
                     self.call_var = ptr
                     return block
+                else:
+                    length_type = self._aux.type
 
-        raise NotImplementedError
+                    block, data, ptr, length = backend.setup_carray_basic_length(self._param_type, length_type)
+                    self.call_var = ptr
+                    block2, self._aux.call_var = backend.get_reference(length)
+                    block2.write_into(block)
+                    self._length = length
+                    self._data = data
+                    return block
+            else:
+                raise NotImplementedError("zero")
 
     def post_call(self):
         if not self.is_direction_out():
@@ -234,7 +272,7 @@ class CArrayArgument(ArrayArgument):
             self.out_var = out
             return block
 
-        raise NotImplementedError
+        raise NotImplementedError("post zero")
 
 
 class InterfaceArgument(GIArgument):

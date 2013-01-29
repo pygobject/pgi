@@ -882,11 +882,22 @@ class TestArray(unittest.TestCase):
     def test_array_fixed_short_in(self):
         GIMarshallingTests.array_fixed_short_in(Sequence([-1, 0, 1, 2]))
 
+    def test_array_fixed_inout(self):
+        self.assertEqual([2, 1, 0, -1], GIMarshallingTests.array_fixed_inout([-1, 0, 1, 2]))
+
+    def test_array_in(self):
+        GIMarshallingTests.array_in(Sequence([-1, 0, 1, 2]))
+        GIMarshallingTests.array_in_guint64_len(Sequence([-1, 0, 1, 2]))
+        GIMarshallingTests.array_in_guint8_len(Sequence([-1, 0, 1, 2]))
+
     def test_array_return(self):
         self.assertEqual([-1, 0, 1, 2], GIMarshallingTests.array_return())
 
     def test_array_return_etc(self):
         self.assertEqual(([5, 0, 1, 9], 14), GIMarshallingTests.array_return_etc(5, 9))
+
+    def test_array_string_in(self):
+        GIMarshallingTests.array_string_in(['foo', 'bar'])
 
     def test_array_in_len_before(self):
         GIMarshallingTests.array_in_len_before(Sequence([-1, 0, 1, 2]))

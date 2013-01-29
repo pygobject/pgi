@@ -552,10 +552,11 @@ $flags = $flags_class($value)
 
 class CArrayTypes(object):
 
-    def pack_carray_basic_fixed_zero(self, name, item_in, item_out, type_pack, type_):
+    def pack_carray_basic_fixed_zero(self, name, item_in, item_out, type_pack, type_, length):
         block, var = self.parse("""
-$length = len($name)
-$c_length = ctypes.c_int($length)
+if len($name) != $length:
+    raise ValueError("Wrong list length")
+
 $array = ($ctypes_type * ($length + 1))()
 for $i, $item_in in enumerate($name):
     $type_pack
@@ -563,23 +564,55 @@ for $i, $item_in in enumerate($name):
 $array[-1] = $ctypes_type()
 $array_ptr = ctypes.pointer($array)
 """, name=name, item_in=item_in, item_out=item_out, type_pack=type_pack,
-     ctypes_type=typeinfo_to_ctypes(type_))
+     ctypes_type=typeinfo_to_ctypes(type_), length=length)
+
+        return block, var["array_ptr"]
+
+    def pack_carray_basic_length_zero(self, name, item_in, item_out, type_pack, type_, length_type_):
+        block, var = self.parse("""
+$length = len($name)
+$c_length = $length_type($length)
+$array = ($ctypes_type * ($length + 1))()
+for $i, $item_in in enumerate($name):
+    $type_pack
+    $array[$i] = $item_out
+$array[-1] = $ctypes_type()
+$array_ptr = ctypes.pointer($array)
+""", name=name, item_in=item_in, item_out=item_out, type_pack=type_pack,
+     ctypes_type=typeinfo_to_ctypes(type_),
+     length_type=typeinfo_to_ctypes(length_type_))
 
         return block, var["array_ptr"], var["c_length"]
 
-    def pack_carray_basic_fixed(self, name, item_in, item_out, type_pack, type_):
+    def pack_carray_basic_length(self, name, item_in, item_out, type_pack, type_, length_type_):
         block, var = self.parse("""
 $length = len($name)
-$c_length = ctypes.c_int($length)
+$c_length = $length_type($length)
 $array = ($ctypes_type * $length)()
 for $i, $item_in in enumerate($name):
     $type_pack
     $array[$i] = $item_out
 $array_ptr = ctypes.pointer($array)
 """, name=name, item_in=item_in, item_out=item_out, type_pack=type_pack,
-     ctypes_type=typeinfo_to_ctypes(type_))
+     ctypes_type=typeinfo_to_ctypes(type_),
+     length_type=typeinfo_to_ctypes(length_type_))
 
         return block, var["array_ptr"], var["c_length"]
+
+    def pack_carray_basic_fixed(self, name, item_in, item_out, type_pack, type_, length):
+        block, var = self.parse("""
+if len($name) != $length:
+    raise ValueError("Wrong list length")
+
+$array = ($ctypes_type * $length)()
+for $i, $item_in in enumerate($name):
+    $type_pack
+    $array[$i] = $item_out
+$array_ptr = ctypes.pointer($array)
+""", name=name, item_in=item_in, item_out=item_out, type_pack=type_pack,
+     ctypes_type=typeinfo_to_ctypes(type_), length=length)
+
+        return block, var["array_ptr"]
 
     def setup_carray_basic_fixed(self, length, type_):
         block, var = self.parse("""
