@@ -116,13 +116,13 @@ class ArrayReturnValue(ReturnValue):
                     # array size const
                     array_size = str(self.type.array_fixed_size)
                     # unpack array
-                    block2, var = backend.unpack_array_c_fixed(var, array_size)
+                    block2, var = backend.unpack_array_c_basic_fixed(var, array_size)
                     block2.write_into(block)
                 else:
                     # filled by the aux
                     array_size = self._length_var
                     # unpack array
-                    block2, var = backend.unpack_array_c_length(var, array_size)
+                    block2, var = backend.unpack_array_c_basic_length(var, array_size)
                     block2.write_into(block)
 
                 return block, var

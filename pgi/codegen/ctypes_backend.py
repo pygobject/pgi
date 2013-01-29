@@ -581,9 +581,22 @@ $flags = $flags_class($value)
 
 
 class ArrayTypes(object):
-    # FIXME: these all ignore item types
 
-    def unpack_array_c_fixed(self, array, length):
+    def pack_array_c_basic_fixed(self, name, type_):
+        block, var = self.parse("""
+# pack a basic type array
+$length = len($name)
+$array = ($ctypes_type * $length)()
+for $i, $item in enumerate($name):
+    $array[$i] = $item
+$array_ref = ctypes.byref($array)
+$length = ctypes.c_int($length)
+""", name=name, ctypes_type=typeinfo_to_ctypes(type_))
+
+        block.add_dependency("ctypes", ctypes)
+        return block, var["array_ref"], var["length"]
+
+    def unpack_array_c_basic_fixed(self, array, length):
         block, var = self.parse("""
 $out = []
 for $i in xrange($length):
@@ -593,12 +606,9 @@ for $i in xrange($length):
 
         return block, var["out"]
 
-    def unpack_array_c_length(self, array, length):
+    def unpack_array_c_basic_length(self, array, length):
         block, var = self.parse("""
-$out = []
-for $i in xrange($length.value):
-    $value = $array[$i]
-    $out.append($value)
+$out = [$array[$i] for $i in xrange($length.value)]
 """, array=array, length=length)
 
         return block, var["out"]
@@ -633,20 +643,6 @@ $array_ref = ctypes.byref($array_ptr)
 
         return (block, var["array_ptr"], var["array_ref"],
                 var["length_c"], var["length_ref"])
-
-    def pack_array_ptr_fixed_c_in(self, name):
-        block, var = self.parse("""
-# pack c array
-$length = len($name)
-$array = (ctypes.c_char_p * $length)()
-for $i, $item in enumerate($name):
-    $array[$i] = $item
-$array_ref = ctypes.byref($array)
-""", name=name)
-
-        block.add_dependency("ctypes", ctypes)
-
-        return block, var["array_ref"], var["length"]
 
     def unpack_array_ptr_fixed_c(self, array, length):
         block, var = self.parse("""

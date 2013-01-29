@@ -110,7 +110,7 @@ class ArrayArgument(GIArgument):
             self._aux = aux
 
         self._array_type = self.type.array_type.value
-        self._param_type = self.type.get_param_type(0).tag.value
+        self._param_type = self.type.get_param_type(0)
 
     def is_zero_terminated(self):
         return self.type.is_zero_terminated
@@ -128,12 +128,25 @@ class ArrayArgument(GIArgument):
                 self._data = data
                 self._length = length
                 return block
+            raise NotImplementedError
+
         elif self.is_direction_in():
             if not self.is_zero_terminated():
                 block, data_ref, length = \
-                    backend.pack_array_ptr_fixed_c_in(self.name)
+                    backend.pack_array_c_basic_fixed(self.name, self._param_type)
                 self.call_var = data_ref
-                self._aux.call_var = length
+                if self.type.array_length != -1:
+                    self._aux.call_var = length
+                return block
+            raise NotImplementedError
+
+    def _post_c(self):
+        b = self.backend
+        if self.is_direction_out():
+            if not self.is_zero_terminated() and self.is_pointer():
+                block, out = b.unpack_array_ptr_fixed_c(self._data,
+                                                        self._length)
+                self.out_var = out
                 return block
 
     def pre_call(self):
@@ -148,20 +161,14 @@ class ArrayArgument(GIArgument):
         elif array_type == GIArrayType.BYTE_ARRAY:
             pass
 
-    def _post_c(self):
-        b = self.backend
-        if self.is_direction_out():
-            if not self.is_zero_terminated() and self.is_pointer():
-                block, out = b.unpack_array_ptr_fixed_c(self._data,
-                                                        self._length)
-                self.out_var = out
-                return block
-
     def post_call(self):
-        array_type = self._array_type
+        if self.is_direction_out():
+            array_type = self._array_type
 
-        if array_type == GIArrayType.C:
-            return self._post_c()
+            if array_type == GIArrayType.C:
+                return self._post_c()
+
+            raise NotImplementedError
 
 
 class InterfaceArgument(GIArgument):
