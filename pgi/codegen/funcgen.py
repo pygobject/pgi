@@ -12,6 +12,47 @@ from pgi.codegen.arguments import get_argument_class, ErrorArgument
 from pgi.codegen.returnvalues import get_return_class
 
 
+def build_docstring(func_name, args, ret):
+    """Create a docstring in the form:
+        name(in_name: type) -> (ret_type, out_name: type)
+    """
+
+    out_args = []
+    if ret:
+        if ret.py_type is None:
+            out_args.append("unknown")
+        else:
+            out_args.append(ret.py_type.__name__)
+
+    in_args = []
+    for arg in args:
+        if arg.is_aux:
+            continue
+
+        if arg.in_var:
+            if arg.py_type is None:
+                in_args.append(arg.in_var)
+            else:
+                in_args.append("%s: %s" % (arg.in_var, arg.py_type.__name__))
+
+        if arg.out_var:
+            if arg.py_type is None:
+                out_args.append(arg.name)
+            else:
+                out_args.append("%s: %s" % (arg.name, arg.py_type.__name__))
+
+    in_def = ", ".join(in_args)
+
+    if not out_args:
+        out_def = "None"
+    elif len(out_args) == 1:
+        out_def = out_args[0]
+    else:
+        out_def = "(%s)" % ", ".join(out_args)
+
+    return "%s(%s) -> %s" % (func_name, in_def, out_def)
+
+
 def _generate_function(backend, info, arg_infos, arg_types,
                        return_type, method, throws):
 
@@ -97,17 +138,18 @@ def _generate_function(backend, info, arg_infos, arg_types,
 
     # build final function block
 
+    docstring = build_docstring(info.name, args, return_var and return_value)
+
     names = [a.in_var for a in args if not a.is_aux and a.in_var]
     if method:
         names.insert(0, "self")
     names = ", ".join(names)
 
-    docstring = "%s(%s)" % (info.name, names)
-
     main, var = backend.parse("""
 # backend: $backend_name
 def $func_name($func_args):
     '''$docstring'''
+
     $func_body
 """, backend_name=backend.NAME, func_args=names, docstring=docstring,
      func_body=body, func_name=info.name)

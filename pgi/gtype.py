@@ -135,3 +135,5 @@ class PGType(object):
 
     def __repr__(self):
         return "<GType %s (%d)>" % (self.name, self._type.value)
+
+PGType.__name__ = "GType"

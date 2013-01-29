@@ -7,6 +7,7 @@
 
 from pgi.gir import GIDirection, GIArrayType, GITypeTag, GIInfoType, GITransfer
 from pgi.util import import_attribute
+from pgi.gtype import PGType
 
 
 class Argument(object):
@@ -16,12 +17,14 @@ class Argument(object):
     in_var   -- variable name in the function def
     out_var  -- variable name to return
     call_var -- variable name passed to the function
+    py_type  -- a python type for docs / possibly annotation
     """
 
     is_aux = False
     in_var = ""
     call_var = ""
     out_var = ""
+    py_type = None
 
     def __init__(self, arguments, backend):
         self.args = arguments
@@ -95,6 +98,7 @@ class GIArgument(Argument):
 
 class ArrayArgument(GIArgument):
     TAG = GITypeTag.ARRAY
+    py_type = list
 
     def setup(self):
         array_length = self.type.array_length
@@ -162,6 +166,7 @@ class ArrayArgument(GIArgument):
 
 class InterfaceArgument(GIArgument):
     TAG = GITypeTag.INTERFACE
+    py_type = object
 
     def _pre_object(self):
         if self.is_direction_in():
@@ -265,60 +270,75 @@ class BasicTypeArgument(GIArgument):
 class BoolArgument(BasicTypeArgument):
     TAG = GITypeTag.BOOLEAN
     TYPE_NAME = "bool"
+    py_type = bool
 
 
 class Int8Argument(BasicTypeArgument):
     TAG = GITypeTag.INT8
     TYPE_NAME = "int8"
+    py_type = int
 
 
 class UInt8Argument(BasicTypeArgument):
     TAG = GITypeTag.UINT8
     TYPE_NAME = "uint8"
+    py_type = int
 
 
 class Int16Argument(BasicTypeArgument):
     TAG = GITypeTag.INT16
     TYPE_NAME = "int16"
+    py_type = int
 
 
 class UInt16Argument(BasicTypeArgument):
     TAG = GITypeTag.UINT16
     TYPE_NAME = "uint16"
+    py_type = int
 
 
 class Int32Argument(BasicTypeArgument):
     TAG = GITypeTag.INT32
     TYPE_NAME = "int32"
+    py_type = int
 
 
 class Int64Argument(BasicTypeArgument):
     TAG = GITypeTag.INT64
     TYPE_NAME = "int64"
+    py_type = int
 
 
 class UInt64Argument(BasicTypeArgument):
     TAG = GITypeTag.UINT64
     TYPE_NAME = "uint64"
+    py_type = int
 
 
 class UINT32Argument(BasicTypeArgument):
     TAG = GITypeTag.UINT32
     TYPE_NAME = "uint32"
+    py_type = int
 
 
 class FloatArgument(BasicTypeArgument):
     TAG = GITypeTag.FLOAT
     TYPE_NAME = "float"
+    py_type = float
 
 
 class DoubleArgument(BasicTypeArgument):
     TAG = GITypeTag.DOUBLE
     TYPE_NAME = "double"
+    py_type = float
 
 
 class VoidArgument(GIArgument):
     TAG = GITypeTag.VOID
+
+    def setup(self):
+        if self.is_pointer():
+            self.py_type = int
 
     def pre_call(self):
         if self.is_pointer():
@@ -332,6 +352,7 @@ class VoidArgument(GIArgument):
 
 class Utf8Argument(GIArgument):
     TAG = GITypeTag.UTF8
+    py_type = str
 
     def pre_call(self):
         if self.is_direction_inout():
@@ -371,6 +392,7 @@ class Utf8Argument(GIArgument):
 
 class GTypeArgument(GIArgument):
     TAG = GITypeTag.GTYPE
+    py_type = PGType
 
     def pre_call(self):
         if self.is_direction_inout():

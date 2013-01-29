@@ -7,10 +7,13 @@
 
 from pgi.gir import GITypeTag, GIInfoType, GITransfer, GIArrayType
 from pgi.util import import_attribute
+from pgi.gtype import PGType
 
 
 class ReturnValue(object):
     TAG = None
+
+    py_type = None
 
     def __init__(self, info, type_, args, backend):
         super(ReturnValue, self).__init__()
@@ -47,12 +50,20 @@ class ReturnValue(object):
 class BooleanReturnValue(ReturnValue):
     TAG = GITypeTag.BOOLEAN
 
+    py_type = bool
+
     def post_call(self, name):
         return self.backend.unpack_bool(name)
 
 
 class VoidReturnValue(ReturnValue):
     TAG = GITypeTag.VOID
+
+    def setup(self):
+        if self.is_pointer():
+            self.py_type = int
+        else:
+            self.py_type = None
 
     def post_call(self, name):
         if self.is_pointer():
@@ -63,6 +74,8 @@ class VoidReturnValue(ReturnValue):
 
 class ArrayReturnValue(ReturnValue):
     TAG = GITypeTag.ARRAY
+
+    py_type = list
 
     def setup(self):
         self.array_length = self.type.array_length
@@ -124,46 +137,57 @@ class BasicReturnValue(ReturnValue):
 
 class UInt8ReturnValue(BasicReturnValue):
     TAG = GITypeTag.UINT8
+    py_type = int
 
 
 class Int8ReturnValue(BasicReturnValue):
     TAG = GITypeTag.INT8
+    py_type = int
 
 
 class Int16ReturnValue(BasicReturnValue):
     TAG = GITypeTag.INT16
+    py_type = int
 
 
 class UInt16ReturnValue(BasicReturnValue):
     TAG = GITypeTag.UINT16
+    py_type = int
 
 
 class Int32ReturnValue(BasicReturnValue):
     TAG = GITypeTag.INT32
+    py_type = int
 
 
 class UInt32ReturnValue(BasicReturnValue):
     TAG = GITypeTag.UINT32
+    py_type = int
 
 
 class Int64ReturnValue(BasicReturnValue):
     TAG = GITypeTag.INT64
+    py_type = int
 
 
 class UInt64ReturnValue(BasicReturnValue):
     TAG = GITypeTag.UINT64
+    py_type = int
 
 
 class DoubleReturnValue(BasicReturnValue):
     TAG = GITypeTag.DOUBLE
+    py_type = float
 
 
 class FloatReturnValue(BasicReturnValue):
     TAG = GITypeTag.FLOAT
+    py_type = float
 
 
 class Utf8ReturnValue(ReturnValue):
     TAG = GITypeTag.UTF8
+    py_type = str
 
     def post_call(self, name):
         block, var, ref = self.backend.unpack_utf8_return(name)
@@ -175,6 +199,7 @@ class Utf8ReturnValue(ReturnValue):
 
 class FilenameReturnValue(Utf8ReturnValue):
     TAG = GITypeTag.FILENAME
+    py_type = str
 
     def post_call(self, name):
         return self.backend.unpack_utf8_return(name)[:2]
@@ -182,6 +207,7 @@ class FilenameReturnValue(Utf8ReturnValue):
 
 class InterfaceReturnValue(ReturnValue):
     TAG = GITypeTag.INTERFACE
+    py_type = object
 
     def post_call(self, name):
         backend = self.backend
@@ -223,6 +249,7 @@ class InterfaceReturnValue(ReturnValue):
 
 class GTypeReturnValue(ReturnValue):
     TAG = GITypeTag.GTYPE
+    py_type = PGType
 
     def post_call(self, name):
         return self.backend.unpack_gtype(name)
