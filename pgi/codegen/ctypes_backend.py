@@ -117,8 +117,7 @@ $var = ctypes.c_char_p($var)
         block, var = self.parse("""
 if $ptr is None:
     raise TypeError("No None allowed")
-# FIXME!: add object to global weakrefdict and pass the id
-$ptr = ctypes.c_void_p()
+$ptr = ctypes.c_void_p($ptr)
 """, ptr=name)
 
         return block, name
