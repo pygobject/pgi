@@ -301,6 +301,17 @@ class InterfaceArgument(GIArgument):
 class CallbackArgument(InterfaceArgument):
     py_type = type(lambda: None)
 
+    def setup(self):
+        self._user_data = None
+        if self.info.closure != -1:
+            self._user_data = self.args[self.info.closure]
+            self._user_data.is_aux = True
+
+        self._destroy = None
+        if self.info.destroy != -1:
+            self._destroy = self.args[self.info.destroy]
+            self._destroy.is_aux = True
+
     def pre_call(self):
         iface = self.type.get_interface()
         iface = gicast(iface, GICallableInfoPtr)
@@ -310,6 +321,16 @@ class CallbackArgument(InterfaceArgument):
         self.py_type = docstring
         block, out = self.backend.pack_callback(self.name, pack)
         self.call_var = out
+
+
+        if self._destroy:
+            from pgi.gobject import GCallback
+            block.add_dependency("GCallback", GCallback)
+            self._destroy.call_var = "GCallback()"
+
+        if self._user_data:
+            self._user_data.call_var = "None"
+
         return block
 
 
