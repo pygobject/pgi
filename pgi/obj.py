@@ -102,7 +102,7 @@ class _Object(object):
 
         def _add_self(*args):
             return callback(self, *itertools.chain(args, user_args))
-        cb = generate_signal_callback(info, _add_self)
+        cb = generate_signal_callback(info)(_add_self)
 
         destroy = GClosureNotify()
         id_ = signal_connect_data(self._obj, name, cb, None, destroy, flags)

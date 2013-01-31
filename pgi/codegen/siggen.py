@@ -61,7 +61,7 @@ def $cb_wrapper($args):
     return create_cb_for_func
 
 
-def _generate_signal_callback(backend, info, args, arg_types, callback):
+def _generate_signal_callback(backend, info, args, arg_types):
     sig_args = []
 
     for arg, type_ in zip(args, arg_types):
@@ -87,6 +87,7 @@ def _generate_signal_callback(backend, info, args, arg_types, callback):
     argument_list = ", ".join([a.name for a in sig_args])
     forward_arguments = ", ".join(outs_vars)
     func_name = escape_name(info.name)
+    cb_name = backend._var()
 
     block, var = backend.parse("""
 def $cb_wrapper($args):
@@ -94,13 +95,16 @@ def $cb_wrapper($args):
     $ret = $callback($out_args)
     # FIXME: convert return value
 """, args=argument_list, out_args=forward_arguments, cb_wrapper=func_name,
-     callback=callback, body=body)
+     callback=cb_name, body=body)
 
-    func = block.compile()[func_name]
-    return backend.get_callback_object(func, sig_args)
+    def create_sig_for_func(real_func):
+        func = block.compile(**{cb_name: real_func})[func_name]
+        return backend.get_callback_object(func, sig_args)
+
+    return create_sig_for_func
 
 
-def generate_signal_callback(info, callback):
+def generate_signal_callback(info):
     for backend in ACTIVE_BACKENDS:
         if backend.NAME == "ctypes":
             break
@@ -110,8 +114,7 @@ def generate_signal_callback(info, callback):
 
     cb_func = None
     try:
-        cb_func = _generate_signal_callback(backend, info, args,
-                                            arg_types, callback)
+        cb_func = _generate_signal_callback(backend, info, args, arg_types)
     except NotImplementedError:
         pass
 
