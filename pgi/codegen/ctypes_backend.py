@@ -117,6 +117,8 @@ $var = ctypes.c_char_p($var)
         block, var = self.parse("""
 if $ptr is None:
     raise TypeError("No None allowed")
+# FIXME!: add object to global weakrefdict and pass the id
+$ptr = ctypes.c_void_p()
 """, ptr=name)
 
         return block, name
@@ -439,6 +441,15 @@ $gtype = GType($pgtype._type.value)
 
 class InterfaceTypes(object):
 
+    def pack_callback(self, name, pack_func):
+        block, var = self.parse("""
+if not callable($py_cb):
+    raise TypeError("%r must be callable" % $py_cb)
+$ctypes_cb = $pack_func($py_cb)
+""", pack_func=pack_func, py_cb=name)
+
+        return block, var["ctypes_cb"]
+
     def ref_object_null(self, name):
         block, var = self.parse("""
 # take ownership
@@ -736,14 +747,13 @@ $new_self = $sself._obj
 
         return block, method and var["new_self"], h
 
-    def call(self, name, args):
+    def call(self, func, args):
         block, var = self.parse("""
-# call '$name'
 try:
     $ret = $name($args)
 except ctypes.ArgumentError, $e:
     raise TypeError($e.message)
-""", name=name, args=args)
+""", name=func, args=args)
 
         return block, var["ret"]
 

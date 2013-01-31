@@ -54,11 +54,15 @@ class CodeBlock(object):
         for line in lines:
             self.write_line(line, level)
 
-    def compile(self):
-        """Execute the python code and returns the global dict"""
+    def compile(self, **kwargs):
+        """Execute the python code and returns the global dict.
+        kwargs can contain extra dependencies that get only used
+        at compile time.
+        """
 
         code = compile(str(self), "<string>", "exec")
         global_dict = dict(self._deps)
+        global_dict.update(kwargs)
         exec code in global_dict
         return global_dict
 

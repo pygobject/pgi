@@ -101,8 +101,7 @@ def _generate_function(backend, info, arg_infos, arg_types,
     call_vars = [a.call_var for a in args if a.call_var]
     if method:
         call_vars.insert(0, svar)
-    block, ret = backend.call("func", ", ".join(call_vars))
-    block.add_dependency("func", func)
+    block, ret = backend.call(func, ", ".join(call_vars))
     block.write_into(body)
 
     out = []

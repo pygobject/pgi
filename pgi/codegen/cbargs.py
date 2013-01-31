@@ -5,7 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from pgi.gir import GITypeTag, GIInfoType
+from pgi.gir import GITypeTag, GIInfoType, GIDirection, GITransfer
 from pgi.util import import_attribute
 
 
@@ -30,6 +30,30 @@ class CallbackArgument(object):
     def process(self):
         return None, self.name
 
+    def may_be_null(self):
+        return self.info.may_be_null
+
+    def is_pointer(self):
+        return self.type.is_pointer
+
+    def is_direction_in(self):
+        return self.direction in (GIDirection.INOUT, GIDirection.IN)
+
+    def is_direction_out(self):
+        return self.direction in (GIDirection.INOUT, GIDirection.OUT)
+
+    def is_direction_inout(self):
+        return self.direction == GIDirection.INOUT
+
+    def transfer_nothing(self):
+        return self.info.ownership_transfer.value == GITransfer.NOTHING
+
+    def transfer_container(self):
+        return self.info.ownership_transfer.value == GITransfer.CONTAINER
+
+    def transfer_everything(self):
+        return self.info.ownership_transfer.value == GITransfer.EVERYTHING
+
 
 class InterfaceArgument(CallbackArgument):
     TAG = GITypeTag.INTERFACE
@@ -49,8 +73,19 @@ class InterfaceArgument(CallbackArgument):
         elif iface_type == GIInfoType.STRUCT:
             attr = import_attribute(iface_namespace, iface_name)
             return backend.unpack_struct(self.name, attr)
+        elif iface_type == GIInfoType.FLAGS:
+            attr = import_attribute(iface_namespace, iface_name)
+            return backend.unpack_flags(self.name, attr)
 
-        raise NotImplementedError("interface %r not supported")
+        raise NotImplementedError("interface %r not supported" % iface.type)
+
+
+class Utf8Argument(CallbackArgument):
+    TAG = GITypeTag.UTF8
+
+
+class VoidArgument(CallbackArgument):
+    TAG = GITypeTag.VOID
 
 
 _classes = {}

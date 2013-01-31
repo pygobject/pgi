@@ -6,7 +6,9 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from pgi.gir import GIDirection, GIArrayType, GITypeTag, GIInfoType, GITransfer
+from pgi.gir import GICallableInfoPtr
 from pgi.util import import_attribute
+from pgi.ctypesutil import gicast
 from pgi.gtype import PGType
 
 
@@ -298,6 +300,16 @@ class InterfaceArgument(GIArgument):
 
 class CallbackArgument(InterfaceArgument):
     py_type = type(lambda: None)
+
+    def pre_call(self):
+        iface = self.type.get_interface()
+        iface = gicast(iface, GICallableInfoPtr)
+
+        from pgi.codegen.siggen import generate_callback
+        pack = generate_callback(iface)
+        block, out = self.backend.pack_callback(self.name, pack)
+        self.call_var = out
+        return block
 
 
 class EnumArgument(InterfaceArgument):

@@ -283,11 +283,10 @@ $new_self = ffi.cast('gpointer', $sself._obj)
 
         return block, method and var["new_self"], getattr(lib, symbol)
 
-    def call(self, name, args):
+    def call(self, func, args):
         block, var = self.parse("""
-# call '$name'
 $ret = $name($args)
-""", name=name, args=args)
+""", name=func, args=args)
 
         return block, var["ret"]
 
