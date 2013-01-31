@@ -13,6 +13,7 @@ class CallbackArgument(object):
     TAG = None
 
     is_aux = False
+    py_type = None
 
     def __init__(self, backend, info, type_, name):
         self.info = info
@@ -57,6 +58,7 @@ class CallbackArgument(object):
 
 class InterfaceArgument(CallbackArgument):
     TAG = GITypeTag.INTERFACE
+    py_type = object
 
     def process(self):
         backend = self.backend
@@ -82,11 +84,12 @@ class InterfaceArgument(CallbackArgument):
 
 class Utf8Argument(CallbackArgument):
     TAG = GITypeTag.UTF8
+    py_type = str
 
 
 class VoidArgument(CallbackArgument):
     TAG = GITypeTag.VOID
-
+    py_type = int
 
 _classes = {}
 def _find_cbargs():

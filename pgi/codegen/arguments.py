@@ -306,7 +306,8 @@ class CallbackArgument(InterfaceArgument):
         iface = gicast(iface, GICallableInfoPtr)
 
         from pgi.codegen.siggen import generate_callback
-        pack = generate_callback(iface)
+        pack, docstring = generate_callback(iface)
+        self.py_type = docstring
         block, out = self.backend.pack_callback(self.name, pack)
         self.call_var = out
         return block

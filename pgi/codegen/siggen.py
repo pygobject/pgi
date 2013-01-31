@@ -11,6 +11,17 @@ from pgi.codegen.cbargs import get_cbarg_class
 from pgi.util import escape_name, escape_builtin
 
 
+def build_docstring(cb_name, args):
+    parts = []
+    for arg in args:
+        if arg.py_type is None:
+            parts.append(arg.name)
+        else:
+            parts.append("%s: %s" % (arg.name, arg.py_type.__name__))
+
+    return "%s(%s) -> None" % (cb_name, ", ".join(parts))
+
+
 def generate_callback(info):
     for backend in ACTIVE_BACKENDS:
         if backend.NAME == "ctypes":
@@ -45,20 +56,23 @@ def generate_callback(info):
     func_name = escape_name(info.name)
     cb_name = backend._var()
 
+    docstring = build_docstring(func_name, cb_args)
+
     block, var = backend.parse("""
 def $cb_wrapper($args):
     $body
+    # $docstring
     $ret = $callback($out_args)
     # FIXME: convert return value
 """, args=argument_list, out_args=forward_arguments, cb_wrapper=func_name,
-     callback=cb_name, body=body)
+     callback=cb_name, body=body, docstring=docstring)
 
     def create_cb_for_func(real_func):
         # binds the callback to the block and compiles it
         func = block.compile(**{cb_name: real_func})[func_name]
         return backend.get_callback_object(func, cb_args)
 
-    return create_cb_for_func
+    return create_cb_for_func, docstring
 
 
 def _generate_signal_callback(backend, info, args, arg_types):

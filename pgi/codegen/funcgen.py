@@ -17,12 +17,18 @@ def build_docstring(func_name, args, ret):
         name(in_name: type) -> (ret_type, out_name: type)
     """
 
+    def get_type_name(x):
+        if isinstance(x.py_type, basestring):
+            return x.py_type
+        return x.py_type.__name__
+
+
     out_args = []
     if ret:
         if ret.py_type is None:
             out_args.append("unknown")
         else:
-            out_args.append(ret.py_type.__name__)
+            out_args.append(get_type_name(ret))
 
     in_args = []
     for arg in args:
@@ -33,13 +39,13 @@ def build_docstring(func_name, args, ret):
             if arg.py_type is None:
                 in_args.append(arg.in_var)
             else:
-                in_args.append("%s: %s" % (arg.in_var, arg.py_type.__name__))
+                in_args.append("%s: %s" % (arg.in_var, get_type_name(arg)))
 
         if arg.out_var:
             if arg.py_type is None:
                 out_args.append(arg.name)
             else:
-                out_args.append("%s: %s" % (arg.name, arg.py_type.__name__))
+                out_args.append("%s: %s" % (arg.name, get_type_name(arg)))
 
     in_def = ", ".join(in_args)
 
