@@ -290,8 +290,14 @@ class InterfaceArgument(GIArgument):
             return EnumArgument
         elif iface_type == GIInfoType.STRUCT:
             return StructArgument
+        elif iface_type == GIInfoType.CALLBACK:
+            return CallbackArgument
 
-        raise NotImplementedError("Unsupported interface type")
+        raise NotImplementedError("Unsupported interface type %r" % iface.type)
+
+
+class CallbackArgument(InterfaceArgument):
+    py_type = type(lambda: None)
 
 
 class EnumArgument(InterfaceArgument):

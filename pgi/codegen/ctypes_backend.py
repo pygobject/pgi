@@ -66,6 +66,9 @@ def typeinfo_to_ctypes(info, return_value=False):
                 return gpointer
             elif iface_type == GIInfoType.FLAGS:
                 return gint
+            elif iface_type == GIInfoType.CALLBACK:
+                return GCallback
+
             raise NotImplementedError(
                 "Could not convert interface: %r to ctypes type" % iface.type)
         else:
