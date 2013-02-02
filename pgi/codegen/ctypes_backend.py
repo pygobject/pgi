@@ -429,6 +429,9 @@ $pgtype = PGType($gtype)
     def pack_gtype(self, name):
         gtype_map = {
             str: "gchararray",
+            int: "gint",
+            float: "gdouble",
+            bool: "gboolean",
         }
 
         items = gtype_map.items()
