@@ -190,6 +190,12 @@ class FuncsTest(unittest.TestCase):
         v.set_gtype(GObject.TYPE_DOUBLE)
         self.assertEqual(v.get_gtype(), GObject.TYPE_DOUBLE)
 
+    def test_value_gtype_convert(self):
+        v = GObject.Value()
+        v.init(GObject.TYPE_GTYPE)
+        v.set_gtype(str)
+        self.assertEqual(v.get_gtype(), GObject.TYPE_STRING)
+
     def test_value_float(self):
         v = GObject.Value()
         v.init(GObject.TYPE_FLOAT)
