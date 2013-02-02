@@ -8,6 +8,7 @@
 from pgi.codegen import ACTIVE_BACKENDS
 from pgi.codegen.utils import CodeBlock
 from pgi.codegen.cbargs import get_cbarg_class
+from pgi.codegen.cbreturn import get_cbreturn_class
 from pgi.util import escape_name, escape_builtin
 
 
@@ -29,6 +30,10 @@ def generate_callback(info):
 
     args = info.get_args()
     arg_types = [a.get_type() for a in args]
+
+    ret_type = info.get_return_type()
+    cls = get_cbreturn_class(ret_type)
+    return_value = cls(info, ret_type)
 
     cb_args = []
     for arg, type_ in zip(args, arg_types):
@@ -56,6 +61,10 @@ def generate_callback(info):
     func_name = escape_name(info.name)
     cb_name = backend._var()
 
+    return_var = backend._var()
+    return_block, out_var = return_value.process(return_var)
+    return_block = return_block or CodeBlock()
+
     docstring = build_docstring(func_name, cb_args)
 
     block, var = backend.parse("""
@@ -63,14 +72,16 @@ def $cb_wrapper($args):
     $body
     # $docstring
     $ret = $callback($out_args)
-    # FIXME: convert return value
+    $post
+    return $out
 """, args=argument_list, out_args=forward_arguments, cb_wrapper=func_name,
-     callback=cb_name, body=body, docstring=docstring)
+     callback=cb_name, body=body, docstring=docstring, ret=return_var,
+     out=out_var, post=return_block)
 
     def create_cb_for_func(real_func):
         # binds the callback to the block and compiles it
         func = block.compile(**{cb_name: real_func})[func_name]
-        return backend.get_callback_object(func, cb_args)
+        return backend.get_callback_object(func, cb_args, return_value)
 
     return create_cb_for_func, docstring
 

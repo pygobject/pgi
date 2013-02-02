@@ -818,7 +818,9 @@ $ptr = ctypes.byref($value)
 
         return block, var["ptr"]
 
-    def get_callback_object(self, func, args):
+    def get_callback_object(self, func, args, ret=None):
         arg_types = [typeinfo_to_ctypes(a.type) for a in args]
-        cb_object_type = ctypes.CFUNCTYPE(None, *arg_types)
+        # FIXME.. don't ignore missing ret
+        ret_type = ret and typeinfo_to_ctypes(ret.type)
+        cb_object_type = ctypes.CFUNCTYPE(ret_type, *arg_types)
         return ctypes.cast(cb_object_type(func), GCallback)
