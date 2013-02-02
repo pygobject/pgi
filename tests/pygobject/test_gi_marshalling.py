@@ -924,7 +924,7 @@ class TestProjectVersion(unittest.TestCase):
         self.assertGreaterEqual(gi.__version__, "0.0.2")
 
     def test_version_info(self):
-        self.assertEqual(len(gi.version_info), 3)
+        self.assertTrue(len(gi.version_info) >= 3)
         self.assertGreaterEqual(gi.version_info, (0, 0, 2))
 
     def test_check_version(self):
