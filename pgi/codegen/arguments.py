@@ -294,6 +294,8 @@ class InterfaceArgument(GIArgument):
             return StructArgument
         elif iface_type == GIInfoType.CALLBACK:
             return CallbackArgument
+        elif iface_type == GIInfoType.FLAGS:
+            return FlagsArgument
 
         raise NotImplementedError("Unsupported interface type %r" % iface.type)
 
@@ -336,6 +338,19 @@ class CallbackArgument(InterfaceArgument):
 
 class EnumArgument(InterfaceArgument):
     pass
+
+
+class FlagsArgument(InterfaceArgument):
+
+    def pre_call(self):
+        iface = self.type.get_interface()
+        iface_name = iface.name
+        iface_namespace = iface.namespace
+
+        type_ = import_attribute(iface_namespace, iface_name)
+        block, out = self.backend.pack_flags(self.name, type_)
+        self.call_var = out
+        return block
 
 
 class StructArgument(InterfaceArgument):

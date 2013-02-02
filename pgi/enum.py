@@ -52,6 +52,12 @@ class _FlagsClass(int):
 
     __str__ = __repr__
 
+    def __or__(self, other):
+        return type(self)(int(self) | other)
+
+    def __and__(self, other):
+        return type(self)(int(self) & other)
+
 
 def _get_values(enum):
     values = []

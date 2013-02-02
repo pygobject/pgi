@@ -316,3 +316,17 @@ class FuncsTest(unittest.TestCase):
     def test_string_none(self):
         entry = Gtk.Entry()
         entry.set_icon_from_stock(Gtk.EntryIconPosition.PRIMARY, None)
+
+    def test_flags_in(self):
+        spinner = Gtk.Spinner()
+        table = Gtk.Table(3, 2, True)
+        self.assertRaises(TypeError, table.attach, spinner, 0, 2, 2, 3,
+                          xoptions=True)
+        self.assertRaises(TypeError, table.attach, spinner, 0, 2, 2, 3,
+                          xoptions=-1)
+        table.attach(spinner, 0, 2, 2, 3, xoptions=Gtk.AttachOptions.EXPAND)
+        table.remove(spinner)
+        table.attach(spinner, 0, 2, 2, 3, xoptions=Gtk.AttachOptions.SHRINK)
+        table.remove(spinner)
+        table.attach(spinner, 0, 2, 2, 3, xoptions=Gtk.AttachOptions.FILL)
+        table.remove(spinner)

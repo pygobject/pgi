@@ -19,6 +19,16 @@ class FlagsTest(unittest.TestCase):
         self.assertEqual(Gtk.RcFlags(1 | 1 << 3),
                          Gtk.RcFlags.BASE | Gtk.RcFlags.FG)
 
+    def test_or(self):
+        x =  Gtk.RcFlags.BASE | Gtk.RcFlags.FG
+        self.assertTrue(isinstance(x, Gtk.RcFlags))
+        self.assertEqual(int(Gtk.RcFlags.BASE) | int(Gtk.RcFlags.FG), int(x))
+
+    def test_and(self):
+        x =  Gtk.RcFlags.BASE & Gtk.RcFlags.FG
+        self.assertTrue(isinstance(x, Gtk.RcFlags))
+        self.assertEqual(int(Gtk.RcFlags.BASE) & int(Gtk.RcFlags.FG), int(x))
+
     def test_repr(self):
         self.assertTrue("FG" in repr(Gtk.RcFlags.FG))
         self.assertTrue("0" in repr(Gtk.RcFlags(0)))
