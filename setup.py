@@ -15,7 +15,7 @@ import pgi
 
 
 class CoverageCommand(Command):
-    description = "generaqte coverage"
+    description = "generate coverage"
     user_options = []
 
     def initialize_options(self):
@@ -157,8 +157,17 @@ setup(name='pgi',
       author_email='reiter.christoph@gmail.com',
       url='https://github.com/lazka/pgi',
       packages=['pgi', 'pgi.gir', 'pgi.glib', 'pgi.gobject',
-                'pgi.overrides', 'pgi.repository'],
+                'pgi.overrides', 'pgi.repository', 'pgi.codegen'],
       license='LGPL-2.1+',
+      classifiers=[
+        'Development Status :: 2 - Pre-Alpha',
+        'Intended Audience :: Developers',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: Implementation :: CPython',
+        'Programming Language :: Python :: Implementation :: PyPy',
+      ],
       cmdclass={
             'test': TestCommand,
             'coverage': CoverageCommand,
