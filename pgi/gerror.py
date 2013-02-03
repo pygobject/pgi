@@ -9,18 +9,8 @@
 class PGError(Exception):
 
     def __init__(self, error):
-        self.__error = error
-
-    @property
-    def domain(self):
-        return self.__error.domain.string
-
-    @property
-    def code(self):
-        return self.__error.code
-
-    @property
-    def message(self):
-        return self.__error.message
+        self.domain = error.domain.string
+        self.code = error.code
+        self.message = error.message
 
 PGError.__name__ = "GError"

@@ -739,13 +739,18 @@ else:
         block.add_dependency("PGError", PGError)
         return block, var["out"]
 
-    def check_gerror(self, gerror_ptr):
+    def raise_gerror(self, name):
         block, var = self.parse("""
-if $gerror_ptr:
-    raise PGError($gerror_ptr.contents)
-""", gerror_ptr=gerror_ptr)
+raise $var
+""", var=name)
 
-        block.add_dependency("PGError", PGError)
+        return block
+
+    def free_gerror(self, name):
+        block, var = self.parse("""
+if $ptr:
+    $ptr.free()
+""", ptr=name)
         return block
 
 

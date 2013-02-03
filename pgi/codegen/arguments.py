@@ -57,7 +57,12 @@ class ErrorArgument(Argument):
         return block
 
     def post_call(self):
-        return self.backend.check_gerror(self._error)
+        block, out = self.backend.unpack_gerror(self._error)
+        block2 = self.backend.free_gerror(self._error)
+        block2.write_into(block)
+        block2 = self.backend.raise_gerror(out)
+        block2.write_into(block)
+        return block
 
 
 class GIArgument(Argument):
@@ -123,6 +128,10 @@ class GIErrorArgument(GIArgument):
             return
 
         block, self.out_var = self.backend.unpack_gerror(self._error)
+        if self.transfer_everything():
+            block2 = self.backend.free_gerror(self._error)
+            block2.write_into(block)
+
         return block
 
 
