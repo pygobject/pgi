@@ -1171,3 +1171,16 @@ class TestGErrorException(unittest.TestCase):
             self.assertEqual(e.domain, GIMarshallingTests.CONSTANT_GERROR_DOMAIN)
             self.assertEqual(e.code, GIMarshallingTests.CONSTANT_GERROR_CODE)
             self.assertEqual(e.message, GIMarshallingTests.CONSTANT_GERROR_MESSAGE)
+
+
+@unittest.skipUnless(GIMarshallingTests, "")
+class TestGErrorOut(unittest.TestCase):
+    # See https://bugzilla.gnome.org/show_bug.cgi?id=666098
+    def test_gerror_out(self):
+        error, debug = GIMarshallingTests.gerror_out()
+
+        self.assertIsInstance(error, GObject.GError)
+        self.assertEqual(error.domain, GIMarshallingTests.CONSTANT_GERROR_DOMAIN)
+        self.assertEqual(error.code, GIMarshallingTests.CONSTANT_GERROR_CODE)
+        self.assertEqual(error.message, GIMarshallingTests.CONSTANT_GERROR_MESSAGE)
+        self.assertEqual(debug, GIMarshallingTests.CONSTANT_GERROR_DEBUG_MESSAGE)

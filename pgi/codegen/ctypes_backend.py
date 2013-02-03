@@ -50,6 +50,8 @@ def typeinfo_to_ctypes(info, return_value=False):
                 return gchar_p
         elif tag == GITypeTag.ARRAY:
             return gpointer
+        elif tag == GITypeTag.ERROR:
+            return gpointer
         else:
             if tag in mapping:
                 return ctypes.POINTER(mapping[tag])
@@ -722,10 +724,20 @@ class ErrorTypes(object):
     def setup_gerror(self):
         block, var = self.parse("""
 $ptr = $gerror_ptr()
-$ptr_ref = ctypes.byref($ptr)
 """, gerror_ptr=GErrorPtr)
 
-        return block, var["ptr"], var["ptr_ref"]
+        return block, var["ptr"]
+
+    def unpack_gerror(self, name):
+        block, var = self.parse("""
+if $gerror_ptr:
+    $out = PGError($gerror_ptr.contents)
+else:
+    $out = None
+""", gerror_ptr=name)
+
+        block.add_dependency("PGError", PGError)
+        return block, var["out"]
 
     def check_gerror(self, gerror_ptr):
         block, var = self.parse("""

@@ -10,6 +10,7 @@ from pgi.gir import GICallableInfoPtr
 from pgi.util import import_attribute
 from pgi.ctypesutil import gicast
 from pgi.gtype import PGType
+from pgi.gerror import PGError
 
 
 class Argument(object):
@@ -49,8 +50,9 @@ class Argument(object):
 class ErrorArgument(Argument):
 
     def pre_call(self):
-        block, error, ref = self.backend.setup_gerror()
-        self.call_var = ref
+        block, error = self.backend.setup_gerror()
+        block2, self.call_var = self.backend.get_reference(error)
+        block2.write_into(block)
         self._error = error
         return block
 
@@ -100,6 +102,28 @@ class GIArgument(Argument):
 
     def __repr__(self):
         return "<%s name=%r>" % (self.__class__.__name__, self.name)
+
+
+class GIErrorArgument(GIArgument):
+    TAG = GITypeTag.ERROR
+    py_type = PGError
+
+    def pre_call(self):
+        if self.is_direction_out():
+            block, error = self.backend.setup_gerror()
+            block2, self.call_var = self.backend.get_reference(error)
+            block2.write_into(block)
+            self._error = error
+            return block
+
+        raise NotImplementedError("Error not out")
+
+    def post_call(self):
+        if not self.is_direction_out():
+            return
+
+        block, self.out_var = self.backend.unpack_gerror(self._error)
+        return block
 
 
 class ArrayArgument(GIArgument):
