@@ -458,6 +458,22 @@ $gtype = GType($obj._type.value)
 
 class InterfaceTypes(object):
 
+    def pack_enum(self, name, base_type):
+        block, var = self.parse("""
+if $val not in $base_type._allowed:
+    raise TypeError("Invalid enum value %r" % $val)
+
+$val = ctypes.c_uint($val)
+""", base_type=base_type, val=name)
+
+        return block, var["val"]
+
+    def setup_enum(self):
+        block, var = self.parse("""
+$val = ctypes.c_uint()
+""")
+        return block, var["val"]
+
     def pack_flags(self, name, base_type):
         block, var = self.parse("""
 # https://bugzilla.gnome.org/show_bug.cgi?id=693053

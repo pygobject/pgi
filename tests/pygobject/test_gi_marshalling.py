@@ -935,6 +935,31 @@ class TestProjectVersion(unittest.TestCase):
 
 
 @unittest.skipUnless(GIMarshallingTests, "")
+class TestEnum(unittest.TestCase):
+    def test_enum_in(self):
+        GIMarshallingTests.enum_in(GIMarshallingTests.Enum.VALUE3)
+        GIMarshallingTests.enum_in(42)
+
+        self.assertRaises(TypeError, GIMarshallingTests.enum_in, 43)
+        self.assertRaises(TypeError, GIMarshallingTests.enum_in, 'GIMarshallingTests.Enum.VALUE3')
+
+    def test_enum_return(self):
+        enum = GIMarshallingTests.enum_returnv()
+        self.assertTrue(isinstance(enum, GIMarshallingTests.Enum))
+        self.assertEqual(enum, GIMarshallingTests.Enum.VALUE3)
+
+    def test_enum_out(self):
+        enum = GIMarshallingTests.enum_out()
+        self.assertTrue(isinstance(enum, GIMarshallingTests.Enum))
+        self.assertEqual(enum, GIMarshallingTests.Enum.VALUE3)
+
+    def test_enum_inout(self):
+        enum = GIMarshallingTests.enum_inout(GIMarshallingTests.Enum.VALUE3)
+        self.assertTrue(isinstance(enum, GIMarshallingTests.Enum))
+        self.assertEqual(enum, GIMarshallingTests.Enum.VALUE1)
+
+
+@unittest.skipUnless(GIMarshallingTests, "")
 class TestTimet(unittest.TestCase):
 
     def test_time_t_return(self):

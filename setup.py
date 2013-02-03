@@ -85,13 +85,16 @@ class TestCommand(Command):
     description = "run unit tests"
     user_options = [
         ("pgi-only", None, "only run pgi"),
+        ("gi-only", None, "only run gi"),
     ]
 
     def initialize_options(self):
         self.pgi_only = False
+        self.gi_only = False
 
     def finalize_options(self):
         self.pgi_only = bool(self.pgi_only)
+        self.gi_only = bool(self.gi_only)
 
     def run(self):
         import tests
@@ -100,6 +103,9 @@ class TestCommand(Command):
 
         if os.name == "nt":
             exit(tests.test(False, "ctypes"))
+
+        if self.gi_only:
+            exit(tests.test(True, None))
 
         is_cpython = platform.python_implementation() == "CPython"
         runs = [(False, "ctypes"), (False, "cffi"), (True, None)]

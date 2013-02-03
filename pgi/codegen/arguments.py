@@ -337,7 +337,43 @@ class CallbackArgument(InterfaceArgument):
 
 
 class EnumArgument(InterfaceArgument):
-    pass
+
+    def pre_call(self):
+        iface = self.type.get_interface()
+        iface_name = iface.name
+        iface_namespace = iface.namespace
+
+        if self.is_direction_inout():
+            type_ = import_attribute(iface_namespace, iface_name)
+            block, self._data = self.backend.pack_enum(self.name, type_)
+            block2, self.call_var = self.backend.get_reference(self._data)
+            block2.write_into(block)
+            return block
+        elif self.is_direction_in():
+            type_ = import_attribute(iface_namespace, iface_name)
+            block, out = self.backend.pack_enum(self.name, type_)
+            self.call_var = out
+            return block
+        else:
+            block, out = self.backend.setup_enum()
+            block2, self.call_var = self.backend.get_reference(out)
+            block2.write_into(block)
+            self._data = out
+            return block
+
+    def post_call(self):
+        if not self.is_direction_out():
+            return
+
+        iface = self.type.get_interface()
+        iface_name = iface.name
+        iface_namespace = iface.namespace
+        type_ = import_attribute(iface_namespace, iface_name)
+
+        block, var = self.backend.unpack_basic(self._data)
+        block2, self.out_var = self.backend.unpack_enum(var, type_)
+        block2.write_into(block)
+        return block
 
 
 class FlagsArgument(InterfaceArgument):
