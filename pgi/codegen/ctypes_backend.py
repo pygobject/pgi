@@ -741,7 +741,8 @@ else:
 
     def raise_gerror(self, name):
         block, var = self.parse("""
-raise $var
+if $var:
+    raise $var
 """, var=name)
 
         return block
