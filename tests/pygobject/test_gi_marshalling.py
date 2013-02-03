@@ -1148,3 +1148,14 @@ class TestTimet(unittest.TestCase):
 
     def test_time_t_inout(self):
         self.assertEqual(0, GIMarshallingTests.time_t_inout(1234567890))
+
+
+@unittest.skipUnless(GIMarshallingTests, "")
+class TestMultiOutputArgs(unittest.TestCase):
+
+    def test_int_out_out(self):
+        self.assertEqual((6, 7), GIMarshallingTests.int_out_out())
+
+    def test_int_return_out(self):
+        self.assertEqual((6, 7), GIMarshallingTests.int_return_out())
+

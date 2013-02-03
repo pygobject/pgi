@@ -49,6 +49,11 @@ GFlags = GFlags
 __all__.append("GFlags")
 
 
+from pgi.gerror import PGError as GError
+GError = GError
+__all__.append("GError")
+
+
 TYPE_INVALID = GObjectModule.type_from_name('invalid')
 TYPE_NONE = GObjectModule.type_from_name('void')
 TYPE_INTERFACE = GObjectModule.type_from_name('GInterface')
