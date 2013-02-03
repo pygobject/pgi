@@ -112,6 +112,8 @@ def wrap_setup():
                     attr_name = name
                     if attr_name.startswith("get_"):
                         attr_name = attr_name[4:]
+                    elif attr_name.startswith("to_"):
+                        attr_name = attr_name[3:]
                     # e.g. conflict with ctypes "contents" attribute
                     if hasattr(ptr, attr_name):
                         attr_name += "_"

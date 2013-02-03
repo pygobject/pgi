@@ -81,9 +81,7 @@ class Flags(guint):
 
 
 class GQuark(guint32):
-    def to_string(self):
-        GQuark.to_string(self)
-
+    pass
 
 _methods = [
     ("from_string", GQuark, [gchar_p]),
@@ -92,7 +90,7 @@ _methods = [
     ("try_string", GQuark, [gchar_p]),
 ]
 
-wrap_class(_glib, GQuark, None, "g_quark_", _methods)
+wrap_class(_glib, GQuark, GQuark, "g_quark_", _methods)
 
 
 class GError(Structure):

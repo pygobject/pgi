@@ -78,7 +78,7 @@ class FuncsTest(unittest.TestCase):
 
     def test_func_throws(self):
         builder = Gtk.Builder()
-        self.assertRaises(RuntimeError, builder.add_from_file, "")
+        self.assertRaises(GObject.GError, builder.add_from_file, "")
 
     def test_func_string_null(self):
         ag = Gtk.ActionGroup("foo")

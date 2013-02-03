@@ -1159,3 +1159,15 @@ class TestMultiOutputArgs(unittest.TestCase):
     def test_int_return_out(self):
         self.assertEqual((6, 7), GIMarshallingTests.int_return_out())
 
+
+@unittest.skipUnless(GIMarshallingTests, "")
+class TestGErrorException(unittest.TestCase):
+    def test_gerror_exception(self):
+        self.assertRaises(GObject.GError, GIMarshallingTests.gerror)
+        try:
+            GIMarshallingTests.gerror()
+        except Exception:
+            etype, e = sys.exc_info()[:2]
+            self.assertEqual(e.domain, GIMarshallingTests.CONSTANT_GERROR_DOMAIN)
+            self.assertEqual(e.code, GIMarshallingTests.CONSTANT_GERROR_CODE)
+            self.assertEqual(e.message, GIMarshallingTests.CONSTANT_GERROR_MESSAGE)

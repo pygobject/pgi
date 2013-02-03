@@ -14,6 +14,7 @@ from pgi.glib import *
 from pgi.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr, GType
 from pgi.gobject import GCallback
 from pgi.gtype import PGType
+from pgi.gerror import PGError
 
 
 def typeinfo_to_ctypes(info, return_value=False):
@@ -729,9 +730,10 @@ $ptr_ref = ctypes.byref($ptr)
     def check_gerror(self, gerror_ptr):
         block, var = self.parse("""
 if $gerror_ptr:
-    raise RuntimeError($gerror_ptr.contents.message)
+    raise PGError($gerror_ptr.contents)
 """, gerror_ptr=gerror_ptr)
 
+        block.add_dependency("PGError", PGError)
         return block
 
 
