@@ -35,6 +35,9 @@ class EnumTest(unittest.TestCase):
     @unittest.skipIf(is_gi, "no enum methods in gi")
     def test_methods(self):
         self.assertTrue("from_name" in dir(Gtk.IconSize))
+        self.assertEqual(Gtk.IconSize.from_name("gtk-menu"), 1)
+        self.assertEqual(Gtk.IconSize.get_name(2), "gtk-small-toolbar")
+        self.assertEqual(Gtk.IconSize.lookup(1), (True, 16, 16))
 
     def test_return_enum(self):
         box = Gtk.HBox()

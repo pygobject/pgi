@@ -12,6 +12,7 @@ from pgi.ctypesutil import gicast
 from pgi.gir import GIEnumInfoPtr
 from pgi.gtype import PGType
 from pgi.util import cached_property
+from pgi.obj import MethodAttribute
 
 
 class EnumBase(int):
@@ -138,14 +139,6 @@ def FlagsAttribute(info):
     return cls
 
 
-class _EnumMethod(object):
-    def __init__(self, name):
-        self._name = name
-
-    def __get__(self, instance, owner):
-        raise NotImplementedError("%r not supported" % self._name)
-
-
 def EnumAttribute(info):
     info = gicast(info, GIEnumInfoPtr)
     enum_name = info.namespace + info.name
@@ -158,8 +151,7 @@ def EnumAttribute(info):
     cls._info = info
 
     for method in info.get_methods():
-        name = method.name
-        setattr(cls, name, _EnumMethod(name))
+        setattr(cls, method.name, MethodAttribute(method))
 
     # create instances for all of them and add to the class
     for num, vname in values:
