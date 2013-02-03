@@ -39,6 +39,11 @@ GType = GType
 __all__.append("GType")
 
 
+from pgi.enum import EnumBase as GEnum
+GEnum = GEnum
+__all__.append("GEnum")
+
+
 TYPE_INVALID = GObjectModule.type_from_name('invalid')
 TYPE_NONE = GObjectModule.type_from_name('void')
 TYPE_INTERFACE = GObjectModule.type_from_name('GInterface')

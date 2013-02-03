@@ -5,14 +5,42 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
+import ctypes
+
+from pgi.gobject import GEnumClassPtr
 from pgi.ctypesutil import gicast
 from pgi.gir import GIEnumInfoPtr
 from pgi.gtype import PGType
+from pgi.util import cached_property
 
 
-class _EnumClass(int):
+class EnumBase(int):
+    pass
+
+
+class _EnumClass(EnumBase):
     _allowed = {}
-    __gtype__ = None
+    _info = None
+
+    @property
+    def __gtype__(self):
+        return PGType(self._info.g_type)
+
+    @property
+    def __enum_value(self):
+        gtype = self.__gtype__._type
+        klass = ctypes.cast(gtype.class_ref(), GEnumClassPtr)
+        return klass.get_value(self)
+
+    @cached_property
+    def value_nick(self):
+        enum_value = self.__enum_value
+        return enum_value.contents.value_nick
+
+    @cached_property
+    def value_name(self):
+        enum_value = self.__enum_value
+        return enum_value.contents.value_name
 
     def __new__(cls, value):
         if not isinstance(value, (long, int)):
@@ -29,7 +57,11 @@ class _EnumClass(int):
     __str__ = __repr__
 
 
-class _FlagsClass(int):
+class FlagsBase(int):
+    pass
+
+
+class _FlagsClass(FlagsBase):
     _flags = []
     __gtype__ = None
 
@@ -74,13 +106,11 @@ def FlagsAttribute(info):
     info = gicast(info, GIEnumInfoPtr)
     enum_name = info.type_name or info.name
 
-    values = _get_values(info)
-
     # add them to the class for init checks
-    cls_dict = dict(_FlagsClass.__dict__)
-    cls_dict["_flags"] = values
-    cls = type(enum_name, _FlagsClass.__bases__, cls_dict)
+    cls = type(enum_name, _FlagsClass.__bases__, dict(_FlagsClass.__dict__))
 
+    values = _get_values(info)
+    cls._flags = values
     cls.__gtype__ = PGType(info.g_type)
 
     # create instances for all of them and add to the class
@@ -100,16 +130,14 @@ class _EnumMethod(object):
 
 def EnumAttribute(info):
     info = gicast(info, GIEnumInfoPtr)
-    enum_name = info.type_name or info.name
-
-    values = _get_values(info)
+    enum_name = info.namespace + info.name
 
     # add them to the class for init checks
-    cls_dict = dict(_EnumClass.__dict__)
-    cls_dict["_allowed"] = dict(values)
-    cls = type(enum_name, _EnumClass.__bases__, cls_dict)
+    cls = type(enum_name, _EnumClass.__bases__, dict(_EnumClass.__dict__))
 
-    cls.__gtype__ = PGType(info.g_type)
+    values = _get_values(info)
+    cls._allowed = dict(values)
+    cls._info = info
 
     for method in info.get_methods():
         name = method.name

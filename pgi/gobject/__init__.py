@@ -39,6 +39,33 @@ class GTypeFlags(Flags):
     VALUE_ABSTRACT = 1 << 5
 
 
+class GEnumValue(Structure):
+    _fields_ = [
+        ("value", gint),
+        ("value_name", gchar_p),
+        ("value_nick", gchar_p),
+    ]
+
+
+class GEnumValuePtr(POINTER(GEnumValue)):
+    _type_ = GEnumValue
+
+
+class GEnumClass(Structure):
+    pass
+
+
+class GEnumClassPtr(POINTER(GEnumClass)):
+    _type_ = GEnumClass
+
+
+_methods = [
+    ("get_value", GEnumValuePtr, [GEnumClassPtr, gint]),
+]
+
+wrap_class(_gobject, GEnumClass, GEnumClassPtr, "g_enum_", _methods)
+
+
 class GType(gulong):
     def __repr__(self):
         return "<GType %r>" % repr(self.value)
@@ -75,9 +102,9 @@ _methods = [
     ("fundamental", GType, [GType]),
     ("children", POINTER(GType), [GType, POINTER(guint)]),
     ("interfaces", POINTER(GType), [GType, POINTER(guint)]),
-    ("class_peek", GObjectClassPtr, [GType]),
-    ("class_ref", GObjectClassPtr, [GType]),
-    ("class_unref", None, [GObjectClassPtr]),
+    ("class_peek", gpointer, [GType]),
+    ("class_ref", gpointer, [GType]),
+    ("class_unref", None, [gpointer]),
     ("class_peek_parent", gpointer, [gpointer]),
     ("default_interface_ref", GTypeInterfacePtr, [GType]),
     ("default_interface_peek", GTypeInterfacePtr, [GType]),
@@ -312,5 +339,6 @@ __all__ = ["GType", "g_type_init", "GParamFlags", "GValue", "GValuePtr",
            "GClosureNotify", "signal_handler_disconnect", "GConnectFlags",
            "signal_handler_unblock", "signal_handler_block", "signal_lookup",
            "GTypeInterface", "GTypeInterfacePtr", "boxed_type_register_static",
-           "GBoxedCopyFunc", "GBoxedFreeFunc",
+           "GBoxedCopyFunc", "GBoxedFreeFunc", "GEnumClassPtr", "GEnumValue",
+           "GEnumClass", "GEnumValue",
 ]

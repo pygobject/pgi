@@ -936,6 +936,23 @@ class TestProjectVersion(unittest.TestCase):
 
 @unittest.skipUnless(GIMarshallingTests, "")
 class TestEnum(unittest.TestCase):
+    def test_enum(self):
+        self.assertTrue(issubclass(GIMarshallingTests.Enum, int))
+        self.assertTrue(isinstance(GIMarshallingTests.Enum.VALUE1, GIMarshallingTests.Enum))
+        self.assertTrue(isinstance(GIMarshallingTests.Enum.VALUE2, GIMarshallingTests.Enum))
+        self.assertTrue(isinstance(GIMarshallingTests.Enum.VALUE3, GIMarshallingTests.Enum))
+        self.assertEqual(42, GIMarshallingTests.Enum.VALUE3)
+
+    @unittest.skip("no gtype")
+    def test_value_nick_and_name(self):
+        self.assertEqual(GIMarshallingTests.Enum.VALUE1.value_nick, 'value1')
+        self.assertEqual(GIMarshallingTests.Enum.VALUE2.value_nick, 'value2')
+        self.assertEqual(GIMarshallingTests.Enum.VALUE3.value_nick, 'value3')
+
+        self.assertEqual(GIMarshallingTests.Enum.VALUE1.value_name, 'GI_MARSHALLING_TESTS_ENUM_VALUE1')
+        self.assertEqual(GIMarshallingTests.Enum.VALUE2.value_name, 'GI_MARSHALLING_TESTS_ENUM_VALUE2')
+        self.assertEqual(GIMarshallingTests.Enum.VALUE3.value_name, 'GI_MARSHALLING_TESTS_ENUM_VALUE3')
+
     def test_enum_in(self):
         GIMarshallingTests.enum_in(GIMarshallingTests.Enum.VALUE3)
         GIMarshallingTests.enum_in(42)
@@ -957,6 +974,64 @@ class TestEnum(unittest.TestCase):
         enum = GIMarshallingTests.enum_inout(GIMarshallingTests.Enum.VALUE3)
         self.assertTrue(isinstance(enum, GIMarshallingTests.Enum))
         self.assertEqual(enum, GIMarshallingTests.Enum.VALUE1)
+
+    def test_enum_second(self):
+        # check for the bug where different non-gtype enums share the same class
+        self.assertNotEqual(GIMarshallingTests.Enum, GIMarshallingTests.SecondEnum)
+
+        # check that values are not being shared between different enums
+        self.assertTrue(hasattr(GIMarshallingTests.SecondEnum, "SECONDVALUE1"))
+        self.assertRaises(AttributeError, getattr, GIMarshallingTests.Enum, "SECONDVALUE1")
+        self.assertTrue(hasattr(GIMarshallingTests.Enum, "VALUE1"))
+        self.assertRaises(AttributeError, getattr, GIMarshallingTests.SecondEnum, "VALUE1")
+
+    @unittest.skip("no gtype")
+    def test_enum_gtype_name_is_namespaced(self):
+        self.assertEqual(GIMarshallingTests.Enum.__gtype__.name,
+                         'GIMarshallingTestsEnum')
+
+
+@unittest.skipUnless(GIMarshallingTests, "")
+class TestGEnum(unittest.TestCase):
+    def test_genum(self):
+        self.assertTrue(issubclass(GIMarshallingTests.GEnum, GObject.GEnum))
+        self.assertTrue(isinstance(GIMarshallingTests.GEnum.VALUE1, GIMarshallingTests.GEnum))
+        self.assertTrue(isinstance(GIMarshallingTests.GEnum.VALUE2, GIMarshallingTests.GEnum))
+        self.assertTrue(isinstance(GIMarshallingTests.GEnum.VALUE3, GIMarshallingTests.GEnum))
+        self.assertEqual(42, GIMarshallingTests.GEnum.VALUE3)
+
+    def test_value_nick_and_name(self):
+        self.assertEqual(GIMarshallingTests.GEnum.VALUE1.value_nick, 'value1')
+        self.assertEqual(GIMarshallingTests.GEnum.VALUE2.value_nick, 'value2')
+        self.assertEqual(GIMarshallingTests.GEnum.VALUE3.value_nick, 'value3')
+
+        self.assertEqual(GIMarshallingTests.GEnum.VALUE1.value_name, 'GI_MARSHALLING_TESTS_GENUM_VALUE1')
+        self.assertEqual(GIMarshallingTests.GEnum.VALUE2.value_name, 'GI_MARSHALLING_TESTS_GENUM_VALUE2')
+        self.assertEqual(GIMarshallingTests.GEnum.VALUE3.value_name, 'GI_MARSHALLING_TESTS_GENUM_VALUE3')
+
+
+    def test_genum_in(self):
+        GIMarshallingTests.genum_in(GIMarshallingTests.GEnum.VALUE3)
+        GIMarshallingTests.genum_in(42)
+
+        self.assertRaises(TypeError, GIMarshallingTests.genum_in, 43)
+        self.assertRaises(TypeError, GIMarshallingTests.genum_in, 'GIMarshallingTests.GEnum.VALUE3')
+
+    @unittest.skip("FIXME")
+    def test_genum_return(self):
+        genum = GIMarshallingTests.genum_returnv()
+        self.assertTrue(isinstance(genum, GIMarshallingTests.GEnum))
+        self.assertEqual(genum, GIMarshallingTests.GEnum.VALUE3)
+
+    def test_genum_out(self):
+        genum = GIMarshallingTests.genum_out()
+        self.assertTrue(isinstance(genum, GIMarshallingTests.GEnum))
+        self.assertEqual(genum, GIMarshallingTests.GEnum.VALUE3)
+
+    def test_genum_inout(self):
+        genum = GIMarshallingTests.genum_inout(GIMarshallingTests.GEnum.VALUE3)
+        self.assertTrue(isinstance(genum, GIMarshallingTests.GEnum))
+        self.assertEqual(genum, GIMarshallingTests.GEnum.VALUE1)
 
 
 @unittest.skipUnless(GIMarshallingTests, "")

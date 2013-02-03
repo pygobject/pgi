@@ -6,9 +6,11 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from warnings import warn
+import ctypes
 
 from pgi import gobject
 from pgi.gobject import GValue, GValuePtr, G_TYPE_FROM_INSTANCE
+from pgi.gobject import GObjectClassPtr
 from pgi.gir import GIInfoType, GITypeTag
 
 from pgi.util import escape_name, unescape_name, InfoIterWrapper
@@ -171,6 +173,7 @@ class _ObjectClassProp(object):
             gtype = info.g_type
             if info.type.value == GIInfoType.OBJECT:
                 klass = gtype.class_ref()
+                klass = ctypes.cast(klass, GObjectClassPtr)
                 spec = klass.find_property(gname)
                 gtype.class_unref(klass)
             else:
