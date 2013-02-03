@@ -65,7 +65,7 @@ def typeinfo_to_ctypes(info, return_value=False):
             elif iface_type == GIInfoType.UNION:
                 return gpointer
             elif iface_type == GIInfoType.FLAGS:
-                return gint
+                return guint
             elif iface_type == GIInfoType.CALLBACK:
                 return GCallback
 
@@ -474,13 +474,21 @@ $val = ctypes.c_uint()
 """)
         return block, var["val"]
 
+    def setup_flags(self):
+        block, var = self.parse("""
+$val = ctypes.c_uint()
+""")
+        return block, var["val"]
+
     def pack_flags(self, name, base_type):
         block, var = self.parse("""
 # https://bugzilla.gnome.org/show_bug.cgi?id=693053
-if not isinstance($var, $base_type):
+if not isinstance($var, basestring) and not int($var):
+    $var = ctypes.c_uint()
+elif not isinstance($var, $base_type):
     raise TypeError("Expected %r but got %r" % ($base_type.__name__, type($var).__name__))
 else:
-    $var = int($var)
+    $var = ctypes.c_uint(int($var))
 """, var=name, base_type=base_type)
 
         return block, var["var"]

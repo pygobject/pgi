@@ -44,6 +44,11 @@ GEnum = GEnum
 __all__.append("GEnum")
 
 
+from pgi.enum import FlagsBase as GFlags
+GFlags = GFlags
+__all__.append("GFlags")
+
+
 TYPE_INVALID = GObjectModule.type_from_name('invalid')
 TYPE_NONE = GObjectModule.type_from_name('void')
 TYPE_INTERFACE = GObjectModule.type_from_name('GInterface')

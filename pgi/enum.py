@@ -7,7 +7,7 @@
 
 import ctypes
 
-from pgi.gobject import GEnumClassPtr
+from pgi.gobject import GEnumClassPtr, GFlagsClassPtr
 from pgi.ctypesutil import gicast
 from pgi.gir import GIEnumInfoPtr
 from pgi.gtype import PGType
@@ -26,21 +26,20 @@ class _EnumClass(EnumBase):
     def __gtype__(self):
         return PGType(self._info.g_type)
 
-    @property
-    def __enum_value(self):
+    def __get_enum_value(self):
         gtype = self.__gtype__._type
         klass = ctypes.cast(gtype.class_ref(), GEnumClassPtr)
-        return klass.get_value(self)
+        return klass.get_value(self).contents
 
     @cached_property
     def value_nick(self):
-        enum_value = self.__enum_value
-        return enum_value.contents.value_nick
+        enum_value = self.__get_enum_value()
+        return enum_value.value_nick
 
     @cached_property
     def value_name(self):
-        enum_value = self.__enum_value
-        return enum_value.contents.value_name
+        enum_value = self.__get_enum_value()
+        return enum_value.value_name
 
     def __new__(cls, value):
         if not isinstance(value, (long, int)):
@@ -63,7 +62,26 @@ class FlagsBase(int):
 
 class _FlagsClass(FlagsBase):
     _flags = []
-    __gtype__ = None
+    _info = None
+
+    @property
+    def __gtype__(self):
+        return PGType(self._info.g_type)
+
+    def __get_flags_value(self):
+        gtype = self.__gtype__._type
+        klass = ctypes.cast(gtype.class_ref(), GFlagsClassPtr)
+        return klass.get_first_value(self).contents
+
+    @cached_property
+    def first_value_nick(self):
+        flags_value = self.__get_flags_value()
+        return flags_value.value_nick
+
+    @cached_property
+    def first_value_name(self):
+        flags_value = self.__get_flags_value()
+        return flags_value.value_name
 
     def __new__(cls, value):
         if not isinstance(value, (long, int)):
@@ -104,14 +122,14 @@ def _get_values(enum):
 
 def FlagsAttribute(info):
     info = gicast(info, GIEnumInfoPtr)
-    enum_name = info.type_name or info.name
+    flags_name = info.namespace + info.name
 
     # add them to the class for init checks
-    cls = type(enum_name, _FlagsClass.__bases__, dict(_FlagsClass.__dict__))
+    cls = type(flags_name, _FlagsClass.__bases__, dict(_FlagsClass.__dict__))
 
     values = _get_values(info)
     cls._flags = values
-    cls.__gtype__ = PGType(info.g_type)
+    cls._info = info
 
     # create instances for all of them and add to the class
     for num, vname in values:

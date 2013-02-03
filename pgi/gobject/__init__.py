@@ -39,6 +39,33 @@ class GTypeFlags(Flags):
     VALUE_ABSTRACT = 1 << 5
 
 
+class GFlagsValue(Structure):
+    _fields_ = [
+        ("value", guint),
+        ("value_name", gchar_p),
+        ("value_nick", gchar_p),
+    ]
+
+
+class GFlagsValuePtr(POINTER(GFlagsValue)):
+    _type_ = GFlagsValue
+
+
+class GFlagsClass(Structure):
+    pass
+
+
+class GFlagsClassPtr(POINTER(GFlagsClass)):
+    _type_ = GFlagsClass
+
+
+_methods = [
+    ("get_first_value", GFlagsValuePtr, [GFlagsClassPtr, guint]),
+]
+
+wrap_class(_gobject, GFlagsClass, GFlagsClassPtr, "g_flags_", _methods)
+
+
 class GEnumValue(Structure):
     _fields_ = [
         ("value", gint),
@@ -340,5 +367,6 @@ __all__ = ["GType", "g_type_init", "GParamFlags", "GValue", "GValuePtr",
            "signal_handler_unblock", "signal_handler_block", "signal_lookup",
            "GTypeInterface", "GTypeInterfacePtr", "boxed_type_register_static",
            "GBoxedCopyFunc", "GBoxedFreeFunc", "GEnumClassPtr", "GEnumValue",
-           "GEnumClass", "GEnumValue",
+           "GEnumClass", "GEnumValue", "GFlagsClass", "GFlagsClassPtr",
+           "GFlagsValue", "GFlagsValuePtr",
 ]

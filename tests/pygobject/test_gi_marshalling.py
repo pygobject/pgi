@@ -1035,6 +1035,105 @@ class TestGEnum(unittest.TestCase):
 
 
 @unittest.skipUnless(GIMarshallingTests, "")
+class TestGFlags(unittest.TestCase):
+
+    def test_flags(self):
+        self.assertTrue(issubclass(GIMarshallingTests.Flags, GObject.GFlags))
+        self.assertTrue(isinstance(GIMarshallingTests.Flags.VALUE1, GIMarshallingTests.Flags))
+        self.assertTrue(isinstance(GIMarshallingTests.Flags.VALUE2, GIMarshallingTests.Flags))
+        self.assertTrue(isinstance(GIMarshallingTests.Flags.VALUE3, GIMarshallingTests.Flags))
+        # __or__() operation should still return an instance, not an int.
+        self.assertTrue(isinstance(GIMarshallingTests.Flags.VALUE1 | GIMarshallingTests.Flags.VALUE2,
+                                   GIMarshallingTests.Flags))
+        self.assertEqual(1 << 1, GIMarshallingTests.Flags.VALUE2)
+
+    def test_value_nick_and_name(self):
+        self.assertEqual(GIMarshallingTests.Flags.VALUE1.first_value_nick, 'value1')
+        self.assertEqual(GIMarshallingTests.Flags.VALUE2.first_value_nick, 'value2')
+        self.assertEqual(GIMarshallingTests.Flags.VALUE3.first_value_nick, 'value3')
+
+        self.assertEqual(GIMarshallingTests.Flags.VALUE1.first_value_name, 'GI_MARSHALLING_TESTS_FLAGS_VALUE1')
+        self.assertEqual(GIMarshallingTests.Flags.VALUE2.first_value_name, 'GI_MARSHALLING_TESTS_FLAGS_VALUE2')
+        self.assertEqual(GIMarshallingTests.Flags.VALUE3.first_value_name, 'GI_MARSHALLING_TESTS_FLAGS_VALUE3')
+
+    def test_flags_in(self):
+        GIMarshallingTests.flags_in(GIMarshallingTests.Flags.VALUE2)
+        # result of __or__() operation should still be valid instance, not an int.
+        GIMarshallingTests.flags_in(GIMarshallingTests.Flags.VALUE2 | GIMarshallingTests.Flags.VALUE2)
+        GIMarshallingTests.flags_in_zero(Number(0))
+
+        self.assertRaises(TypeError, GIMarshallingTests.flags_in, 1 << 1)
+        self.assertRaises(TypeError, GIMarshallingTests.flags_in, 'GIMarshallingTests.Flags.VALUE2')
+
+    def test_flags_return(self):
+        flags = GIMarshallingTests.flags_returnv()
+        self.assertTrue(isinstance(flags, GIMarshallingTests.Flags))
+        self.assertEqual(flags, GIMarshallingTests.Flags.VALUE2)
+
+    def test_flags_out(self):
+        flags = GIMarshallingTests.flags_out()
+        self.assertTrue(isinstance(flags, GIMarshallingTests.Flags))
+        self.assertEqual(flags, GIMarshallingTests.Flags.VALUE2)
+
+    def test_flags_inout(self):
+        flags = GIMarshallingTests.flags_inout(GIMarshallingTests.Flags.VALUE2)
+        self.assertTrue(isinstance(flags, GIMarshallingTests.Flags))
+        self.assertEqual(flags, GIMarshallingTests.Flags.VALUE1)
+
+
+@unittest.skipUnless(GIMarshallingTests, "")
+class TestNoTypeFlags(unittest.TestCase):
+
+    def test_flags(self):
+        self.assertTrue(issubclass(GIMarshallingTests.NoTypeFlags, GObject.GFlags))
+        self.assertTrue(isinstance(GIMarshallingTests.NoTypeFlags.VALUE1, GIMarshallingTests.NoTypeFlags))
+        self.assertTrue(isinstance(GIMarshallingTests.NoTypeFlags.VALUE2, GIMarshallingTests.NoTypeFlags))
+        self.assertTrue(isinstance(GIMarshallingTests.NoTypeFlags.VALUE3, GIMarshallingTests.NoTypeFlags))
+        # __or__() operation should still return an instance, not an int.
+        self.assertTrue(isinstance(GIMarshallingTests.NoTypeFlags.VALUE1 | GIMarshallingTests.NoTypeFlags.VALUE2,
+                                   GIMarshallingTests.NoTypeFlags))
+        self.assertEqual(1 << 1, GIMarshallingTests.NoTypeFlags.VALUE2)
+
+    @unittest.skip("no gtype")
+    def test_value_nick_and_name(self):
+        self.assertEqual(GIMarshallingTests.NoTypeFlags.VALUE1.first_value_nick, 'value1')
+        self.assertEqual(GIMarshallingTests.NoTypeFlags.VALUE2.first_value_nick, 'value2')
+        self.assertEqual(GIMarshallingTests.NoTypeFlags.VALUE3.first_value_nick, 'value3')
+
+        self.assertEqual(GIMarshallingTests.NoTypeFlags.VALUE1.first_value_name, 'GI_MARSHALLING_TESTS_NO_TYPE_FLAGS_VALUE1')
+        self.assertEqual(GIMarshallingTests.NoTypeFlags.VALUE2.first_value_name, 'GI_MARSHALLING_TESTS_NO_TYPE_FLAGS_VALUE2')
+        self.assertEqual(GIMarshallingTests.NoTypeFlags.VALUE3.first_value_name, 'GI_MARSHALLING_TESTS_NO_TYPE_FLAGS_VALUE3')
+
+    def test_flags_in(self):
+        GIMarshallingTests.no_type_flags_in(GIMarshallingTests.NoTypeFlags.VALUE2)
+        GIMarshallingTests.no_type_flags_in(GIMarshallingTests.NoTypeFlags.VALUE2 | GIMarshallingTests.NoTypeFlags.VALUE2)
+        GIMarshallingTests.no_type_flags_in_zero(Number(0))
+
+        self.assertRaises(TypeError, GIMarshallingTests.no_type_flags_in, 1 << 1)
+        self.assertRaises(TypeError, GIMarshallingTests.no_type_flags_in, 'GIMarshallingTests.NoTypeFlags.VALUE2')
+
+    def test_flags_return(self):
+        flags = GIMarshallingTests.no_type_flags_returnv()
+        self.assertTrue(isinstance(flags, GIMarshallingTests.NoTypeFlags))
+        self.assertEqual(flags, GIMarshallingTests.NoTypeFlags.VALUE2)
+
+    def test_flags_out(self):
+        flags = GIMarshallingTests.no_type_flags_out()
+        self.assertTrue(isinstance(flags, GIMarshallingTests.NoTypeFlags))
+        self.assertEqual(flags, GIMarshallingTests.NoTypeFlags.VALUE2)
+
+    def test_flags_inout(self):
+        flags = GIMarshallingTests.no_type_flags_inout(GIMarshallingTests.NoTypeFlags.VALUE2)
+        self.assertTrue(isinstance(flags, GIMarshallingTests.NoTypeFlags))
+        self.assertEqual(flags, GIMarshallingTests.NoTypeFlags.VALUE1)
+
+    @unittest.skip("no gtype")
+    def test_flags_gtype_name_is_namespaced(self):
+        self.assertEqual(GIMarshallingTests.NoTypeFlags.__gtype__.name,
+                         'GIMarshallingTestsNoTypeFlags')
+
+
+@unittest.skipUnless(GIMarshallingTests, "")
 class TestTimet(unittest.TestCase):
 
     def test_time_t_return(self):
