@@ -156,6 +156,33 @@ $gtype = $pgtype._type.value
         block.add_dependency("PGType", PGType)
         return block, var["gtype"]
 
+    def pack_gtype(self, name):
+        gtype_map = {
+            str: "gchararray",
+            int: "gint",
+            float: "gdouble",
+            bool: "gboolean",
+        }
+
+        items = gtype_map.items()
+        gtype_map = dict((k, PGType.from_name(v)) for (k, v) in items)
+
+        block, var = self.parse("""
+if not isinstance($obj, PGType):
+    if hasattr($obj, "__gtype__"):
+        $obj = $obj.__gtype__
+    elif $obj in $gtype_map:
+        $obj = $gtype_map[$obj]
+
+if not isinstance($obj, PGType):
+    raise TypeError("%r not a GType" % $obj)
+
+$gtype = $obj._type.value
+""", gtype_map=gtype_map, obj=name)
+
+        block.add_dependency("PGType", PGType)
+        return block, var["gtype"]
+
     def unpack_gtype(self, name):
         block, var = self.parse("""
 $pgtype = PGType($gtype)
