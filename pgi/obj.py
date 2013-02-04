@@ -38,6 +38,10 @@ class _Object(object):
         if not self.super(*args, **kwargs):
             return
 
+        if self.__gtype__.is_abstract():
+            raise TypeError("cannot create instance of abstract type %r" %
+                            self.__gtype__.name)
+
         num_params, params = self.__get_gparam_array(**kwargs)
         obj = gobject.newv(self.__gtype__._type, num_params, params)
 

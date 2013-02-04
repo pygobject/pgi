@@ -127,6 +127,9 @@ class ObjectTest(unittest.TestCase):
         out = Gio.File.new_for_path("")
         self.assertTrue("GLocalFile" in repr(out))
 
+    def test_abstract_init(self):
+        self.assertRaises(TypeError, Gtk.Widget)
+
 
 class GTypeTest(unittest.TestCase):
     def test_repr(self):
