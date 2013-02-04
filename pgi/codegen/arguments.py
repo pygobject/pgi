@@ -310,7 +310,7 @@ class CArrayArgument(ArrayArgument):
         raise NotImplementedError("post zero")
 
 
-class InterfaceArgument(GIArgument):
+class BaseInterfaceArgument(GIArgument):
     TAG = GITypeTag.INTERFACE
     py_type = object
 
@@ -320,6 +320,8 @@ class InterfaceArgument(GIArgument):
         iface_type = iface.type.value
 
         if iface_type == GIInfoType.OBJECT:
+            return ObjectArgument
+        elif iface_type == GIInfoType.INTERFACE:
             return ObjectArgument
         elif iface_type == GIInfoType.ENUM:
             return EnumArgument
@@ -333,7 +335,7 @@ class InterfaceArgument(GIArgument):
         raise NotImplementedError("Unsupported interface type %r" % iface.type)
 
 
-class CallbackArgument(InterfaceArgument):
+class CallbackArgument(BaseInterfaceArgument):
     py_type = type(lambda: None)
 
     def setup(self):
@@ -369,7 +371,7 @@ class CallbackArgument(InterfaceArgument):
         return block
 
 
-class EnumArgument(InterfaceArgument):
+class EnumArgument(BaseInterfaceArgument):
 
     def pre_call(self):
         iface = self.type.get_interface()
@@ -409,7 +411,7 @@ class EnumArgument(InterfaceArgument):
         return block
 
 
-class FlagsArgument(InterfaceArgument):
+class FlagsArgument(BaseInterfaceArgument):
 
     def pre_call(self):
         iface = self.type.get_interface()
@@ -459,7 +461,7 @@ class FlagsArgument(InterfaceArgument):
         return block
 
 
-class StructArgument(InterfaceArgument):
+class StructArgument(BaseInterfaceArgument):
 
     def pre_call(self):
         iface = self.type.get_interface()
@@ -478,7 +480,7 @@ class StructArgument(InterfaceArgument):
             return block
 
 
-class ObjectArgument(InterfaceArgument):
+class ObjectArgument(BaseInterfaceArgument):
 
     def pre_call(self):
         if self.is_direction_in():

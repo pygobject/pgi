@@ -25,7 +25,7 @@ except ImportError:
     GIMarshallingTests = None
 
 import gi
-from gi.repository import GObject, GLib
+from gi.repository import GObject, GLib, Gio
 
 from compathelper import _bytes, _unicode
 
@@ -670,6 +670,14 @@ class TestGType(unittest.TestCase):
 
 
 @unittest.skipUnless(GIMarshallingTests, "")
+class TestCallbacks(unittest.TestCase):
+    def test_return_value_only(self):
+        def cb():
+            return 5
+        self.assertEqual(GIMarshallingTests.callback_return_value_only(cb), 5)
+
+
+@unittest.skipUnless(GIMarshallingTests, "")
 class TestPointer(unittest.TestCase):
     def test_pointer_in_return(self):
         self.assertEqual(GIMarshallingTests.pointer_in_return(42), 42)
@@ -1199,3 +1207,125 @@ class TestGErrorOutTransferNone(unittest.TestCase):
         self.assertEqual(error.code, GIMarshallingTests.CONSTANT_GERROR_CODE)
         self.assertEqual(error.message, GIMarshallingTests.CONSTANT_GERROR_MESSAGE)
         self.assertEqual(GIMarshallingTests.CONSTANT_GERROR_DEBUG_MESSAGE, debug)
+
+
+@unittest.skipUnless(GIMarshallingTests, "")
+class TestInterfaces(unittest.TestCase):
+
+    class TestInterfaceImpl(GObject.GObject, GIMarshallingTests.Interface):
+        def __init__(self):
+            GObject.GObject.__init__(self)
+            self.val = None
+
+        def do_test_int8_in(self, int8):
+            self.val = int8
+
+    def setUp(self):
+        self.instance = self.TestInterfaceImpl()
+
+    def test_wrapper(self):
+        self.assertTrue(issubclass(GIMarshallingTests.Interface, GObject.GInterface))
+        self.assertEqual(GIMarshallingTests.Interface.__gtype__.name, 'GIMarshallingTestsInterface')
+        self.assertRaises(NotImplementedError, GIMarshallingTests.Interface)
+
+    def test_implementation(self):
+        self.assertTrue(issubclass(self.TestInterfaceImpl, GIMarshallingTests.Interface))
+        self.assertTrue(isinstance(self.instance, GIMarshallingTests.Interface))
+
+    @unittest.skip("FIXME")
+    def test_int8_int(self):
+        GIMarshallingTests.test_interface_test_int8_in(self.instance, 42)
+        self.assertEqual(self.instance.val, 42)
+
+    @unittest.skip("FIXME")
+    def test_subclass(self):
+        class TestInterfaceImplA(self.TestInterfaceImpl):
+            pass
+
+        class TestInterfaceImplB(TestInterfaceImplA):
+            pass
+
+        instance = TestInterfaceImplA()
+        GIMarshallingTests.test_interface_test_int8_in(instance, 42)
+        self.assertEqual(instance.val, 42)
+
+    @unittest.skip("FIXME")
+    def test_mro(self):
+        # there was a problem with Python bailing out because of
+        # http://en.wikipedia.org/wiki/Diamond_problem with interfaces,
+        # which shouldn't really be a problem.
+
+        class TestInterfaceImpl(GObject.GObject, GIMarshallingTests.Interface):
+            pass
+
+        class TestInterfaceImpl2(GIMarshallingTests.Interface,
+                                 TestInterfaceImpl):
+            pass
+
+        class TestInterfaceImpl3(self.TestInterfaceImpl,
+                                 GIMarshallingTests.Interface2):
+            pass
+
+    @unittest.skip("FIXME")
+    def test_type_mismatch(self):
+        obj = GIMarshallingTests.Object()
+
+        # wrong type for first argument: interface
+        enum = Gio.File.new_for_path('.').enumerate_children(
+            '', Gio.FileQueryInfoFlags.NONE, None)
+        try:
+            enum.next_file(obj)
+            self.fail('call with wrong type argument unexpectedly succeeded')
+        except TypeError as e:
+            # should have argument name
+            self.assertTrue('cancellable' in str(e), e)
+            # should have expected type
+            self.assertTrue('xpected Gio.Cancellable' in str(e), e)
+            # should have actual type
+            self.assertTrue('GIMarshallingTests.Object' in str(e), e)
+
+        # wrong type for self argument: interface
+        try:
+            Gio.FileEnumerator.next_file(obj, None)
+            self.fail('call with wrong type argument unexpectedly succeeded')
+        except TypeError as e:
+            if sys.version_info < (3, 0):
+                self.assertTrue('FileEnumerator' in str(e), e)
+                self.assertTrue('Object' in str(e), e)
+            else:
+                # should have argument name
+                self.assertTrue('self' in str(e), e)
+                # should have expected type
+                self.assertTrue('xpected Gio.FileEnumerator' in str(e), e)
+                # should have actual type
+                self.assertTrue('GIMarshallingTests.Object' in str(e), e)
+
+        # wrong type for first argument: GObject
+        var = GLib.Variant('s', 'mystring')
+        action = Gio.SimpleAction.new('foo', var.get_type())
+        try:
+            action.activate(obj)
+            self.fail('call with wrong type argument unexpectedly succeeded')
+        except TypeError as e:
+            # should have argument name
+            self.assertTrue('parameter' in str(e), e)
+            # should have expected type
+            self.assertTrue('xpected GLib.Variant' in str(e), e)
+            # should have actual type
+            self.assertTrue('GIMarshallingTests.Object' in str(e), e)
+
+        # wrong type for self argument: GObject
+        try:
+            Gio.SimpleAction.activate(obj, obj)
+            self.fail('call with wrong type argument unexpectedly succeeded')
+        except TypeError as e:
+            if sys.version_info < (3, 0):
+                self.assertTrue('SimpleAction' in str(e), e)
+                self.assertTrue('Object' in str(e), e)
+            else:
+                # should have argument name
+                self.assertTrue('self' in str(e), e)
+                # should have expected type
+                self.assertTrue('xpected Gio.Action' in str(e), e)
+                # should have actual type
+                self.assertTrue('GIMarshallingTests.Object' in str(e), e)

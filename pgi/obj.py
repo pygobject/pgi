@@ -89,6 +89,8 @@ class _Object(object):
 
     def __get_signal(self, name):
         for base in type(self).__mro__[:-1]:
+            if base is InterfaceBase:
+                continue
             if name in base._sigs:
                 return base._sigs[name]
 
@@ -158,8 +160,13 @@ class MethodAttribute(object):
             raise NotImplementedError("%r not supported" % flags)
 
 
-class _Interface(object):
+class InterfaceBase(object):
     pass
+
+
+class _Interface(InterfaceBase):
+    def __init__(self):
+        raise NotImplementedError("Interface can not be constructed")
 
 
 def InterfaceAttribute(info):

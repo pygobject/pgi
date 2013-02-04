@@ -27,6 +27,10 @@ class BooleanReturn(CallbackReturn):
     TAG = GITypeTag.BOOLEAN
 
 
+class Int64Return(CallbackReturn):
+    TAG = GITypeTag.INT64
+
+
 _classes = {}
 def _find_cbreturn():
     global _classes

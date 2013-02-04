@@ -209,7 +209,7 @@ class FilenameReturnValue(Utf8ReturnValue):
         return self.backend.unpack_utf8_return(name)[:2]
 
 
-class InterfaceReturn(ReturnValue):
+class BaseInterfaceReturn(ReturnValue):
     TAG = GITypeTag.INTERFACE
     py_type = object
 
@@ -222,6 +222,8 @@ class InterfaceReturn(ReturnValue):
             return EnumReturn
         elif iface_type == GIInfoType.OBJECT:
             return ObjectReturn
+        elif iface_type == GIInfoType.INTERFACE:
+            return InterfaceReturn
         elif iface_type == GIInfoType.STRUCT:
             return StructReturn
         elif iface_type == GIInfoType.UNION:
@@ -233,7 +235,7 @@ class InterfaceReturn(ReturnValue):
             "Unsuported interface return type %r" % iface.type)
 
 
-class EnumReturn(InterfaceReturn):
+class EnumReturn(BaseInterfaceReturn):
 
     def post_call(self, name):
         iface = self.type.get_interface()
@@ -243,7 +245,8 @@ class EnumReturn(InterfaceReturn):
         attr = import_attribute(iface_namespace, iface_name)
         return self.backend.unpack_enum(name, attr)
 
-class ObjectReturn(InterfaceReturn):
+
+class InterfaceReturn(BaseInterfaceReturn):
 
     def post_call(self, name):
         iface = self.type.get_interface()
@@ -257,7 +260,21 @@ class ObjectReturn(InterfaceReturn):
         return block, out
 
 
-class StructReturn(InterfaceReturn):
+class ObjectReturn(BaseInterfaceReturn):
+
+    def post_call(self, name):
+        iface = self.type.get_interface()
+        iface_namespace = iface.namespace
+        iface_name = iface.name
+
+        block, out = self.backend.unpack_object(name)
+        if self.transfer_nothing():
+            block2 = self.backend.ref_object_null(out)
+            block2.write_into(block)
+        return block, out
+
+
+class StructReturn(BaseInterfaceReturn):
 
     def post_call(self, name):
         iface = self.type.get_interface()
@@ -276,7 +293,7 @@ class StructReturn(InterfaceReturn):
             return self.backend.unpack_struct(name, attr)
 
 
-class UnionReturn(InterfaceReturn):
+class UnionReturn(BaseInterfaceReturn):
 
     def post_call(self, name):
         iface = self.type.get_interface()
@@ -287,7 +304,7 @@ class UnionReturn(InterfaceReturn):
         return self.backend.unpack_union(name, attr)
 
 
-class FlagsReturn(InterfaceReturn):
+class FlagsReturn(BaseInterfaceReturn):
 
     def post_call(self, name):
         iface = self.type.get_interface()

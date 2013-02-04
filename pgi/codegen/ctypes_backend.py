@@ -543,8 +543,11 @@ else:
     def unpack_object(self, name):
         def get_class_func(pointer):
             instance = ctypes.cast(pointer, GTypeInstancePtr)
-            gtype = G_TYPE_FROM_INSTANCE(instance.contents)
-            return PGType(gtype).pytype
+            gtype = PGType(G_TYPE_FROM_INSTANCE(instance.contents))
+            pytype = gtype.pytype
+            if not pytype:
+                raise RuntimeError("Couldn't find python type for %r" % gtype)
+            return pytype
 
         block, var = self.parse("""
 # unpack object
