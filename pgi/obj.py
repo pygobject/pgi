@@ -200,6 +200,23 @@ def InterfaceAttribute(info):
     return cls
 
 
+def new_class_from_gtype(gtype):
+    """Create a new class for a gtype not in the gir.
+    The caller is responsible for caching etc.
+    """
+
+    parent = gtype.parent.pytype
+    if parent is None or parent == PGType.from_name("void"):
+        return
+    interfaces = [i.pytype for i in gtype.interfaces]
+    bases = tuple([parent] + interfaces)
+
+    cls = type(gtype.name, bases, dict(_Object.__dict__))
+    cls.__gtype__ = gtype
+
+    return cls
+
+
 def ObjectAttribute(obj_info):
     """Creates a GObject class.
 

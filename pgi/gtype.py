@@ -109,7 +109,8 @@ class PGType(object):
         repo = GIRepository.get_default()
         base_info = repo.find_by_gtype(self._type)
         if not base_info:
-            return None
+            from pgi.obj import new_class_from_gtype
+            return new_class_from_gtype(self)
         name = base_info.name
         namespace = base_info.namespace
 

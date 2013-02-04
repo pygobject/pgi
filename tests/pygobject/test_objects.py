@@ -123,6 +123,10 @@ class ObjectTest(unittest.TestCase):
         self.assertEqual(b, b2)
         self.assertEqual(len(set([b, b2])), 1)
 
+    def test_create_from_gtype(self):
+        out = Gio.File.new_for_path("")
+        self.assertTrue("GLocalFile" in repr(out))
+
 
 class GTypeTest(unittest.TestCase):
     def test_repr(self):
