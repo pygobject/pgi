@@ -513,30 +513,24 @@ if $obj:
 """, obj=name)
         return block
 
-    def pack_object(self, obj_name):
-        from pgi.util import import_attribute
-        gobj_class = import_attribute("GObject", "Object")
-
+    def pack_object(self, obj_name, type_):
         block, var = self.parse("""
-if not isinstance($obj, $gobject):
-    raise TypeError("%r not a GObject.Object" % $obj)
+if not isinstance($obj, $type_class):
+    raise TypeError("argument $obj: Expected %s, got %s" % ($type_class.__name__, $obj.__class__.__name__))
 $ptr = ctypes.c_void_p($obj._obj)
-""", obj=obj_name, gobject=gobj_class)
+""", obj=obj_name, type_class=type_)
 
         return block, var["ptr"]
 
-    def pack_object_null(self, obj_name):
-        from pgi.util import import_attribute
-        gobj_class = import_attribute("GObject", "Object")
-
+    def pack_object_null(self, obj_name, type_):
         block, var = self.parse("""
 if $obj is not None:
-    if not isinstance($obj, $gobject):
-        raise TypeError("%r not a GObject.Object or None" % $obj)
+    if not isinstance($obj, $type_class):
+        raise TypeError("argument $obj: Expected %s, got %s" % ($type_class.__name__, $obj.__class__.__name__))
     $ptr = ctypes.c_void_p($obj._obj)
 else:
     $ptr = None
-""", obj=obj_name, gobject=gobj_class)
+""", obj=obj_name, type_class=type_)
 
         return block, var["ptr"]
 

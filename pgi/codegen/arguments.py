@@ -483,11 +483,17 @@ class StructArgument(BaseInterfaceArgument):
 class ObjectArgument(BaseInterfaceArgument):
 
     def pre_call(self):
+        iface = self.type.get_interface()
+        iface_name = iface.name
+        iface_namespace = iface.namespace
+
         if self.is_direction_in():
+            type_ = import_attribute(iface_namespace, iface_name)
+
             if self.may_be_null():
-                block, self._data = self.backend.pack_object_null(self.name)
+                block, self._data = self.backend.pack_object_null(self.name, type_)
             else:
-                block, self._data = self.backend.pack_object(self.name)
+                block, self._data = self.backend.pack_object(self.name, type_)
 
             if self.transfer_everything():
                 block2 = self.backend.ref_object_null(self.name)

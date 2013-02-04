@@ -208,18 +208,15 @@ $obj = ffi.cast("void*", $obj._obj)
         block.add_dependency("ffi", self._ffi)
         return block, var["obj"]
 
-    def pack_object_null(self, obj_name):
-        from pgi.util import import_attribute
-        gobj_class = import_attribute("GObject", "Object")
-
+    def pack_object_null(self, obj_name, type_):
         block, var = self.parse("""
 if $obj is not None:
-    if not isinstance($obj, $gobject):
-        raise TypeError("%r not a GObject.Object or None" % $obj)
+    if not isinstance($obj, $type_class):
+        raise TypeError("argument $obj: Expected %s, got %s" % ($type_class.__name__, $obj.__class__.__name__))
     $obj = ffi.cast("void*", $obj._obj)
 else:
     $obj = ffi.cast("void*", 0)
-""", obj=obj_name, gobject=gobj_class)
+""", obj=obj_name, type_class=type_)
 
         block.add_dependency("ffi", self._ffi)
         return block, var["obj"]
