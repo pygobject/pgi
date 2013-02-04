@@ -7,7 +7,7 @@
 
 from pgi.gir import GIDirection, GIArrayType, GITypeTag, GIInfoType, GITransfer
 from pgi.gir import GICallableInfoPtr
-from pgi.util import import_attribute
+from pgi.util import import_attribute, cached_property_writable
 from pgi.ctypesutil import gicast
 from pgi.gtype import PGType
 from pgi.gerror import PGError
@@ -314,6 +314,10 @@ class BaseInterfaceArgument(GIArgument):
     TAG = GITypeTag.INTERFACE
     py_type = object
 
+    @cached_property_writable
+    def interface(self):
+        return self.type.get_interface()
+
     @classmethod
     def get_class(cls, type_):
         iface = type_.get_interface()
@@ -339,6 +343,8 @@ class CallbackArgument(BaseInterfaceArgument):
     py_type = type(lambda: None)
 
     def setup(self):
+        self.interface = gicast(self.interface, GICallableInfoPtr)
+
         self._user_data = None
         if self.info.closure != -1:
             self._user_data = self.args[self.info.closure]
@@ -350,11 +356,8 @@ class CallbackArgument(BaseInterfaceArgument):
             self._destroy.is_aux = True
 
     def pre_call(self):
-        iface = self.type.get_interface()
-        iface = gicast(iface, GICallableInfoPtr)
-
         from pgi.codegen.siggen import generate_callback
-        pack, docstring = generate_callback(iface)
+        pack, docstring = generate_callback(self.interface)
         self.py_type = docstring
         block, out = self.backend.pack_callback(self.name, pack)
         self.call_var = out
@@ -374,7 +377,7 @@ class CallbackArgument(BaseInterfaceArgument):
 class EnumArgument(BaseInterfaceArgument):
 
     def pre_call(self):
-        iface = self.type.get_interface()
+        iface = self.interface
         iface_name = iface.name
         iface_namespace = iface.namespace
 
@@ -400,7 +403,7 @@ class EnumArgument(BaseInterfaceArgument):
         if not self.is_direction_out():
             return
 
-        iface = self.type.get_interface()
+        iface = self.interface
         iface_name = iface.name
         iface_namespace = iface.namespace
         type_ = import_attribute(iface_namespace, iface_name)
@@ -414,7 +417,7 @@ class EnumArgument(BaseInterfaceArgument):
 class FlagsArgument(BaseInterfaceArgument):
 
     def pre_call(self):
-        iface = self.type.get_interface()
+        iface = self.interface
         iface_name = iface.name
         iface_namespace = iface.namespace
 
@@ -424,7 +427,7 @@ class FlagsArgument(BaseInterfaceArgument):
         return block
 
     def pre_call(self):
-        iface = self.type.get_interface()
+        iface = self.interface
         iface_name = iface.name
         iface_namespace = iface.namespace
 
@@ -450,7 +453,7 @@ class FlagsArgument(BaseInterfaceArgument):
         if not self.is_direction_out():
             return
 
-        iface = self.type.get_interface()
+        iface = self.interface
         iface_name = iface.name
         iface_namespace = iface.namespace
         type_ = import_attribute(iface_namespace, iface_name)
@@ -464,7 +467,7 @@ class FlagsArgument(BaseInterfaceArgument):
 class StructArgument(BaseInterfaceArgument):
 
     def pre_call(self):
-        iface = self.type.get_interface()
+        iface = self.interface
         iface_name = iface.name
         iface_namespace = iface.namespace
 
@@ -483,7 +486,7 @@ class StructArgument(BaseInterfaceArgument):
 class ObjectArgument(BaseInterfaceArgument):
 
     def pre_call(self):
-        iface = self.type.get_interface()
+        iface = self.interface
         iface_name = iface.name
         iface_namespace = iface.namespace
 
