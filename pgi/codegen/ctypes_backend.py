@@ -634,6 +634,20 @@ $array_ptr = ctypes.pointer($array)
 
         return block, var["array_ptr"]
 
+    def pack_carray_basic_zero(self, name, item_in, item_out, type_pack, type_):
+        block, var = self.parse("""
+$length = len($name)
+$array = ($ctypes_type * ($length + 1))()
+for $i, $item_in in enumerate($name):
+    $type_pack
+    $array[$i] = $item_out
+$array[-1] = $ctypes_type()
+$array_ptr = ctypes.pointer($array)
+""", name=name, item_in=item_in, item_out=item_out, type_pack=type_pack,
+     ctypes_type=typeinfo_to_ctypes(type_))
+
+        return block, var["array_ptr"]
+
     def pack_carray_basic_length_zero(self, name, item_in, item_out, type_pack, type_, length_type_):
         block, var = self.parse("""
 $length = len($name)

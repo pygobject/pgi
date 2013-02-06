@@ -1518,3 +1518,21 @@ class TestModule(unittest.TestCase):
         self.assertTrue('SimpleStruct' in output, output)
         self.assertTrue('Interface2' in output, output)
         self.assertTrue('method_array_inout' in output, output)
+
+
+@unittest.skipUnless(GIMarshallingTests, "")
+class TestGStrv(unittest.TestCase):
+    @unittest.skip("FIXME")
+    def test_gstrv_return(self):
+        self.assertEqual(['0', '1', '2'], GIMarshallingTests.gstrv_return())
+
+    def test_gstrv_in(self):
+        GIMarshallingTests.gstrv_in(Sequence(['0', '1', '2']))
+
+    @unittest.skip("FIXME")
+    def test_gstrv_out(self):
+        self.assertEqual(['0', '1', '2'], GIMarshallingTests.gstrv_out())
+
+    @unittest.skip("FIXME")
+    def test_gstrv_inout(self):
+        self.assertEqual(['-1', '0', '1', '2'], GIMarshallingTests.gstrv_inout(['0', '1', '2']))

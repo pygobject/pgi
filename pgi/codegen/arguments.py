@@ -230,7 +230,7 @@ class CArrayArgument(ArrayArgument):
 
                 return block
 
-            raise NotImplementedError
+            raise NotImplementedError("carray zero inout")
 
         elif self.is_direction_in():
             param_block, in_var, out_var = self._pack_param(self._param_type)
@@ -252,13 +252,17 @@ class CArrayArgument(ArrayArgument):
     
                 return block
             else:
-                length = str(self.array_fixed_size)
-
-                if self.is_zero_terminated():
+                if self.array_fixed_size == -1 and self.is_zero_terminated():
+                    block, data = backend.pack_carray_basic_zero(
+                        self.name, in_var, out_var, param_block,
+                        self._param_type)
+                elif self.is_zero_terminated():
+                    length = str(self.array_fixed_size)
                     block, data = backend.pack_carray_basic_fixed_zero(
                         self.name, in_var, out_var, param_block,
                         self._param_type, length)
                 else:
+                    length = str(self.array_fixed_size)
                     block, data = backend.pack_carray_basic_fixed(
                         self.name, in_var, out_var, param_block,
                         self._param_type, length)
@@ -287,7 +291,7 @@ class CArrayArgument(ArrayArgument):
                     self._data = data
                     return block
             else:
-                raise NotImplementedError("zero")
+                raise NotImplementedError("carray zero out")
 
     def post_call(self):
         if not self.is_direction_out():
