@@ -1212,13 +1212,14 @@ class TestGErrorOutTransferNone(unittest.TestCase):
 @unittest.skipUnless(GIMarshallingTests, "")
 class TestInterfaces(unittest.TestCase):
 
-    class TestInterfaceImpl(GObject.GObject, GIMarshallingTests.Interface):
-        def __init__(self):
-            GObject.GObject.__init__(self)
-            self.val = None
+    if GIMarshallingTests:
+        class TestInterfaceImpl(GObject.GObject, GIMarshallingTests.Interface):
+            def __init__(self):
+                GObject.GObject.__init__(self)
+                self.val = None
 
-        def do_test_int8_in(self, int8):
-            self.val = int8
+            def do_test_int8_in(self, int8):
+                self.val = int8
 
     def setUp(self):
         self.instance = self.TestInterfaceImpl()
