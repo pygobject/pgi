@@ -778,7 +778,12 @@ class CTypesBackend(CodeGenBackend, BasicTypes, InterfaceTypes, CArrayTypes,
 
     def get_function_object(self, lib, symbol, args, ret,
                             method=False, self_name="", throws=False):
-        h = getattr(lib, symbol)
+        try:
+            h = getattr(lib, symbol)
+        except AttributeError:
+            raise NotImplementedError(
+                "Library doesn't provide symbol: %s" % symbol)
+
         if ret:
             h.restype = typeinfo_to_ctypes(ret.type, return_value=True)
         else:

@@ -305,7 +305,13 @@ $new_self = ffi.cast('gpointer', $sself._obj)
         self._ffi.cdef(cdef, override=True)
         block.write_line("# " + cdef)
 
-        return block, method and var["new_self"], getattr(lib, symbol)
+        try:
+            func = getattr(lib, symbol)
+        except KeyError:
+            raise NotImplementedError(
+                "Library doesn't provide symbol: %s" % symbol)
+
+        return block, method and var["new_self"], func
 
     def call(self, func, args):
         block, var = self.parse("""

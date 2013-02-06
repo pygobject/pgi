@@ -50,9 +50,21 @@ class _Module(types.ModuleType):
         self._wrapper = wrapper
 
     def __dir__(self):
+        # get all infos and
         names = list(self._wrapper.iternames())
-        base = dir(self.__class__)
-        return list(set(base + names))
+        names.extend(self.__dict__.keys())
+
+        # filter out not implemented ones
+        implemented_names = []
+        for name in list(set(names)):
+            try:
+                getattr(self, name)
+            except NotImplementedError:
+                pass
+            else:
+                implemented_names.append(name)
+
+        return implemented_names
 
     def __getattr__(self, name):
         info = self._wrapper.lookup_name(name)
@@ -65,7 +77,8 @@ class _Module(types.ModuleType):
             attr = cls(info)
             setattr(self, name, attr)
         else:
-            raise NotImplementedError("%r attribute type not supported")
+            raise NotImplementedError(
+                "%r attribute type not supported" % info.type)
 
         return attr
 

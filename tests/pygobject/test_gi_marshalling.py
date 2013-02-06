@@ -13,6 +13,7 @@ import shutil
 import unittest
 import os
 import sys
+from io import StringIO, BytesIO
 
 from tests import is_gi
 from pgi.gir import *
@@ -1475,3 +1476,45 @@ class TestKeywords(unittest.TestCase):
 
     def test_uppercase(self):
         self.assertEqual(GLib.IOCondition.IN.value_nicks, ['in'])
+
+
+@unittest.skipUnless(GIMarshallingTests, "")
+class TestModule(unittest.TestCase):
+    def test_path(self):
+        self.assertTrue(GIMarshallingTests.__path__.endswith('GIMarshallingTests-1.0.typelib'),
+                        GIMarshallingTests.__path__)
+
+    def test_str(self):
+        self.assertTrue("'GIMarshallingTests' from '" in str(GIMarshallingTests),
+                        str(GIMarshallingTests))
+
+    def test_dir(self):
+        _dir = dir(GIMarshallingTests)
+        self.assertGreater(len(_dir), 10)
+
+        self.assertTrue('SimpleStruct' in _dir)
+        self.assertTrue('Interface2' in _dir)
+        self.assertTrue('CONSTANT_GERROR_CODE' in _dir)
+        # FIXME
+        #self.assertTrue('array_zero_terminated_inout' in _dir)
+
+        # assert that dir() does not contain garbage
+        for item_name in _dir:
+            item = getattr(GIMarshallingTests, item_name)
+            self.assertTrue(hasattr(item, '__class__'))
+
+    def test_help(self):
+        orig_stdout = sys.stdout
+        try:
+            if sys.version_info < (3, 0):
+                sys.stdout = BytesIO()
+            else:
+                sys.stdout = StringIO()
+            help(GIMarshallingTests)
+            output = sys.stdout.getvalue()
+        finally:
+            sys.stdout = orig_stdout
+
+        self.assertTrue('SimpleStruct' in output, output)
+        self.assertTrue('Interface2' in output, output)
+        self.assertTrue('method_array_inout' in output, output)
