@@ -51,7 +51,7 @@ def typeinfo_to_ctypes(info, return_value=False):
         elif tag == GITypeTag.ARRAY:
             return gpointer
         elif tag == GITypeTag.ERROR:
-            return gpointer
+            return GErrorPtr
         else:
             if tag in mapping:
                 return ctypes.POINTER(mapping[tag])

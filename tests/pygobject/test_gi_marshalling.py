@@ -1235,6 +1235,7 @@ class TestInterfaces(unittest.TestCase):
 
     @unittest.skip("FIXME")
     def test_int8_int(self):
+        GIMarshallingTests.test_interface_test_int8_in._code.pprint()
         GIMarshallingTests.test_interface_test_int8_in(self.instance, 42)
         self.assertEqual(self.instance.val, 42)
 
@@ -1331,3 +1332,41 @@ class TestInterfaces(unittest.TestCase):
                 self.assertTrue('xpected Gio.Action' in str(e), e)
                 # should have actual type
                 self.assertTrue('GIMarshallingTests.Object' in str(e), e)
+
+
+@unittest.skipUnless(GIMarshallingTests, "")
+class TestDir(unittest.TestCase):
+    def test_members_list(self):
+        list = dir(GIMarshallingTests)
+        self.assertTrue('OverridesStruct' in list)
+        self.assertTrue('BoxedStruct' in list)
+        self.assertTrue('OVERRIDES_CONSTANT' in list)
+        self.assertTrue('GEnum' in list)
+        self.assertTrue('int32_return_max' in list)
+
+    def test_modules_list(self):
+        import gi.repository
+        list = dir(gi.repository)
+        self.assertTrue('GIMarshallingTests' in list)
+
+        # FIXME: test to see if a module which was not imported is in the list
+        #        we should be listing every typelib we find, not just the ones
+        #        which are imported
+        #
+        #        to test this I recommend we compile a fake module which
+        #        our tests would never import and check to see if it is
+        #        in the list:
+        #
+        # self.assertTrue('DoNotImportDummyTests' in list)
+
+
+@unittest.skipUnless(GIMarshallingTests, "")
+class TestGErrorReturn(unittest.TestCase):
+    # See https://bugzilla.gnome.org/show_bug.cgi?id=666098
+    def test_return_gerror(self):
+        error = GIMarshallingTests.gerror_return()
+
+        self.assertIsInstance(error, GObject.GError)
+        self.assertEqual(error.domain, GIMarshallingTests.CONSTANT_GERROR_DOMAIN)
+        self.assertEqual(error.code, GIMarshallingTests.CONSTANT_GERROR_CODE)
+        self.assertEqual(error.message, GIMarshallingTests.CONSTANT_GERROR_MESSAGE)

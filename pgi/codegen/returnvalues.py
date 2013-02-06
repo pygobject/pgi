@@ -8,6 +8,7 @@
 from pgi.gir import GITypeTag, GIInfoType, GITransfer, GIArrayType
 from pgi.util import import_attribute
 from pgi.gtype import PGType
+from pgi.gerror import PGError
 
 
 class ReturnValue(object):
@@ -199,6 +200,14 @@ class Utf8ReturnValue(ReturnValue):
             block2 = self.backend.free_pointer(ref)
             block2.write_into(block)
         return block, var
+
+
+class ErrorReturn(ReturnValue):
+    TAG = GITypeTag.ERROR
+    py_type = PGError
+
+    def post_call(self, name):
+        return self.backend.unpack_gerror(name)
 
 
 class FilenameReturnValue(Utf8ReturnValue):
