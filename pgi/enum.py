@@ -12,7 +12,7 @@ from pgi.ctypesutil import gicast
 from pgi.gir import GIEnumInfoPtr
 from pgi.gtype import PGType
 from pgi.util import cached_property
-from pgi.obj import MethodAttribute
+from pgi.obj import add_method
 
 
 class EnumBase(int):
@@ -69,20 +69,40 @@ class _FlagsClass(FlagsBase):
     def __gtype__(self):
         return PGType(self._info.g_type)
 
-    def __get_flags_value(self):
+    def __get_flags_value(self, value):
         gtype = self.__gtype__._type
         klass = ctypes.cast(gtype.class_ref(), GFlagsClassPtr)
-        return klass.get_first_value(self).contents
+        value_ptr = klass.get_first_value(value)
+        if not value_ptr:
+            return
+        return value_ptr.contents
+
+    def __get_flag_values(self):
+        values = []
+        for (num, vname) in self._flags:
+            masked = self & num
+            if not masked:
+                continue
+            value = self.__get_flags_value(masked)
+            if value:
+                values.append(value)
+        return values
 
     @cached_property
+    def value_nicks(self):
+        return [v.value_nick for v in self.__get_flag_values()]
+
+    @property
     def first_value_nick(self):
-        flags_value = self.__get_flags_value()
-        return flags_value.value_nick
+        return (self.value_nicks and self.value_nicks[0]) or None
 
     @cached_property
+    def value_names(self):
+        return [v.value_name for v in self.__get_flag_values()]
+
+    @property
     def first_value_name(self):
-        flags_value = self.__get_flags_value()
-        return flags_value.value_name
+        return (self.value_names and self.value_names[0]) or None
 
     def __new__(cls, value):
         if not isinstance(value, (long, int)):
@@ -151,7 +171,7 @@ def EnumAttribute(info):
     cls._info = info
 
     for method in info.get_methods():
-        setattr(cls, method.name, MethodAttribute(method))
+        add_method(method, cls)
 
     # create instances for all of them and add to the class
     for num, vname in values:

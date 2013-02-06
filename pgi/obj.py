@@ -16,7 +16,7 @@ from pgi.gobject import GConnectFlags, signal_handler_disconnect, signal_lookup
 from pgi.gir import GIInterfaceInfoPtr, GIFunctionInfoFlags, GIObjectInfoPtr
 
 from pgi.ctypesutil import gicast
-from pgi.util import import_attribute, Super
+from pgi.util import import_attribute, Super, escape_name
 from pgi.util import gparamspec_to_gvalue_ptr
 from pgi.gtype import PGType
 from pgi.properties import PropertyAttribute, PROPS_NAME
@@ -139,15 +139,16 @@ class _Object(object):
 
 
 class MethodAttribute(object):
-    def __init__(self, info):
+    def __init__(self, info, name):
         super(MethodAttribute, self).__init__()
         self._info = info
+        self._name = name
 
     def __get__(self, instance, owner):
         info = self._info
         flags = info.flags
         func_flags = flags.value
-        name = info.name
+        name = self._name
 
         throws = func_flags & GIFunctionInfoFlags.THROWS
 
@@ -162,6 +163,14 @@ class MethodAttribute(object):
             return getattr(owner, name)
         else:
             raise NotImplementedError("%r not supported" % flags)
+
+
+def add_method(info, target_cls):
+    """Add a method to the target class"""
+
+    name = escape_name(info.name)
+    attr = MethodAttribute(info, name)
+    setattr(target_cls, name, attr)
 
 
 class InterfaceBase(object):
@@ -196,8 +205,7 @@ def InterfaceAttribute(info):
 
     # Add methods
     for method_info in iface_info.get_methods():
-        attr = MethodAttribute(method_info)
-        setattr(cls, method_info.name, attr)
+        add_method(method_info, cls)
 
     cls._sigs = {}
 
@@ -272,9 +280,7 @@ def ObjectAttribute(obj_info):
 
     # Add methods
     for method_info in obj_info.get_methods():
-        method_name = method_info.name
-        attr = MethodAttribute(method_info)
-        setattr(cls, method_name, attr)
+        add_method(method_info, cls)
 
     # Signals
     cls._sigs = {}

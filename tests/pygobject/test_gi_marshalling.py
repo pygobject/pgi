@@ -1370,3 +1370,108 @@ class TestGErrorReturn(unittest.TestCase):
         self.assertEqual(error.domain, GIMarshallingTests.CONSTANT_GERROR_DOMAIN)
         self.assertEqual(error.code, GIMarshallingTests.CONSTANT_GERROR_CODE)
         self.assertEqual(error.message, GIMarshallingTests.CONSTANT_GERROR_MESSAGE)
+
+
+@unittest.skipUnless(GIMarshallingTests, "")
+class TestKeywordArgs(unittest.TestCase):
+
+    def test_calling(self):
+        kw_func = GIMarshallingTests.int_three_in_three_out
+
+        self.assertEqual(kw_func(1, 2, 3), (1, 2, 3))
+        self.assertEqual(kw_func(**{'a': 4, 'b': 5, 'c': 6}), (4, 5, 6))
+        self.assertEqual(kw_func(1, **{'b': 7, 'c': 8}), (1, 7, 8))
+        self.assertEqual(kw_func(1, 7, **{'c': 8}), (1, 7, 8))
+        self.assertEqual(kw_func(1, c=8, **{'b': 7}), (1, 7, 8))
+        self.assertEqual(kw_func(2, c=4, b=3), (2, 3, 4))
+        self.assertEqual(kw_func(a=2, c=4, b=3), (2, 3, 4))
+
+    def assertRaisesMessage(self, exception, message, func, *args, **kwargs):
+        try:
+            func(*args, **kwargs)
+        except exception:
+            (e_type, e) = sys.exc_info()[:2]
+            if message is not None:
+                self.assertEqual(str(e), message)
+        except:
+            raise
+        else:
+            msg = "%s() did not raise %s" % (func.__name__, exception.__name__)
+            raise AssertionError(msg)
+
+    def test_type_errors(self):
+        # test too few args
+        self.assertRaisesMessage(TypeError, "int_three_in_three_out() takes exactly 3 arguments (0 given)",
+                                 GIMarshallingTests.int_three_in_three_out)
+        self.assertRaisesMessage(TypeError, "int_three_in_three_out() takes exactly 3 arguments (1 given)",
+                                 GIMarshallingTests.int_three_in_three_out, 1)
+        self.assertRaisesMessage(TypeError, "int_three_in_three_out() takes exactly 3 arguments (0 given)",
+                                 GIMarshallingTests.int_three_in_three_out, *())
+        self.assertRaisesMessage(TypeError, "int_three_in_three_out() takes exactly 3 arguments (0 given)",
+                                 GIMarshallingTests.int_three_in_three_out, *(), **{})
+        if is_gi:
+            self.assertRaisesMessage(TypeError, "int_three_in_three_out() takes exactly 3 non-keyword arguments (0 given)",
+                                     GIMarshallingTests.int_three_in_three_out, *(), **{'c': 4})
+        else:
+            self.assertRaisesMessage(TypeError, "int_three_in_three_out() takes exactly 3 arguments (1 given)",
+                                     GIMarshallingTests.int_three_in_three_out, *(), **{'c': 4})
+
+        # test too many args
+        self.assertRaisesMessage(TypeError, "int_three_in_three_out() takes exactly 3 arguments (4 given)",
+                                 GIMarshallingTests.int_three_in_three_out, *(1, 2, 3, 4))
+        if is_gi:
+            self.assertRaisesMessage(TypeError, "int_three_in_three_out() takes exactly 3 non-keyword arguments (4 given)",
+                                     GIMarshallingTests.int_three_in_three_out, *(1, 2, 3, 4), c=6)
+        else:
+            self.assertRaisesMessage(TypeError, "int_three_in_three_out() takes exactly 3 arguments (5 given)",
+                                     GIMarshallingTests.int_three_in_three_out, *(1, 2, 3, 4), c=6)
+
+        # test too many keyword args
+        self.assertRaisesMessage(TypeError, "int_three_in_three_out() got multiple values for keyword argument 'a'",
+                                 GIMarshallingTests.int_three_in_three_out, 1, 2, 3, **{'a': 4, 'b': 5})
+        self.assertRaisesMessage(TypeError, "int_three_in_three_out() got an unexpected keyword argument 'd'",
+                                 GIMarshallingTests.int_three_in_three_out, d=4)
+        self.assertRaisesMessage(TypeError, "int_three_in_three_out() got an unexpected keyword argument 'e'",
+                                 GIMarshallingTests.int_three_in_three_out, **{'e': 2})
+
+    def test_kwargs_are_not_modified(self):
+        d = {'b': 2}
+        d2 = d.copy()
+        GIMarshallingTests.int_three_in_three_out(1, c=4, **d)
+        self.assertEqual(d, d2)
+
+
+@unittest.skipUnless(GIMarshallingTests, "")
+class TestPropertiesObject(unittest.TestCase):
+
+    def setUp(self):
+        self.obj = GIMarshallingTests.PropertiesObject()
+
+    def test_boolean(self):
+        self.assertEqual(self.obj.props.some_boolean, False)
+        self.obj.props.some_boolean = True
+        self.assertEqual(self.obj.props.some_boolean, True)
+
+        obj = GIMarshallingTests.PropertiesObject(some_boolean=True)
+        self.assertEqual(obj.props.some_boolean, True)
+
+
+class TestKeywords(unittest.TestCase):
+    @unittest.skip("FIXME")
+    def test_method(self):
+        # g_variant_print()
+        v = GLib.Variant('i', 1)
+        self.assertEqual(v.print_(False), '1')
+
+    def test_function(self):
+        # g_thread_yield()
+        self.assertEqual(GLib.Thread.yield_(), None)
+
+    def test_struct_method(self):
+        # g_timer_continue()
+        # we cannot currently instantiate GLib.Timer objects, so just ensure
+        # the method exists
+        self.assertTrue(callable(GLib.Timer.continue_))
+
+    def test_uppercase(self):
+        self.assertEqual(GLib.IOCondition.IN.value_nicks, ['in'])

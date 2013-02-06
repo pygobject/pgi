@@ -9,7 +9,7 @@ import sys
 import unittest
 
 from tests import is_gi
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 
 
 class FlagsTest(unittest.TestCase):
@@ -44,3 +44,16 @@ class FlagsTest(unittest.TestCase):
         self.assertRaises(TypeError, Gtk.RcFlags, None)
         self.assertRaises(TypeError, Gtk.RcFlags, 1.1)
         self.assertRaises(OverflowError, Gtk.RcFlags, sys.maxsize + 1)
+
+    def test_no_value_nick(self):
+        self.assertEqual(GLib.IOCondition(0).first_value_nick, None)
+        self.assertEqual(GLib.IOCondition(0).first_value_name, None)
+        self.assertEqual(GLib.IOCondition(0).value_names, [])
+        self.assertEqual(GLib.IOCondition(0).value_nicks, [])
+
+    def test_value_nicks_names(self):
+        self.assertEqual(GLib.IOCondition(3).value_nicks, ["in", "pri"])
+        self.assertEqual(GLib.IOCondition(3).value_names,
+                         ["G_IO_IN", "G_IO_PRI"])
+        self.assertEqual(GLib.IOCondition(3).first_value_nick, "in")
+        self.assertEqual(GLib.IOCondition(3).first_value_name, "G_IO_IN")

@@ -150,6 +150,8 @@ def _generate_function(backend, info, arg_infos, arg_types,
         names.insert(0, "self")
     names = ", ".join(names)
 
+    func_name = escape_name(info.name)
+
     main, var = backend.parse("""
 # backend: $backend_name
 def $func_name($func_args):
@@ -157,9 +159,9 @@ def $func_name($func_args):
 
     $func_body
 """, backend_name=backend.NAME, func_args=names, docstring=docstring,
-     func_body=body, func_name=info.name)
+     func_body=body, func_name=func_name)
 
-    func = main.compile()[info.name]
+    func = main.compile()[func_name]
     func._code = main
     func.__doc__ = docstring
 

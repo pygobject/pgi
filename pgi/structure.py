@@ -10,7 +10,7 @@ from pgi.codegen.fieldgen import generate_field_getter, generate_field_setter
 from pgi.gir import GIUnionInfoPtr, GIFieldInfoFlags, GIStructInfoPtr
 from pgi.glib import g_try_malloc0, free
 from pgi.gtype import PGType
-from pgi.obj import MethodAttribute
+from pgi.obj import add_method
 
 
 class _DummyInfo(object):
@@ -122,9 +122,7 @@ def UnionAttribute(union_info):
 
     # Add methods
     for method_info in union_info.get_methods():
-        method_name = method_info.name
-        attr = MethodAttribute(method_info)
-        setattr(cls, method_name, attr)
+        add_method(method_info, cls)
 
     # Add fields
     for field_info in union_info.get_fields():
@@ -149,9 +147,7 @@ def StructureAttribute(struct_info):
 
     # Add methods
     for method_info in struct_info.get_methods():
-        method_name = method_info.name
-        attr = MethodAttribute(method_info)
-        setattr(cls, method_name, attr)
+        add_method(method_info, cls)
 
     # Add fields
     for field_info in struct_info.get_fields():
