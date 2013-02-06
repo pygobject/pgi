@@ -86,15 +86,18 @@ class TestCommand(Command):
     user_options = [
         ("pgi-only", None, "only run pgi"),
         ("gi-only", None, "only run gi"),
+        ("backend=", None, "backend"),
     ]
 
     def initialize_options(self):
         self.pgi_only = False
         self.gi_only = False
+        self.backend = ""
 
     def finalize_options(self):
         self.pgi_only = bool(self.pgi_only)
         self.gi_only = bool(self.gi_only)
+        self.backend = str(self.backend)
 
     def run(self):
         import tests
@@ -102,18 +105,36 @@ class TestCommand(Command):
         import platform
 
         if os.name == "nt":
-            exit(tests.test(False, "ctypes"))
+            self.pgi_only = True
+            self.backend = "ctypes"
+            self.gi_only = False
 
-        if self.gi_only:
-            exit(tests.test(True, None))
+        if platform.python_implementation() != "CPython":
+            self.pgi_only = True
+            self.gi_only = False
 
-        is_cpython = platform.python_implementation() == "CPython"
-        runs = [(False, "ctypes"), (False, "cffi"), (True, None)]
+        if self.pgi_only and self.gi_only:
+            raise ValueError("You can't set both pgi-only and gi-only")
 
-        for is_gi, backend in runs:
-            if is_gi and (self.pgi_only or not is_cpython):
+        if self.backend and self.gi_only :
+            raise ValueError("Backend selection only works with pgi")
+
+        filtered_runs = []
+        runs =  [(False, "ctypes"), (False, "cffi"), (True, None)]
+        for (run_gi, backend) in runs:
+            if run_gi and self.pgi_only:
                 continue
+            if not run_gi and self.gi_only:
+                continue
+            if self.backend and self.backend != backend:
+                continue
+            filtered_runs.append((run_gi, backend))
 
+        # don't fork with one run
+        if len(filtered_runs) == 1:
+            exit(tests.test(*filtered_runs[0]))
+
+        for is_gi, backend in filtered_runs:
             pid = os.fork()
             if pid != 0:
                 pid, status = os.waitpid(pid, 0)
