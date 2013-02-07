@@ -11,6 +11,7 @@ import StringIO
 from pgi.codegen import ctypes_backend
 try:
     from pgi.codegen import cffi_backend
+    cffi_backend = cffi_backend
 except ImportError:
     cffi_backend = None
 from pgi.util import escape_name, unescape_name, escape_builtin

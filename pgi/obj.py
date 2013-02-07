@@ -12,7 +12,7 @@ import weakref
 from pgi import gobject
 from pgi.gobject import GParameter, GClosureNotify, signal_connect_data
 from pgi.gobject import signal_handler_unblock, signal_handler_block
-from pgi.gobject import GConnectFlags, signal_handler_disconnect, signal_lookup
+from pgi.gobject import GConnectFlags, signal_handler_disconnect
 from pgi.gir import GIInterfaceInfoPtr, GIFunctionInfoFlags, GIObjectInfoPtr
 
 from pgi.ctypesutil import gicast

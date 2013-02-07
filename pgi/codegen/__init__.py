@@ -8,6 +8,7 @@
 from pgi.codegen.ctypes_backend import CTypesBackend
 try:
     from pgi.codegen.cffi_backend import CFFIBackend
+    CFFIBackend = CFFIBackend
 except ImportError:
     CFFIBackend = None
 

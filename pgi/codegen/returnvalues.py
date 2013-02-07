@@ -255,10 +255,6 @@ class EnumReturn(BaseInterfaceReturn):
 class InterfaceReturn(BaseInterfaceReturn):
 
     def post_call(self, name):
-        iface = self.type.get_interface()
-        iface_namespace = iface.namespace
-        iface_name = iface.name
-
         block, out = self.backend.unpack_object(name)
         if self.transfer_nothing():
             block2 = self.backend.ref_object_null(out)
@@ -269,10 +265,6 @@ class InterfaceReturn(BaseInterfaceReturn):
 class ObjectReturn(BaseInterfaceReturn):
 
     def post_call(self, name):
-        iface = self.type.get_interface()
-        iface_namespace = iface.namespace
-        iface_name = iface.name
-
         block, out = self.backend.unpack_object(name)
         if self.transfer_nothing():
             block2 = self.backend.ref_object_null(out)

@@ -787,7 +787,6 @@ class CTypesBackend(CodeGenBackend, BasicTypes, InterfaceTypes, CArrayTypes,
     def parse(self, *args, **kwargs):
         # make ctypes dependencies local
         new_kwargs = {}
-        base_type = type(ctypes.c_int)
         for key, value in kwargs.iteritems():
             if isinstance(value, type) and value.__module__ == "ctypes":
                 new_kwargs[key] = "%s.%s" % (value.__module__, value.__name__)
