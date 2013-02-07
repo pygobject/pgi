@@ -702,17 +702,19 @@ $array_ptr = ctypes.pointer($array)
 
         return block, var["array"], var["array_ptr"]
 
-    def unpack_carray_basic_fixed(self, array, length):
+    def unpack_carray_basic_fixed(self, array, length, type_):
         block, var = self.parse("""
-$out = [$array[$i] for $i in xrange($length)]
-""", array=array, length=length)
+$casted = ctypes.cast($array, ctypes.POINTER($array_type))
+$out = $casted[:$length]
+""", array=array, length=length, array_type=typeinfo_to_ctypes(type_))
 
         return block, var["out"]
 
-    def unpack_carray_basic_length(self, array, length):
+    def unpack_carray_basic_length(self, array, length, type_):
         block, var = self.parse("""
-$out = [$array[$i] for $i in xrange($length.value)]
-""", array=array, length=length)
+$casted = ctypes.cast($array, ctypes.POINTER($array_type))
+$out = $casted[:$length.value]
+""", array=array, length=length, array_type=typeinfo_to_ctypes(type_))
 
         return block, var["out"]
 

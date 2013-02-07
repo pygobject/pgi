@@ -278,7 +278,6 @@ class CArrayArgument(ArrayArgument):
                     self._data = ptr
                     block2, self.call_var = backend.get_reference(ptr)
                     block2.write_into(block)
-                    self.call_var = ptr
                     return block
                 else:
                     length_type = self._aux.type
@@ -302,10 +301,10 @@ class CArrayArgument(ArrayArgument):
 
             if self.array_length == -1:
                 length = str(self.array_fixed_size)
-                block2, out = self.backend.unpack_carray_basic_fixed(data, length)
+                block2, out = self.backend.unpack_carray_basic_fixed(data, length, self._param_type)
                 block2.write_into(block)
             else:
-                block2, out = self.backend.unpack_carray_basic_length(data, self._length)
+                block2, out = self.backend.unpack_carray_basic_length(data, self._length, self._param_type)
                 block2.write_into(block)
 
             self.out_var = out

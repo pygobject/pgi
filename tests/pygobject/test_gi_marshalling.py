@@ -893,13 +893,11 @@ class TestArray(unittest.TestCase):
     def test_array_fixed_short_in(self):
         GIMarshallingTests.array_fixed_short_in(Sequence([-1, 0, 1, 2]))
 
+    def test_array_fixed_out(self):
+        self.assertEqual([-1, 0, 1, 2], GIMarshallingTests.array_fixed_out())
+
     def test_array_fixed_inout(self):
         self.assertEqual([2, 1, 0, -1], GIMarshallingTests.array_fixed_inout([-1, 0, 1, 2]))
-
-    def test_array_in(self):
-        GIMarshallingTests.array_in(Sequence([-1, 0, 1, 2]))
-        GIMarshallingTests.array_in_guint64_len(Sequence([-1, 0, 1, 2]))
-        GIMarshallingTests.array_in_guint8_len(Sequence([-1, 0, 1, 2]))
 
     def test_array_return(self):
         self.assertEqual([-1, 0, 1, 2], GIMarshallingTests.array_return())
@@ -907,18 +905,163 @@ class TestArray(unittest.TestCase):
     def test_array_return_etc(self):
         self.assertEqual(([5, 0, 1, 9], 14), GIMarshallingTests.array_return_etc(5, 9))
 
-    def test_array_string_in(self):
-        GIMarshallingTests.array_string_in(['foo', 'bar'])
+    def test_array_in(self):
+        GIMarshallingTests.array_in(Sequence([-1, 0, 1, 2]))
+        GIMarshallingTests.array_in_guint64_len(Sequence([-1, 0, 1, 2]))
+        GIMarshallingTests.array_in_guint8_len(Sequence([-1, 0, 1, 2]))
 
     def test_array_in_len_before(self):
         GIMarshallingTests.array_in_len_before(Sequence([-1, 0, 1, 2]))
 
+    def test_array_string_in(self):
+        GIMarshallingTests.array_string_in(['foo', 'bar'])
+
     def test_array_in_len_zero_terminated(self):
         GIMarshallingTests.array_in_len_zero_terminated(Sequence([-1, 0, 1, 2]))
+
+    def test_array_uint8_in(self):
+        GIMarshallingTests.array_uint8_in(Sequence([97, 98, 99, 100]))
+        GIMarshallingTests.array_uint8_in(_bytes("abcd"))
+
+    def test_array_string_in(self):
+        GIMarshallingTests.array_string_in(['foo', 'bar'])
+
+    @unittest.skip("FIXME")
+    def test_array_out(self):
+        self.assertEqual([-1, 0, 1, 2], GIMarshallingTests.array_out())
+
+    @unittest.skip("FIXME")
+    def test_array_out_etc(self):
+        self.assertEqual(([-5, 0, 1, 9], 4), GIMarshallingTests.array_out_etc(-5, 9))
+
+    def test_array_inout(self):
+        self.assertEqual([-2, -1, 0, 1, 2], GIMarshallingTests.array_inout(Sequence([-1, 0, 1, 2])))
+
+    def test_array_inout_etc(self):
+        self.assertEqual(([-5, -1, 0, 1, 9], 4),
+                         GIMarshallingTests.array_inout_etc(-5, Sequence([-1, 0, 1, 2]), 9))
+
+    def test_method_array_in(self):
+        object_ = GIMarshallingTests.Object()
+        object_.method_array_in(Sequence([-1, 0, 1, 2]))
+
+    @unittest.skip("FIXME")
+    def test_method_array_out(self):
+        object_ = GIMarshallingTests.Object()
+        self.assertEqual([-1, 0, 1, 2], object_.method_array_out())
+
+    def test_method_array_inout(self):
+        object_ = GIMarshallingTests.Object()
+        self.assertEqual([-2, -1, 0, 1, 2], object_.method_array_inout(Sequence([-1, 0, 1, 2])))
+
+    def test_method_array_return(self):
+        object_ = GIMarshallingTests.Object()
+        self.assertEqual([-1, 0, 1, 2], object_.method_array_return())
+
+    def test_array_enum_in(self):
+        GIMarshallingTests.array_enum_in([GIMarshallingTests.Enum.VALUE1,
+                                          GIMarshallingTests.Enum.VALUE2,
+                                          GIMarshallingTests.Enum.VALUE3])
+
+    @unittest.skip("FIXME")
+    def test_array_boxed_struct_in(self):
+        struct1 = GIMarshallingTests.BoxedStruct()
+        struct1.long_ = 1
+        struct2 = GIMarshallingTests.BoxedStruct()
+        struct2.long_ = 2
+        struct3 = GIMarshallingTests.BoxedStruct()
+        struct3.long_ = 3
+
+        GIMarshallingTests.array_struct_in([struct1, struct2, struct3])
+
+    @unittest.skip("FIXME")
+    @unittest.skipUnless(hasattr(GIMarshallingTests, 'array_struct_value_in'),
+                         'too old gobject-introspection')
+    def test_array_boxed_struct_value_in(self):
+        struct1 = GIMarshallingTests.BoxedStruct()
+        struct1.long_ = 1
+        struct2 = GIMarshallingTests.BoxedStruct()
+        struct2.long_ = 2
+        struct3 = GIMarshallingTests.BoxedStruct()
+        struct3.long_ = 3
+
+        GIMarshallingTests.array_struct_value_in([struct1, struct2, struct3])
+
+    @unittest.skip("FIXME")
+    def test_array_boxed_struct_take_in(self):
+        struct1 = GIMarshallingTests.BoxedStruct()
+        struct1.long_ = 1
+        struct2 = GIMarshallingTests.BoxedStruct()
+        struct2.long_ = 2
+        struct3 = GIMarshallingTests.BoxedStruct()
+        struct3.long_ = 3
+
+        GIMarshallingTests.array_struct_take_in([struct1, struct2, struct3])
+
+        self.assertEqual(1, struct1.long_)
+
+    @unittest.skip("FIXME")
+    def test_array_boxed_struct_return(self):
+        (struct1, struct2, struct3) = GIMarshallingTests.array_zero_terminated_return_struct()
+        self.assertEqual(GIMarshallingTests.BoxedStruct, type(struct1))
+        self.assertEqual(GIMarshallingTests.BoxedStruct, type(struct2))
+        self.assertEqual(GIMarshallingTests.BoxedStruct, type(struct3))
+        self.assertEqual(42, struct1.long_)
+        self.assertEqual(43, struct2.long_)
+        self.assertEqual(44, struct3.long_)
+
+    @unittest.skip("FIXME")
+    def test_array_simple_struct_in(self):
+        struct1 = GIMarshallingTests.SimpleStruct()
+        struct1.long_ = 1
+        struct2 = GIMarshallingTests.SimpleStruct()
+        struct2.long_ = 2
+        struct3 = GIMarshallingTests.SimpleStruct()
+        struct3.long_ = 3
+
+        GIMarshallingTests.array_simple_struct_in([struct1, struct2, struct3])
+
+    @unittest.skip("FIXME")
+    def test_array_multi_array_key_value_in(self):
+        GIMarshallingTests.multi_array_key_value_in(["one", "two", "three"],
+                                                    [1, 2, 3])
+
+    @unittest.skip("FIXME")
+    def test_array_in_nonzero_nonlen(self):
+        GIMarshallingTests.array_in_nonzero_nonlen(1, b'abcd')
+
+    @unittest.skip("FIXME")
+    def test_array_fixed_out_struct(self):
+        struct1, struct2 = GIMarshallingTests.array_fixed_out_struct()
+
+        self.assertEqual(7, struct1.long_)
+        self.assertEqual(6, struct1.int8)
+        self.assertEqual(6, struct2.long_)
+        self.assertEqual(7, struct2.int8)
+
+    @unittest.skip("FIXME")
+    def test_array_zero_terminated_return(self):
+        self.assertEqual(['0', '1', '2'], GIMarshallingTests.array_zero_terminated_return())
 
     def test_array_zero_terminated_return_null(self):
         self.assertEqual([], GIMarshallingTests.array_zero_terminated_return_null())
 
+    def test_array_zero_terminated_in(self):
+        GIMarshallingTests.array_zero_terminated_in(Sequence(['0', '1', '2']))
+
+    @unittest.skip("FIXME")
+    def test_array_zero_terminated_out(self):
+        self.assertEqual(['0', '1', '2'], GIMarshallingTests.array_zero_terminated_out())
+
+    @unittest.skip("FIXME")
+    def test_array_zero_terminated_inout(self):
+        self.assertEqual(['-1', '0', '1', '2'], GIMarshallingTests.array_zero_terminated_inout(['0', '1', '2']))
+
+    def test_init_function(self):
+        self.assertEqual((True, []), GIMarshallingTests.init_function([]))
+        self.assertEqual((True, []), GIMarshallingTests.init_function(['hello']))
+        self.assertEqual((True, ['hello']),
+                         GIMarshallingTests.init_function(['hello', 'world']))
 
 @unittest.skipUnless(GIMarshallingTests, "")
 class TestPGI(unittest.TestCase):

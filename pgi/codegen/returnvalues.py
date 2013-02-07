@@ -107,9 +107,6 @@ class ArrayReturnValue(ReturnValue):
         param_type = self.type.get_param_type(0)
 
         if array_type == GIArrayType.C:
-            param_cls = get_return_class(param_type)
-            param = param_cls(self.info, param_type, [], self.backend)
-
             if self.is_zero_terminated():
                 block, var = backend.unpack_carray_zeroterm(name)
                 return block, var
@@ -121,13 +118,13 @@ class ArrayReturnValue(ReturnValue):
                     # array size const
                     array_size = str(self.type.array_fixed_size)
                     # unpack array
-                    block2, var = backend.unpack_carray_basic_fixed(var, array_size)
+                    block2, var = backend.unpack_carray_basic_fixed(var, array_size, param_type)
                     block2.write_into(block)
                 else:
                     # filled by the aux
                     array_size = self._length_var
                     # unpack array
-                    block2, var = backend.unpack_carray_basic_length(var, array_size)
+                    block2, var = backend.unpack_carray_basic_length(var, array_size, param_type)
                     block2.write_into(block)
 
                 return block, var
