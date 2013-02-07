@@ -274,18 +274,22 @@ class CArrayArgument(ArrayArgument):
             if not self.is_zero_terminated():
                 if self.array_length == -1:
                     length = str(self.array_fixed_size)
-                    block, data, ptr = backend.setup_carray_basic_fixed(length, self._param_type)
-                    self._data = ptr
-                    block2, self.call_var = backend.get_reference(ptr)
+                    block, data = backend.setup_carray_basic_fixed(length, self._param_type)
+                    block2, self.call_var = backend.get_reference(data)
                     block2.write_into(block)
+
+                    self._data = data
                     return block
                 else:
                     length_type = self._aux.type
 
-                    block, data, ptr, length = backend.setup_carray_basic_length(self._param_type, length_type)
-                    self.call_var = ptr
+                    block, data, length = backend.setup_carray_basic_length(self._param_type, length_type)
+                    block2, self.call_var = backend.get_reference(data)
+                    block2.write_into(block)
+
                     block2, self._aux.call_var = backend.get_reference(length)
                     block2.write_into(block)
+
                     self._length = length
                     self._data = data
                     return block
@@ -297,7 +301,7 @@ class CArrayArgument(ArrayArgument):
             return
 
         if not self.is_zero_terminated():
-            block, data = self.backend.deref_pointer(self._data)
+            block, data = self.backend.cast_pointer(self._data, self._param_type)
 
             if self.array_length == -1:
                 length = str(self.array_fixed_size)

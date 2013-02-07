@@ -926,11 +926,9 @@ class TestArray(unittest.TestCase):
     def test_array_string_in(self):
         GIMarshallingTests.array_string_in(['foo', 'bar'])
 
-    @unittest.skip("FIXME")
     def test_array_out(self):
         self.assertEqual([-1, 0, 1, 2], GIMarshallingTests.array_out())
 
-    @unittest.skip("FIXME")
     def test_array_out_etc(self):
         self.assertEqual(([-5, 0, 1, 9], 4), GIMarshallingTests.array_out_etc(-5, 9))
 
@@ -945,7 +943,6 @@ class TestArray(unittest.TestCase):
         object_ = GIMarshallingTests.Object()
         object_.method_array_in(Sequence([-1, 0, 1, 2]))
 
-    @unittest.skip("FIXME")
     def test_method_array_out(self):
         object_ = GIMarshallingTests.Object()
         self.assertEqual([-1, 0, 1, 2], object_.method_array_out())

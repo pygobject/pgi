@@ -696,24 +696,31 @@ $array_ptr = ctypes.pointer($array)
 
     def setup_carray_basic_fixed(self, length, type_):
         block, var = self.parse("""
-$array = ($ctypes_type * $length)()
-$array_ptr = ctypes.pointer($array)
+$data = ($ctypes_type * $length)()
+$array = ctypes.pointer($data)
 """, ctypes_type=typeinfo_to_ctypes(type_), length=length)
 
-        return block, var["array"], var["array_ptr"]
+        return block, var["array"]
+
+    def setup_carray_basic_length(self, type_, length_type):
+        block, var = self.parse("""
+$length = $length_type()
+$array = ctypes.c_void_p()
+""", type=typeinfo_to_ctypes(type_),
+     length_type=typeinfo_to_ctypes(length_type))
+
+        return block, var["array"], var["length"]
 
     def unpack_carray_basic_fixed(self, array, length, type_):
         block, var = self.parse("""
-$casted = ctypes.cast($array, ctypes.POINTER($array_type))
-$out = $casted[:$length]
+$out = $array[:$length]
 """, array=array, length=length, array_type=typeinfo_to_ctypes(type_))
 
         return block, var["out"]
 
     def unpack_carray_basic_length(self, array, length, type_):
         block, var = self.parse("""
-$casted = ctypes.cast($array, ctypes.POINTER($array_type))
-$out = $casted[:$length.value]
+$out = $array[:$length.value]
 """, array=array, length=length, array_type=typeinfo_to_ctypes(type_))
 
         return block, var["out"]
@@ -778,7 +785,16 @@ class CTypesBackend(CodeGenBackend, BasicTypes, InterfaceTypes, CArrayTypes,
         self._libs = {}
 
     def parse(self, *args, **kwargs):
-        block, var = CodeGenBackend.parse(self, *args, **kwargs)
+        # make ctypes dependencies local
+        new_kwargs = {}
+        base_type = type(ctypes.c_int)
+        for key, value in kwargs.iteritems():
+            if isinstance(value, type) and value.__module__ == "ctypes":
+                new_kwargs[key] = "%s.%s" % (value.__module__, value.__name__)
+            else:
+                new_kwargs[key] = value
+
+        block, var = CodeGenBackend.parse(self, *args, **new_kwargs)
         block.add_dependency("ctypes", ctypes)
         return block, var
 
