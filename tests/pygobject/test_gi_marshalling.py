@@ -1060,6 +1060,7 @@ class TestArray(unittest.TestCase):
         self.assertEqual((True, ['hello']),
                          GIMarshallingTests.init_function(['hello', 'world']))
 
+
 @unittest.skipUnless(GIMarshallingTests, "")
 class TestPGI(unittest.TestCase):
     def test_array_type_checks(self):

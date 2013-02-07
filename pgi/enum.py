@@ -16,16 +16,12 @@ from pgi.obj import add_method
 
 
 class EnumBase(int):
-    pass
+    __gtype__ = PGType.from_name("GEnum")
 
 
 class _EnumClass(EnumBase):
     _allowed = {}
     _info = None
-
-    @property
-    def __gtype__(self):
-        return PGType(self._info.g_type)
 
     def __get_enum_value(self):
         gtype = self.__gtype__._type
@@ -168,7 +164,7 @@ def EnumAttribute(info):
 
     values = _get_values(info)
     cls._allowed = dict(values)
-    cls._info = info
+    cls.__gtype__ = PGType(info.g_type)
 
     for method in info.get_methods():
         add_method(method, cls)

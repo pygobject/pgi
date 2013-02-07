@@ -9,7 +9,7 @@ import sys
 import unittest
 
 from tests import is_gi
-from gi.repository import Gtk
+from gi.repository import Gtk, GObject
 
 
 class EnumTest(unittest.TestCase):
@@ -42,3 +42,11 @@ class EnumTest(unittest.TestCase):
     def test_return_enum(self):
         box = Gtk.HBox()
         self.assertEqual(box.get_resize_mode(), Gtk.ResizeMode.PARENT)
+
+    def test_enum_gtype(self):
+        self.assertEqual(GObject.GEnum.__gtype__,
+                         GObject.GType.from_name("GEnum"))
+
+    @unittest.skipIf(is_gi, "doesn't work in gi")
+    def test_enum_gtype2(self):
+        self.assertEqual(Gtk.IconSize.__gtype__.parent.pytype, GObject.GEnum)
