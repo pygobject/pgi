@@ -143,6 +143,9 @@ class BasicType(BaseType):
             raise NotImplementedError("basic type pointer")
         return cls
 
+    def pack_in(self, name):
+        return name
+
     def pre_unpack(self, c_value):
         # ctypes does auto unpacking of return values
         # to keep the unpack methods for out arguments and return values
@@ -437,7 +440,7 @@ $value = ctypes.c_double()
 """)["value"]
 
 
-class Boolean(BaseType):
+class Boolean(BasicType):
     GI_TYPE_TAG = GITypeTag.BOOLEAN
 
     def check(self, name):
@@ -501,6 +504,8 @@ $gtype = GType($obj._type.value)
 
         self.block.add_dependency("GType", GType)
         return var["gtype"]
+
+    pack_in = pack
 
     def pre_unpack(self, name):
         return name

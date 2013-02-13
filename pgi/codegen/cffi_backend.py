@@ -131,7 +131,13 @@ class BaseType(object):
         raise NotImplementedError
 
 
-class Boolean(BaseType):
+class BasicType(BaseType):
+
+    def pack_in(self, name):
+        return name
+
+
+class Boolean(BasicType):
     GI_TYPE_TAG = GITypeTag.BOOLEAN
 
     def check(self, name):
@@ -153,7 +159,7 @@ $value = ffi.cast("gboolean", 0)
 """)["value"]
 
 
-class Int32(BaseType):
+class Int32(BasicType):
     GI_TYPE_TAG = GITypeTag.INT32
 
     def check(self, name):
@@ -181,7 +187,7 @@ $value = ffi.cast("gint32", 0)
 """)["value"]
 
 
-class Utf8(BaseType):
+class Utf8(BasicType):
     GI_TYPE_TAG = GITypeTag.UTF8
 
     def check(self, name):

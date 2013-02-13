@@ -353,7 +353,7 @@ class BasicTypeArgument(GIArgument):
             self.call_var = var.get_reference(self._data)
             return var.block
         elif self.is_direction_in():
-            self.call_var = var.pack(var.check(self.name))
+            self.call_var = var.pack_in(var.check(self.name))
             return var.block
         else:
             self._data = var.new()
