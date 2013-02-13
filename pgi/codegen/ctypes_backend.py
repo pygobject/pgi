@@ -1000,10 +1000,7 @@ while $current:
         else:
             packed_length = ""
 
-        if self.type.is_zero_terminated:
-            raise NotImplementedError("carry new zero")
-
-        if self.type.array_length != -1:
+        if self.type.is_zero_terminated or self.type.array_length != -1:
             return self.parse("""
 $array = ctypes.c_void_p()
 """)["array"], packed_length

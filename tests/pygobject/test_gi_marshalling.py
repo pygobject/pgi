@@ -1036,7 +1036,6 @@ class TestArray(unittest.TestCase):
         self.assertEqual(6, struct2.long_)
         self.assertEqual(7, struct2.int8)
 
-    @unittest.skip("FIXME")
     def test_array_zero_terminated_return(self):
         self.assertEqual(['0', '1', '2'], GIMarshallingTests.array_zero_terminated_return())
 
@@ -1046,11 +1045,9 @@ class TestArray(unittest.TestCase):
     def test_array_zero_terminated_in(self):
         GIMarshallingTests.array_zero_terminated_in(Sequence(['0', '1', '2']))
 
-    @unittest.skip("FIXME")
     def test_array_zero_terminated_out(self):
         self.assertEqual(['0', '1', '2'], GIMarshallingTests.array_zero_terminated_out())
 
-    @unittest.skip("FIXME")
     def test_array_zero_terminated_inout(self):
         self.assertEqual(['-1', '0', '1', '2'], GIMarshallingTests.array_zero_terminated_inout(['0', '1', '2']))
 

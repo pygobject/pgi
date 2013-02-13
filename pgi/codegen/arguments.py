@@ -146,9 +146,6 @@ class ArrayArgument(GIArgument):
 
         raise NotImplementedError("unsupported array type")
 
-    def is_zero_terminated(self):
-        return self.type.is_zero_terminated
-
 
 class CArrayArgument(ArrayArgument):
 
@@ -191,17 +188,12 @@ class CArrayArgument(ArrayArgument):
         if not self.is_direction_out():
             return
 
-        if not self.is_zero_terminated():
-            var = self.backend.get_type(self.type)
-
-            if self.type.array_length != -1:
-                self.out_var = var.unpack(self._data, self._length)
-            else:
-                self.out_var = var.unpack(self._data, None)
-
-            return var.block
-
-        raise NotImplementedError("post zero")
+        var = self.backend.get_type(self.type)
+        if self.type.array_length != -1:
+            self.out_var = var.unpack(self._data, self._length)
+        else:
+            self.out_var = var.unpack(self._data, None)
+        return var.block
 
 
 class BaseInterfaceArgument(GIArgument):
