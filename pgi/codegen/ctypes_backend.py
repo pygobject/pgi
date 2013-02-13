@@ -1103,13 +1103,7 @@ class CTypesBackend(Backend):
 # ret: $ret
 """, args=repr([n.__name__ for n in h.argtypes]), ret=repr(h.restype))
 
-        if method:
-            self_block, var = self.parse("""
-$new_self = $sself._obj
-""", sself=self_name)
-            self_block.write_into(block)
-
-        return block, method and var["new_self"], h
+        return block, method and "%s._obj" % self_name, h
 
     def get_callback(self, func, args, ret=None):
         arg_types = [typeinfo_to_ctypes(a.type) for a in args]
