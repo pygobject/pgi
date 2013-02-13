@@ -5,8 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from pgi.gir import GITypeTag, GIInfoType, GIDirection, GITransfer
-from pgi.util import import_attribute
+from pgi.gir import GITypeTag, GIDirection, GITransfer, GIInfoType
 
 
 class CallbackArgument(object):
@@ -34,9 +33,6 @@ class CallbackArgument(object):
     def may_be_null(self):
         return self.info.may_be_null
 
-    def is_pointer(self):
-        return self.type.is_pointer
-
     def is_direction_in(self):
         return self.direction in (GIDirection.INOUT, GIDirection.IN)
 
@@ -61,25 +57,15 @@ class InterfaceArgument(CallbackArgument):
     py_type = object
 
     def process(self):
-        backend = self.backend
         iface = self.type.get_interface()
         iface_type = iface.type.value
-        iface_namespace = iface.namespace
-        iface_name = iface.name
+        var = self.backend.get_type(self.type)
 
-        if iface_type == GIInfoType.OBJECT:
-            return backend.unpack_object(self.name)
-        elif iface_type == GIInfoType.UNION:
-            attr = import_attribute(iface_namespace, iface_name)
-            return backend.unpack_union(self.name, attr)
-        elif iface_type == GIInfoType.STRUCT:
-            attr = import_attribute(iface_namespace, iface_name)
-            return backend.unpack_struct(self.name, attr)
-        elif iface_type == GIInfoType.FLAGS:
-            attr = import_attribute(iface_namespace, iface_name)
-            return backend.unpack_flags(self.name, attr)
-
-        raise NotImplementedError("interface %r not supported" % iface.type)
+        if iface_type == GIInfoType.STRUCT or iface_type == GIInfoType.UNION:
+            out = var.unpack(self.name)
+        else:
+            out = var.unpack_null(self.name)
+        return var.block, out
 
 
 class Utf8Argument(CallbackArgument):
@@ -91,7 +77,10 @@ class VoidArgument(CallbackArgument):
     TAG = GITypeTag.VOID
     py_type = int
 
+
 _classes = {}
+
+
 def _find_cbargs():
     global _classes
     for var in globals().values():

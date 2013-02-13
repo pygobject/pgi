@@ -1,4 +1,4 @@
-# Copyright 2012 Christoph Reiter
+# Copyright 2012,2013 Christoph Reiter
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -6,7 +6,6 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from pgi.gir import GITypeTag, GIInfoType, GITransfer, GIArrayType
-from pgi.util import import_attribute
 from pgi.gtype import PGType
 from pgi.gerror import PGError
 
@@ -39,9 +38,6 @@ class ReturnValue(object):
     def is_zero_terminated(self):
         return self.type.is_zero_terminated
 
-    def is_pointer(self):
-        return self.type.is_pointer
-
     def transfer_nothing(self):
         return self.info.caller_owns.value == GITransfer.NOTHING
 
@@ -58,81 +54,68 @@ class BooleanReturnValue(ReturnValue):
     py_type = bool
 
     def post_call(self, name):
-        return self.backend.unpack_bool(name)
+        var = self.backend.get_type(self.type)
+        out = var.unpack(name)
+        return var.block, out
 
 
 class VoidReturnValue(ReturnValue):
     TAG = GITypeTag.VOID
 
     def setup(self):
-        if self.is_pointer():
+        if self.type.is_pointer:
             self.py_type = int
         else:
             self.py_type = None
 
     def post_call(self, name):
-        if self.is_pointer():
+        # FIXME
+        if self.type.is_pointer:
             return None, name
         else:
             return None, None
 
 
-class ArrayReturnValue(ReturnValue):
+class ArrayReturn(ReturnValue):
     TAG = GITypeTag.ARRAY
-
     py_type = list
 
-    def setup(self):
-        self.array_length = self.type.array_length
+    @classmethod
+    def get_class(cls, type_):
+        value = type_.array_type.value
 
-        # mark other arg as aux so we handle it alone
-        if self.array_length != -1:
-            aux = self.args[self.array_length]
+        if value == GIArrayType.C:
+            return CArrayReturn
+
+        raise NotImplementedError("Unsupported array return type")
+
+
+class CArrayReturn(ArrayReturn):
+
+    def setup(self):
+        if self.type.array_length != -1:
+            aux = self.args[self.type.array_length]
             aux.is_aux = True
             self._aux = aux
 
     def pre_call(self):
-        if self.array_length != -1:
-            block, var = self.backend.setup_int32()
-            self._length_var = var
-
-            block2, ref = self.backend.get_reference(var)
-            block2.write_into(block)
-            self._aux.call_var = ref
-            return block
+        if self.type.array_length != -1:
+            var = self.backend.get_type(self._aux.type)
+            self._length_var = var.new()
+            self._aux.call_var = var.get_reference(self._length_var)
+            return var.block
 
     def post_call(self, name):
-        backend = self.backend
-        array_type = self.type.array_type.value
-        param_type = self.type.get_param_type(0)
-
-        if array_type == GIArrayType.C:
-            if self.is_zero_terminated():
-                block, var = backend.unpack_carray_zeroterm(name)
-                return block, var
-            else:
-                # cast the gpointer to a pointer to the array type
-                block, var = self.backend.cast_pointer(name, param_type)
-
-                if self.type.array_length == -1:
-                    # array size const
-                    array_size = str(self.type.array_fixed_size)
-                    # unpack array
-                    block2, var = backend.unpack_carray_basic_fixed(var, array_size, param_type)
-                    block2.write_into(block)
-                else:
-                    # filled by the aux
-                    array_size = self._length_var
-                    # unpack array
-                    block2, var = backend.unpack_carray_basic_length(var, array_size, param_type)
-                    block2.write_into(block)
-
-                return block, var
-
-        raise NotImplementedError("array return")
+        var = self.backend.get_type(self.type)
+        if self.type.array_length != -1:
+            out = var.unpack(name, self._length_var)
+        else:
+            out = var.unpack(name, None)
+        return var.block, out
 
 
 class BasicReturnValue(ReturnValue):
+
     def post_call(self, name):
         return None, name
 
@@ -192,11 +175,11 @@ class Utf8ReturnValue(ReturnValue):
     py_type = str
 
     def post_call(self, name):
-        block, var, ref = self.backend.unpack_utf8_return(name)
+        var = self.backend.get_type(self.type)
+        out = var.unpack_return(name)
         if self.transfer_everything():
-            block2 = self.backend.free_pointer(ref)
-            block2.write_into(block)
-        return block, var
+            var.free(name)
+        return var.block, out
 
 
 class ErrorReturn(ReturnValue):
@@ -204,15 +187,14 @@ class ErrorReturn(ReturnValue):
     py_type = PGError
 
     def post_call(self, name):
-        return self.backend.unpack_gerror(name)
+        var = self.backend.get_type(self.type)
+        out = var.unpack(name)
+        return var.block, out
 
 
 class FilenameReturnValue(Utf8ReturnValue):
     TAG = GITypeTag.FILENAME
     py_type = str
-
-    def post_call(self, name):
-        return self.backend.unpack_utf8_return(name)[:2]
 
 
 class BaseInterfaceReturn(ReturnValue):
@@ -244,32 +226,29 @@ class BaseInterfaceReturn(ReturnValue):
 class EnumReturn(BaseInterfaceReturn):
 
     def post_call(self, name):
-        iface = self.type.get_interface()
-        iface_namespace = iface.namespace
-        iface_name = iface.name
-
-        attr = import_attribute(iface_namespace, iface_name)
-        return self.backend.unpack_enum(name, attr)
+        var = self.backend.get_type(self.type)
+        out = var.unpack(name)
+        return var.block, out
 
 
 class InterfaceReturn(BaseInterfaceReturn):
 
     def post_call(self, name):
-        block, out = self.backend.unpack_object(name)
+        var = self.backend.get_type(self.type)
+        out = var.unpack_null(name)
         if self.transfer_nothing():
-            block2 = self.backend.ref_object_null(out)
-            block2.write_into(block)
-        return block, out
+            var.ref_null(out)
+        return var.block, out
 
 
 class ObjectReturn(BaseInterfaceReturn):
 
     def post_call(self, name):
-        block, out = self.backend.unpack_object(name)
+        var = self.backend.get_type(self.type)
+        out = var.unpack_null(name)
         if self.transfer_nothing():
-            block2 = self.backend.ref_object_null(out)
-            block2.write_into(block)
-        return block, out
+            var.ref_null(out)
+        return var.block, out
 
 
 class StructReturn(BaseInterfaceReturn):
@@ -279,38 +258,27 @@ class StructReturn(BaseInterfaceReturn):
         iface_namespace = iface.namespace
         iface_name = iface.name
 
-        attr = import_attribute(iface_namespace, iface_name)
-        # we need to unpack GValues to match pygobject
+        var = self.backend.get_type(self.type)
+        out = var.unpack(name)
         if iface_namespace == "GObject" and iface_name == "Value":
-            #raise NotImplementedError
-            block, out = self.backend.unpack_struct(name, attr)
-            block2, out = self.backend.unpack_gvalue(out)
-            block2.write_into(block)
-            return block, out
-        else:
-            return self.backend.unpack_struct(name, attr)
+            out = var.unpack_gvalue(out)
+        return var.block, out
 
 
 class UnionReturn(BaseInterfaceReturn):
 
     def post_call(self, name):
-        iface = self.type.get_interface()
-        iface_namespace = iface.namespace
-        iface_name = iface.name
-
-        attr = import_attribute(iface_namespace, iface_name)
-        return self.backend.unpack_union(name, attr)
+        var = self.backend.get_type(self.type)
+        out = var.unpack(name)
+        return var.block, out
 
 
 class FlagsReturn(BaseInterfaceReturn):
 
     def post_call(self, name):
-        iface = self.type.get_interface()
-        iface_namespace = iface.namespace
-        iface_name = iface.name
-
-        attr = import_attribute(iface_namespace, iface_name)
-        return self.backend.unpack_flags(name, attr)
+        var = self.backend.get_type(self.type)
+        out = var.unpack(name)
+        return var.block, out
 
 
 class GTypeReturnValue(ReturnValue):
@@ -318,7 +286,9 @@ class GTypeReturnValue(ReturnValue):
     py_type = PGType
 
     def post_call(self, name):
-        return self.backend.unpack_gtype(name)
+        var = self.backend.get_type(self.type)
+        out = var.unpack(name)
+        return var.block, out
 
 
 _classes = {}

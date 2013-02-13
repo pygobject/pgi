@@ -14,18 +14,6 @@ from pgi.util import import_attribute, cached_property
 
 
 class PGType(object):
-    __types = {}
-
-    def __new__(cls, type_):
-        if isinstance(type_, (int, long)):
-            value = type_
-        else:
-            value = type_.value
-        if value in cls.__types:
-            return cls.__types[value]
-        obj = super(PGType, cls).__new__(cls)
-        cls.__types[value] = obj
-        return obj
 
     def __init__(self, type_):
         if isinstance(type_, (int, long)):

@@ -27,6 +27,7 @@ def generate_callback(info):
     for backend in ACTIVE_BACKENDS:
         if backend.NAME == "ctypes":
             break
+    backend = backend()
 
     args = info.get_args()
     arg_types = [a.get_type() for a in args]
@@ -59,9 +60,9 @@ def generate_callback(info):
     argument_list = ", ".join([a.name for a in cb_args])
     forward_arguments = ", ".join(outs_vars)
     func_name = escape_name(info.name)
-    cb_name = backend._var()
+    cb_name = backend.var()
 
-    return_var = backend._var()
+    return_var = backend.var()
     return_block, out_var = return_value.process(return_var)
     return_block = return_block or CodeBlock()
 
@@ -81,7 +82,7 @@ def $cb_wrapper($args):
     def create_cb_for_func(real_func):
         # binds the callback to the block and compiles it
         func = block.compile(**{cb_name: real_func})[func_name]
-        return backend.get_callback_object(func, cb_args, return_value)
+        return backend.get_callback(func, cb_args, return_value)
 
     return create_cb_for_func, docstring
 
@@ -112,7 +113,7 @@ def _generate_signal_callback(backend, info, args, arg_types):
     argument_list = ", ".join([a.name for a in sig_args])
     forward_arguments = ", ".join(outs_vars)
     func_name = escape_name(info.name)
-    cb_name = backend._var()
+    cb_name = backend.var()
 
     block, var = backend.parse("""
 def $cb_wrapper($args):
@@ -124,7 +125,7 @@ def $cb_wrapper($args):
 
     def create_sig_for_func(real_func):
         func = block.compile(**{cb_name: real_func})[func_name]
-        return backend.get_callback_object(func, sig_args)
+        return backend.get_callback(func, sig_args)
 
     return create_sig_for_func
 
@@ -139,7 +140,7 @@ def generate_signal_callback(info):
 
     cb_func = None
     try:
-        cb_func = _generate_signal_callback(backend, info, args, arg_types)
+        cb_func = _generate_signal_callback(backend(), info, args, arg_types)
     except NotImplementedError:
         pass
 

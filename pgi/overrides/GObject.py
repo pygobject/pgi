@@ -152,9 +152,9 @@ class Value(GObjectModule.Value):
                 self.set_value(py_value)
 
     def __del__(self):
-        GObjectModule.Value.__del__(self)
         if self._free_on_dealloc and self.g_type != TYPE_INVALID:
             self.unset()
+        GObjectModule.Value.__del__(self)
 
     def set_value(self, py_value):
         if self.g_type == TYPE_INVALID:

@@ -6,7 +6,6 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from pgi.gir import GIInfoType, GITypeTag
-from pgi.util import import_attribute
 
 
 class Field(object):
@@ -28,18 +27,16 @@ class InterfaceField(Field):
     TAG = GITypeTag.INTERFACE
 
     def get(self, name):
-        backend = self.backend
+        var = self.backend.get_type(self.type)
         iface = self.type.get_interface()
         iface_type = iface.type.value
-        iface_namespace = iface.namespace
-        iface_name = iface.name
 
         if iface_type == GIInfoType.ENUM:
-            attr = import_attribute(iface_namespace, iface_name)
-            return backend.unpack_enum(name, attr)
+            out = var.unpack(var.pre_unpack(name))
+            return var.block, out
         elif iface_type == GIInfoType.STRUCT:
-            attr = import_attribute(iface_namespace, iface_name)
-            return backend.unpack_struct(name, attr)
+            out = var.unpack(name)
+            return var.block, out
 
         raise NotImplementedError("interface type not supported")
 
@@ -48,54 +45,42 @@ class TypeField(Field):
     TAG = GITypeTag.GTYPE
 
     def get(self, name):
-        return self.backend.unpack_gtype(name)
+        var = self.backend.get_type(self.type)
+        out = var.unpack(var.pre_unpack(name))
+        return var.block, out
 
 
-class DoubleField(Field):
+class BasicField(Field):
+
+    def get(self, name):
+        var = self.backend.get_type(self.type)
+        out = var.unpack(var.pre_unpack(name))
+        return var.block, out
+
+    def set(self, name, value_name):
+        var = self.backend.get_type(self.type)
+        out = var.pack(value_name)
+        return var.block, out
+
+
+class DoubleField(BasicField):
     TAG = GITypeTag.DOUBLE
 
-    def get(self, name):
-        return None, name
 
-
-class UInt32Field(Field):
+class UInt32Field(BasicField):
     TAG = GITypeTag.UINT32
 
-    def set(self, name, value_name):
-        return self.backend.pack_uint32(value_name)
 
-    def get(self, name):
-        return None, name
-
-
-class UInt8Field(Field):
+class UInt8Field(BasicField):
     TAG = GITypeTag.UINT8
 
-    def set(self, name, value_name):
-        return self.backend.pack_uint8(value_name)
 
-    def get(self, name):
-        return None, name
-
-
-class UInt16Field(Field):
+class UInt16Field(BasicField):
     TAG = GITypeTag.UINT16
 
-    def set(self, name, value_name):
-        return self.backend.pack_uint16(value_name)
 
-    def get(self, name):
-        return None, name
-
-
-class FloatField(Field):
+class FloatField(BasicField):
     TAG = GITypeTag.FLOAT
-
-    def set(self, name, value_name):
-        return self.backend.pack_float(value_name)
-
-    def get(self, name):
-        return None, name
 
 
 _classes = {}

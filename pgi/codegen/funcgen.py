@@ -22,7 +22,6 @@ def build_docstring(func_name, args, ret):
             return x.py_type
         return x.py_type.__name__
 
-
     out_args = []
     if ret:
         if ret.py_type is None:
@@ -95,9 +94,9 @@ def _generate_function(backend, info, arg_infos, arg_types,
         block.write_into(body)
 
     # generate call
-    lib = backend.get_library_object(info.namespace)
+    lib = backend.get_library(info.namespace)
     symbol = info.symbol
-    block, svar, func = backend.get_function_object(lib, symbol, args,
+    block, svar, func = backend.get_function(lib, symbol, args,
                                                     return_value, method,
                                                     "self", throws)
     if block:
@@ -107,8 +106,10 @@ def _generate_function(backend, info, arg_infos, arg_types,
     call_vars = [a.call_var for a in args if a.call_var]
     if method:
         call_vars.insert(0, svar)
-    block, ret = backend.call(func, ", ".join(call_vars))
-    block.write_into(body)
+    call_block, var = backend.parse("$ret = $func($args)",
+                                    func=func, args=", ".join(call_vars))
+    call_block.write_into(body)
+    ret = var["ret"]
 
     out = []
 
@@ -176,8 +177,9 @@ def generate_function(info, method=False, throws=False):
     func = None
     messages = []
     for backend in ACTIVE_BACKENDS:
+        instance = backend()
         try:
-            func = _generate_function(backend, info, arg_infos, arg_types,
+            func = _generate_function(instance, info, arg_infos, arg_types,
                                       return_type, method, throws)
         except NotImplementedError, e:
             messages.append("%s: %s" % (backend.NAME, e.message))

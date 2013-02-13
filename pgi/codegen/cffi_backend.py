@@ -1,18 +1,15 @@
-# Copyright 2012 Christoph Reiter
+# Copyright 2012,2013 Christoph Reiter
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-import ctypes
 from cffi import FFI
 
-from pgi.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr
 from pgi.gir import GIRepositoryPtr, GITypeTag, GIInfoType
-from pgi.gtype import PGType
-from pgi.codegen.backend import CodeGenBackend
-from pgi.codegen.utils import CodeBlock
+from pgi.codegen.backend import Backend, VariableFactory
+from pgi.codegen.utils import CodeBlock, parse_with_objects
 
 
 _glib_defs = """
@@ -85,180 +82,175 @@ def typeinfo_to_cffi(info):
     raise NotImplementedError("Couldn't convert %r to cffi type" % info.tag)
 
 
-class BasicTypes(object):
+def get_type(type_, gen):
+    tag_value = type_.tag.value
+    for obj in globals().values():
+        if isinstance(obj, type) and issubclass(obj, BaseType):
+            if obj.GI_TYPE_TAG == tag_value:
+                cls = obj
+                break
+    else:
+        raise NotImplementedError("type: %r", type_.tag)
 
-    def unpack_utf8(self, name):
-        # most annotations don't specify if the return value for gchar*
-        # can be NULL... so check for all strings
-        block, var = self.parse("""
-if $cdata != ffi.NULL:
-    $string = ffi.string($cdata)
+    cls = cls.get_class(type_)
+    return cls(gen, type_)
+
+
+class BaseType(object):
+    GI_TYPE_TAG = None
+    type = None
+    py_type = None
+
+    def __init__(self, gen, type_):
+        self._gen = gen
+        self.block = CodeBlock()
+        self.type = type_
+
+    def get_type(self, type_):
+        return get_type(type_, self._gen)
+
+    def var(self):
+        return self._gen.var()
+
+    @classmethod
+    def get_class(cls, type_):
+        return cls
+
+    def parse(self, code, **kwargs):
+        block, var = self._gen.parse(code, **kwargs)
+        block.write_into(self.block)
+        return var
+
+    def pre_unpack(self, name):
+        return name
+
+    def get_reference(self, value):
+        raise NotImplementedError
+
+    def free(self, name):
+        raise NotImplementedError
+
+
+class Boolean(BaseType):
+    GI_TYPE_TAG = GITypeTag.BOOLEAN
+
+    def check(self, name):
+        return self.parse("""
+$bool = bool($value)
+""", value=name)["bool"]
+
+    def pack(self, name):
+        return name
+
+    def unpack(self, name):
+        return self.parse("""
+$bool = bool($value)
+""", value=name)["bool"]
+
+    def new(self):
+        return self.parse("""
+$value = ffi.cast("gboolean", 0)
+""")["value"]
+
+
+class Int32(BaseType):
+    GI_TYPE_TAG = GITypeTag.INT32
+
+    def check(self, name):
+        return self.parse("""
+# int32 type/value check
+if not isinstance($value, basestring):
+    $int = int($value)
+else:
+    raise TypeError("'$value' not a number")
+
+if not -2**31 <= $int < 2**31:
+    raise ValueError("Value %r not in range" % $int)
+""", value=name)["int"]
+
+    def pack(self, valid):
+        return self.parse("""
+# to cffi
+$c_value = ffi.cast("gint32", $value)
+""", value=valid)["c_value"]
+
+    def new(self):
+        return self.parse("""
+# new int32
+$value = ffi.cast("gint32", 0)
+""")["value"]
+
+
+class Utf8(BaseType):
+    GI_TYPE_TAG = GITypeTag.UTF8
+
+    def check(self, name):
+        return self.parse("""
+if isinstance($value, unicode):
+    $string = $value.encode("utf-8")
+elif not isinstance($value, str):
+    raise TypeError("%r not a string" % $value)
+else:
+    $string = $value
+""", value=name)["string"]
+
+    def check_null(self, name):
+        return self.parse("""
+if $value is not None:
+    if isinstance($value, unicode):
+        $string = $value.encode("utf-8")
+    elif not isinstance($value, str):
+        raise TypeError("%r not a string or None" % $value)
+    else:
+        $string = $value
 else:
     $string = None
-""", cdata=name)
+""", value=name)["string"]
 
-        block.add_dependency("ffi", self._ffi)
-        return block, var["string"]
-
-    def unpack_bool(self, name):
-        block, var = self.parse("""
-$bool = bool($name)
-""", name=name)
-
-        return block, var["bool"]
-
-    def unpack_basic(self, name):
-        block, var = self.parse("""
-$value = int($value)
-""", value=name)
-
-        return block, name
-
-    def pack_bool(self, name):
-        block, var = self.parse("""
-$boolean = bool($var)
-""", var=name)
-
-        return block, var["boolean"]
-
-    def pack_utf8(self, name):
-        block, var = self.parse("""
-# pack string, no None
-if isinstance($var, unicode):
-    $var = $var.encode("utf-8")
-elif not isinstance($var, str):
-    raise TypeError("$var must be a string")
-""", var=name)
-
-        return block, name
-
-    def pack_utf8_null(self, name):
-        block, var = self.parse("""
-# pack string, allow None
-if $var is not None:
-    if isinstance($var, unicode):
-        $var = $var.encode("utf-8")
-    elif not isinstance($var, str):
-        raise TypeError("$var must be a string or None")
+    def pack(self, name):
+        return self.parse("""
+if $value:
+    $c_value = $value
 else:
-    $var = ffi.cast("char*", 0)
-""", var=name)
+    $c_value = ffi.cast("char*", 0)
+""", value=name)["c_value"]
 
-        return block, name
+    def dup(self, name):
+        raise NotImplementedError
 
-    def pack_gtype(self, name):
-        gtype_map = {
-            str: "gchararray",
-            int: "gint",
-            float: "gdouble",
-            bool: "gboolean",
-        }
+    def unpack(self, name):
+        raise NotImplementedError
 
-        items = gtype_map.items()
-        gtype_map = dict((k, PGType.from_name(v)) for (k, v) in items)
+    def unpack_return(self, name):
+        raise NotImplementedError
 
-        block, var = self.parse("""
-if not isinstance($obj, PGType):
-    if hasattr($obj, "__gtype__"):
-        $obj = $obj.__gtype__
-    elif $obj in $gtype_map:
-        $obj = $gtype_map[$obj]
-
-if not isinstance($obj, PGType):
-    raise TypeError("%r not a GType" % $obj)
-
-$gtype = $obj._type.value
-""", gtype_map=gtype_map, obj=name)
-
-        block.add_dependency("PGType", PGType)
-        return block, var["gtype"]
-
-    def unpack_gtype(self, name):
-        block, var = self.parse("""
-$pgtype = PGType($gtype)
-""", gtype=name)
-
-        block.add_dependency("PGType", PGType)
-        return block, var["pgtype"]
+    def new(self):
+        raise NotImplementedError
 
 
-class InterfaceTypes(object):
+class CFFICodeGen(object):
+    def __init__(self, var, ffi):
+        self.var = var
+        self._ffi = ffi
 
-    def pack_struct(self, name):
-        from pgi.util import import_attribute
-        base_obj = import_attribute("GObject", "Object")
-        from pgi.structure import BaseStructure
-
-        block, var = self.parse("""
-if not isinstance($obj, ($base_struct_class, $base_obj_class)):
-    raise TypeError("%r is not a structure object" % $obj)
-$obj = ffi.cast("void*", $obj._obj)
-""", obj=name, base_struct_class=BaseStructure, base_obj_class=base_obj)
-
+    def parse(self, code, **kwargs):
+        block, var = parse_with_objects(code, self.var, **kwargs)
         block.add_dependency("ffi", self._ffi)
-        return block, var["obj"]
-
-    def pack_object_null(self, obj_name, type_):
-        block, var = self.parse("""
-if $obj is not None:
-    if not isinstance($obj, $type_class):
-        raise TypeError("argument $obj: Expected %s, got %s" % ($type_class.__name__, $obj.__class__.__name__))
-    $obj = ffi.cast("void*", $obj._obj)
-else:
-    $obj = ffi.cast("void*", 0)
-""", obj=obj_name, type_class=type_)
-
-        block.add_dependency("ffi", self._ffi)
-        return block, var["obj"]
-
-    def unpack_object(self, name):
-        def get_class_func(pointer):
-            instance = ctypes.cast(pointer, GTypeInstancePtr)
-            gtype = G_TYPE_FROM_INSTANCE(instance.contents)
-            return PGType(gtype).pytype
-
-        block, var = self.parse("""
-# unpack object
-$address = int(ffi.cast("size_t", $value))
-if $address:
-    $pyclass = $get_class($address)
-    $obj = object.__new__($pyclass)
-    $obj._obj = $address
-else:
-    $obj = None
-""", value=name, get_class=get_class_func)
-
-        block.add_dependency("ffi", self._ffi)
-        return block, var["obj"]
-
-    def setup_struct(self, name, type_):
-        block, var = self.parse("""
-# setup struct
-$obj = $type()
-$obj._needs_free = False
-$ptr = ffi.cast("void*", $obj._obj)
-""", value=name, type=type_)
-
-        block.add_dependency("ffi", self._ffi)
-        return block, var["obj"], var["ptr"]
+        return block, var
 
 
-class CFFIBackend(CodeGenBackend, BasicTypes, InterfaceTypes):
-
+class CFFIBackend(Backend):
     NAME = "cffi"
 
-    def __init__(self, *args, **kwargs):
-        CodeGenBackend.__init__(self, *args, **kwargs)
-        self._libs = {}
-        self._ffi = None
+    _libs = {}
+    _ffi = FFI()
+    _ffi.cdef(_glib_defs)
 
-    def __init_ffi(self):
-        if self._ffi is None:
-            self._ffi = FFI()
-            self._ffi.cdef(_glib_defs)
+    def __init__(self):
+        Backend.__init__(self)
+        self._gen = CFFICodeGen(VariableFactory(), self._ffi)
 
-    def get_library_object(self, namespace):
-        self.__init_ffi()
+    def get_library(self, namespace):
         if namespace not in self._libs:
             paths = GIRepositoryPtr().get_shared_library(namespace)
             if not paths:
@@ -269,8 +261,8 @@ class CFFIBackend(CodeGenBackend, BasicTypes, InterfaceTypes):
             self._libs[namespace] = self._ffi.dlopen(path)
         return self._libs[namespace]
 
-    def get_function_object(self, lib, symbol, args, ret,
-                            method=False, self_name="", throws=False):
+    def get_function(self, lib, symbol, args, ret,
+                     method=False, self_name="", throws=False):
 
         block = CodeBlock()
         cdef_types = []
@@ -303,12 +295,11 @@ $new_self = ffi.cast('gpointer', $sself._obj)
 
         return block, method and var["new_self"], func
 
-    def call(self, func, args):
-        block, var = self.parse("""
-$ret = $name($args)
-""", name=func, args=args)
+    def get_type(self, type_):
+        return get_type(type_, self._gen)
 
-        return block, var["ret"]
+    def parse(self, code, **kwargs):
+        return self._gen.parse(code, **kwargs)
 
     def cast_pointer(self, name, type_):
         block, var = self.parse("""

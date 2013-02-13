@@ -6,9 +6,6 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from pgi.gir import GIDirection, GIArrayType, GITypeTag, GIInfoType, GITransfer
-from pgi.gir import GICallableInfoPtr
-from pgi.util import import_attribute, cached_property_writable
-from pgi.ctypesutil import gicast
 from pgi.gtype import PGType
 from pgi.gerror import PGError
 
@@ -49,20 +46,25 @@ class Argument(object):
 
 class ErrorArgument(Argument):
 
+    class FakeType(object):
+        class Y(object):
+            value = GITypeTag.ERROR
+        tag = Y()
+
     def pre_call(self):
-        block, error = self.backend.setup_gerror()
-        block2, self.call_var = self.backend.get_reference(error)
-        block2.write_into(block)
-        self._error = error
-        return block
+        var = self.backend.get_type(ErrorArgument.FakeType())
+
+        self._error = var.new()
+        self.call_var = var.get_reference(self._error)
+        return var.block
 
     def post_call(self):
-        block, out = self.backend.unpack_gerror(self._error)
-        block2 = self.backend.free_gerror(self._error)
-        block2.write_into(block)
-        block2 = self.backend.raise_gerror(out)
-        block2.write_into(block)
-        return block
+        var = self.backend.get_type(ErrorArgument.FakeType())
+
+        out = var.unpack(self._error)
+        var.free(self._error)
+        var.check_raise(out)
+        return var.block
 
 
 class GIArgument(Argument):
@@ -83,9 +85,6 @@ class GIArgument(Argument):
 
     def may_be_null(self):
         return self.info.may_be_null
-
-    def is_pointer(self):
-        return self.type.is_pointer
 
     def is_direction_in(self):
         return self.direction in (GIDirection.INOUT, GIDirection.IN)
@@ -114,12 +113,11 @@ class GIErrorArgument(GIArgument):
     py_type = PGError
 
     def pre_call(self):
+        var = self.backend.get_type(self.type)
         if self.is_direction_out():
-            block, error = self.backend.setup_gerror()
-            block2, self.call_var = self.backend.get_reference(error)
-            block2.write_into(block)
-            self._error = error
-            return block
+            self._error = var.new()
+            self.call_var = var.get_reference(self._error)
+            return var.block
 
         raise NotImplementedError("Error not out")
 
@@ -127,12 +125,12 @@ class GIErrorArgument(GIArgument):
         if not self.is_direction_out():
             return
 
-        block, self.out_var = self.backend.unpack_gerror(self._error)
+        var = self.backend.get_type(self.type)
+        self.out_var = var.unpack(self._error)
         if self.transfer_everything():
-            block2 = self.backend.free_gerror(self._error)
-            block2.write_into(block)
+            var.free(self._error)
 
-        return block
+        return var.block
 
 
 class ArrayArgument(GIArgument):
@@ -156,163 +154,52 @@ class CArrayArgument(ArrayArgument):
 
     def setup(self):
         # mark other arg as aux so we handle it alone
-        if self.array_length != -1:
-            aux = self.args[self.array_length]
+        if self.type.array_length != -1:
+            aux = self.args[self.type.array_length]
             aux.is_aux = True
             self._aux = aux
 
-        self._param_type = self.type.get_param_type(0)
-
-    @property
-    def array_length(self):
-        return self.type.array_length
-
-    @property
-    def array_fixed_size(self):
-        return self.type.array_fixed_size
-
-    def _pack_param(self, type_):
-        # HACK: reuse argument classes of subtypes for packing
-        # ...replace with something sane
-
-        class SubInfo(object):
-            @property
-            def direction(self):
-                class X(object):
-                    value = GIDirection.IN
-                return X()
-
-            @property
-            def ownership_transfer(self):
-                class X(object):
-                    value = GITransfer.EVERYTHING
-                return X()
-
-            @property
-            def may_be_null(self):
-                return False
-
-        param_cls = get_argument_class(type_)
-        in_name = self.backend._var()
-        sub_arg = param_cls(in_name, [], self.backend, SubInfo(), type_)
-        sub_arg.setup()
-        block = sub_arg.pre_call()
-        return block, in_name, sub_arg.call_var
-
     def pre_call(self):
-        backend = self.backend
-
         if self.is_direction_inout():
-            param_block, in_var, out_var = self._pack_param(self._param_type)
-
-            if not self.is_zero_terminated():
-                if self.array_length != -1:
-                    length_type = self._aux.type
-
-                    block, data, length = backend.pack_carray_basic_length(
-                        self.name, in_var, out_var, param_block,
-                        self._param_type, length_type)
-
-                    block2, self._aux.call_var = backend.get_reference(length)
-                    block2.write_into(block)
-                else:
-                    length = str(self.array_fixed_size)
-
-                    block, data = backend.pack_carray_basic_fixed(
-                        self.name, in_var, out_var, param_block,
-                        self._param_type, length)
-
-                block2, self.call_var = backend.get_reference(data)
-                block2.write_into(block)
-
-                self._data = data
-                self._length = length
-
-                return block
-
-            raise NotImplementedError("carray zero inout")
-
+            var = self.backend.get_type(self.type)
+            if self.type.array_length != -1:
+                self._data, self._length = var.pack(var.check(self.name), self._aux.type)
+                self._aux.call_var = var.get_reference(self._length)
+            else:
+                self._data, length = var.pack(var.check(self.name), None)
+            self.call_var = var.get_reference(self._data)
+            return var.block
         elif self.is_direction_in():
-            param_block, in_var, out_var = self._pack_param(self._param_type)
-
-            if self.array_length != -1:
-                length_type = self._aux.type
-
-                if self.is_zero_terminated():
-                    block, data, length = backend.pack_carray_basic_length_zero(
-                        self.name, in_var, out_var, param_block,
-                        self._param_type, length_type)
-                else:
-                    block, data, length = backend.pack_carray_basic_length(
-                        self.name, in_var, out_var, param_block,
-                        self._param_type, length_type)
-
+            var = self.backend.get_type(self.type)
+            if self.type.array_length != -1:
+                self.call_var, length = var.pack(var.check(self.name), self._aux.type)
                 self._aux.call_var = length
-                self.call_var = data
-    
-                return block
             else:
-                if self.array_fixed_size == -1 and self.is_zero_terminated():
-                    block, data = backend.pack_carray_basic_zero(
-                        self.name, in_var, out_var, param_block,
-                        self._param_type)
-                elif self.is_zero_terminated():
-                    length = str(self.array_fixed_size)
-                    block, data = backend.pack_carray_basic_fixed_zero(
-                        self.name, in_var, out_var, param_block,
-                        self._param_type, length)
-                else:
-                    length = str(self.array_fixed_size)
-                    block, data = backend.pack_carray_basic_fixed(
-                        self.name, in_var, out_var, param_block,
-                        self._param_type, length)
-
-                self.call_var = data
-                return block
-
+                self.call_var, dummy = var.pack(var.check(self.name), None)
+            return var.block
         else:
-            if not self.is_zero_terminated():
-                if self.array_length == -1:
-                    length = str(self.array_fixed_size)
-                    block, data = backend.setup_carray_basic_fixed(length, self._param_type)
-                    block2, self.call_var = backend.get_reference(data)
-                    block2.write_into(block)
-
-                    self._data = data
-                    return block
-                else:
-                    length_type = self._aux.type
-
-                    block, data, length = backend.setup_carray_basic_length(self._param_type, length_type)
-                    block2, self.call_var = backend.get_reference(data)
-                    block2.write_into(block)
-
-                    block2, self._aux.call_var = backend.get_reference(length)
-                    block2.write_into(block)
-
-                    self._length = length
-                    self._data = data
-                    return block
+            var = self.backend.get_type(self.type)
+            if self.type.array_length != -1:
+                self._data, self._length = var.new(self._aux.type)
+                self._aux.call_var = var.get_reference(self._length)
             else:
-                raise NotImplementedError("carray zero out")
+                self._data, dummy = var.new(None)
+            self.call_var = var.get_reference(self._data)
+            return var.block
 
     def post_call(self):
         if not self.is_direction_out():
             return
 
         if not self.is_zero_terminated():
-            block, data = self.backend.cast_pointer(self._data, self._param_type)
+            var = self.backend.get_type(self.type)
 
-            if self.array_length == -1:
-                length = str(self.array_fixed_size)
-                block2, out = self.backend.unpack_carray_basic_fixed(data, length, self._param_type)
-                block2.write_into(block)
+            if self.type.array_length != -1:
+                self.out_var = var.unpack(self._data, self._length)
             else:
-                block2, out = self.backend.unpack_carray_basic_length(data, self._length, self._param_type)
-                block2.write_into(block)
+                self.out_var = var.unpack(self._data, None)
 
-            self.out_var = out
-            return block
+            return var.block
 
         raise NotImplementedError("post zero")
 
@@ -320,10 +207,6 @@ class CArrayArgument(ArrayArgument):
 class BaseInterfaceArgument(GIArgument):
     TAG = GITypeTag.INTERFACE
     py_type = object
-
-    @cached_property_writable
-    def interface(self):
-        return self.type.get_interface()
 
     @classmethod
     def get_class(cls, type_):
@@ -334,14 +217,12 @@ class BaseInterfaceArgument(GIArgument):
             return ObjectArgument
         elif iface_type == GIInfoType.INTERFACE:
             return ObjectArgument
-        elif iface_type == GIInfoType.ENUM:
-            return EnumArgument
+        elif iface_type == GIInfoType.ENUM or iface_type == GIInfoType.FLAGS:
+            return EnumFlagsArgument
         elif iface_type == GIInfoType.STRUCT:
             return StructArgument
         elif iface_type == GIInfoType.CALLBACK:
             return CallbackArgument
-        elif iface_type == GIInfoType.FLAGS:
-            return FlagsArgument
 
         raise NotImplementedError("Unsupported interface type %r" % iface.type)
 
@@ -350,8 +231,6 @@ class CallbackArgument(BaseInterfaceArgument):
     py_type = type(lambda: None)
 
     def setup(self):
-        self.interface = gicast(self.interface, GICallableInfoPtr)
-
         self._user_data = None
         if self.info.closure != -1:
             self._user_data = self.args[self.info.closure]
@@ -363,277 +242,205 @@ class CallbackArgument(BaseInterfaceArgument):
             self._destroy.is_aux = True
 
     def pre_call(self):
-        from pgi.codegen.siggen import generate_callback
-        pack, docstring = generate_callback(self.interface)
-        self.py_type = docstring
-        block, out = self.backend.pack_callback(self.name, pack)
-        self.call_var = out
-
+        var = self.backend.get_type(self.type)
+        self.call_var = var.pack(var.check(self.name))
 
         if self._destroy:
             from pgi.gobject import GCallback
-            block.add_dependency("GCallback", GCallback)
+            var.block.add_dependency("GCallback", GCallback)
             self._destroy.call_var = "GCallback()"
 
         if self._user_data:
             self._user_data.call_var = "None"
 
-        return block
+        return var.block
 
 
-class EnumArgument(BaseInterfaceArgument):
+class EnumFlagsArgument(BaseInterfaceArgument):
 
     def pre_call(self):
-        iface = self.interface
-        iface_name = iface.name
-        iface_namespace = iface.namespace
+        var = self.backend.get_type(self.type)
 
         if self.is_direction_inout():
-            type_ = import_attribute(iface_namespace, iface_name)
-            block, self._data = self.backend.pack_enum(self.name, type_)
-            block2, self.call_var = self.backend.get_reference(self._data)
-            block2.write_into(block)
-            return block
+            self._data = var.pack(var.check(self.name))
+            self.call_var = var.get_reference(self._data)
         elif self.is_direction_in():
-            type_ = import_attribute(iface_namespace, iface_name)
-            block, out = self.backend.pack_enum(self.name, type_)
-            self.call_var = out
-            return block
+            self.call_var = var.pack(var.check(self.name))
         else:
-            block, out = self.backend.setup_enum()
-            block2, self.call_var = self.backend.get_reference(out)
-            block2.write_into(block)
-            self._data = out
-            return block
+            self._data = var.new()
+            self.call_var = var.get_reference(self._data)
+
+        return var.block
 
     def post_call(self):
         if not self.is_direction_out():
             return
 
-        iface = self.interface
-        iface_name = iface.name
-        iface_namespace = iface.namespace
-        type_ = import_attribute(iface_namespace, iface_name)
-
-        block, var = self.backend.unpack_basic(self._data)
-        block2, self.out_var = self.backend.unpack_enum(var, type_)
-        block2.write_into(block)
-        return block
-
-
-class FlagsArgument(BaseInterfaceArgument):
-
-    def pre_call(self):
-        iface = self.interface
-        iface_name = iface.name
-        iface_namespace = iface.namespace
-
-        if self.is_direction_inout():
-            type_ = import_attribute(iface_namespace, iface_name)
-            block, self._data = self.backend.pack_flags(self.name, type_)
-            block2, self.call_var = self.backend.get_reference(self._data)
-            block2.write_into(block)
-            return block
-        elif self.is_direction_in():
-            type_ = import_attribute(iface_namespace, iface_name)
-            block, out = self.backend.pack_flags(self.name, type_)
-            self.call_var = out
-            return block
-        else:
-            block, out = self.backend.setup_flags()
-            block2, self.call_var = self.backend.get_reference(out)
-            block2.write_into(block)
-            self._data = out
-            return block
-
-    def post_call(self):
-        if not self.is_direction_out():
-            return
-
-        iface = self.interface
-        iface_name = iface.name
-        iface_namespace = iface.namespace
-        type_ = import_attribute(iface_namespace, iface_name)
-
-        block, var = self.backend.unpack_basic(self._data)
-        block2, self.out_var = self.backend.unpack_flags(var, type_)
-        block2.write_into(block)
-        return block
+        var = self.backend.get_type(self.type)
+        self.out_var = var.unpack(var.pre_unpack(self._data))
+        return var.block
 
 
 class StructArgument(BaseInterfaceArgument):
 
     def pre_call(self):
-        iface = self.interface
-        iface_name = iface.name
-        iface_namespace = iface.namespace
+        var = self.backend.get_type(self.type)
 
-        if self.is_direction_in():
-            block, var = self.backend.pack_struct(self.name)
-            self.call_var = var
-            return block
+        if self.is_direction_inout():
+            self._data = var.pack(var.check(self.name))
+            self.call_var = var.get_reference(self._data)
+        elif self.is_direction_in():
+            self.call_var = var.pack(var.check(self.name))
         else:
-            type_ = import_attribute(iface_namespace, iface_name)
-            block, data, ref = self.backend.setup_struct(self.name, type_)
-            self.call_var = ref
-            self.out_var = data
-            return block
+            self._data = var.new()
+            self.call_var = var.get_reference(self._data)
+
+        return var.block
+
+    def post_call(self):
+        if not self.is_direction_out():
+            return
+
+        var = self.backend.get_type(self.type)
+        self.out_var = var.unpack(self._data)
+        return var.block
 
 
 class ObjectArgument(BaseInterfaceArgument):
 
     def pre_call(self):
-        iface = self.interface
-        iface_name = iface.name
-        iface_namespace = iface.namespace
+        var = self.backend.get_type(self.type)
 
         if self.is_direction_in():
-            type_ = import_attribute(iface_namespace, iface_name)
-
             if self.may_be_null():
-                block, self._data = self.backend.pack_object_null(self.name, type_)
+                self._data = var.pack_null(var.check_null(self.name))
             else:
-                block, self._data = self.backend.pack_object(self.name, type_)
+                self._data = var.pack(var.check(self.name))
 
             if self.transfer_everything():
-                block2 = self.backend.ref_object_null(self.name)
-                block2.write_into(block)
+                var.ref_null(self.name)
 
             if self.is_direction_out():
-                block2, self.call_var = self.backend.get_reference(self._data)
-                block2.write_into(block)
+                self.call_var = var.get_reference(self._data)
             else:
                 self.call_var = self._data
 
-            return block
+            return var.block
         else:
-            block, self._data = self.backend.setup_pointer()
-            block2, self.call_var = self.backend.get_reference(self._data)
-            block2.write_into(block)
-            return block
+            self._data = var.new()
+            self.call_var = var.get_reference(self._data)
+
+            return var.block
 
     def post_call(self):
         if self.is_direction_out():
-            block, out = self.backend.unpack_basic(self._data)
-            block2, out = self.backend.unpack_object(out)
-            block2.write_into(block)
+            var = self.backend.get_type(self.type)
+            out = var.unpack_null(self._data)
             if self.transfer_nothing():
-                block2 = self.backend.ref_object_null(out)
-                block2.write_into(block)
+                var.ref_null(out)
             self.out_var = out
-            return block
+            return var.block
 
 
 class BasicTypeArgument(GIArgument):
     TYPE_NAME = ""
 
     def pre_call(self):
+        var = self.backend.get_type(self.type)
+
         if self.is_direction_inout():
-            pack = getattr(self.backend, "pack_%s" % self.TYPE_NAME)
-            block, self._data = pack(self.name)
-            block2, self.call_var = self.backend.get_reference(self._data)
-            block2.write_into(block)
-            return block
+            self._data = var.pack(var.check(self.name))
+            self.call_var = var.get_reference(self._data)
+            return var.block
         elif self.is_direction_in():
-            pack = getattr(self.backend, "pack_%s" % self.TYPE_NAME)
-            block, var = pack(self.name)
-            self.call_var = var
-            return block
+            self.call_var = var.pack(var.check(self.name))
+            return var.block
         else:
-            setup = getattr(self.backend, "setup_%s" % self.TYPE_NAME)
-            block, self._data = setup()
-            block2, self.call_var = self.backend.get_reference(self._data)
-            block2.write_into(block)
-            return block
+            self._data = var.new()
+            self.call_var = var.get_reference(self._data)
+            return var.block
 
     def post_call(self):
         if self.is_direction_out():
-            block, var = self.backend.unpack_basic(self._data)
-            self.out_var = var
-            return block
+            var = self.backend.get_type(self.type)
+            self.out_var = var.unpack(var.pre_unpack(self._data))
+            return var.block
 
 
 class BoolArgument(BasicTypeArgument):
     TAG = GITypeTag.BOOLEAN
-    TYPE_NAME = "bool"
     py_type = bool
 
 
 class Int8Argument(BasicTypeArgument):
     TAG = GITypeTag.INT8
-    TYPE_NAME = "int8"
     py_type = int
 
 
 class UInt8Argument(BasicTypeArgument):
     TAG = GITypeTag.UINT8
-    TYPE_NAME = "uint8"
     py_type = int
 
 
 class Int16Argument(BasicTypeArgument):
     TAG = GITypeTag.INT16
-    TYPE_NAME = "int16"
     py_type = int
 
 
 class UInt16Argument(BasicTypeArgument):
     TAG = GITypeTag.UINT16
-    TYPE_NAME = "uint16"
     py_type = int
 
 
 class Int32Argument(BasicTypeArgument):
     TAG = GITypeTag.INT32
-    TYPE_NAME = "int32"
     py_type = int
 
 
 class Int64Argument(BasicTypeArgument):
     TAG = GITypeTag.INT64
-    TYPE_NAME = "int64"
     py_type = int
 
 
 class UInt64Argument(BasicTypeArgument):
     TAG = GITypeTag.UINT64
-    TYPE_NAME = "uint64"
     py_type = int
 
 
 class UINT32Argument(BasicTypeArgument):
     TAG = GITypeTag.UINT32
-    TYPE_NAME = "uint32"
     py_type = int
 
 
 class FloatArgument(BasicTypeArgument):
     TAG = GITypeTag.FLOAT
-    TYPE_NAME = "float"
     py_type = float
 
 
 class DoubleArgument(BasicTypeArgument):
     TAG = GITypeTag.DOUBLE
-    TYPE_NAME = "double"
     py_type = float
+
+
+class GTypeArgument(BasicTypeArgument):
+    TAG = GITypeTag.GTYPE
+    py_type = PGType
 
 
 class VoidArgument(GIArgument):
     TAG = GITypeTag.VOID
 
     def setup(self):
-        if self.is_pointer():
+        if self.type.is_pointer:
             self.py_type = int
 
     def pre_call(self):
-        if self.is_pointer():
-            if not self.may_be_null():
-                block, out = self.backend.pack_pointer(self.name)
-                self.call_var = out
-                return block
-
-        raise NotImplementedError
+        var = self.backend.get_type(self.type)
+        if self.may_be_null():
+            self.call_var = var.pack(var.check_null(self.name))
+        else:
+            self.call_var = var.pack(var.check(self.name))
+        return var.block
 
 
 class Utf8Argument(GIArgument):
@@ -641,66 +448,39 @@ class Utf8Argument(GIArgument):
     py_type = str
 
     def pre_call(self):
+        var = self.backend.get_type(self.type)
+
         if self.is_direction_inout():
-            block, data = self.backend.pack_utf8(self.name)
+            if self.may_be_null():
+                data = var.pack(var.check_null(self.name))
+            else:
+                data = var.pack(var.check(self.name))
+
             if self.transfer_everything():
-                block3, data = self.backend.dup_string(data)
-                block3.write_into(block)
-            block2, ref = self.backend.get_reference(data)
-            block2.write_into(block)
-            self.call_var = ref
+                data = var.dup(data)
+
+            self.call_var = var.get_reference(data)
             self._data = data
-            return block
         elif self.is_direction_in():
             if self.may_be_null():
-                block, var = self.backend.pack_utf8_null(self.name)
+                self.call_var = var.pack(var.check_null(self.name))
             else:
-                block, var = self.backend.pack_utf8(self.name)
-            self.call_var = var
-            return block
-        elif self.is_direction_out():
-            block, data = self.backend.setup_string()
-            block2, ref = self.backend.get_reference(data)
-            block2.write_into(block)
-            self.call_var = ref
-            self._data = data
-            return block
-
-    def post_call(self):
-        if self.is_direction_out():
-            block, var = self.backend.unpack_utf8(self._data)
-            if self.transfer_everything():
-                block2 = self.backend.free_pointer(self._data)
-                block2.write_into(block)
-            self.out_var = var
-            return block
-
-
-class GTypeArgument(GIArgument):
-    TAG = GITypeTag.GTYPE
-    py_type = PGType
-
-    def pre_call(self):
-        if self.is_direction_inout():
-            block, self._data = self.backend.pack_gtype(self.name)
-            block2, self.call_var = self.backend.get_reference(self._data)
-            block2.write_into(block)
-            return block
-        elif self.is_direction_in():
-            block, var = self.backend.pack_gtype(self.name)
-            self.call_var = var
-            return block
+                self.call_var = var.pack(var.check(self.name))
         else:
-            block, self._data = self.backend.setup_gtype()
-            block2, self.call_var = self.backend.get_reference(self._data)
-            block2.write_into(block)
-            return block
+            self._data = var.new()
+            self.call_var = var.get_reference(self._data)
+
+        return var.block
 
     def post_call(self):
-        if self.is_direction_out():
-            block, var = self.backend.unpack_gtype(self._data)
-            self.out_var = var
-            return block
+        if not self.is_direction_out():
+            return
+
+        var = self.backend.get_type(self.type)
+        self.out_var = var.unpack(self._data)
+        if self.transfer_everything():
+            var.free(self._data)
+        return var.block
 
 
 _classes = {}

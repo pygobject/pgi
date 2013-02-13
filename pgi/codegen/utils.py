@@ -145,3 +145,22 @@ def parse_code(code, var_factory, **kwargs):
 
         block.write_line(string.Template(line).substitute(defdict), level)
     return block, dict(defdict)
+
+
+def parse_with_objects(code, var, **kwargs):
+    """Parse code and include non string/codeblock kwargs as
+    dependencies.
+    """
+
+    deps = {}
+    for key, value in kwargs.items():
+        if not isinstance(value, (basestring, CodeBlock)):
+            new_var = var()
+            deps[new_var] = value
+            kwargs[key] = new_var
+
+    block, var = parse_code(code, var, **kwargs)
+    for key, dep in deps.iteritems():
+        block.add_dependency(key, dep)
+
+    return block, var

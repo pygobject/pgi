@@ -5,22 +5,19 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from pgi.codegen.ctypes_backend import CTypesBackend
+BACKENDS = []
+
 try:
     from pgi.codegen.cffi_backend import CFFIBackend
-    CFFIBackend = CFFIBackend
 except ImportError:
-    CFFIBackend = None
+    pass
+else:
+    BACKENDS.append(CFFIBackend)
 
+from pgi.codegen.ctypes_backend import CTypesBackend
+BACKENDS.append(CTypesBackend)
 
-BACKENDS = [CFFIBackend, CTypesBackend]
-ACTIVE_BACKENDS = []
-
-
-def _init_backends():
-    BACKENDS[:] = [b() for b in BACKENDS if b]
-    ACTIVE_BACKENDS[:] = BACKENDS
-_init_backends()
+ACTIVE_BACKENDS = BACKENDS[:]
 
 
 def set_backend(name=None):

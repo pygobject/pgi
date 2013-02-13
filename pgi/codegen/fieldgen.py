@@ -45,17 +45,13 @@ def _generate_field_getter(info, info_type, backend):
     main.write_line("def getter(instance):")
 
     if info.offset:
-        # gi docs are lying, offset in bytes
         main.write_line("pointer = instance._obj + %d" % info.offset, 1)
     else:
         main.write_line("pointer = instance._obj", 1)
 
-    # uh.. too much logic here..
     block, var = backend.cast_pointer("pointer", info_type)
     block.write_into(main, 1)
     block, var = backend.deref_pointer(var)
-    block.write_into(main, 1)
-    block, var = backend.unpack_basic(var)
     block.write_into(main, 1)
 
     block, var = f.get(var)
@@ -74,11 +70,12 @@ def _generate_field_access(info, setter=True):
     func = None
     messages = []
     for backend in ACTIVE_BACKENDS:
+        instance = backend()
         try:
             if setter:
-                func = _generate_field_setter(info, info_type, backend)
+                func = _generate_field_setter(info, info_type, instance)
             else:
-                func = _generate_field_getter(info, info_type, backend)
+                func = _generate_field_getter(info, info_type, instance)
         except NotImplementedError, e:
             messages.append("%s: %s" % (backend.NAME, e.message))
         else:
