@@ -1,12 +1,12 @@
 PGI - Pure Python GObject Introspection Bindings
 ================================================
 
- GObject Introspection bindings written in pure python using ctypes_
- and cffi_ (optional).
+GObject Introspection bindings written in pure python using ctypes_
+and cffi_ (optional).
 
- See the 'examples' directory for working examples.
+See the 'examples' directory for working examples.
 
- License: LGPL 2.1+
+License: LGPL 2.1+
 
 .. _ctypes: http://docs.python.org/2/library/ctypes.html
 .. _cffi: http://cffi.readthedocs.org/en/latest/
@@ -14,8 +14,8 @@ PGI - Pure Python GObject Introspection Bindings
 Goals
 -----
 
- - PyGObject compatibility
- - Python 2.7 / PyPy 1.9
+- PyGObject compatibility
+- Python 2.7 / PyPy 1.9
 
 Usage
 -----
@@ -46,8 +46,8 @@ If the backend doesn't support an operation it will fall back to the other one.
 Tests
 -----
 
- - `./setup.py test` will run unit tests using PGI and PyGObject
- - `./setup.py test --pgi-only` to skip PyGObject tests
+- `./setup.py test` will run unit tests using PGI and PyGObject
+- `./setup.py test --pgi-only` to skip PyGObject tests
 
 `./tests/libs/` includes additional libraries that will be used for testing
 if present. Call `make` in `./tests/libs/` to build them.
