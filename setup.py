@@ -26,6 +26,7 @@ class CoverageCommand(Command):
         pass
 
     def run(self):
+        set_test_environ()
 
         for k in sys.modules.keys():
             if k.startswith("pgi"):
