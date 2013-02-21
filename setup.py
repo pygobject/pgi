@@ -89,17 +89,17 @@ def set_test_environ():
     ld_path = os.path.join(os.path.dirname(__file__), "tests", "libs")
 
     paths = os.environ.get("LD_LIBRARY_PATH", "")
-    if ld_path not in paths.split(":"):
+    if ld_path not in paths.split(os.pathsep):
         print "Testlibs not in LD_LIBRARY_PATH: exec self with new environ"
-        paths = ld_path + ":" + paths
+        paths = ld_path + os.pathsep + paths
         os.environ["LD_LIBRARY_PATH"] = paths
         # restart the interpreter so dlopen gets te right environ
         exit(subprocess.call([sys.executable] + sys.argv))
 
     typelib_paths = os.environ.get("GI_TYPELIB_PATH", "")
-    if ld_path not in typelib_paths.split(":"):
+    if ld_path not in typelib_paths.split(os.pathsep):
         print "Adding %r to GI_TYPELIB_PATH" % ld_path
-        typelib_paths = ld_path + ":" + typelib_paths
+        typelib_paths = ld_path + os.pathsep + typelib_paths
         os.environ["GI_TYPELIB_PATH"] = typelib_paths
 
 
