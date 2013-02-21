@@ -16,9 +16,6 @@ import sys
 from io import StringIO, BytesIO
 
 from tests import is_gi
-from pgi.gir import *
-search_path = os.path.dirname(__file__)
-GIRepository.prepend_search_path(search_path)
 
 try:
     from gi.repository import GIMarshallingTests

@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright 2012 Christoph Reiter
+# Copyright 2012,2013 Christoph Reiter
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -9,6 +9,7 @@
 import os
 import sys
 import glob
+import subprocess
 
 from distutils.core import setup, Command
 import pgi
@@ -81,6 +82,26 @@ class CoverageCommand(Command):
         print "#" * 80
 
 
+def set_test_environ():
+    """Sets LD_LIBRARY_PATH for dlopen and GI_TYPELIB_PATH for gi"""
+
+    ld_path = os.path.join(os.path.dirname(__file__), "tests", "libs")
+
+    paths = ""
+    if "LD_LIBRARY_PATH" in os.environ:
+        paths = os.environ["LD_LIBRARY_PATH"]
+
+    if ld_path not in paths.split(":"):
+        print "Testlibs not in LD_LIBRARY_PATH: exec self with new environ"
+        paths = ld_path + ":" + paths
+        os.environ["LD_LIBRARY_PATH"] = paths
+        # restart the interpreter so dlopen gets te right environ
+        exit(subprocess.call([sys.executable] + sys.argv))
+
+    print "Setting GI_TYPELIB_PATH to %r" % ld_path
+    os.environ["GI_TYPELIB_PATH"] = ld_path
+
+
 class TestCommand(Command):
     description = "run unit tests"
     user_options = [
@@ -103,6 +124,8 @@ class TestCommand(Command):
         import tests
         import os
         import platform
+
+        set_test_environ()
 
         if os.name == "nt":
             self.pgi_only = True

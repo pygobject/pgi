@@ -8,7 +8,7 @@
 """Provides a custom PEP-302 import hook to load GI libraries"""
 
 import sys
-from ctypes import c_char_p, byref
+from ctypes import c_char_p, byref, CDLL
 
 from pgi.gir import GIRepositoryPtr
 from pgi.glib import GErrorPtr
@@ -107,6 +107,15 @@ class Importer(object):
                 raise ImportError(error.contents.message)
             finally:
                 error.free()
+
+        # No strictly needed here, but most things will fail during use
+        library = repository.get_shared_library(namespace)
+        if library:
+            library = library.split(",")[0]
+            try:
+                CDLL(library)
+            except OSError:
+                raise ImportError("Couldn't load shared library %r" % library)
 
         # Generate bindings, set up lazy attributes
         instance = module.Module(repository, namespace)

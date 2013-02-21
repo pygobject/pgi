@@ -1,2 +1,9 @@
 *.pyc
 *.cover
+*.lo
+*.la
+*.so
+*.gir
+*.typelib
+*.o
+.libs
