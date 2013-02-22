@@ -262,8 +262,6 @@ class CFFIBackend(Backend):
             if not paths:
                 return
             path = paths.split(",")[0]
-            # pfff, strip so verion
-            path = path[3:].rsplit(".", 1)[0]
             self._libs[namespace] = self._ffi.dlopen(path)
         return self._libs[namespace]
 
