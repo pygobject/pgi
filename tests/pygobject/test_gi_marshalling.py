@@ -1345,10 +1345,10 @@ class TestGErrorOutTransferNone(unittest.TestCase):
         self.assertEqual(GIMarshallingTests.CONSTANT_GERROR_DEBUG_MESSAGE, debug)
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@unittest.skipUnless(GIMarshallingTests and not is_gi, "")
 class TestInterfaces(unittest.TestCase):
 
-    if GIMarshallingTests:
+    if GIMarshallingTests and not is_gi:
         class TestInterfaceImpl(GObject.GObject, GIMarshallingTests.Interface):
             def __init__(self):
                 GObject.GObject.__init__(self)
