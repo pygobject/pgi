@@ -29,5 +29,5 @@ class Backend(object):
     def get_callback(self, func, args):
         raise NotImplementedError
 
-    def get_type(self, type_):
+    def get_type(self, type_, may_be_null=False):
         raise NotImplementedError

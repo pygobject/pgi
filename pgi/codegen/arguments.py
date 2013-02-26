@@ -52,14 +52,14 @@ class ErrorArgument(Argument):
         tag = Y()
 
     def pre_call(self):
-        var = self.backend.get_type(ErrorArgument.FakeType())
+        var = self.backend.get_type(ErrorArgument.FakeType(), True)
 
         self._error = var.new()
         self.call_var = var.get_reference(self._error)
         return var.block
 
     def post_call(self):
-        var = self.backend.get_type(ErrorArgument.FakeType())
+        var = self.backend.get_type(ErrorArgument.FakeType(), True)
 
         out = var.unpack(self._error)
         var.free(self._error)
@@ -83,8 +83,8 @@ class GIArgument(Argument):
         if self.is_direction_in():
             self.in_var = name
 
-    def may_be_null(self):
-        return self.info.may_be_null
+    def get_type(self):
+        return self.backend.get_type(self.type, self.info.may_be_null)
 
     def is_direction_in(self):
         return self.direction in (GIDirection.INOUT, GIDirection.IN)
@@ -113,7 +113,7 @@ class GIErrorArgument(GIArgument):
     py_type = PGError
 
     def pre_call(self):
-        var = self.backend.get_type(self.type)
+        var = self.get_type()
         if self.is_direction_out():
             self._error = var.new()
             self.call_var = var.get_reference(self._error)
@@ -125,7 +125,7 @@ class GIErrorArgument(GIArgument):
         if not self.is_direction_out():
             return
 
-        var = self.backend.get_type(self.type)
+        var = self.get_type()
         self.out_var = var.unpack(self._error)
         if self.transfer_everything():
             var.free(self._error)
@@ -157,8 +157,8 @@ class CArrayArgument(ArrayArgument):
             self._aux = aux
 
     def pre_call(self):
+        var = self.get_type()
         if self.is_direction_inout():
-            var = self.backend.get_type(self.type)
             if self.type.array_length != -1:
                 self._data, self._length = var.pack(var.check(self.name), self._aux.type)
                 self._aux.call_var = var.get_reference(self._length)
@@ -167,7 +167,6 @@ class CArrayArgument(ArrayArgument):
             self.call_var = var.get_reference(self._data)
             return var.block
         elif self.is_direction_in():
-            var = self.backend.get_type(self.type)
             if self.type.array_length != -1:
                 self.call_var, length = var.pack(var.check(self.name), self._aux.type)
                 self._aux.call_var = length
@@ -175,7 +174,6 @@ class CArrayArgument(ArrayArgument):
                 self.call_var, dummy = var.pack(var.check(self.name), None)
             return var.block
         else:
-            var = self.backend.get_type(self.type)
             if self.type.array_length != -1:
                 self._data, self._length = var.new(self._aux.type)
                 self._aux.call_var = var.get_reference(self._length)
@@ -188,7 +186,7 @@ class CArrayArgument(ArrayArgument):
         if not self.is_direction_out():
             return
 
-        var = self.backend.get_type(self.type)
+        var = self.get_type()
         if self.type.array_length != -1:
             self.out_var = var.unpack(self._data, self._length)
         else:
@@ -234,7 +232,7 @@ class CallbackArgument(BaseInterfaceArgument):
             self._destroy.is_aux = True
 
     def pre_call(self):
-        var = self.backend.get_type(self.type)
+        var = self.get_type()
         self.call_var = var.pack(var.check(self.name))
 
         if self._destroy:
@@ -251,7 +249,7 @@ class CallbackArgument(BaseInterfaceArgument):
 class EnumFlagsArgument(BaseInterfaceArgument):
 
     def pre_call(self):
-        var = self.backend.get_type(self.type)
+        var = self.get_type()
 
         if self.is_direction_inout():
             self._data = var.pack(var.check(self.name))
@@ -268,7 +266,7 @@ class EnumFlagsArgument(BaseInterfaceArgument):
         if not self.is_direction_out():
             return
 
-        var = self.backend.get_type(self.type)
+        var = self.get_type()
         self.out_var = var.unpack(var.pre_unpack(self._data))
         return var.block
 
@@ -276,7 +274,7 @@ class EnumFlagsArgument(BaseInterfaceArgument):
 class StructArgument(BaseInterfaceArgument):
 
     def pre_call(self):
-        var = self.backend.get_type(self.type)
+        var = self.get_type()
 
         if self.is_direction_inout():
             self._data = var.pack(var.check(self.name))
@@ -293,7 +291,7 @@ class StructArgument(BaseInterfaceArgument):
         if not self.is_direction_out():
             return
 
-        var = self.backend.get_type(self.type)
+        var = self.get_type()
         self.out_var = var.unpack(self._data)
         return var.block
 
@@ -301,16 +299,13 @@ class StructArgument(BaseInterfaceArgument):
 class ObjectArgument(BaseInterfaceArgument):
 
     def pre_call(self):
-        var = self.backend.get_type(self.type)
+        var = self.get_type()
 
         if self.is_direction_in():
-            if self.may_be_null():
-                self._data = var.pack_null(var.check_null(self.name))
-            else:
-                self._data = var.pack(var.check(self.name))
+            self._data = var.pack(var.check(self.name))
 
             if self.transfer_everything():
-                var.ref_null(self.name)
+                var.ref(self.name)
 
             if self.is_direction_out():
                 self.call_var = var.get_reference(self._data)
@@ -326,10 +321,10 @@ class ObjectArgument(BaseInterfaceArgument):
 
     def post_call(self):
         if self.is_direction_out():
-            var = self.backend.get_type(self.type)
-            out = var.unpack_null(self._data)
+            var = self.get_type()
+            out = var.unpack(self._data)
             if self.transfer_nothing():
-                var.ref_null(out)
+                var.ref(out)
             self.out_var = out
             return var.block
 
@@ -338,7 +333,7 @@ class BasicTypeArgument(GIArgument):
     TYPE_NAME = ""
 
     def pre_call(self):
-        var = self.backend.get_type(self.type)
+        var = self.get_type()
 
         if self.is_direction_inout():
             self._data = var.pack(var.check(self.name))
@@ -354,7 +349,7 @@ class BasicTypeArgument(GIArgument):
 
     def post_call(self):
         if self.is_direction_out():
-            var = self.backend.get_type(self.type)
+            var = self.get_type()
             self.out_var = var.unpack(var.pre_unpack(self._data))
             return var.block
 
@@ -427,11 +422,8 @@ class VoidArgument(GIArgument):
             self.py_type = int
 
     def pre_call(self):
-        var = self.backend.get_type(self.type)
-        if self.may_be_null():
-            self.call_var = var.pack(var.check_null(self.name))
-        else:
-            self.call_var = var.pack(var.check(self.name))
+        var = self.get_type()
+        self.call_var = var.pack(var.check(self.name))
         return var.block
 
 
@@ -440,13 +432,10 @@ class Utf8Argument(GIArgument):
     py_type = str
 
     def pre_call(self):
-        var = self.backend.get_type(self.type)
+        var = self.get_type()
 
         if self.is_direction_inout():
-            if self.may_be_null():
-                data = var.pack(var.check_null(self.name))
-            else:
-                data = var.pack(var.check(self.name))
+            data = var.pack(var.check(self.name))
 
             if self.transfer_everything():
                 data = var.dup(data)
@@ -454,10 +443,7 @@ class Utf8Argument(GIArgument):
             self.call_var = var.get_reference(data)
             self._data = data
         elif self.is_direction_in():
-            if self.may_be_null():
-                self.call_var = var.pack(var.check_null(self.name))
-            else:
-                self.call_var = var.pack(var.check(self.name))
+            self.call_var = var.pack(var.check(self.name))
         else:
             self._data = var.new()
             self.call_var = var.get_reference(self._data)
@@ -468,7 +454,7 @@ class Utf8Argument(GIArgument):
         if not self.is_direction_out():
             return
 
-        var = self.backend.get_type(self.type)
+        var = self.get_type()
         self.out_var = var.unpack(self._data)
         if self.transfer_everything():
             var.free(self._data)

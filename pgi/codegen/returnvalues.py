@@ -26,6 +26,9 @@ class ReturnValue(object):
     def get_class(cls, type_):
         return cls
 
+    def get_type(self):
+        return self.backend.get_type(self.type, self.info.may_return_null)
+
     def setup(self):
         pass
 
@@ -54,7 +57,7 @@ class BooleanReturnValue(ReturnValue):
     py_type = bool
 
     def post_call(self, name):
-        var = self.backend.get_type(self.type)
+        var = self.get_type()
         out = var.unpack(name)
         return var.block, out
 
@@ -106,7 +109,7 @@ class CArrayReturn(ArrayReturn):
             return var.block
 
     def post_call(self, name):
-        var = self.backend.get_type(self.type)
+        var = self.get_type()
         if self.type.array_length != -1:
             out = var.unpack(name, self._length_var)
         else:
@@ -175,7 +178,7 @@ class Utf8ReturnValue(ReturnValue):
     py_type = str
 
     def post_call(self, name):
-        var = self.backend.get_type(self.type)
+        var = self.get_type()
         out = var.unpack_return(name)
         if self.transfer_everything():
             var.free(name)
@@ -187,7 +190,7 @@ class ErrorReturn(ReturnValue):
     py_type = PGError
 
     def post_call(self, name):
-        var = self.backend.get_type(self.type)
+        var = self.get_type()
         out = var.unpack(name)
         return var.block, out
 
@@ -226,7 +229,7 @@ class BaseInterfaceReturn(ReturnValue):
 class EnumReturn(BaseInterfaceReturn):
 
     def post_call(self, name):
-        var = self.backend.get_type(self.type)
+        var = self.get_type()
         out = var.unpack(name)
         return var.block, out
 
@@ -234,20 +237,20 @@ class EnumReturn(BaseInterfaceReturn):
 class InterfaceReturn(BaseInterfaceReturn):
 
     def post_call(self, name):
-        var = self.backend.get_type(self.type)
-        out = var.unpack_null(name)
+        var = self.get_type()
+        out = var.unpack(name)
         if self.transfer_nothing():
-            var.ref_null(out)
+            var.ref(out)
         return var.block, out
 
 
 class ObjectReturn(BaseInterfaceReturn):
 
     def post_call(self, name):
-        var = self.backend.get_type(self.type)
-        out = var.unpack_null(name)
+        var = self.get_type()
+        out = var.unpack(name)
         if self.transfer_nothing():
-            var.ref_null(out)
+            var.ref(out)
         return var.block, out
 
 
@@ -258,7 +261,7 @@ class StructReturn(BaseInterfaceReturn):
         iface_namespace = iface.namespace
         iface_name = iface.name
 
-        var = self.backend.get_type(self.type)
+        var = self.get_type()
         out = var.unpack(name)
         if iface_namespace == "GObject" and iface_name == "Value":
             out = var.unpack_gvalue(out)
@@ -268,7 +271,7 @@ class StructReturn(BaseInterfaceReturn):
 class UnionReturn(BaseInterfaceReturn):
 
     def post_call(self, name):
-        var = self.backend.get_type(self.type)
+        var = self.get_type()
         out = var.unpack(name)
         return var.block, out
 
@@ -276,7 +279,7 @@ class UnionReturn(BaseInterfaceReturn):
 class FlagsReturn(BaseInterfaceReturn):
 
     def post_call(self, name):
-        var = self.backend.get_type(self.type)
+        var = self.get_type()
         out = var.unpack(name)
         return var.block, out
 
@@ -286,7 +289,7 @@ class GTypeReturnValue(ReturnValue):
     py_type = PGType
 
     def post_call(self, name):
-        var = self.backend.get_type(self.type)
+        var = self.get_type()
         out = var.unpack(name)
         return var.block, out
 

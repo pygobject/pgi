@@ -98,16 +98,17 @@ def fixup_ctypes_kwargs(kwargs):
 
 class BaseType(object):
     GI_TYPE_TAG = None
-    type = None
     py_type = None
 
-    def __init__(self, gen, type_):
+    def __init__(self, gen, type_, may_be_null, may_return_null):
         self._gen = gen
         self.block = CodeBlock()
         self.type = type_
+        self.may_be_null = may_be_null
+        self.return_null = may_return_null
 
-    def get_type(self, type_):
-        return get_type(type_, self._gen)
+    def get_type(self, type_, may_be_null=False, may_return_null=False):
+        return get_type(type_, self._gen, may_be_null, may_return_null)
 
     def var(self):
         return self._gen.var()
@@ -559,28 +560,28 @@ class BaseInterface(BaseType):
 class Object(BaseInterface):
 
     def check(self, name):
+        if self.may_be_null:
+            return self.parse("""
+if $obj is not None and not isinstance($obj, $type_class):
+    raise TypeError("argument $obj: Expected %s, got %s" % ($type_class.__name__, $obj.__class__.__name__))
+""", obj=name, type_class=self._import_type())["obj"]
+
         return self.parse("""
 if not isinstance($obj, $type_class):
     raise TypeError("argument $obj: Expected %s, got %s" % ($type_class.__name__, $obj.__class__.__name__))
 """, obj=name, type_class=self._import_type())["obj"]
 
-    def check_null(self, name):
-        return self.parse("""
-if $obj is not None and not isinstance($obj, $type_class):
-    raise TypeError("argument $obj: Expected %s, got %s" % ($type_class.__name__, $obj.__class__.__name__))
-""", obj=name, type_class=self._import_type())["obj"]
-
     def pack(self, name):
+        if self.may_be_null:
+            return self.parse("""
+$ptr = ctypes.c_void_p($obj and $obj._obj)
+""", obj=name)["ptr"]
+
         return self.parse("""
 $ptr = ctypes.c_void_p($obj._obj)
 """, obj=name)["ptr"]
 
-    def pack_null(self, name):
-        return self.parse("""
-$ptr = ctypes.c_void_p($obj and $obj._obj)
-""", obj=name)["ptr"]
-
-    def unpack_null(self, name):
+    def unpack(self, name):
         def get_class_func(pointer):
             instance = ctypes.cast(pointer, GTypeInstancePtr)
             gtype = PGType(G_TYPE_FROM_INSTANCE(instance.contents))
@@ -599,9 +600,8 @@ else:
     $obj = None
 """, value=name, get_class=get_class_func)["obj"]
 
-    def ref_null(self, name):
-        self.parse("""
-# ref object
+    def ref(self, name):
+            self.parse("""
 if $obj:
     $obj._ref()
 """, obj=name)
@@ -631,13 +631,13 @@ class Void(BaseType):
     GI_TYPE_TAG = GITypeTag.VOID
 
     def check(self, name):
+        if self.may_be_null:
+            return name
+
         return self.parse("""
 if $ptr is None:
     raise TypeError("No None allowed")
 """, ptr=name)["ptr"]
-
-    def check_null(self, name):
-        return name
 
     def pack(self, name):
         assert self.type.is_pointer
@@ -698,17 +698,8 @@ class Utf8(BaseType):
     GI_TYPE_TAG = GITypeTag.UTF8
 
     def check(self, name):
-        return self.parse("""
-if isinstance($value, unicode):
-    $string = $value.encode("utf-8")
-elif not isinstance($value, str):
-    raise TypeError("%r not a string" % $value)
-else:
-    $string = $value
-""", value=name)["string"]
-
-    def check_null(self, name):
-        return self.parse("""
+        if self.may_be_null:
+            return self.parse("""
 if $value is not None:
     if isinstance($value, unicode):
         $string = $value.encode("utf-8")
@@ -718,6 +709,15 @@ if $value is not None:
         $string = $value
 else:
     $string = None
+""", value=name)["string"]
+
+        return self.parse("""
+if isinstance($value, unicode):
+    $string = $value.encode("utf-8")
+elif not isinstance($value, str):
+    raise TypeError("%r not a string" % $value)
+else:
+    $string = $value
 """, value=name)["string"]
 
     def pack(self, name):
@@ -1025,7 +1025,7 @@ class CTypesCodeGen(object):
         return block, var
 
 
-def get_type(type_, gen):
+def get_type(type_, gen, may_be_null, may_return_null):
     tag_value = type_.tag.value
     for obj in globals().values():
         if isinstance(obj, type) and issubclass(obj, BaseType):
@@ -1035,8 +1035,8 @@ def get_type(type_, gen):
     else:
         raise NotImplementedError("type: %r", type_.tag)
 
-    cls = cls.get_class(type_)
-    return cls(gen, type_)
+    cls = cls.get_class(type_, )
+    return cls(gen, type_, may_be_null, may_return_null)
 
 
 class CTypesBackend(Backend):
@@ -1050,8 +1050,8 @@ class CTypesBackend(Backend):
     def var(self):
         return self._gen.var()
 
-    def get_type(self, type_):
-        return get_type(type_, self._gen)
+    def get_type(self, type_, may_be_null=False, may_return_null=False):
+        return get_type(type_, self._gen, may_be_null, may_return_null)
 
     def get_library(self, namespace):
         if namespace not in self._libs:
