@@ -30,9 +30,6 @@ class CallbackArgument(object):
     def process(self):
         return None, self.name
 
-    def may_be_null(self):
-        return self.info.may_be_null
-
     def is_direction_in(self):
         return self.direction in (GIDirection.INOUT, GIDirection.IN)
 
@@ -61,10 +58,8 @@ class InterfaceArgument(CallbackArgument):
         iface_type = iface.type.value
         var = self.backend.get_type(self.type)
 
-        if iface_type == GIInfoType.STRUCT or iface_type == GIInfoType.UNION:
-            out = var.unpack(self.name)
-        else:
-            out = var.unpack_null(self.name)
+        out = var.unpack(self.name)
+
         return var.block, out
 
 
