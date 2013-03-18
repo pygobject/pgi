@@ -12,7 +12,7 @@ import logging
 
 is_gi = False
 
-def test(load_gi, backend=None):
+def test(load_gi, backend=None, strict=False):
     """Run the test suite.
 
     gi -- run all tests in the pygobject suite with PyGObject
@@ -45,6 +45,14 @@ def test(load_gi, backend=None):
 
     # gi uses logging
     logging.disable(logging.ERROR)
+
+    if strict:
+        # make glib warnings fatal
+        from gi.repository import GLib
+        GLib.log_set_always_fatal(
+            GLib.LogLevelFlags.LEVEL_CRITICAL |
+            GLib.LogLevelFlags.LEVEL_ERROR |
+            GLib.LogLevelFlags.LEVEL_WARNING)
 
     current_dir = os.path.join(os.path.dirname(__file__))
 

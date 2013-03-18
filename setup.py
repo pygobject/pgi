@@ -109,17 +109,20 @@ class TestCommand(Command):
         ("pgi-only", None, "only run pgi"),
         ("gi-only", None, "only run gi"),
         ("backend=", None, "backend"),
+        ("strict", None, "make glib warnings/errors fatal"),
     ]
 
     def initialize_options(self):
         self.pgi_only = False
         self.gi_only = False
         self.backend = ""
+        self.strict = False
 
     def finalize_options(self):
         self.pgi_only = bool(self.pgi_only)
         self.gi_only = bool(self.gi_only)
         self.backend = str(self.backend)
+        self.strict = bool(self.strict)
 
     def run(self):
         import tests
@@ -156,7 +159,8 @@ class TestCommand(Command):
 
         # don't fork with one run
         if len(filtered_runs) == 1:
-            exit(tests.test(*filtered_runs[0]))
+            run_gi, backend = filtered_runs[0]
+            exit(tests.test(run_gi, backend, self.strict))
 
         for is_gi, backend in filtered_runs:
             pid = os.fork()
@@ -165,7 +169,7 @@ class TestCommand(Command):
                 if status:
                     exit(status)
             else:
-                exit(tests.test(is_gi, backend))
+                exit(tests.test(is_gi, backend, self.strict))
 
 
 class BenchmarkCommand(Command):
