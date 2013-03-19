@@ -17,7 +17,7 @@ from pgi.gir import GIInterfaceInfoPtr, GIFunctionInfoFlags, GIObjectInfoPtr
 
 from pgi.ctypesutil import gicast
 from pgi.util import import_attribute, Super, escape_name
-from pgi.util import gparamspec_to_gvalue_ptr
+from pgi.util import gparamspec_to_gvalue
 from pgi.gtype import PGType
 from pgi.properties import PropertyAttribute, PROPS_NAME
 from pgi.constant import ConstantAttribute
@@ -79,10 +79,10 @@ class _Object(object):
             spec = getattr(specs, key, None)
             if not spec:
                 raise TypeError("Property %r not supported" % key)
-            gvalue_ptr = gparamspec_to_gvalue_ptr(spec, value)
+            gvalue = gparamspec_to_gvalue(spec, value)
             param = array[i]
             param.name = spec.name
-            param.value = gvalue_ptr.contents
+            param.value = gvalue
 
         return nums, array
 

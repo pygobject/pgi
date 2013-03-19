@@ -1,4 +1,4 @@
-# Copyright 2012 Christoph Reiter
+# Copyright 2012,2013 Christoph Reiter
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -136,11 +136,12 @@ class InfoIterWrapper(object):
         self.__names.clear()
 
 
-def gparamspec_to_gvalue_ptr(spec, value):
+def gparamspec_to_gvalue(spec, value):
     type_ = spec._info.get_type()
     tag = type_.tag.value
 
-    ptr = GValuePtr(GValue())
+    val = GValue()
+    ptr = GValuePtr(val)
     ptr.init(spec.value_type._type.value)
 
     is_interface = False
@@ -153,7 +154,7 @@ def gparamspec_to_gvalue_ptr(spec, value):
         ptr.unset()
         return None
 
-    return ptr
+    return val
 
 
 def set_gvalue_from_py(ptr, is_interface, tag, value):
@@ -161,7 +162,7 @@ def set_gvalue_from_py(ptr, is_interface, tag, value):
         if tag == GIInfoType.ENUM:
             ptr.set_enum(int(value))
         else:
-            return False
+            raise NotImplementedError
     else:
         if tag == GITypeTag.BOOLEAN:
             ptr.set_boolean(value)
