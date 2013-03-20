@@ -17,7 +17,6 @@ from pgi.gir import GIInterfaceInfoPtr, GIFunctionInfoFlags, GIObjectInfoPtr
 
 from pgi.ctypesutil import gicast
 from pgi.util import import_attribute, Super, escape_name
-from pgi.util import gparamspec_to_gvalue
 from pgi.gtype import PGType
 from pgi.properties import PropertyAttribute, PROPS_NAME
 from pgi.constant import ConstantAttribute

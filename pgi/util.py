@@ -136,27 +136,6 @@ class InfoIterWrapper(object):
         self.__names.clear()
 
 
-def gparamspec_to_gvalue(spec, value):
-    type_ = spec._info.get_type()
-    tag = type_.tag.value
-
-    val = GValue()
-    ptr = GValuePtr(val)
-    ptr.init(spec.value_type._type.value)
-
-    is_interface = False
-    if tag == GITypeTag.INTERFACE:
-        iface_info = type_.get_interface()
-        tag = iface_info.type.value
-        is_interface = True
-
-    if not set_gvalue_from_py(ptr, is_interface, tag, value):
-        ptr.unset()
-        return None
-
-    return val
-
-
 def set_gvalue_from_py(ptr, is_interface, tag, value):
     if is_interface:
         if tag == GIInfoType.ENUM:
