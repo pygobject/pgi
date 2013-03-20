@@ -9,7 +9,7 @@ NAME=regress
 all: lib$(NAME).la lib$(NAME).so $(GI_NAME).typelib
 
 $(NAME).o: $(NAME).c $(NAME).h
-	libtool --mode=compile gcc $(FLAGS) -c -Wall $(NAME).c
+	libtool --mode=compile gcc -g $(FLAGS) -c -Wall $(NAME).c
 
 $(NAME).lo: $(NAME).o
 
