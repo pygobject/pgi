@@ -51,11 +51,21 @@ class BaseInterfaceSetter(ConstructorSetter):
             return EnumFlagsSetter
         elif iface_type == GIInfoType.OBJECT:
             return ObjectSetter
+        elif iface_type == GIInfoType.STRUCT:
+            return StructSetter
 
         raise NotImplementedError(iface.type)
 
 
 class ObjectSetter(BaseInterfaceSetter):
+    def set(self, name):
+        var = self.get_type()
+        out = var.pack(var.check(name))
+        self.out_var = out
+        return var.block, out
+
+
+class StructSetter(BaseInterfaceSetter):
     def set(self, name):
         var = self.get_type()
         out = var.pack(var.check(name))

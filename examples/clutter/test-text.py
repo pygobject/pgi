@@ -19,14 +19,12 @@ RUNES = """
 if __name__ == "__main__":
     stage = Clutter.Stage()
 
-    stage.set_color(Clutter.Color.from_string("#ffbb00"))
+    stage.set_color(Clutter.Color.from_string("#000000"))
     stage.set_size(1024, 768)
     stage.set_title("Text Editing")
     stage.connect("destroy", Clutter.main_quit)
 
-    # FIXME
-    #text = Clutter.Text("Mono Bold 24px", "", Clutter.Color.from_string("#33FF33"))
-    text = Clutter.Text("Mono Bold 24px", "")
+    text = Clutter.Text("Mono Bold 24px", "", Clutter.Color.from_string("#33FF33"))
 
     text.set_position(40, 30)
     text.set_width(1024)

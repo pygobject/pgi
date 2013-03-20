@@ -7,7 +7,9 @@
 
 import unittest
 
-from gi.repository import Gtk, GObject, Atk, Gdk, Gio
+from gi.repository import Gtk, GObject, Atk, Gdk, Gio, Clutter
+
+from tests import is_gi
 
 
 class ObjectTest(unittest.TestCase):
@@ -55,28 +57,6 @@ class ObjectTest(unittest.TestCase):
         self.assertEqual(w.__grefcount__, 2)
         w.destroy()
         self.assertEqual(w.__grefcount__, 1)
-
-    def test_props_construct(self):
-        w = Gtk.Window(type=1)
-        self.assertEqual(w.props.type, Gtk.WindowType.POPUP)
-
-        w = Gtk.Window()
-        self.assertEqual(w.props.type, Gtk.WindowType.TOPLEVEL)
-
-        w = Gtk.Window(title="test123")
-        self.assertEqual(w.props.title, "test123")
-
-        w = Gtk.Window(title=u"test123")
-        self.assertTrue(isinstance(w.props.title, str))
-        self.assertEqual(w.props.title, "test123")
-
-    def test_props_construct_null(self):
-        w = Gtk.ScrolledWindow()
-        w.destroy()
-
-    def test_props_construct_inval(self):
-        self.assertRaises(TypeError,
-                          lambda x: Gtk.ScrolledWindow(**x), dict(foo=3))
 
     def test_construcor(self):
         self.assertTrue(Gtk.Label.new("foo"))
@@ -137,6 +117,35 @@ class ObjectTest(unittest.TestCase):
 
     def test_abstract_init(self):
         self.assertRaises(TypeError, Gtk.Widget)
+
+
+class GObjectConstructTest(unittest.TestCase):
+    def test_props_construct(self):
+        w = Gtk.Window(type=1)
+        self.assertEqual(w.props.type, Gtk.WindowType.POPUP)
+
+        w = Gtk.Window()
+        self.assertEqual(w.props.type, Gtk.WindowType.TOPLEVEL)
+
+        w = Gtk.Window(title="test123")
+        self.assertEqual(w.props.title, "test123")
+
+        w = Gtk.Window(title=u"test123")
+        self.assertTrue(isinstance(w.props.title, str))
+        self.assertEqual(w.props.title, "test123")
+
+    def test_props_construct_null(self):
+        w = Gtk.ScrolledWindow()
+        w.destroy()
+
+    def test_props_construct_inval(self):
+        self.assertRaises(TypeError,
+                          lambda x: Gtk.ScrolledWindow(**x), dict(foo=3))
+
+    @unittest.skipIf(is_gi, "no gi clutter overrides")
+    def test_struct(self):
+        Clutter.Text("Mono Bold 24px", "",
+                     Clutter.Color.from_string("#33FF33"))
 
 
 class GTypeTest(unittest.TestCase):
