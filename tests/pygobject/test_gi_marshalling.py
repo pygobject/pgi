@@ -1020,7 +1020,6 @@ class TestArray(unittest.TestCase):
         GIMarshallingTests.multi_array_key_value_in(["one", "two", "three"],
                                                     [1, 2, 3])
 
-    @unittest.skip("FIXME")
     def test_array_in_nonzero_nonlen(self):
         GIMarshallingTests.array_in_nonzero_nonlen(1, b'abcd')
 
@@ -1163,7 +1162,6 @@ class TestGEnum(unittest.TestCase):
         self.assertRaises(TypeError, GIMarshallingTests.genum_in, 43)
         self.assertRaises(TypeError, GIMarshallingTests.genum_in, 'GIMarshallingTests.GEnum.VALUE3')
 
-    @unittest.skip("FIXME")
     def test_genum_return(self):
         genum = GIMarshallingTests.genum_returnv()
         self.assertTrue(isinstance(genum, GIMarshallingTests.GEnum))
@@ -1371,7 +1369,6 @@ class TestInterfaces(unittest.TestCase):
 
     @unittest.skip("FIXME")
     def test_int8_int(self):
-        GIMarshallingTests.test_interface_test_int8_in._code.pprint()
         GIMarshallingTests.test_interface_test_int8_in(self.instance, 42)
         self.assertEqual(self.instance.val, 42)
 
