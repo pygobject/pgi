@@ -12,13 +12,14 @@ from pgi.codegen.utils import CodeBlock, parse_with_objects
 from pgi.gir import GIRepositoryPtr, GITypeTag, GIInfoType, GIArrayType
 from pgi.gir import GICallableInfoPtr
 from pgi import glib
+from pgi import gobject
 from pgi.glib import *
 from pgi.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr, GType
 from pgi.gobject import GCallback
 from pgi.gtype import PGType
 from pgi.gerror import PGError
 from pgi.util import import_attribute
-from pgi.ctypesutil import gicast
+from pgi.ctypesutil import gicast, find_library
 
 
 def typeinfo_to_ctypes(info, return_value=False):
@@ -451,7 +452,7 @@ $bool = bool($value)
 
     def pack(self, name):
         return self.parse("""
-$c_bool = ctypes.c_bool($value)
+$c_bool = ctypes.c_int($value)
 """, value=name)["c_bool"]
 
     def pre_unpack(self, name):
@@ -465,7 +466,7 @@ $bool = bool($value)
 
     def new(self):
         return self.parse("""
-$value = ctypes.c_bool()
+$value = ctypes.c_int()
 """)["value"]
 
 
@@ -1108,6 +1109,36 @@ class CTypesBackend(Backend):
         ret_type = ret and typeinfo_to_ctypes(ret.type)
         cb_object_type = ctypes.CFUNCTYPE(ret_type, *arg_types)
         return ctypes.cast(cb_object_type(func), GCallback)
+
+    def get_constructor(self, gtype, args):
+        # we need to create a new library, or the argtypes change for all
+        # instances
+        lib = find_library("gobject-2.0", cached=False)
+        h = getattr(lib, "g_object_new")
+
+        arg_types = [GType]
+        for arg in args:
+            arg_types.append(ctypes.c_char_p)
+            arg_types.append(typeinfo_to_ctypes(arg.type))
+        arg_types.append(ctypes.c_void_p)
+        h.argtypes = arg_types
+        h.restype = ctypes.c_void_p
+
+        values = []
+        for arg in args:
+            values.append("'%s'" % arg.name)
+            values.append(arg.out_var)
+        values.append("None")
+        type_ = gtype._type
+
+        block, var = self.parse("""
+# args: $args
+# ret: $ret
+$out = $func($type_num, $values)
+""", args=repr([n.__name__ for n in h.argtypes]), ret=repr(h.restype),
+        type_num=type_, values=", ".join(values), func=h)
+
+        return block, var["out"]
 
     def parse(self, code, **kwargs):
         return self._gen.parse(code, **fixup_ctypes_kwargs(kwargs))

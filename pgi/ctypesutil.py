@@ -23,7 +23,9 @@ else:
     }
 
 
-def find_library(name):
+def find_library(name, cached=True):
+    if not cached:
+        return cdll.LoadLibrary(_so_mapping[name])
     return getattr(cdll, _so_mapping[name])
 
 

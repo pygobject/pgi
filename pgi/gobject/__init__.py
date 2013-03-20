@@ -294,7 +294,7 @@ class GParameterPtr(POINTER(GParameter)):
 
 _methods = [
     ("newv", gpointer, [GType, guint, GParameterPtr]),
-    ("new", gpointer, [GType, guint]),
+    ("new", gpointer, []),
     ("unref", None, [gpointer]),
     ("ref_sink", gpointer, [gpointer]),
     ("ref", gpointer, [gpointer]),

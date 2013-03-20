@@ -1,4 +1,4 @@
-# Copyright 2012 Christoph Reiter
+# Copyright 2012,2013 Christoph Reiter
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@ gpointer = c_void_p
 gint32 = c_int32
 guint32 = c_uint32
 gint = c_int
-gboolean = c_bool
+gboolean = gint
 gint8 = c_int8
 guint8 = c_uint8
 gint16 = c_int16

@@ -26,6 +26,9 @@ class Backend(object):
                      method=False, self_name="", throws=False):
         raise NotImplementedError
 
+    def get_constructor(self, gtype, args):
+        raise NotImplementedError
+
     def get_callback(self, func, args):
         raise NotImplementedError
 

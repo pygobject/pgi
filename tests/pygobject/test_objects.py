@@ -70,6 +70,14 @@ class ObjectTest(unittest.TestCase):
         self.assertTrue(isinstance(w.props.title, str))
         self.assertEqual(w.props.title, "test123")
 
+    def test_props_construct_null(self):
+        w = Gtk.ScrolledWindow()
+        w.destroy()
+
+    def test_props_construct_inval(self):
+        self.assertRaises(TypeError,
+                          lambda x: Gtk.ScrolledWindow(**x), dict(foo=3))
+
     def test_construcor(self):
         self.assertTrue(Gtk.Label.new("foo"))
         w = Gtk.Label.new_with_mnemonic("foobar")

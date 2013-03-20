@@ -12,7 +12,7 @@ class CallbackReturn(object):
     TAG = None
 
     @classmethod
-    def get_class(cls):
+    def get_class(cls, type_):
         return cls
 
     def __init__(self, info, type_):
@@ -53,4 +53,4 @@ def get_cbreturn_class(arg_type):
         raise NotImplementedError(
             "%r callback return not implemented" % arg_type.tag)
     else:
-        return cls.get_class()
+        return cls.get_class(arg_type)

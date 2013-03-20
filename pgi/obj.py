@@ -21,6 +21,7 @@ from pgi.util import gparamspec_to_gvalue
 from pgi.gtype import PGType
 from pgi.properties import PropertyAttribute, PROPS_NAME
 from pgi.constant import ConstantAttribute
+from pgi.codegen.construct import generate_constructor
 from pgi.codegen.funcgen import generate_function
 from pgi.codegen.siggen import generate_signal_callback
 
@@ -42,8 +43,10 @@ class _Object(object):
             raise TypeError("cannot create instance of abstract type %r" %
                             self.__gtype__.name)
 
-        num_params, params = self.__get_gparam_array(**kwargs)
-        obj = gobject.newv(self.__gtype__._type, num_params, params)
+        names = kwargs.keys()
+        specs = type(self).props
+        constructor = generate_constructor(self.__gtype__, specs, names)
+        obj = constructor(*kwargs.values())
 
         # sink unowned objects
         if self._unowned:
@@ -67,24 +70,6 @@ class _Object(object):
     @classmethod
     def __destroy(cls, ref):
         gobject.unref(cls.__weak.pop(ref))
-
-    def __get_gparam_array(self, **kwargs):
-        if not kwargs:
-            return 0, None
-
-        specs = type(self).props
-        nums = len(kwargs)
-        array = (GParameter * nums)()
-        for i, (key, value) in enumerate(kwargs.iteritems()):
-            spec = getattr(specs, key, None)
-            if not spec:
-                raise TypeError("Property %r not supported" % key)
-            gvalue = gparamspec_to_gvalue(spec, value)
-            param = array[i]
-            param.name = spec.name
-            param.value = gvalue
-
-        return nums, array
 
     def __repr__(self):
         form = "<%s object at 0x%x (%s at 0x%x)>"
