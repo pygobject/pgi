@@ -12,7 +12,6 @@ from pgi.codegen.utils import CodeBlock, parse_with_objects
 from pgi.gir import GIRepositoryPtr, GITypeTag, GIInfoType, GIArrayType
 from pgi.gir import GICallableInfoPtr
 from pgi import glib
-from pgi import gobject
 from pgi.glib import *
 from pgi.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr, GType
 from pgi.gobject import GCallback

@@ -15,7 +15,7 @@ import os
 import sys
 from io import StringIO, BytesIO
 
-from tests import is_gi
+from tests import is_gi, is_pypy
 
 try:
     from gi.repository import GIMarshallingTests
@@ -1637,6 +1637,7 @@ class TestModule(unittest.TestCase):
             item = getattr(GIMarshallingTests, item_name)
             self.assertTrue(hasattr(item, '__class__'))
 
+    @unittest.skipIf(is_pypy, "FIXME: pypy gets confused by some __path__")
     def test_help(self):
         orig_stdout = sys.stdout
         try:

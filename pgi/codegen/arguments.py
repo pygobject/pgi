@@ -159,19 +159,21 @@ class CArrayArgument(ArrayArgument):
     def pre_call(self):
         var = self.get_type()
         if self.is_direction_inout():
+            checked = var.check(self.name)
             if self.type.array_length != -1:
-                self._data, self._length = var.pack(var.check(self.name), self._aux.type)
+                self._data, self._length = var.pack(checked, self._aux.type)
                 self._aux.call_var = var.get_reference(self._length)
             else:
-                self._data, length = var.pack(var.check(self.name), None)
+                self._data, length = var.pack(checked, None)
             self.call_var = var.get_reference(self._data)
             return var.block
         elif self.is_direction_in():
+            checked = var.check(self.name)
             if self.type.array_length != -1:
-                self.call_var, length = var.pack(var.check(self.name), self._aux.type)
+                self.call_var, length = var.pack(checked, self._aux.type)
                 self._aux.call_var = length
             else:
-                self.call_var, dummy = var.pack(var.check(self.name), None)
+                self.call_var, dummy = var.pack(checked, None)
             return var.block
         else:
             if self.type.array_length != -1:

@@ -75,7 +75,7 @@ class GIFunctionInfoPtr(GICallableInfoPtr):
         values["symbol"] = repr(self.symbol)
         values["flags"] = repr(self.flags)
         if self.flags.value & (GIFunctionInfoFlags.IS_GETTER |
-                                     GIFunctionInfoFlags.IS_SETTER):
+                               GIFunctionInfoFlags.IS_SETTER):
             values["property"] = repr(self.get_property())
         elif self.flags.value & GIFunctionInfoFlags.WRAPS_VFUNC:
             values["vfunc"] = repr(self.get_vfunc())
@@ -139,8 +139,9 @@ _methods = [
     ("get_caller_owns", GITransfer, [GICallableInfoPtr]),
     ("may_return_null", gboolean, [GICallableInfoPtr]),
     ("get_return_attribute", gchar_p, [GICallableInfoPtr, gchar_p]),
-    ("iterate_return_attributes", gint, [GICallableInfoPtr,
-        GIAttributeIterPtr, POINTER(c_char_p), POINTER(c_char_p)]),
+    ("iterate_return_attributes", gint,
+     [GICallableInfoPtr,
+      GIAttributeIterPtr, POINTER(c_char_p), POINTER(c_char_p)]),
     ("get_n_args", gint, [GICallableInfoPtr]),
     ("get_arg", GIArgInfoPtr, [GICallableInfoPtr, gint], True),
     ("load_arg", None, [GICallableInfoPtr, gint, GIArgInfoPtr]),

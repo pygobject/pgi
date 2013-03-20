@@ -5,7 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from pgi.gir import GITypeTag, GIDirection, GITransfer, GIInfoType
+from pgi.gir import GITypeTag, GIDirection, GITransfer
 
 
 class CallbackArgument(object):
@@ -54,12 +54,8 @@ class InterfaceArgument(CallbackArgument):
     py_type = object
 
     def process(self):
-        iface = self.type.get_interface()
-        iface_type = iface.type.value
         var = self.backend.get_type(self.type)
-
         out = var.unpack(self.name)
-
         return var.block, out
 
 

@@ -12,7 +12,6 @@ from ctypes import cast, POINTER, c_void_p
 from pgi import const
 from pgi.gir import GITypeTag, GIInfoType
 from pgi.glib import free
-from pgi.gobject import GValuePtr, GValue
 
 
 class Super(object):

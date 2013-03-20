@@ -8,9 +8,11 @@
 import os
 import unittest
 import logging
+import platform
 
 
 is_gi = False
+is_pypy = False
 
 def test(load_gi, backend=None, strict=False):
     """Run the test suite.
@@ -19,8 +21,9 @@ def test(load_gi, backend=None, strict=False):
 
     """
 
-    global is_gi
+    global is_gi, is_pypy
     is_gi = load_gi
+    is_pypy = platform.python_implementation() == "PyPy"
 
     if not load_gi:
         import pgi

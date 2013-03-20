@@ -122,10 +122,12 @@ def wrap_setup():
                     prop = _CProperty(lib, attr_name, symbol, ret, args)
                     setattr(ptr, attr_name, prop)
                 else:
-                    method = _CMethod(lib, name, symbol, ret, args, True, unref)
+                    method = _CMethod(
+                        lib, name, symbol, ret, args, True, unref)
                     setattr(ptr, name, method)
             else:
-                static_method = _CMethod(lib, name, symbol, ret, args, False, unref)
+                static_method = _CMethod(
+                    lib, name, symbol, ret, args, False, unref)
                 setattr(base, name, static_method)
 
     _wraps = []

@@ -43,7 +43,8 @@ _methods = [
     ("require", GITypelibPtr, [GIRepositoryPtr, gchar_p, gchar_p,
                                GIRepositoryLoadFlags,
                                POINTER(GErrorPtr)]),
-    ("find_by_name", GIBaseInfoPtr, [GIRepositoryPtr, gchar_p, gchar_p], True), # leak, fixme
+    ("find_by_name", GIBaseInfoPtr,
+     [GIRepositoryPtr, gchar_p, gchar_p], True),  # leak, fixme
     ("get_version", gchar_p, [GIRepositoryPtr, gchar_p]),
     ("prepend_search_path", None, [c_char_p]),
     ("get_search_path", GSListPtr, []),
