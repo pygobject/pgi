@@ -169,7 +169,7 @@ class FuncsTest(unittest.TestCase):
     def test_value_char(self):
         v = GObject.Value()
         v.init(GObject.TYPE_CHAR)
-        v.set_char("a")
+        v.set_char(97)
         self.assertEqual(v.get_char(), 97)
         self.assertRaises(TypeError, v.set_char, u"a")
         self.assertRaises(TypeError, v.set_char, "ab")
