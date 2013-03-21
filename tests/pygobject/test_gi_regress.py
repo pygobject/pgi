@@ -395,3 +395,99 @@ class TestTortureProfile(unittest.TestCase):
         print("%f secs" % delta_time)
         print("\t====")
         print("\tTotal: %f sec" % total_time)
+
+
+@unittest.skipUnless(Everything, "no Regress")
+class TestSignals(unittest.TestCase):
+    def test_object_param_signal(self):
+        obj = Everything.TestObj()
+
+        def callback(obj, obj_param):
+            # FIXME
+            #self.assertEqual(obj_param.props.int, 3)
+            self.assertGreater(obj_param.__grefcount__, 1)
+            obj.called = True
+
+        obj.called = False
+        obj.connect('sig-with-obj', callback)
+        obj.emit_sig_with_obj()
+        self.assertTrue(obj.called)
+
+    @unittest.skip("FIXME")
+    def test_int64_param_from_py(self):
+        obj = Everything.TestObj()
+
+        def callback(obj, i):
+            obj.callback_i = i
+            return i
+
+        obj.callback_i = None
+        obj.connect('sig-with-int64-prop', callback)
+        rv = obj.emit('sig-with-int64-prop', GObject.G_MAXINT64)
+        self.assertEqual(rv, GObject.G_MAXINT64)
+        self.assertEqual(obj.callback_i, GObject.G_MAXINT64)
+
+    @unittest.skip("FIXME")
+    def test_uint64_param_from_py(self):
+        obj = Everything.TestObj()
+
+        def callback(obj, i):
+            obj.callback_i = i
+            return i
+
+        obj.callback_i = None
+        obj.connect('sig-with-uint64-prop', callback)
+        rv = obj.emit('sig-with-uint64-prop', GObject.G_MAXUINT64)
+        self.assertEqual(rv, GObject.G_MAXUINT64)
+        self.assertEqual(obj.callback_i, GObject.G_MAXUINT64)
+
+    @unittest.skip("FIXME")
+    def test_int64_param_from_c(self):
+        obj = Everything.TestObj()
+
+        def callback(obj, i):
+            obj.callback_i = i
+            return i
+
+        obj.callback_i = None
+
+        obj.connect('sig-with-int64-prop', callback)
+        obj.emit_sig_with_int64()
+        self.assertEqual(obj.callback_i, GObject.G_MAXINT64)
+
+    @unittest.skip("FIXME")
+    def test_uint64_param_from_c(self):
+        obj = Everything.TestObj()
+
+        def callback(obj, i):
+            obj.callback_i = i
+            return i
+
+        obj.callback_i = None
+
+        obj.connect('sig-with-uint64-prop', callback)
+        obj.emit_sig_with_uint64()
+        self.assertEqual(obj.callback_i, GObject.G_MAXUINT64)
+
+    @unittest.skip("FIXME")
+    def test_intarray_ret(self):
+        obj = Everything.TestObj()
+
+        def callback(obj, i):
+            obj.callback_i = i
+            return [i, i + 1]
+
+        obj.callback_i = None
+
+        try:
+            obj.connect('sig-with-intarray-ret', callback)
+        except TypeError as e:
+            # compat with g-i 1.34.x
+            if 'unknown signal' in str(e):
+                return
+            raise
+
+        rv = obj.emit('sig-with-intarray-ret', 42)
+        self.assertEqual(obj.callback_i, 42)
+        self.assertEqual(type(rv), GLib.Array)
+        self.assertEqual(rv.len, 2)

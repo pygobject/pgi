@@ -29,7 +29,7 @@ class Backend(object):
     def get_constructor(self, gtype, args):
         raise NotImplementedError
 
-    def get_callback(self, func, args):
+    def get_callback(self, func, args, ret):
         raise NotImplementedError
 
     def get_type(self, type_, may_be_null=False):

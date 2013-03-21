@@ -31,6 +31,17 @@ class Int64Return(CallbackReturn):
     TAG = GITypeTag.INT64
 
 
+class UInt64Return(CallbackReturn):
+    TAG = GITypeTag.UINT64
+
+
+class VoidReturn(CallbackReturn):
+    TAG = GITypeTag.VOID
+
+    def process(self, name):
+        return None, "None"
+
+
 _classes = {}
 
 

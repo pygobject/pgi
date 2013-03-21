@@ -64,6 +64,16 @@ class Utf8Argument(CallbackArgument):
     py_type = str
 
 
+class Int64Argument(CallbackArgument):
+    TAG = GITypeTag.INT64
+    py_type = int
+
+
+class UInt64Argument(CallbackArgument):
+    TAG = GITypeTag.UINT64
+    py_type = int
+
+
 class VoidArgument(CallbackArgument):
     TAG = GITypeTag.VOID
     py_type = int

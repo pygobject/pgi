@@ -1102,10 +1102,9 @@ class CTypesBackend(Backend):
 
         return block, method and "%s._obj" % self_name, h
 
-    def get_callback(self, func, args, ret=None):
+    def get_callback(self, func, args, ret):
         arg_types = [typeinfo_to_ctypes(a.type) for a in args]
-        # FIXME.. don't ignore missing ret
-        ret_type = ret and typeinfo_to_ctypes(ret.type)
+        ret_type = typeinfo_to_ctypes(ret.type)
         cb_object_type = ctypes.CFUNCTYPE(ret_type, *arg_types)
         return ctypes.cast(cb_object_type(func), GCallback)
 
