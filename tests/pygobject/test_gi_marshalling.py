@@ -72,6 +72,7 @@ class TestConstant(unittest.TestCase):
     def test_constant_number(self):
         self.assertEqual(CONSTANT_NUMBER, GIMarshallingTests.CONSTANT_NUMBER)
 
+    @unittest.skipUnless(hasattr(GLib, "MAXINT32"), "too old gi")
     def test_min_max_int(self):
         self.assertEqual(GLib.MAXINT32, 2 ** 31 - 1)
         self.assertEqual(GLib.MININT32, -2 ** 31)
