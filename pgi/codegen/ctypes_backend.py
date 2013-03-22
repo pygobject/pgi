@@ -10,7 +10,7 @@ import ctypes
 from pgi.codegen.backend import Backend, VariableFactory
 from pgi.codegen.utils import CodeBlock, parse_with_objects
 from pgi.gir import GIRepositoryPtr, GITypeTag, GIInfoType, GIArrayType
-from pgi.gir import GICallableInfoPtr
+from pgi.gir import GICallableInfoPtr, GIStructInfoPtr
 from pgi import glib
 from pgi.glib import *
 from pgi.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr, GType
@@ -19,6 +19,7 @@ from pgi.gtype import PGType
 from pgi.gerror import PGError
 from pgi.util import import_attribute
 from pgi.ctypesutil import gicast, find_library
+from pgi import foreign
 
 
 def typeinfo_to_ctypes(info, return_value=False):
@@ -835,6 +836,19 @@ $out = ctypes.c_void_p($obj._obj)
 """, obj=name)["out"]
 
     def unpack(self, name):
+        iface = gicast(self.type.get_interface(), GIStructInfoPtr)
+        foreign_struct = None
+        if iface.is_foreign:
+            foreign_struct = foreign.get_foreign(iface.namespace, iface.name)
+
+        if foreign_struct:
+            return self.parse("""
+if $obj:
+    $new_foreign = $foreign.from_pointer($obj)
+else:
+    $new_foreign = $obj
+""", obj=name, foreign=foreign_struct)["new_foreign"]
+
         return self.parse("""
 if $value:
     $obj = object.__new__($type)

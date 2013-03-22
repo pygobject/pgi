@@ -5,7 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from pgi.gir import GITypeTag, GIDirection, GITransfer
+from pgi.gir import GITypeTag, GIDirection, GITransfer, GIInfoType
 
 
 class CallbackArgument(object):
@@ -21,7 +21,7 @@ class CallbackArgument(object):
         self.type = type_
 
     @classmethod
-    def get_class(cls):
+    def get_class(cls, type_):
         return cls
 
     def setup(self):
@@ -49,14 +49,34 @@ class CallbackArgument(object):
         return self.info.ownership_transfer.value == GITransfer.EVERYTHING
 
 
-class InterfaceArgument(CallbackArgument):
+class BaseInterfaceArgument(CallbackArgument):
     TAG = GITypeTag.INTERFACE
     py_type = object
+
+    @classmethod
+    def get_class(cls, type_):
+        iface = type_.get_interface()
+        iface_type = iface.type.value
+
+        if iface_type == GIInfoType.STRUCT:
+            return StructArgument
+        elif iface_type == GIInfoType.OBJECT:
+            return ObjectArgument
+
+        raise NotImplementedError("Unsupported interface type %r" % iface.type)
 
     def process(self):
         var = self.backend.get_type(self.type)
         out = var.unpack(self.name)
         return var.block, out
+
+
+class ObjectArgument(BaseInterfaceArgument):
+    pass
+
+
+class StructArgument(BaseInterfaceArgument):
+    pass
 
 
 class Utf8Argument(CallbackArgument):
@@ -101,4 +121,4 @@ def get_cbarg_class(arg_type):
         raise NotImplementedError(
             "%r signal argument not implemented" % arg_type.tag)
     else:
-        return cls.get_class()
+        return cls.get_class(arg_type)
