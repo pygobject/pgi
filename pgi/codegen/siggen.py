@@ -34,7 +34,7 @@ def generate_callback(info):
 
     ret_type = info.get_return_type()
     cls = get_cbreturn_class(ret_type)
-    return_value = cls(info, ret_type)
+    return_value = cls(backend, info, ret_type)
 
     cb_args = []
     for arg, type_ in zip(args, arg_types):
@@ -92,7 +92,7 @@ def _generate_signal_callback(backend, info, args, arg_types):
 
     ret_type = info.get_return_type()
     cls = get_cbreturn_class(ret_type)
-    return_value = cls(info, ret_type)
+    return_value = cls(backend, info, ret_type)
 
     for arg, type_ in zip(args, arg_types):
         cls = get_cbarg_class(type_)

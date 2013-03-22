@@ -41,3 +41,22 @@ class SignalTest(unittest.TestCase):
         w = Gtk.Window()
         id_ = w.connect("map", lambda *x: None, 1, 2, 3, 4)
         w.disconnect(id_)
+
+
+class SignalReturnTest(unittest.TestCase):
+
+    def test_bool(self):
+        window = Gtk.OffscreenWindow()
+        area = Gtk.DrawingArea()
+        window.add(area)
+        called = [0]
+        def foo(area, context):
+            called[0] += 1
+            return True
+        area.connect("draw", foo)
+        area.connect("draw", foo)
+        window.show_all()
+        while Gtk.events_pending():
+            Gtk.main_iteration()
+        window.destroy()
+        self.assertEqual(called[0], 1)

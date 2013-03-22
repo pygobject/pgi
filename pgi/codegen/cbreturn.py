@@ -15,12 +15,18 @@ class CallbackReturn(object):
     def get_class(cls, type_):
         return cls
 
-    def __init__(self, info, type_):
+    def __init__(self, backend, info, type_):
         self.info = info
         self.type = type_
+        self.backend = backend
+
+    def get_type(self):
+        return self.backend.get_type(self.type)
 
     def process(self, name):
-        return None, name
+        var = self.get_type()
+        out = var.check(name)
+        return var.block, out
 
 
 class BooleanReturn(CallbackReturn):
@@ -39,7 +45,7 @@ class VoidReturn(CallbackReturn):
     TAG = GITypeTag.VOID
 
     def process(self, name):
-        return None, "None"
+        return None, ""
 
 
 _classes = {}
