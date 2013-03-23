@@ -8,6 +8,7 @@
 from pgi import const
 from pgi.importer import require_version, get_required_version
 from pgi.codegen import set_backend
+from pgi import foreign
 
 require_version = require_version
 get_required_version = get_required_version
@@ -15,6 +16,10 @@ set_backend = set_backend
 
 version_info = const.VERSION
 __version__ = ".".join(map(str, version_info))
+
+
+def check_foreign(namespace, name):
+    return foreign.get_foreign(namespace, name) is not None
 
 
 def check_version(version):

@@ -124,7 +124,7 @@ def _generate_signal_callback(backend, info, args, arg_types):
     return_block = return_block or CodeBlock()
 
     block, var = backend.parse("""
-def $cb_wrapper($args):
+def $cb_wrapper($dummy, $args):
     $body
     $ret = $callback($out_args)
     $post
@@ -134,8 +134,8 @@ def $cb_wrapper($args):
      ret=return_var)
 
     def create_sig_for_func(real_func):
-        func = block.compile(**{cb_name: real_func})[func_name]
-        return backend.get_callback(func, sig_args, return_value)
+        f = block.compile(**{cb_name: real_func})[func_name]
+        return backend.get_callback(f, sig_args, return_value, is_signal=True)
 
     return create_sig_for_func
 

@@ -13,6 +13,7 @@ import platform
 
 is_gi = False
 is_pypy = False
+has_cairo = False
 
 def test(load_gi, backend=None, strict=False):
     """Run the test suite.
@@ -21,7 +22,7 @@ def test(load_gi, backend=None, strict=False):
 
     """
 
-    global is_gi, is_pypy
+    global is_gi, is_pypy, has_cairo
     is_gi = load_gi
     is_pypy = platform.python_implementation() == "PyPy"
 
@@ -45,6 +46,11 @@ def test(load_gi, backend=None, strict=False):
         else:
             hl = "### PGI " + "#" * 100
     print hl[:80]
+
+    if load_gi:
+        has_cairo = True
+    else:
+        gi.check_foreign("cairo", "Context")
 
     # gi uses logging
     logging.disable(logging.ERROR)

@@ -9,12 +9,12 @@ import unittest
 
 from gi.repository import Gtk
 
-from tests import is_gi
+from tests import is_gi, has_cairo
 
 
 class StructTest(unittest.TestCase):
 
-    @unittest.skipUnless(is_gi, "FIXME")
+    @unittest.skipUnless(has_cairo, "")
     def test_foreign_cairo(self):
         window = Gtk.OffscreenWindow()
         area = Gtk.DrawingArea()

@@ -1116,8 +1116,11 @@ class CTypesBackend(Backend):
 
         return block, method and "%s._obj" % self_name, h
 
-    def get_callback(self, func, args, ret):
+    def get_callback(self, func, args, ret, is_signal=False):
         arg_types = [typeinfo_to_ctypes(a.type) for a in args]
+        # skip the first arg, we pass the signal's object manually
+        if is_signal:
+            arg_types.insert(0, ctypes.c_void_p)
         ret_type = typeinfo_to_ctypes(ret.type)
         cb_object_type = ctypes.CFUNCTYPE(ret_type, *arg_types)
         return ctypes.cast(cb_object_type(func), GCallback)
