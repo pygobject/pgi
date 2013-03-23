@@ -403,8 +403,7 @@ class TestSignals(unittest.TestCase):
         obj = Everything.TestObj()
 
         def callback(obj, obj_param):
-            # FIXME
-            #self.assertEqual(obj_param.props.int, 3)
+            self.assertEqual(obj_param.props.int, 3)
             self.assertGreater(obj_param.__grefcount__, 1)
             obj.called = True
 
