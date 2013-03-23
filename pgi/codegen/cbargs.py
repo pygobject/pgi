@@ -62,6 +62,8 @@ class BaseInterfaceArgument(CallbackArgument):
             return StructArgument
         elif iface_type == GIInfoType.OBJECT:
             return ObjectArgument
+        elif iface_type == GIInfoType.UNION:
+            return UnionArgument
 
         raise NotImplementedError("Unsupported interface type %r" % iface.type)
 
@@ -76,6 +78,10 @@ class ObjectArgument(BaseInterfaceArgument):
 
 
 class StructArgument(BaseInterfaceArgument):
+    pass
+
+
+class UnionArgument(BaseInterfaceArgument):
     pass
 
 
