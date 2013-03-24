@@ -39,3 +39,12 @@ License for "./clutter/*.py"
     by Jeremy Moles <cubicool@gmail.com>
 
     License according to Jeremy Moles: "Totally free in every way"
+
+License for "./cairo"
+=====================
+
+    examples taken from
+    zetcode.com/gfx/pycairo/
+    by Jan Bodnar <vronskij@gmail.com>
+
+    License according to Jan Bodnar: "BSD"
