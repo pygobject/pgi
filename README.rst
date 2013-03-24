@@ -11,13 +11,16 @@ and cffi_ (optional). API compatible with PyGObject_.
 - CPython_ 2.7 or PyPy_ 1.9
 - libgirepository_ 1.0
 - cffi_ 0.6+ (optional)
+- cairocffi_ 0.4+ (optional, for cairo support)
 
 **Development Status:**
 
 See the 'examples' directory for working examples.
+Anything else will probably not work.
 
 .. _ctypes: http://docs.python.org/2/library/ctypes.html
 .. _cffi: http://cffi.readthedocs.org/en/latest/
+.. _cairocffi: http://pythonhosted.org/cairocffi/
 .. _PyGObject: http://git.gnome.org/browse/pygobject/
 .. _libgirepository: http://git.gnome.org/browse/gobject-introspection/
 .. _CPython: http://www.python.org/
