@@ -958,7 +958,6 @@ class TestArray(unittest.TestCase):
                                           GIMarshallingTests.Enum.VALUE2,
                                           GIMarshallingTests.Enum.VALUE3])
 
-    @unittest.skip("FIXME")
     def test_array_boxed_struct_in(self):
         struct1 = GIMarshallingTests.BoxedStruct()
         struct1.long_ = 1

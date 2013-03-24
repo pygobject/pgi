@@ -6,7 +6,7 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 import os
-from ctypes import cdll, c_void_p, cast
+from ctypes import cdll, c_void_p, cast, cdll, c_size_t
 
 
 if os.name == "nt":
@@ -21,6 +21,16 @@ else:
         "gobject-2.0": "libgobject-2.0.so.0",
         "girepository-1.0": "libgirepository-1.0.so.1",
     }
+
+
+if os.name == "nt":
+    stdlib = memcpy = cdll.msvcrt
+else:
+    stdlib = getattr(cdll, "libc.so.6")
+
+memcpy = stdlib.memcpy
+memcpy.argtypes = [c_void_p, c_void_p, c_size_t]
+memcpy.restype = c_void_p
 
 
 def find_library(name, cached=True):

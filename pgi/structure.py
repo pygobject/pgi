@@ -5,7 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from pgi.ctypesutil import gicast
+from pgi.ctypesutil import gicast, memcpy
 from pgi.codegen.fieldgen import generate_field_getter, generate_field_setter
 from pgi.gir import GIUnionInfoPtr, GIFieldInfoFlags, GIStructInfoPtr
 from pgi.glib import g_try_malloc0, free
@@ -72,6 +72,12 @@ class _Structure(BaseStructure):
         form = "<%s structure at 0x%x (%s at 0x%x)>"
         name = type(self).__name__
         return form % (name, id(self), self.__gtype__.name, self._obj)
+
+    def copy(self):
+        new = type(self)()
+        memcpy(new._obj, self._obj, self._size)
+        new._needs_free = True
+        return new
 
     __str__ = __repr__
 

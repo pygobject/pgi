@@ -29,7 +29,17 @@ class StructTest(unittest.TestCase):
             Gtk.main_iteration()
         window.destroy()
 
+    @unittest.skip("FIXME")
     def test_struct_out(self):
         model = Gtk.ListStore(int)
         iter_ = model.insert_with_valuesv(0, [], [])
         self.failUnless(isinstance(iter_, Gtk.TreeIter))
+
+    def test_struct_copy(self):
+        iter_ = Gtk.TreeIter()
+        iter_.stamp = 4
+        new = iter_.copy()
+        self.failUnlessEqual(new.stamp, 4)
+        iter_.stamp = 999
+        self.failUnlessEqual(new.stamp, 4)
+        self.failUnlessEqual(iter_.stamp, 999)

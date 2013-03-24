@@ -182,6 +182,9 @@ if not -2**31 <= $int < 2**31:
 $c_value = ffi.cast("gint32", $value)
 """, value=valid)["c_value"]
 
+    def unpack(self, name):
+        raise NotImplementedError
+
     def new(self):
         return self.parse("""
 # new int32
@@ -314,6 +317,9 @@ $value = ffi.cast("$type*", $value)
 
         block.add_dependency("ffi", self._ffi)
         return block, name
+
+    def assign_pointer(self, ptr, value):
+        raise NotImplementedError
 
     def deref_pointer(self, name):
         block, var = self.parse("""

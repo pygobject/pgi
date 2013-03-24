@@ -79,6 +79,10 @@ class Int32Field(BasicField):
     TAG = GITypeTag.INT32
 
 
+class Int64Field(BasicField):
+    TAG = GITypeTag.INT64
+
+
 class UInt16Field(BasicField):
     TAG = GITypeTag.UINT16
 
