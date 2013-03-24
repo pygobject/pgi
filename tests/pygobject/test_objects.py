@@ -7,7 +7,12 @@
 
 import unittest
 
-from gi.repository import Gtk, GObject, Atk, Gdk, Gio, Clutter
+from gi.repository import Gtk, GObject, Atk, Gdk, Gio
+
+try:
+    from gi.repository import Clutter
+except ImportError:
+    Clutter = None
 
 from tests import is_gi
 
@@ -143,6 +148,7 @@ class GObjectConstructTest(unittest.TestCase):
                           lambda x: Gtk.ScrolledWindow(**x), dict(foo=3))
 
     @unittest.skipIf(is_gi, "no gi clutter overrides")
+    @unittest.skipUnless(Clutter, "no clutter")
     def test_struct(self):
         Clutter.Text("Mono Bold 24px", "",
                      Clutter.Color.from_string("#33FF33"))
