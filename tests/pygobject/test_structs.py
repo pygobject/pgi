@@ -28,3 +28,8 @@ class StructTest(unittest.TestCase):
         while Gtk.events_pending():
             Gtk.main_iteration()
         window.destroy()
+
+    def test_struct_out(self):
+        model = Gtk.ListStore(int)
+        iter_ = model.insert_with_valuesv(0, [], [])
+        self.failUnless(isinstance(iter_, Gtk.TreeIter))

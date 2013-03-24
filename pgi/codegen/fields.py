@@ -75,6 +75,10 @@ class UInt8Field(BasicField):
     TAG = GITypeTag.UINT8
 
 
+class Int32Field(BasicField):
+    TAG = GITypeTag.INT32
+
+
 class UInt16Field(BasicField):
     TAG = GITypeTag.UINT16
 

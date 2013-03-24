@@ -835,6 +835,11 @@ if not isinstance($obj, ($struct_class, $obj_class)):
 $out = ctypes.c_void_p($obj._obj)
 """, obj=name)["out"]
 
+    def pre_unpack(self, name):
+        return self.parse("""
+$value = $cvalue.value
+""", cvalue=name)["value"]
+
     def unpack(self, name):
         iface = gicast(self.type.get_interface(), GIStructInfoPtr)
         foreign_struct = None
