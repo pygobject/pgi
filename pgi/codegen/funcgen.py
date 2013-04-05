@@ -7,7 +7,7 @@
 
 from pgi.codegen import ACTIVE_BACKENDS
 from pgi.codegen.utils import CodeBlock
-from pgi.util import escape_name, escape_builtin
+from pgi.util import escape_name, escape_builtin, escape_keyword
 from pgi.codegen.arguments import get_argument_class, ErrorArgument
 from pgi.codegen.returnvalues import get_return_class
 
@@ -144,14 +144,14 @@ def _generate_function(backend, info, arg_infos, arg_types,
 
     # build final function block
 
-    docstring = build_docstring(info.name, args, return_var and return_value)
+    func_name = escape_name(info.name)
+
+    docstring = build_docstring(func_name, args, return_var and return_value)
 
     names = [a.in_var for a in args if not a.is_aux and a.in_var]
     if method:
         names.insert(0, "self")
     names = ", ".join(names)
-
-    func_name = escape_name(info.name)
 
     main, var = backend.parse("""
 # backend: $backend_name

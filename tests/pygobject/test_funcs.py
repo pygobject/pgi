@@ -8,10 +8,16 @@
 import unittest
 
 from tests import is_gi
-from gi.repository import Gtk, GLib, GObject
+from gi.repository import Gtk, GLib, GObject, Pango
 
 
 class FuncsTest(unittest.TestCase):
+
+    @unittest.skipIf(is_gi, "bug in gi")
+    def test_escape_name(self):
+        self.failUnless(Pango.break_)
+        self.failUnless(Pango.break_.__doc__.startswith("break_("))
+
     def test_basic(self):
         self.assertTrue("themes" in Gtk.rc_get_theme_dir())
         self.assertTrue(Gtk.rc_get_module_dir())

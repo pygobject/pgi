@@ -12,7 +12,7 @@ from pgi.constant import ConstantAttribute
 from pgi.function import FunctionAttribute
 from pgi.structure import StructureAttribute, UnionAttribute
 from pgi.obj import ObjectAttribute, InterfaceAttribute
-from pgi.util import InfoIterWrapper
+from pgi.util import InfoIterWrapper, escape_keyword, unescape_keyword
 
 
 _attr_list = [None, FunctionAttribute, None, StructureAttribute, None,
@@ -53,6 +53,7 @@ class _Module(types.ModuleType):
         # get all infos and
         names = list(self._wrapper.iternames())
         names.extend(self.__dict__.keys())
+        names = map(escape_keyword, names)
 
         # filter out not implemented ones
         implemented_names = []
@@ -67,7 +68,7 @@ class _Module(types.ModuleType):
         return implemented_names
 
     def __getattr__(self, name):
-        info = self._wrapper.lookup_name(name)
+        info = self._wrapper.lookup_name(unescape_keyword(name))
         if not info:
             raise AttributeError("%r module has not attribute %r" %
                                  (self.__class__.__name__, name))

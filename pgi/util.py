@@ -211,7 +211,20 @@ def escape_builtin(text):
     return text
 
 
-def escape_name(text, reg=re.compile("^(%s)$" % "|".join(keyword.kwlist))):
+_KWD_RE = re.compile("^(%s)$" % "|".join(keyword.kwlist))
+
+def escape_keyword(text, reg=_KWD_RE):
+    return reg.sub(r"\1_", text)
+
+
+def unescape_keyword(text):
+    new = text.rstrip("_")
+    if new != escape_keyword(new):
+        return new
+    return text
+
+
+def escape_name(text, reg=_KWD_RE):
     """Escape identifiers and keywords by changing them in a defined way
      - '-' will be replaced by '_'
      - keywords get '_' appended"""
@@ -221,7 +234,9 @@ def escape_name(text, reg=re.compile("^(%s)$" % "|".join(keyword.kwlist))):
 
 
 def unescape_name(text):
-    return text.rstrip("_").replace("_", "-")
+    if text.endswith("_"):
+        return text[:-1]
+    return text.replace("_", "-")
 
 try:
     import pypyjit

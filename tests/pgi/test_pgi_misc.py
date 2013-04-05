@@ -28,7 +28,7 @@ class PGIMisc(unittest.TestCase):
 
     def test_unescape_property(self):
         self.assertEqual(unescape_name("foo_"), "foo")
-        self.assertEqual(unescape_name("fo_oo_"), "fo-oo")
+        self.assertEqual(unescape_name("fo_oo"), "fo-oo")
 
     def test_escape_builtin(self):
         self.assertEqual(escape_builtin("type"), "type_")
