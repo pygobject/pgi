@@ -7,4 +7,4 @@
 *.typelib
 *.o
 .libs
-docgen/_*
+docgen/_docs

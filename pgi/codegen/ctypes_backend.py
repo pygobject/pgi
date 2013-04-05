@@ -1032,6 +1032,8 @@ $array = ctypes.c_void_p()
 $data = ($ctypes_type * $length)()
 $array = ctypes.pointer($data)
 """, ctypes_type=ctypes_type, length=length)["array"], packed_length
+        else:
+            raise NotImplementedError
 
 
 class CTypesCodeGen(object):
