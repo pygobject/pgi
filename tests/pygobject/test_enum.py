@@ -23,7 +23,7 @@ class EnumTest(unittest.TestCase):
 
     def test_repr(self):
         self.assertTrue("CENTER" in repr(Gtk.WindowPosition.CENTER))
-        self.assertTrue("GtkWindowPosition" in repr(Gtk.WindowPosition(0)))
+        self.assertTrue("WindowPosition" in repr(Gtk.WindowPosition(0)))
 
     def test_inval_value(self):
         self.assertRaises(ValueError, Gtk.WindowPosition, 9)

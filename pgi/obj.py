@@ -160,6 +160,9 @@ def add_method(info, target_cls):
 class InterfaceBase(object):
     pass
 
+InterfaceBase.__module__ = "GObject"
+InterfaceBase.__name__ = "GInterface"
+
 
 class _Interface(InterfaceBase):
     def __init__(self):

@@ -139,10 +139,10 @@ def _get_values(enum):
 
 def FlagsAttribute(info):
     info = gicast(info, GIEnumInfoPtr)
-    flags_name = info.namespace + info.name
 
     # add them to the class for init checks
-    cls = type(flags_name, _FlagsClass.__bases__, dict(_FlagsClass.__dict__))
+    cls = type(info.name, _FlagsClass.__bases__, dict(_FlagsClass.__dict__))
+    cls.__module__ = info.namespace
 
     values = _get_values(info)
     cls._flags = values
@@ -157,10 +157,10 @@ def FlagsAttribute(info):
 
 def EnumAttribute(info):
     info = gicast(info, GIEnumInfoPtr)
-    enum_name = info.namespace + info.name
 
     # add them to the class for init checks
-    cls = type(enum_name, _EnumClass.__bases__, dict(_EnumClass.__dict__))
+    cls = type(info.name, _EnumClass.__bases__, dict(_EnumClass.__dict__))
+    cls.__module__ = info.namespace
 
     values = _get_values(info)
     cls._allowed = dict(values)

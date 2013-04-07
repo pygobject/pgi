@@ -32,7 +32,7 @@ class FlagsTest(unittest.TestCase):
     def test_repr(self):
         self.assertTrue("FG" in repr(Gtk.RcFlags.FG))
         self.assertTrue("0" in repr(Gtk.RcFlags(0)))
-        self.assertTrue("GtkRcFlags" in repr(Gtk.RcFlags.BASE))
+        self.assertTrue("RcFlags" in repr(Gtk.RcFlags.BASE))
 
     @unittest.skipIf(is_gi, "")
     def test_repr_2(self):
