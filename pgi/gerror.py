@@ -13,4 +13,5 @@ class PGError(Exception):
         self.code = error.code
         self.message = error.message
 
+PGError.__module__ = "GObject"
 PGError.__name__ = "GError"

@@ -18,6 +18,9 @@ from pgi.obj import add_method
 class EnumBase(int):
     __gtype__ = PGType.from_name("GEnum")
 
+EnumBase.__name__ = "GEnum"
+EnumBase.__module__ = "GObject"
+
 
 class _EnumClass(EnumBase):
     _allowed = {}
@@ -55,6 +58,9 @@ class _EnumClass(EnumBase):
 
 class FlagsBase(int):
     pass
+
+FlagsBase.__name__ = "GFlags"
+FlagsBase.__module__ = "GObject"
 
 
 class _FlagsClass(FlagsBase):

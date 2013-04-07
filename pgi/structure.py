@@ -122,7 +122,7 @@ def UnionAttribute(union_info):
     union_info = gicast(union_info, GIUnionInfoPtr)
 
     cls = type(union_info.name, _Union.__bases__, dict(_Union.__dict__))
-    cls.__module__ = union_info.name
+    cls.__module__ = union_info.namespace
     cls.__gtype__ = PGType(union_info.g_type)
     cls._size = union_info.size
 

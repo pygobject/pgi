@@ -72,6 +72,11 @@ def load(namespace, module):
             getattr(proxy, var, None)
             item = override_vars.get(var)
             if item:
+                # make sure new classes have a proper __module__
+                try:
+                    item.__module__ = namespace
+                except AttributeError:
+                    pass
                 setattr(module, var, item)
 
     _active_module.pop(-1)

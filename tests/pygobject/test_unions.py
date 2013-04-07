@@ -7,13 +7,18 @@
 
 import unittest
 
-from gi.repository import Gdk, Gtk, GObject
+from gi.repository import GLib, Gdk, Gtk, GObject
 
 
 class UnionTest(unittest.TestCase):
     def test_union(self):
         e = Gdk.Event()
         repr(e)
+
+    def test_class(self):
+        c = GLib.DoubleIEEE754
+        self.assertTrue("GLib" in c.__module__)
+        self.assertTrue("DoubleIEEE754" in c.__name__)
 
     def test_fields(self):
         self.assertTrue("type" in dir(Gdk.Event))
