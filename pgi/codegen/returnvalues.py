@@ -195,6 +195,11 @@ class ErrorReturn(ReturnValue):
         return var.block, out
 
 
+class GListReturn(ReturnValue):
+    TAG = GITypeTag.GLIST
+    py_type = list
+
+
 class FilenameReturnValue(Utf8ReturnValue):
     TAG = GITypeTag.FILENAME
     py_type = str

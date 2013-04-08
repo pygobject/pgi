@@ -429,6 +429,11 @@ class VoidArgument(GIArgument):
         return var.block
 
 
+class GListArgument(GIArgument):
+    TAG = GITypeTag.GLIST
+    py_type = list
+
+
 class Utf8Argument(GIArgument):
     TAG = GITypeTag.UTF8
     py_type = str
