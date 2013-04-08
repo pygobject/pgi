@@ -90,11 +90,7 @@ class Importer(object):
         if namespace in _versions:
             version = _versions[namespace]
         else:
-            glist = repository.enumerate_versions(namespace)
-            versions = sorted(util.glist_to_list(glist, c_char_p))
-            if not versions:
-                raise ImportError("%r not found." % namespace)
-            version = versions[-1]
+            version = None
 
         # Dependency already loaded, skip
         if fullname in sys.modules:
@@ -123,7 +119,7 @@ class Importer(object):
         instance.__loader__ = self
         instance.__package__ = const.PREFIX[0]
         instance.__file__ = "<%s.%s>" % (const.PREFIX[0], namespace)
-        instance._version = version
+        instance._version = version or repository.get_version(namespace)
 
         # add to module and sys.modules
         for prefix in const.PREFIX:
