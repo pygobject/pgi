@@ -17,6 +17,9 @@ else:
 from pgi.codegen.ctypes_backend import CTypesBackend
 BACKENDS.append(CTypesBackend)
 
+from pgi.codegen.null_backend import NullBackend
+
+
 ACTIVE_BACKENDS = BACKENDS[:]
 
 
@@ -33,8 +36,13 @@ def set_backend(name=None):
         names = []
     else:
         names = name.split(",")
+
+    # if explicitly asked, enable the null backend
+    if "null" in names:
+        possible.append(NullBackend)
+
     for name in reversed(names):
-        for backend in BACKENDS:
+        for backend in list(possible):
             if backend.NAME == name:
                 possible.remove(backend)
                 possible.insert(0, backend)

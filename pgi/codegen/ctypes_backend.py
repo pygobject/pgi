@@ -1080,7 +1080,7 @@ class CTypesBackend(Backend):
             if not paths:
                 return
             path = paths.split(",")[0]
-            lib = getattr(ctypes.cdll, path)
+            lib = ctypes.cdll.LoadLibrary(path)
             self._libs[namespace] = lib
         return self._libs[namespace]
 
