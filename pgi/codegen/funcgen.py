@@ -12,7 +12,7 @@ from pgi.codegen.arguments import get_argument_class, ErrorArgument
 from pgi.codegen.returnvalues import get_return_class
 
 
-def build_docstring(func_name, args, ret):
+def build_docstring(func_name, args, ret, throws):
     """Create a docstring in the form:
         name(in_name: type) -> (ret_type, out_name: type)
     """
@@ -55,7 +55,11 @@ def build_docstring(func_name, args, ret):
     else:
         out_def = "(%s)" % ", ".join(out_args)
 
-    return "%s(%s) -> %s" % (func_name, in_def, out_def)
+    error = ""
+    if throws:
+        error = "raises "
+
+    return "%s(%s) %s-> %s" % (func_name, in_def, error, out_def)
 
 
 def _generate_function(backend, info, arg_infos, arg_types,
@@ -146,7 +150,8 @@ def _generate_function(backend, info, arg_infos, arg_types,
 
     func_name = escape_name(info.name)
 
-    docstring = build_docstring(func_name, args, return_var and return_value)
+    docstring = build_docstring(func_name, args,
+                                return_var and return_value, throws)
 
     names = [a.in_var for a in args if not a.is_aux and a.in_var]
     if method:
