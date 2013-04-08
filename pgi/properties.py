@@ -28,9 +28,11 @@ class GParamSpec(object):
     def __init__(self, spec, name, info):
         self._spec = spec
         self._info = info
-        g_type = G_TYPE_FROM_INSTANCE(spec.contents.g_type_instance)
-        self.__gtype__ = PGType(g_type)
         self.name = name
+
+    @property
+    def __gtype__(self):
+        return G_TYPE_FROM_INSTANCE(self._spec.contents.g_type_instance)
 
     @property
     def flags(self):
@@ -39,6 +41,10 @@ class GParamSpec(object):
     @property
     def nick(self):
         return self._spec.nick
+
+    @property
+    def blurb(self):
+        return self._spec.blurb
 
     @property
     def owner_type(self):
