@@ -265,7 +265,7 @@ class CFFIBackend(Backend):
         if namespace not in self._libs:
             paths = GIRepositoryPtr().get_shared_library(namespace)
             if not paths:
-                return
+                raise OSError("No shared library")
             path = paths.split(",")[0]
             self._libs[namespace] = self._ffi.dlopen(path)
         return self._libs[namespace]
