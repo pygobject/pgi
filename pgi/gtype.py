@@ -15,16 +15,7 @@ from pgi.util import import_attribute, cached_property
 
 class PGType(object):
 
-    _PYTYPES = {
-        "gchararray": str,
-        "gboolean": bool,
-        "gint": int,
-        "guint": int,
-        "guint64": int,
-        "gfloat": float,
-        "gdouble": float,
-        "GStrv": list,
-    }
+    _PYTYPES = {}
 
     def __init__(self, type_):
         if isinstance(type_, (int, long)):
@@ -143,3 +134,18 @@ class PGType(object):
         return "<GType %s (%d)>" % (self.name, self._type.value)
 
 PGType.__name__ = "GType"
+
+PGType._PYTYPES = {
+    "gchararray": str,
+    "gboolean": bool,
+    "gint": int,
+    "guint": int,
+    "guint64": int,
+    "gfloat": float,
+    "gdouble": float,
+    "GStrv": list,
+    "gpointer": int, # ?
+    "gulong": int,
+    "gint64": int,
+    "GType": PGType,
+}
