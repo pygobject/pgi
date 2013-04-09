@@ -60,6 +60,7 @@ class _Structure(BaseStructure):
     _size = 0
     __gtype__ = None
     _needs_free = False
+    _is_gtype_struct = False
 
     def __init__(self):
         obj = g_try_malloc0(self._size)
@@ -150,6 +151,7 @@ def StructureAttribute(struct_info):
     cls.__module__ = struct_info.namespace
     cls.__gtype__ = PGType(struct_info.g_type)
     cls._size = struct_info.size
+    cls._is_gtype_struct = struct_info.is_gtype_struct
 
     # Add methods
     for method_info in struct_info.get_methods():

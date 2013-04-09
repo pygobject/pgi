@@ -59,20 +59,11 @@ class _Module(types.ModuleType):
         implemented_names = []
         for name in list(set(names)):
             try:
-                getattr(self, name)
+                obj = getattr(self, name)
             except NotImplementedError:
                 pass
             else:
-                # don't expose FooPrivate/FooClass/FooIface if Foo exitsts
-                hide = False
-                if name.endswith("Class"):
-                    hide = hasattr(self, name[:-5])
-                elif name.endswith("Private"):
-                    hide = hasattr(self, name[:-7])
-                elif name.endswith("Iface"):
-                    hide = hasattr(self, name[:-5])
-
-                if not hide:
+                if not getattr(obj, "_is_gtype_struct", False):
                     implemented_names.append(name)
 
         return implemented_names
