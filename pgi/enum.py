@@ -11,7 +11,7 @@ from pgi.gobject import GEnumClassPtr, GFlagsClassPtr
 from pgi.ctypesutil import gicast
 from pgi.gir import GIEnumInfoPtr
 from pgi.gtype import PGType
-from pgi.util import cached_property
+from pgi.util import cached_property, escape_name
 from pgi.obj import add_method
 
 
@@ -156,7 +156,11 @@ def FlagsAttribute(info):
 
     # create instances for all of them and add to the class
     for num, vname in values:
-        setattr(cls, vname, cls(num))
+        escaped = escape_name(vname)
+        obj = cls(num)
+        if escaped != vname:
+            setattr(cls, escaped, obj)
+        setattr(cls, vname, obj)
 
     return cls
 
@@ -177,6 +181,10 @@ def EnumAttribute(info):
 
     # create instances for all of them and add to the class
     for num, vname in values:
-        setattr(cls, vname, cls(num))
+        escaped = escape_name(vname)
+        obj = cls(num)
+        if escaped != vname:
+            setattr(cls, escaped, obj)
+        setattr(cls, vname, obj)
 
     return cls

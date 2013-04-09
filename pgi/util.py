@@ -229,11 +229,18 @@ def escape_name(text, reg=_KWD_RE):
      - '-' will be replaced by '_'
      - keywords get '_' appended"""
     # see http://docs.python.org/reference/lexical_analysis.html#identifiers
+    if not text:
+        return text
+    if text[0].isdigit():
+        text = "_" + text
     text = text.replace("-", "_")
     return reg.sub(r"\1_", text)
 
 
 def unescape_name(text):
+    if len(text) >= 2:
+        if text[0] == "_" and text[1].isdigit():
+            text = text[1:]
     if text.endswith("_"):
         return text[:-1]
     return text.replace("_", "-")

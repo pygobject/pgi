@@ -25,6 +25,7 @@ class PGIMisc(unittest.TestCase):
     def test_escape_property(self):
         self.assertEqual(escape_name("class"), "class_")
         self.assertEqual(escape_name("cla-ss"), "cla_ss")
+        self.assertEqual(escape_name("2BUTTON_PRESS"), "_2BUTTON_PRESS")
 
     def test_unescape_property(self):
         self.assertEqual(unescape_name("foo_"), "foo")
