@@ -17,7 +17,7 @@ from gi.repository import Gtk, GObject, GLib, Gdk
 class MiscTest(unittest.TestCase):
     def test_module_dir(self):
         # make sure all descriptors show up in dir(module)
-        self.assertTrue(len(dir(Gtk)) > 1000)
+        self.assertTrue(len(dir(Gtk)) > 750)
 
         self.assertEqual(sys.getdefaultencoding(), "ascii")
 
