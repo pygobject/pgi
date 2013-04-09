@@ -63,12 +63,14 @@ class _Module(types.ModuleType):
             except NotImplementedError:
                 pass
             else:
-                # don't expose FooPrivate/FooClass if Foo exitsts
+                # don't expose FooPrivate/FooClass/FooIface if Foo exitsts
                 hide = False
                 if name.endswith("Class"):
                     hide = hasattr(self, name[:-5])
                 elif name.endswith("Private"):
                     hide = hasattr(self, name[:-7])
+                elif name.endswith("Iface"):
+                    hide = hasattr(self, name[:-5])
 
                 if not hide:
                     implemented_names.append(name)
