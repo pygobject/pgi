@@ -15,6 +15,17 @@ from pgi.util import import_attribute, cached_property
 
 class PGType(object):
 
+    _PYTYPES = {
+        "gchararray": str,
+        "gboolean": bool,
+        "gint": int,
+        "guint": int,
+        "guint64": int,
+        "gfloat": float,
+        "gdouble": float,
+        "GStrv": list,
+    }
+
     def __init__(self, type_):
         if isinstance(type_, (int, long)):
             type_ = GType(type_)
@@ -91,12 +102,18 @@ class PGType(object):
 
     @cached_property
     def pytype(self):
-        if self._type.value == 0:
+        type_ = self._type
+        if type_.value == 0:
             return None
 
         repo = GIRepository.get_default()
-        base_info = repo.find_by_gtype(self._type)
+        base_info = repo.find_by_gtype(type_)
         if not base_info:
+            # look if it's a basic type
+            name = type_.name
+            if name in self._PYTYPES:
+                return self._PYTYPES[name]
+
             from pgi.obj import new_class_from_gtype
             return new_class_from_gtype(self)
         name = base_info.name

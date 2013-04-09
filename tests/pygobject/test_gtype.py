@@ -7,6 +7,8 @@
 
 import unittest
 
+from tests import is_gi
+
 from gi.repository import GObject
 
 
@@ -23,3 +25,7 @@ class GTypeTest(unittest.TestCase):
             self.assertEqual(GObject.type_from_name("invalid"), GObject.TYPE_INVALID)
         except RuntimeError:
             pass
+
+    @unittest.skipIf(is_gi, "no basic pytype in gi.. ask for it?")
+    def test_pytype(self):
+        self.assertTrue(GObject.type_from_name("gint").pytype is int)
