@@ -240,7 +240,12 @@ def ObjectAttribute(obj_info):
     ifaces = []
     for interface in obj_info.get_interfaces():
         attr = import_attribute(interface.namespace, interface.name)
-        ifaces.append(attr)
+        # only add interfaces if the base classes don't have it
+        for base in bases:
+            if attr in base.__mro__:
+                break
+        else:
+            ifaces.append(attr)
 
     # Combine them to a base class list
     if ifaces:

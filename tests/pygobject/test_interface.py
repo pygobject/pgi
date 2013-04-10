@@ -16,5 +16,5 @@ class InterfaceTest(unittest.TestCase):
         self.assertTrue("delete_text" in dir(Gtk.Editable))
 
     def test_obj_iface(self):
-        #print Gtk.Entry
-        pass
+        self.assertTrue(Gtk.Buildable in Gtk.Bin.__mro__)
+        self.assertTrue(Gtk.Buildable not in Gtk.Bin.__bases__)
