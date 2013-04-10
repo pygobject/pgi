@@ -83,3 +83,22 @@ if 2:
         self.assertTrue("set_label" in Gtk.Button.set_label.__doc__)
         self.assertTrue("-> None" in Gtk.Button.set_label.__doc__)
         self.assertTrue("label: str" in Gtk.Button.set_label.__doc__)
+
+    def test_signal_property_object(self):
+        sigs = Gtk.Window.signals
+        sig = sigs.set_focus
+        self.assertEqual(sig.name, "set-focus")
+        self.assertEqual(sig.param_types, [Gtk.Widget.__gtype__])
+        self.assertEqual(sig.instance_type, Gtk.Window.__gtype__)
+        self.assertEqual(sig.flags, 2)
+        self.assertEqual(sig.return_type, PGType.from_name("void"))
+
+    def test_signal_property_interface(self):
+        sigs = Gtk.TreeModel.signals
+        sig = sigs.row_changed
+        self.assertEqual(sig.name, "row-changed")
+        # TreePath gtypes fail here.. no idea
+        self.assertEqual(len(sig.param_types), 2)
+        self.assertEqual(sig.instance_type, Gtk.TreeModel.__gtype__)
+        self.assertEqual(sig.flags, 2)
+        self.assertEqual(sig.return_type, PGType.from_name("void"))

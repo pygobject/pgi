@@ -20,6 +20,7 @@ from pgi.util import import_attribute, Super, escape_name
 from pgi.gtype import PGType
 from pgi.properties import PropertyAttribute, PROPS_NAME
 from pgi.constant import ConstantAttribute
+from pgi.signals import SignalsAttribute
 from pgi.codegen.construct import generate_constructor
 from pgi.codegen.funcgen import generate_function
 from pgi.codegen.siggen import generate_signal_callback
@@ -184,6 +185,9 @@ def InterfaceAttribute(info):
     # Properties
     cls.props = PropertyAttribute(iface_info)
 
+    # Signals
+    cls.signals = SignalsAttribute()
+
     # Add constants
     for constant in iface_info.get_constants():
         constant_name = constant.name
@@ -267,6 +271,9 @@ def ObjectAttribute(obj_info):
 
     # Properties
     setattr(cls, PROPS_NAME, PropertyAttribute(obj_info))
+
+    # Signals
+    cls.signals = SignalsAttribute()
 
     # Add constants
     for constant in obj_info.get_constants():

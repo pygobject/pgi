@@ -325,6 +325,26 @@ class GConnectFlags(Flags):
     CONNECT_SWAPPED = 1 << 1
 
 
+class GSignalQuery(Structure):
+    _fields_ = [
+        ("signal_id", guint),
+        ("signal_name", gchar_p),
+        ("itype", GType),
+        ("signal_flags", GSignalFlags),
+        ("return_type", GType),
+        ("n_params", guint),
+        ("param_types", POINTER(GType)),
+    ]
+
+
+signal_query = _gobject.g_signal_query
+signal_query.argtypes = [guint, POINTER(GSignalQuery)]
+signal_query.restype = None
+
+signal_list_ids = _gobject.g_signal_list_ids
+signal_list_ids.argtypes = [GType, POINTER(guint)]
+signal_list_ids.restype = POINTER(guint)
+
 GCallback = CFUNCTYPE(None)
 GClosureNotify = CFUNCTYPE(None, gpointer, gpointer)
 
@@ -368,5 +388,6 @@ __all__ = ["GType", "g_type_init", "GParamFlags", "GValue", "GValuePtr",
            "GTypeInterface", "GTypeInterfacePtr", "boxed_type_register_static",
            "GBoxedCopyFunc", "GBoxedFreeFunc", "GEnumClassPtr", "GEnumValue",
            "GEnumClass", "GEnumValue", "GFlagsClass", "GFlagsClassPtr",
-           "GFlagsValue", "GFlagsValuePtr",
+           "GFlagsValue", "GFlagsValuePtr", "signal_query",
+           "GSignalQuery",
 ]
