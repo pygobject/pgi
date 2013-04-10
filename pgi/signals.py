@@ -47,6 +47,10 @@ class GSignal(object):
 
 class _GSignalQuery(object):
     def __init__(self, pgtype):
+        # FIXME: DBusGLib.Proxy ?
+        if pgtype == PGType.from_name("void"):
+            return
+
         gtype = pgtype._type
         is_interface = pgtype.is_interface()
 
