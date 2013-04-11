@@ -15,13 +15,17 @@ from pgi.gtype import PGType
 
 class GSignal(object):
     def __init__(self, signal_id):
-        self.id = signal_id
+        self._id = signal_id
 
     @cached_property
     def _query(self):
         query = GSignalQuery()
-        signal_query(self.id, byref(query))
+        signal_query(self._id, byref(query))
         return query
+
+    @property
+    def id(self):
+        return self._query.signal_id
 
     @property
     def name(self):
@@ -37,7 +41,7 @@ class GSignal(object):
 
     @property
     def flags(self):
-        return int(self._query.signal_flags)
+        return self._query.signal_flags.value
 
     @property
     def param_types(self):
