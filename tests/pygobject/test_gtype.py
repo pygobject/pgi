@@ -9,7 +9,7 @@ import unittest
 
 from tests import is_gi
 
-from gi.repository import GObject
+from gi.repository import GObject, Gtk
 
 
 class GTypeTest(unittest.TestCase):
@@ -26,6 +26,16 @@ class GTypeTest(unittest.TestCase):
         except RuntimeError:
             pass
 
+        self.assertRaises(TypeError, GObject.GType.from_name, None)
+        self.assertRaises(TypeError, GObject.GType.from_name, [])
+        GObject.GType.from_name(u"void")
+
     @unittest.skipIf(is_gi, "no basic pytype in gi.. ask for it?")
     def test_pytype(self):
         self.assertTrue(GObject.type_from_name("gint").pytype is int)
+
+    def test_init_(self):
+        window_type = Gtk.Window.__gtype__
+        self.assertEqual(GObject.GType(Gtk.Window), window_type)
+        self.assertEqual(GObject.GType(window_type), window_type)
+        self.assertEqual(GObject.GType(window_type), window_type)

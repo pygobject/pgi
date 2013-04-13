@@ -20,6 +20,10 @@ class PGType(object):
     def __init__(self, type_):
         if isinstance(type_, (int, long)):
             type_ = GType(type_)
+        elif isinstance(type_, type(self)):
+            type_ = type_._type
+        elif hasattr(type_, "__gtype__"):
+            type_ = type_.__gtype__._type
         self._type = type_
 
     def __get_gtype_list(self, function):
@@ -40,8 +44,11 @@ class PGType(object):
 
     @classmethod
     def from_name(self, name):
+        if not isinstance(name, basestring):
+            raise TypeError
         type_ = GType.from_name(name)
         if type_.value == 0:
+            # to match gi
             raise RuntimeError("unknown type name")
         return PGType(type_)
 
