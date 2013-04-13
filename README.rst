@@ -64,6 +64,11 @@ Typelibs will be loaded from paths in the environment variable
 Shared libraries from paths in `LD_LIBRARY_PATH` and the default system
 search paths (see dlopen(3)).
 
+Documentation
+-------------
+
+http://lazka.github.io/pgi-docs
+
 Tests
 -----
 
