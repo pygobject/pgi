@@ -1,4 +1,4 @@
-# Copyright 2012 Christoph Reiter
+# Copyright 2012, 2013 Christoph Reiter
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -33,10 +33,10 @@ class _Object(object):
     __weak = {}
     __cls = None
 
-    super = Super("__init__")
+    _super = Super("__init__")
 
     def __init__(self, *args, **kwargs):
-        if not self.super(*args, **kwargs):
+        if not self._super(*args, **kwargs):
             return
 
         if self.__gtype__.is_abstract():
