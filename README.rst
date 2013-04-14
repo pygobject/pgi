@@ -67,6 +67,8 @@ search paths (see dlopen(3)).
 Documentation
 -------------
 
+https://github.com/lazka/pgi-docgen
+
 http://lazka.github.io/pgi-docs
 
 Tests
