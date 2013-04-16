@@ -7,8 +7,8 @@
 
 import os
 import types
+import sys
 import imp
-import traceback
 
 
 _overrides = []
@@ -45,8 +45,7 @@ def load(namespace, module):
     try:
         name = __package__ + "." + namespace
         override_module = __import__(name, fromlist=[""])
-    except ImportError:
-        exc = traceback.format_exc()
+    except Exception as err:
         try:
             paths = [os.path.dirname(__file__)]
             fp, pn, desc = imp.find_module(namespace, paths)
@@ -55,8 +54,7 @@ def load(namespace, module):
         else:
             if fp:
                 fp.close()
-            print exc
-            raise ImportError("Failed to load overrides for %r" % namespace)
+            raise ImportError, err, sys.exc_info()[2]
     else:
         # FIXME!!! we need a real non-override module somewhere
 
