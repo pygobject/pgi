@@ -84,3 +84,6 @@ class MiscTest(unittest.TestCase):
         self.assertTrue("override" not in c.__module__)
         self.assertTrue("Gdk" in c.__module__)
         self.assertTrue("EventProperty" in c.__name__)
+
+    def test_gerror(self):
+        self.assertTrue(issubclass(GLib.GError, RuntimeError))
