@@ -149,6 +149,9 @@ def _generate_function(backend, info, arg_infos, arg_types,
     # build final function block
 
     func_name = escape_name(info.name)
+    # handle empty string function names
+    if func_name == "":
+        func_name = "_"
 
     docstring = build_docstring(func_name, args,
                                 return_var and return_value, throws)
