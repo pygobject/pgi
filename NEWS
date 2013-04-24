@@ -1,0 +1,14 @@
+0.0.6 (2013-04-24)
+    * Basic cairo support (using cairocffi)
+    * Faster object creation
+    * Basic argument marshaling with signals
+    * New API documentation: http://lazka.github.io/pgi-docs/
+
+0.0.5 (2013-03-20)
+    * Various fixes
+
+0.0.4 (2013-02-04)
+    * Various fixes
+
+0.0.3 (2013-02-02)
+    * Initial release
