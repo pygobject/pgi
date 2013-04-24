@@ -1,3 +1,6 @@
+0.0.6.1 (2013-04-24)
+    * Fix packaging
+
 0.0.6 (2013-04-24)
     * Basic cairo support (using cairocffi)
     * Faster object creation
