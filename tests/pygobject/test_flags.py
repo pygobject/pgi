@@ -43,6 +43,10 @@ class FlagsTest(unittest.TestCase):
         self.assertRaises(TypeError, Gtk.RcFlags, [])
         self.assertRaises(TypeError, Gtk.RcFlags, None)
         self.assertRaises(TypeError, Gtk.RcFlags, 1.1)
+
+    @unittest.skipIf(is_gi, "broken since gi 3.8")
+    def test_overflow(self):
+        # https://bugzilla.gnome.org/show_bug.cgi?id=698765
         self.assertRaises(OverflowError, Gtk.RcFlags, sys.maxsize + 1)
 
     def test_no_value_nick(self):
