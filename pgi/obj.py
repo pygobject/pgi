@@ -77,11 +77,13 @@ class _Object(object):
         return form % (name, id(self), self.__gtype__.name, self._obj)
 
     def __get_signal(self, name):
+        name = name.replace("_", "-")
         for base in type(self).__mro__[:-1]:
             if base is InterfaceBase:
                 continue
-            if name in base._sigs:
-                return base._sigs[name]
+            if "__sigs__" in base.__dict__:
+                if name in base.__sigs__:
+                    return base.__sigs__[name]
 
     def __connect(self, flags, name, callback, *user_args):
         if not callable(callback):
@@ -286,9 +288,9 @@ def ObjectAttribute(obj_info):
         add_method(method_info, cls)
 
     # Signals
-    cls._sigs = {}
+    cls.__sigs__ = {}
     for sig_info in obj_info.get_signals():
         signal_name = sig_info.name
-        cls._sigs[signal_name] = sig_info
+        cls.__sigs__[signal_name] = sig_info
 
     return cls

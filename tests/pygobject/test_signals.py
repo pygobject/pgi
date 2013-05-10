@@ -42,6 +42,24 @@ class SignalTest(unittest.TestCase):
         id_ = w.connect("map", lambda *x: None, 1, 2, 3, 4)
         w.disconnect(id_)
 
+    def test_subclass_connect(self):
+        class A(Gtk.Window):
+            def __init__(self):
+                Gtk.Window.__init__(self)
+        class B(A):
+            def __init__(self):
+                A.__init__(self)
+
+        x = B()
+        id_ = x.connect("map", lambda *x: None)
+        x.disconnect(id_)
+
+    def test_name_under(self):
+         w = Gtk.Window()
+         for name in ["scroll-event", "scroll_event"]:
+             id_ = w.connect("scroll_event", lambda *x: None)
+             self.failUnless(id_ is not None)
+
 
 class SignalReturnTest(unittest.TestCase):
 
