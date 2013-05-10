@@ -60,6 +60,10 @@ GInterface = GInterface
 __all__.append("GInterface")
 
 
+idle_add = GLib.idle_add
+__all__.append("idle_add")
+
+
 TYPE_INVALID = GObjectModule.type_from_name('invalid')
 TYPE_NONE = GObjectModule.type_from_name('void')
 TYPE_INTERFACE = GObjectModule.type_from_name('GInterface')

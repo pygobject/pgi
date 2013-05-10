@@ -12,6 +12,14 @@ GLib = get_introspection_module('GLib')
 
 __all__ = []
 
+
+def idle_add(function, **kwargs):
+    priority = kwargs.get('priority', GLib.PRIORITY_DEFAULT_IDLE)
+    return GLib.idle_add(priority, function)
+
+__all__.append('idle_add')
+
+
 # to support older gir
 if not hasattr(GLib, "MININT8"):
     MININT8 = -2 ** 7
