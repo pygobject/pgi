@@ -25,6 +25,18 @@ class ObjectTest(unittest.TestCase):
         a = Gtk.AccelMap()
         self.assertTrue(isinstance(a, type(g)))
 
+    def test_init_1(self):
+        class A(GObject.Object):
+            def __init__(self, foo):
+                GObject.Object.__init__(self)
+                self.foo = foo
+
+        class B(A):
+            def __init__(self, x):
+                A.__init__(self, x)
+
+        self.assertEqual(B(3).foo, 3)
+
     def test_gtk(self):
         w = Gtk.Window()
         w.set_title("foobar")

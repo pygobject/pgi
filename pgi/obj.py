@@ -33,10 +33,10 @@ class _Object(object):
     __weak = {}
     __cls = None
 
-    _super = Super("__init__")
+    __super__ = Super("__super__", "__init__")
 
     def __init__(self, *args, **kwargs):
-        if not self._super(*args, **kwargs):
+        if not self.__super__(*args, **kwargs):
             return
 
         if self.__gtype__.is_abstract():

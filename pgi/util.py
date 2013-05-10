@@ -17,12 +17,20 @@ from pgi.glib import free
 class Super(object):
     """Biggest hack ever?"""
 
-    def __init__(self, name):
+    def __init__(self, self_name, name):
         self.__name = name
+        self.__self_name = self_name
         self.__instances = {}
 
     def __get__(self, instance, owner):
-        cls = self.__instances.setdefault(instance, owner)
+        if instance not in self.__instances:
+            while not owner.__dict__.get(self.__self_name):
+                owner = owner.__mro__[1]
+            self.__instances[instance] = owner
+            cls = owner
+        else:
+            cls = self.__instances[instance]
+
         next_cls = cls.__mro__[1]
         if next_cls is not object:
             func = getattr(next_cls, self.__name)
