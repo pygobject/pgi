@@ -298,7 +298,7 @@ $new_self = ffi.cast('gpointer', $sself._obj)
 
         try:
             func = getattr(lib, symbol)
-        except KeyError:
+        except (KeyError, AttributeError):
             raise NotImplementedError(
                 "Library doesn't provide symbol: %s" % symbol)
 
