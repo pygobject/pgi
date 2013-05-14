@@ -468,6 +468,10 @@ class Utf8Argument(GIArgument):
         return var.block
 
 
+class FilenameArgument(Utf8Argument):
+    TAG = GITypeTag.FILENAME
+
+
 _classes = {}
 
 

@@ -348,3 +348,8 @@ class FuncsTest(unittest.TestCase):
         table.remove(spinner)
         table.attach(spinner, 0, 2, 2, 3, xoptions=Gtk.AttachOptions.FILL)
         table.remove(spinner)
+
+    def test_filename(self):
+        icon = Gtk.IconSource.new()
+        icon.set_filename("/tmp/foobar")
+        self.assertEqual(icon.get_filename(), "/tmp/foobar")
