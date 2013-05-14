@@ -10,6 +10,7 @@ import os
 import sys
 import glob
 import subprocess
+import re
 
 from distutils.core import setup, Command
 import pgi
@@ -110,12 +111,14 @@ class TestCommand(Command):
         ("gi-only", None, "only run gi"),
         ("backend=", None, "backend"),
         ("strict", None, "make glib warnings/errors fatal"),
+        ("filter=", None, "regexp for filter classes"),
     ]
 
     def initialize_options(self):
         self.pgi_only = False
         self.gi_only = False
         self.backend = ""
+        self.filter = ""
         self.strict = False
 
     def finalize_options(self):
@@ -123,6 +126,7 @@ class TestCommand(Command):
         self.gi_only = bool(self.gi_only)
         self.backend = str(self.backend)
         self.strict = bool(self.strict)
+        self.filter = str(self.filter)
 
     def run(self):
         import tests
@@ -157,10 +161,17 @@ class TestCommand(Command):
                 continue
             filtered_runs.append((run_gi, backend))
 
+        # create a filter function for selecting tests by regexp
+        if self.filter:
+            def filter_tests(name):
+                return re.search(self.filter, name) is not None
+        else:
+            filter_tests = None
+
         # don't fork with one run
         if len(filtered_runs) == 1:
             run_gi, backend = filtered_runs[0]
-            exit(tests.test(run_gi, backend, self.strict))
+            exit(tests.test(run_gi, backend, self.strict, filter_tests))
 
         for is_gi, backend in filtered_runs:
             pid = os.fork()
@@ -169,7 +180,7 @@ class TestCommand(Command):
                 if status:
                     exit(status)
             else:
-                exit(tests.test(is_gi, backend, self.strict))
+                exit(tests.test(is_gi, backend, self.strict, filter_tests))
 
 
 class BenchmarkCommand(Command):

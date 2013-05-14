@@ -15,11 +15,13 @@ is_gi = False
 is_pypy = False
 has_cairo = False
 
-def test(load_gi, backend=None, strict=False):
+def test(load_gi, backend=None, strict=False, filter_=None):
     """Run the test suite.
 
-    gi -- run all tests in the pygobject suite with PyGObject
-
+    load_gi -- run all tests in the pygobject suite with PyGObject
+    backend -- "ctypes" or "cffi"
+    strict  -- fail on glib warnings
+    filter_ -- filter for test names (class names)
     """
 
     global is_gi, is_pypy, has_cairo
@@ -65,14 +67,27 @@ def test(load_gi, backend=None, strict=False):
 
     current_dir = os.path.join(os.path.dirname(__file__))
 
-    suites = []
+    tests = []
 
     loader = unittest.TestLoader()
-    suites.append(loader.discover(os.path.join(current_dir, "pygobject")))
+    tests.extend(loader.discover(os.path.join(current_dir, "pygobject")))
 
     if not load_gi:
         loader = unittest.TestLoader()
-        suites.append(loader.discover(os.path.join(current_dir, "pgi")))
+        tests.extend(loader.discover(os.path.join(current_dir, "pgi")))
 
-    run = unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite(suites))
+    def flatten_tests(suites):
+        tests = []
+        try:
+            for suite in suites:
+                tests.extend(flatten_tests(suite))
+        except TypeError:
+            return [suites]
+        return tests
+
+    tests = flatten_tests(tests)
+    if filter_ is not None:
+        tests = filter(lambda t: filter_(t.__class__.__name__), tests)
+
+    run = unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite(tests))
     return len(run.failures) + len(run.errors)

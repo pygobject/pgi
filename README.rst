@@ -76,6 +76,8 @@ Tests
 
 - `./setup.py test` will run unit tests using PGI and PyGObject
 - `./setup.py test --pgi-only` to skip PyGObject tests
+- `./setup.py test --filter=StructTest` to run tests which include
+  `StructTest` (regexp)
 
 `./tests/libs/` includes additional libraries that will be used for testing
 if present. Call `make` in `./tests/libs/` to build them.
