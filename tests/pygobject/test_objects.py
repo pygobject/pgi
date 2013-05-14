@@ -135,6 +135,32 @@ class ObjectTest(unittest.TestCase):
     def test_abstract_init(self):
         self.assertRaises(TypeError, Gtk.Widget)
 
+    def test_set_property_unknown(self):
+        x = Gtk.HBox()
+        self.assertRaises(TypeError, x.set_property, "foobar123", "blah")
+
+    def test_set_property_invalid(self):
+        x = Gtk.HBox()
+        x.set_property("orientation", Gtk.Orientation.VERTICAL)
+        self.assertRaises(TypeError, x.set_property, "orientation", None)
+
+    def test_set_property_enum(self):
+        x = Gtk.HBox()
+        self.assertEqual(x.props.orientation, Gtk.Orientation.HORIZONTAL)
+        x.set_property("orientation", Gtk.Orientation.VERTICAL)
+        self.assertEqual(x.props.orientation, Gtk.Orientation.VERTICAL)
+
+    @unittest.skip("FIXME")
+    def test_get_property_unknown(self):
+        x = Gtk.HBox()
+        self.assertRaises(TypeError, x.get_property, "foobar12")
+
+    @unittest.skip("FIXME")
+    def test_get_property(self):
+        w = Gtk.Window()
+        w.props.title = "foobar"
+        self.assertEqual(w.get_property("title"), "foobar")
+
 
 class GObjectConstructTest(unittest.TestCase):
     def test_props_construct(self):

@@ -120,6 +120,11 @@ class _Object(object):
     def handler_unblock(self, id_):
         signal_handler_unblock(self._obj, id_)
 
+    def set_property(self, name, value):
+        if not hasattr(self.props, name):
+            raise TypeError("Unknown property: %r" % name)
+        setattr(self.props, name, value)
+
     @property
     def __grefcount__(self):
         return cast(self._obj, gobject.GObjectPtr).contents.ref_count

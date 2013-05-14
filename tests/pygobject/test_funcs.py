@@ -348,9 +348,3 @@ class FuncsTest(unittest.TestCase):
         table.remove(spinner)
         table.attach(spinner, 0, 2, 2, 3, xoptions=Gtk.AttachOptions.FILL)
         table.remove(spinner)
-
-    @unittest.skipUnless(is_gi, "FIXME")
-    def test_gvalue_convert(self):
-        x = Gtk.HBox()
-        # convert any non-gvalue to gvalues if possible
-        x.set_property("orientation", Gtk.Orientation.VERTICAL)
