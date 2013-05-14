@@ -7,3 +7,4 @@
 *.typelib
 *.o
 .libs
+docs/_html
