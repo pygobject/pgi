@@ -37,6 +37,17 @@ class ObjectTest(unittest.TestCase):
 
         self.assertEqual(B(3).foo, 3)
 
+    def test_init_2(self):
+        class B(object):
+            pass
+
+        class A(B, GObject.Object):
+            def __init__(self):
+                GObject.Object.__init__(self)
+                B.__init__(self)
+
+        A()
+
     def test_gtk(self):
         w = Gtk.Window()
         w.set_title("foobar")

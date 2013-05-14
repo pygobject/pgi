@@ -25,6 +25,8 @@ class Super(object):
     def __get__(self, instance, owner):
         if instance not in self.__instances:
             while not owner.__dict__.get(self.__self_name):
+                if owner is object:
+                    return lambda *args, **kwargs: True
                 owner = owner.__mro__[1]
             self.__instances[instance] = owner
             cls = owner
