@@ -29,6 +29,11 @@ def test(load_gi, backend=None, strict=False, filter_=None):
     is_pypy = platform.python_implementation() == "PyPy"
 
     if not load_gi:
+        try:
+            import cairocffi
+            cairocffi.install_as_pycairo()
+        except ImportError:
+            pass
         import pgi
         pgi.install_as_gi()
         try:
