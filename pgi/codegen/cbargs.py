@@ -64,6 +64,8 @@ class BaseInterfaceArgument(CallbackArgument):
             return ObjectArgument
         elif iface_type == GIInfoType.UNION:
             return UnionArgument
+        elif iface_type == GIInfoType.FLAGS:
+            return FlagsArgument
 
         raise NotImplementedError("Unsupported interface type %r" % iface.type)
 
@@ -71,6 +73,10 @@ class BaseInterfaceArgument(CallbackArgument):
         var = self.backend.get_type(self.type)
         out = var.unpack(self.name)
         return var.block, out
+
+
+class FlagsArgument(BaseInterfaceArgument):
+    pass
 
 
 class ObjectArgument(BaseInterfaceArgument):
