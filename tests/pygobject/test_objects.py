@@ -172,6 +172,12 @@ class ObjectTest(unittest.TestCase):
         w.props.title = "foobar"
         self.assertEqual(w.get_property("title"), "foobar")
 
+    def test_non_gir_class(self):
+        instance = Gio.File.new_for_path('.')
+        instance2 = Gio.File.new_for_path('.')
+        # make sure the both share the same class
+        self.assertEqual(type(instance), type(instance2))
+
 
 class GObjectConstructTest(unittest.TestCase):
     def test_props_construct(self):
