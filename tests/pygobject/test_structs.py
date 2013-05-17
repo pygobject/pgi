@@ -7,7 +7,7 @@
 
 import unittest
 
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk
 
 from tests import is_gi, has_cairo
 
@@ -54,3 +54,8 @@ class StructTest(unittest.TestCase):
         iter_.stamp = 999
         self.failUnlessEqual(new.stamp, 4)
         self.failUnlessEqual(iter_.stamp, 999)
+
+    @unittest.skip("FIXME")
+    def test_foo(self):
+        event = Gdk.Event.new(Gdk.EventType.BUTTON_PRESS)
+        event.state

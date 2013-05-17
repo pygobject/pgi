@@ -35,13 +35,13 @@ class InterfaceField(Field):
             out = var.unpack(var.pre_unpack(name))
             return var.block, out
         elif iface_type == GIInfoType.STRUCT:
-            out = var.unpack(name)
+            out = var.unpack(var.pre_unpack(name))
             return var.block, out
         elif iface_type == GIInfoType.OBJECT:
             out = var.unpack(name)
             return var.block, out
         elif iface_type == GIInfoType.FLAGS:
-            out = var.unpack(name)
+            out = var.unpack(var.pre_unpack(name))
             return var.block, out
 
         raise NotImplementedError(
