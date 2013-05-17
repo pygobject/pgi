@@ -40,6 +40,9 @@ class InterfaceField(Field):
         elif iface_type == GIInfoType.OBJECT:
             out = var.unpack(name)
             return var.block, out
+        elif iface_type == GIInfoType.FLAGS:
+            out = var.unpack(name)
+            return var.block, out
 
         raise NotImplementedError(
             "interface type not supported: %r" % iface.type)

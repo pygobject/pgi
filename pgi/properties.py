@@ -94,6 +94,15 @@ class Property(object):
         else:
             if tag == GIInfoType.ENUM:
                 func = lambda: self.__iclass(ptr.enum)
+            elif tag == GIInfoType.OBJECT:
+                def func():
+                    adr = ptr.get_object()
+                    if adr:
+                        new = object.__new__(self.__iclass)
+                        new._obj = ptr.get_object()
+                        return new
+                    else:
+                        return None
 
         if func is None:
             ptr.unset()

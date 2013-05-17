@@ -7,7 +7,7 @@
 
 import unittest
 
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk
 
 
 class PropertiesTest(unittest.TestCase):
@@ -109,3 +109,11 @@ class PropertiesTest(unittest.TestCase):
         self.assertEqual(a.get_property("xalign"), 0.25)
 
         self.assertRaises(TypeError, a.get_property, "foobar")
+
+    def test_get_object(self):
+        w = Gtk.Window()
+        self.assertTrue(w.get_property("window") is None)
+        w.show()
+        w.hide()
+        window = w.get_property("window")
+        self.assertTrue(isinstance(window, Gdk.Window))
