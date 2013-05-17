@@ -269,7 +269,7 @@ class GTypeTest(unittest.TestCase):
     def test_lists(self):
         wt = Gtk.Window.__gtype__
         children = set([x.pytype for x in wt.children])
-        self.assertEqual(children, set([Gtk.Dialog]))
+        self.assertTrue(Gtk.Dialog in children)
         interfaces = set([x.pytype for x in wt.interfaces])
         should = set([Atk.ImplementorIface, Gtk.Buildable])
         self.assertEqual(interfaces, should)

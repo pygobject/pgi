@@ -95,3 +95,17 @@ class PropertiesTest(unittest.TestCase):
         self.assertEqual(a.props.xalign, 0.25)
         a.props.xalign = 0.5
         self.assertEqual(a.props.xalign, 0.5)
+
+    def test_get_property_uninit(self):
+        class Foobar(Gtk.Window):
+            def __init__(s):
+                self.assertRaises(TypeError, s.get_property, "type")
+                Gtk.Window.__init__(s)
+        Foobar()
+
+    def test_get_property(self):
+        a = Gtk.Alignment()
+        a.props.xalign = 0.25
+        self.assertEqual(a.get_property("xalign"), 0.25)
+
+        self.assertRaises(TypeError, a.get_property, "foobar")

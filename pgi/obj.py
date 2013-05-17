@@ -125,6 +125,11 @@ class _Object(object):
             raise TypeError("Unknown property: %r" % name)
         setattr(self.props, name, value)
 
+    def get_property(self, name):
+        if not hasattr(self.props, name):
+            raise TypeError("Unknown property: %r" % name)
+        return getattr(self.props, name)
+
     @property
     def __grefcount__(self):
         return cast(self._obj, gobject.GObjectPtr).contents.ref_count

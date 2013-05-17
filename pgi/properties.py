@@ -101,6 +101,10 @@ class Property(object):
             warn("Property %r unhandled. Type not supported" % name, Warning)
             return None
 
+        if not instance._object:
+            ptr.unset()
+            raise TypeError("Object not initialized")
+
         gobject.get_property(instance._object, self.__spec.name, ptr)
         return func()
 
