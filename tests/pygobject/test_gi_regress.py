@@ -12,7 +12,12 @@ import sys
 import unittest
 
 from gi.repository import Gtk, GObject
-import cairo
+
+try:
+    import cairo
+    cairo
+except ImportError:
+    cairo = None
 
 try:
     from gi.repository import Regress as Everything

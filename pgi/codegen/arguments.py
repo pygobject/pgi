@@ -104,6 +104,9 @@ class GIArgument(Argument):
     def transfer_everything(self):
         return self.info.ownership_transfer.value == GITransfer.EVERYTHING
 
+    def is_caller_allocates(self):
+        return self.info.is_caller_allocates
+
     def __repr__(self):
         return "<%s name=%r>" % (self.__class__.__name__, self.name)
 
@@ -284,8 +287,11 @@ class StructArgument(BaseInterfaceArgument):
         elif self.is_direction_in():
             self.call_var = var.pack(var.check(self.name))
         else:
-            self._data = var.new()
-            self.call_var = var.get_reference(self._data)
+            if self.is_caller_allocates():
+                self.call_var = self._data = var.alloc()
+            else:
+                self._data = var.new()
+                self.call_var = var.get_reference(self._data)
 
         return var.block
 

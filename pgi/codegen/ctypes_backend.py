@@ -867,6 +867,18 @@ else:
 $value = ctypes.c_void_p()
 """)["value"]
 
+    def alloc(self):
+        struct_class = self._import_type()
+        size = struct_class._size
+        malloc = glib.g_try_malloc0
+
+        return self.parse("""
+$mem = $malloc($size)
+if not $mem and $size:
+    raise MemoryError
+$value = ctypes.c_void_p($mem)
+""", malloc=malloc, size=size)["value"]
+
     def unpack_gvalue(self, name):
         getter_map = {
             "gboolean": lambda v: v.get_boolean(),

@@ -29,14 +29,18 @@ class StructTest(unittest.TestCase):
             Gtk.main_iteration()
         window.destroy()
 
-    @unittest.skipUnless(is_gi, "FIXME")
     def test_struct_out_simple(self):
         button = Gtk.Button()
         req = button.size_request()
         self.assertTrue(req)
         self.assertTrue(isinstance(req.height, int))
 
-    @unittest.skipUnless(is_gi, "FIXME")
+    @unittest.skip("FIXME")
+    def test_struct_out_simple_leak(self):
+        button = Gtk.Button()
+        req = button.size_request()
+        self.assertTrue(req._needs_free)
+
     def test_struct_out(self):
         model = Gtk.ListStore(int)
         iter_ = model.insert_with_valuesv(0, [], [])
