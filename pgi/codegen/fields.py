@@ -37,8 +37,12 @@ class InterfaceField(Field):
         elif iface_type == GIInfoType.STRUCT:
             out = var.unpack(name)
             return var.block, out
+        elif iface_type == GIInfoType.OBJECT:
+            out = var.unpack(name)
+            return var.block, out
 
-        raise NotImplementedError("interface type not supported")
+        raise NotImplementedError(
+            "interface type not supported: %r" % iface.type)
 
 
 class TypeField(Field):
@@ -85,6 +89,10 @@ class Int64Field(BasicField):
 
 class UInt16Field(BasicField):
     TAG = GITypeTag.UINT16
+
+
+class Int16Field(BasicField):
+    TAG = GITypeTag.INT16
 
 
 class FloatField(BasicField):
