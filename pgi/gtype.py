@@ -16,6 +16,7 @@ from pgi.util import import_attribute, cached_property
 class PGType(object):
 
     _PYTYPES = {}
+    _REGISTRY = {}
 
     def __init__(self, type_):
         if isinstance(type_, (int, long)):
@@ -112,8 +113,13 @@ class PGType(object):
             if name in self._PYTYPES:
                 return self._PYTYPES[name]
 
+            if name in self._REGISTRY:
+                return self._REGISTRY[name]
+
             from pgi.obj import new_class_from_gtype
-            return new_class_from_gtype(self)
+            cls = new_class_from_gtype(self)
+            self._REGISTRY[name] = cls
+            return cls
         name = base_info.name
         namespace = base_info.namespace
 
