@@ -64,6 +64,10 @@ idle_add = GLib.idle_add
 __all__.append("idle_add")
 
 
+source_remove = GLib.source_remove
+__all__.append("source_remove")
+
+
 TYPE_INVALID = GObjectModule.type_from_name('invalid')
 TYPE_NONE = GObjectModule.type_from_name('void')
 TYPE_INTERFACE = GObjectModule.type_from_name('GInterface')

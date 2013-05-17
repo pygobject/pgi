@@ -15,3 +15,6 @@ class GLibOverrrideTest(unittest.TestCase):
         GObject.idle_add is GLib.idle_add
         GLib.idle_add(lambda *x: None)
         GLib.idle_add(lambda *x: None, priority=GLib.PRIORITY_DEFAULT_IDLE)
+
+    def test_source_remove(self):
+        GObject.source_remove is GLib.source_remove
