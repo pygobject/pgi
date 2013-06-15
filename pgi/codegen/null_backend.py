@@ -66,6 +66,9 @@ class BaseType(object):
     def ref(self, *args):
         pass
 
+    def alloc(self):
+        return "new"
+
 
 class NullBackend(object):
     NAME = "null"
