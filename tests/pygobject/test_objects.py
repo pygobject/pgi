@@ -58,12 +58,12 @@ class ObjectTest(unittest.TestCase):
         r = repr(w)
         self.assertTrue("<Window" in r)
         self.assertTrue("GtkWindow" in r)
-        self.assertTrue(str(hex(id(w))) in r)
+        self.assertTrue(str(hex(int(id(w)))) in r)
 
         g = GObject.Object()
         r = repr(g)
         self.assertTrue("GObject" in r)
-        self.assertTrue(str(hex(id(g))) in r)
+        self.assertTrue(str(hex(int(id(g)))) in r)
 
     def test_mro(self):
         klass = Gtk.Window
