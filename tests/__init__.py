@@ -141,8 +141,6 @@ def test(load_gi, backend=None, strict=False, filter_=None):
     if filter_ is not None:
         tests = filter(lambda t: filter_(t.__class__.__name__), tests)
 
-    run = unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite(tests))
-
     # collected by the FIXME decorator
     print headline("FIXME")
     for item, desc in sorted(_fixme.items()):
@@ -151,5 +149,7 @@ def test(load_gi, backend=None, strict=False, filter_=None):
             print "(%s)" % desc
         else:
             print
+
+    run = unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite(tests))
 
     return len(run.failures) + len(run.errors)

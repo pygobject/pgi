@@ -11,6 +11,7 @@ import sys
 from tests import skipIfGI
 
 from gi import get_required_version, require_version
+require_version("Gtk", "3.0")
 from gi.repository import Gtk, GObject, GLib, Gdk
 
 
@@ -26,7 +27,6 @@ class MiscTest(unittest.TestCase):
         self.assertEqual(GLib._version, "2.0")
 
     def test_require_version(self):
-        self.assertTrue(get_required_version("Gtk") is None)
         self.assertTrue(require_version("Gtk", "3.0") is None)
         self.assertRaises(ValueError, require_version, "Gtk", "4.0")
         self.assertRaises(ValueError, require_version, "Gtk", "2.0")
