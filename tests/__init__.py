@@ -10,10 +10,52 @@ import unittest
 import logging
 import platform
 
+_gi_version = (-1)
+_is_gi = False
+_is_pypy = False
+_has_cairo = False
+_fixme = {}
 
-is_gi = False
-is_pypy = False
-has_cairo = False
+
+def skipUnlessGIVersion(*version):
+    return unittest.skipIf(_is_gi and _gi_version < version, "gi too old")
+
+
+def skipIfGI(func):
+    if callable(func):
+        return unittest.skipIf(_is_gi, "not supported by gi")(func)
+    else:
+        assert isinstance(func, basestring)
+
+        def wrap(f):
+            return unittest.skipIf(_is_gi, func)(f)
+        return wrap
+
+
+def skipIfPyPy(message):
+
+    def wrap(f):
+        _fixme[f] = "PyPy: %s" % message
+        return unittest.skipIf(_is_pypy, message)(f)
+    return wrap
+
+
+def skipUnlessCairo(func):
+    return unittest.skipIf(_has_cairo, "not cairo")(func)
+
+
+def FIXME(func):
+    if callable(func):
+        _fixme[func] = None
+        return unittest.skip("FIXME")(func)
+    else:
+        assert isinstance(func, basestring)
+
+        def wrap(f):
+            _fixme[f] = func
+            return unittest.skip("FIXME")(f)
+        return wrap
+
 
 def test(load_gi, backend=None, strict=False, filter_=None):
     """Run the test suite.
@@ -24,9 +66,10 @@ def test(load_gi, backend=None, strict=False, filter_=None):
     filter_ -- filter for test names (class names)
     """
 
-    global is_gi, is_pypy, has_cairo
-    is_gi = load_gi
-    is_pypy = platform.python_implementation() == "PyPy"
+    global _is_gi, _is_pypy, _has_cairo, _gi_version
+
+    _is_gi = load_gi
+    _is_pypy = platform.python_implementation() == "PyPy"
 
     if not load_gi:
         try:
@@ -42,20 +85,24 @@ def test(load_gi, backend=None, strict=False, filter_=None):
             print "Couldn't load backend: %r" % backend
             return
 
+    def headline(text):
+        return (("### %s " % text) + "#" * 80)[:80]
+
     import gi
     if load_gi:
         assert gi.__name__ == "gi"
-        hl = "### GI " + "#" * 100
+        _gi_version = gi._gobject.pygobject_version
+        hl = headline("GI")
     else:
         assert gi.__name__ == "pgi"
         if backend:
-            hl = "### PGI (%s) " % backend + "#" * 100
+            hl = headline("PGI (%s)" % backend)
         else:
-            hl = "### PGI " + "#" * 100
+            hl = headline("PGI")
     print hl[:80]
 
     if load_gi:
-        has_cairo = True
+        _has_cairo = True
     else:
         gi.check_foreign("cairo", "Context")
 
@@ -95,4 +142,14 @@ def test(load_gi, backend=None, strict=False, filter_=None):
         tests = filter(lambda t: filter_(t.__class__.__name__), tests)
 
     run = unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite(tests))
+
+    # collected by the FIXME decorator
+    print headline("FIXME")
+    for item, desc in sorted(_fixme.items()):
+        print " -> %s.%s" % (item.__module__, item.__name__),
+        if desc:
+            print "(%s)" % desc
+        else:
+            print
+
     return len(run.failures) + len(run.errors)

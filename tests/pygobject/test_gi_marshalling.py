@@ -15,7 +15,7 @@ import os
 import sys
 from io import StringIO, BytesIO
 
-from tests import is_gi, is_pypy
+from tests import is_gi, skipUnlessGIVersion, skipIfGI, FIXME, skipIfPyPy
 
 try:
     from gi.repository import GIMarshallingTests
@@ -36,6 +36,11 @@ else:
     CHAR_255 = bytes([255])
 
 CONSTANT_NUMBER = 42
+
+
+def skipUnlessGIMarshallingTests(func):
+    return unittest.skipUnless(GIMarshallingTests,
+                               "GIMarshallingTests missing")(func)
 
 
 class Number(object):
@@ -68,7 +73,7 @@ class TestConstant(unittest.TestCase):
 #    def test_constant_utf8(self):
 #        self.assertEqual(CONSTANT_UTF8, GIMarshallingTests.CONSTANT_UTF8)
 
-    @unittest.skipUnless(GIMarshallingTests, "")
+    @skipUnlessGIMarshallingTests
     def test_constant_number(self):
         self.assertEqual(CONSTANT_NUMBER, GIMarshallingTests.CONSTANT_NUMBER)
 
@@ -83,7 +88,7 @@ class TestConstant(unittest.TestCase):
         self.assertEqual(GLib.MAXUINT64, 2 ** 64 - 1)
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestBoolean(unittest.TestCase):
 
     def test_boolean_return(self):
@@ -106,7 +111,7 @@ class TestBoolean(unittest.TestCase):
         self.assertEqual(True, GIMarshallingTests.boolean_inout_false_true(False))
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestInt8(unittest.TestCase):
 
     MAX = GObject.G_MAXINT8
@@ -140,7 +145,7 @@ class TestInt8(unittest.TestCase):
         self.assertEqual(self.MAX, GIMarshallingTests.int8_inout_min_max(Number(self.MIN)))
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestUInt8(unittest.TestCase):
 
     MAX = GObject.G_MAXUINT8
@@ -167,7 +172,7 @@ class TestUInt8(unittest.TestCase):
         self.assertEqual(0, GIMarshallingTests.uint8_inout(Number(self.MAX)))
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestInt16(unittest.TestCase):
 
     MAX = GObject.G_MAXINT16
@@ -201,7 +206,7 @@ class TestInt16(unittest.TestCase):
         self.assertEqual(self.MAX, GIMarshallingTests.int16_inout_min_max(Number(self.MIN)))
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestUInt16(unittest.TestCase):
 
     MAX = GObject.G_MAXUINT16
@@ -228,7 +233,7 @@ class TestUInt16(unittest.TestCase):
         self.assertEqual(0, GIMarshallingTests.uint16_inout(Number(self.MAX)))
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestInt32(unittest.TestCase):
 
     MAX = GObject.G_MAXINT32
@@ -262,7 +267,7 @@ class TestInt32(unittest.TestCase):
         self.assertEqual(self.MAX, GIMarshallingTests.int32_inout_min_max(Number(self.MIN)))
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestUInt32(unittest.TestCase):
 
     MAX = GObject.G_MAXUINT32
@@ -289,7 +294,7 @@ class TestUInt32(unittest.TestCase):
         self.assertEqual(0, GIMarshallingTests.uint32_inout(Number(self.MAX)))
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestInt64(unittest.TestCase):
 
     MAX = 2 ** 63 - 1
@@ -323,7 +328,7 @@ class TestInt64(unittest.TestCase):
         self.assertEqual(self.MAX, GIMarshallingTests.int64_inout_min_max(Number(self.MIN)))
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestUInt64(unittest.TestCase):
 
     MAX = 2 ** 64 - 1
@@ -350,7 +355,7 @@ class TestUInt64(unittest.TestCase):
         self.assertEqual(0, GIMarshallingTests.uint64_inout(Number(self.MAX)))
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestShort(unittest.TestCase):
 
     MAX = GObject.G_MAXSHORT
@@ -384,7 +389,7 @@ class TestShort(unittest.TestCase):
         self.assertEqual(self.MAX, GIMarshallingTests.short_inout_min_max(Number(self.MIN)))
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestUShort(unittest.TestCase):
 
     MAX = GObject.G_MAXUSHORT
@@ -411,7 +416,7 @@ class TestUShort(unittest.TestCase):
         self.assertEqual(0, GIMarshallingTests.ushort_inout(Number(self.MAX)))
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestInt(unittest.TestCase):
 
     MAX = GObject.G_MAXINT
@@ -446,7 +451,7 @@ class TestInt(unittest.TestCase):
         self.assertRaises(TypeError, GIMarshallingTests.int_inout_min_max, Number(self.MIN), CONSTANT_NUMBER)
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestUInt(unittest.TestCase):
 
     MAX = GObject.G_MAXUINT
@@ -473,7 +478,7 @@ class TestUInt(unittest.TestCase):
         self.assertEqual(0, GIMarshallingTests.uint_inout(Number(self.MAX)))
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestLong(unittest.TestCase):
 
     MAX = GObject.G_MAXLONG
@@ -507,7 +512,7 @@ class TestLong(unittest.TestCase):
         self.assertEqual(self.MAX, GIMarshallingTests.long_inout_min_max(Number(self.MIN)))
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestULong(unittest.TestCase):
 
     MAX = GObject.G_MAXULONG
@@ -534,7 +539,7 @@ class TestULong(unittest.TestCase):
         self.assertEqual(0, GIMarshallingTests.ulong_inout(Number(self.MAX)))
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestSSize(unittest.TestCase):
 
     MAX = GObject.G_MAXLONG
@@ -568,7 +573,7 @@ class TestSSize(unittest.TestCase):
         self.assertEqual(self.MAX, GIMarshallingTests.ssize_inout_min_max(Number(self.MIN)))
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestSize(unittest.TestCase):
 
     MAX = GObject.G_MAXULONG
@@ -595,7 +600,7 @@ class TestSize(unittest.TestCase):
         self.assertEqual(0, GIMarshallingTests.size_inout(Number(self.MAX)))
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestFloat(unittest.TestCase):
 
     MAX = GObject.G_MAXFLOAT
@@ -616,7 +621,7 @@ class TestFloat(unittest.TestCase):
        self.assertAlmostEqual(self.MIN, GIMarshallingTests.float_inout(Number(self.MAX)))
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestDouble(unittest.TestCase):
 
     MAX = GObject.G_MAXDOUBLE
@@ -637,7 +642,7 @@ class TestDouble(unittest.TestCase):
         self.assertAlmostEqual(self.MIN, GIMarshallingTests.double_inout(Number(self.MAX)))
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestGType(unittest.TestCase):
 
     def test_gtype_name(self):
@@ -668,7 +673,7 @@ class TestGType(unittest.TestCase):
         self.assertEqual(GObject.TYPE_INT, GIMarshallingTests.gtype_inout(GObject.TYPE_NONE))
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestCallbacks(unittest.TestCase):
     def test_return_value_only(self):
         def cb():
@@ -676,13 +681,13 @@ class TestCallbacks(unittest.TestCase):
         self.assertEqual(GIMarshallingTests.callback_return_value_only(cb), 5)
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestPointer(unittest.TestCase):
     def test_pointer_in_return(self):
         self.assertEqual(GIMarshallingTests.pointer_in_return(42), 42)
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestDir(unittest.TestCase):
     def test_members_list(self):
         list = dir(GIMarshallingTests)
@@ -708,7 +713,7 @@ class TestDir(unittest.TestCase):
         # self.assertTrue('DoNotImportDummyTests' in list)
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestGObject(unittest.TestCase):
 
     def test_object(self):
@@ -723,7 +728,7 @@ class TestGObject(unittest.TestCase):
         self.assertTrue(isinstance(object_, GIMarshallingTests.Object))
         self.assertEqual(object_.__grefcount__, 1)
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_object_int(self):
         object_ = GIMarshallingTests.Object(int=42)
         self.assertEqual(object_.int_, 42)
@@ -763,7 +768,7 @@ class TestGObject(unittest.TestCase):
 
         self.assertRaises(TypeError, GIMarshallingTests.SubObject.overwritten_method, GIMarshallingTests.Object())
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_sub_object_int(self):
         object_ = GIMarshallingTests.SubObject()
         self.assertEqual(object_.int_, 0)
@@ -838,7 +843,7 @@ class TestGObject(unittest.TestCase):
         self.assertEqual(new_object.__grefcount__, 1)
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestUtf8(unittest.TestCase):
 
     def test_utf8_none_return(self):
@@ -871,7 +876,7 @@ class TestUtf8(unittest.TestCase):
         self.assertEqual("", GIMarshallingTests.utf8_full_inout(CONSTANT_UTF8))
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestArray(unittest.TestCase):
 
     def test_array_fixed_int_return(self):
@@ -914,6 +919,7 @@ class TestArray(unittest.TestCase):
     def test_array_string_in(self):
         GIMarshallingTests.array_string_in(['foo', 'bar'])
 
+    @skipUnlessGIVersion(3, 4)
     def test_array_in_len_zero_terminated(self):
         GIMarshallingTests.array_in_len_zero_terminated(Sequence([-1, 0, 1, 2]))
 
@@ -968,9 +974,7 @@ class TestArray(unittest.TestCase):
 
         GIMarshallingTests.array_struct_in([struct1, struct2, struct3])
 
-    @unittest.skip("FIXME")
-    @unittest.skipUnless(hasattr(GIMarshallingTests, 'array_struct_value_in'),
-                         'too old gobject-introspection')
+    @FIXME
     def test_array_boxed_struct_value_in(self):
         struct1 = GIMarshallingTests.BoxedStruct()
         struct1.long_ = 1
@@ -981,7 +985,7 @@ class TestArray(unittest.TestCase):
 
         GIMarshallingTests.array_struct_value_in([struct1, struct2, struct3])
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_array_boxed_struct_take_in(self):
         struct1 = GIMarshallingTests.BoxedStruct()
         struct1.long_ = 1
@@ -994,7 +998,7 @@ class TestArray(unittest.TestCase):
 
         self.assertEqual(1, struct1.long_)
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_array_boxed_struct_return(self):
         (struct1, struct2, struct3) = GIMarshallingTests.array_zero_terminated_return_struct()
         self.assertEqual(GIMarshallingTests.BoxedStruct, type(struct1))
@@ -1004,7 +1008,7 @@ class TestArray(unittest.TestCase):
         self.assertEqual(43, struct2.long_)
         self.assertEqual(44, struct3.long_)
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_array_simple_struct_in(self):
         struct1 = GIMarshallingTests.SimpleStruct()
         struct1.long_ = 1
@@ -1015,7 +1019,7 @@ class TestArray(unittest.TestCase):
 
         GIMarshallingTests.array_simple_struct_in([struct1, struct2, struct3])
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_array_multi_array_key_value_in(self):
         GIMarshallingTests.multi_array_key_value_in(["one", "two", "three"],
                                                     [1, 2, 3])
@@ -1023,7 +1027,7 @@ class TestArray(unittest.TestCase):
     def test_array_in_nonzero_nonlen(self):
         GIMarshallingTests.array_in_nonzero_nonlen(1, b'abcd')
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_array_fixed_out_struct(self):
         struct1, struct2 = GIMarshallingTests.array_fixed_out_struct()
 
@@ -1054,7 +1058,7 @@ class TestArray(unittest.TestCase):
                          GIMarshallingTests.init_function(['hello', 'world']))
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestPGI(unittest.TestCase):
     def test_array_type_checks(self):
         self.assertRaises(ValueError, GIMarshallingTests.array_in_len_before,
@@ -1065,13 +1069,16 @@ class TestPGI(unittest.TestCase):
 
 
 class TestProjectVersion(unittest.TestCase):
+    @skipUnlessGIVersion(3, 4)
     def test_version_str(self):
         self.assertGreaterEqual(gi.__version__, "0.0.2")
 
+    @skipUnlessGIVersion(3, 4)
     def test_version_info(self):
         self.assertTrue(len(gi.version_info) >= 3)
         self.assertGreaterEqual(gi.version_info, (0, 0, 2))
 
+    @skipUnlessGIVersion(3, 4)
     def test_check_version(self):
         self.assertRaises(ValueError, gi.check_version, (99, 0, 0))
         self.assertRaises(ValueError, gi.check_version, "99.0.0")
@@ -1079,7 +1086,7 @@ class TestProjectVersion(unittest.TestCase):
         gi.check_version("0.0.2")
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestEnum(unittest.TestCase):
     def test_enum(self):
         self.assertTrue(issubclass(GIMarshallingTests.Enum, int))
@@ -1088,7 +1095,7 @@ class TestEnum(unittest.TestCase):
         self.assertTrue(isinstance(GIMarshallingTests.Enum.VALUE3, GIMarshallingTests.Enum))
         self.assertEqual(42, GIMarshallingTests.Enum.VALUE3)
 
-    @unittest.skip("no gtype")
+    @FIXME("no gtype")
     def test_value_nick_and_name(self):
         self.assertEqual(GIMarshallingTests.Enum.VALUE1.value_nick, 'value1')
         self.assertEqual(GIMarshallingTests.Enum.VALUE2.value_nick, 'value2')
@@ -1136,7 +1143,7 @@ class TestEnum(unittest.TestCase):
                          'GIMarshallingTestsEnum')
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestGEnum(unittest.TestCase):
     def test_genum(self):
         self.assertTrue(issubclass(GIMarshallingTests.GEnum, GObject.GEnum))
@@ -1178,7 +1185,7 @@ class TestGEnum(unittest.TestCase):
         self.assertEqual(genum, GIMarshallingTests.GEnum.VALUE1)
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestGFlags(unittest.TestCase):
 
     def test_flags(self):
@@ -1225,7 +1232,7 @@ class TestGFlags(unittest.TestCase):
         self.assertEqual(flags, GIMarshallingTests.Flags.VALUE1)
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestNoTypeFlags(unittest.TestCase):
 
     def test_flags(self):
@@ -1277,7 +1284,7 @@ class TestNoTypeFlags(unittest.TestCase):
                          'GIMarshallingTestsNoTypeFlags')
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestTimet(unittest.TestCase):
 
     def test_time_t_return(self):
@@ -1294,7 +1301,7 @@ class TestTimet(unittest.TestCase):
         self.assertEqual(0, GIMarshallingTests.time_t_inout(1234567890))
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestMultiOutputArgs(unittest.TestCase):
 
     def test_int_out_out(self):
@@ -1304,7 +1311,7 @@ class TestMultiOutputArgs(unittest.TestCase):
         self.assertEqual((6, 7), GIMarshallingTests.int_return_out())
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestGErrorException(unittest.TestCase):
     def test_gerror_exception(self):
         self.assertRaises(GObject.GError, GIMarshallingTests.gerror)
@@ -1317,7 +1324,7 @@ class TestGErrorException(unittest.TestCase):
             self.assertEqual(e.message, GIMarshallingTests.CONSTANT_GERROR_MESSAGE)
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestGErrorOut(unittest.TestCase):
     # See https://bugzilla.gnome.org/show_bug.cgi?id=666098
     def test_gerror_out(self):
@@ -1330,7 +1337,7 @@ class TestGErrorOut(unittest.TestCase):
         self.assertEqual(debug, GIMarshallingTests.CONSTANT_GERROR_DEBUG_MESSAGE)
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestGErrorOutTransferNone(unittest.TestCase):
     # See https://bugzilla.gnome.org/show_bug.cgi?id=666098
     def test_gerror_out_transfer_none(self):
@@ -1343,7 +1350,8 @@ class TestGErrorOutTransferNone(unittest.TestCase):
         self.assertEqual(GIMarshallingTests.CONSTANT_GERROR_DEBUG_MESSAGE, debug)
 
 
-@unittest.skipUnless(GIMarshallingTests and not is_gi, "")
+@skipIfGI
+@skipUnlessGIMarshallingTests
 class TestInterfaces(unittest.TestCase):
 
     if GIMarshallingTests and not is_gi:
@@ -1367,12 +1375,12 @@ class TestInterfaces(unittest.TestCase):
         self.assertTrue(issubclass(self.TestInterfaceImpl, GIMarshallingTests.Interface))
         self.assertTrue(isinstance(self.instance, GIMarshallingTests.Interface))
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_int8_int(self):
         GIMarshallingTests.test_interface_test_int8_in(self.instance, 42)
         self.assertEqual(self.instance.val, 42)
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_subclass(self):
         class TestInterfaceImplA(self.TestInterfaceImpl):
             pass
@@ -1384,7 +1392,7 @@ class TestInterfaces(unittest.TestCase):
         GIMarshallingTests.test_interface_test_int8_in(instance, 42)
         self.assertEqual(instance.val, 42)
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_mro(self):
         # there was a problem with Python bailing out because of
         # http://en.wikipedia.org/wiki/Diamond_problem with interfaces,
@@ -1418,7 +1426,7 @@ class TestInterfaces(unittest.TestCase):
             # should have actual type
             self.assertTrue('Object' in str(e), e)
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_type_mismatch2(self):
         # wrong type for self argument: interface
         try:
@@ -1467,7 +1475,7 @@ class TestInterfaces(unittest.TestCase):
                 self.assertTrue('GIMarshallingTests.Object' in str(e), e)
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestDir(unittest.TestCase):
     def test_members_list(self):
         list = dir(GIMarshallingTests)
@@ -1493,7 +1501,7 @@ class TestDir(unittest.TestCase):
         # self.assertTrue('DoNotImportDummyTests' in list)
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestGErrorReturn(unittest.TestCase):
     # See https://bugzilla.gnome.org/show_bug.cgi?id=666098
     def test_return_gerror(self):
@@ -1505,7 +1513,7 @@ class TestGErrorReturn(unittest.TestCase):
         self.assertEqual(error.message, GIMarshallingTests.CONSTANT_GERROR_MESSAGE)
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestKeywordArgs(unittest.TestCase):
 
     def test_calling(self):
@@ -1574,7 +1582,7 @@ class TestKeywordArgs(unittest.TestCase):
         self.assertEqual(d, d2)
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestPropertiesObject(unittest.TestCase):
 
     def setUp(self):
@@ -1590,16 +1598,18 @@ class TestPropertiesObject(unittest.TestCase):
 
 
 class TestKeywords(unittest.TestCase):
-    @unittest.skip("FIXME")
+    @FIXME
     def test_method(self):
         # g_variant_print()
         v = GLib.Variant('i', 1)
         self.assertEqual(v.print_(False), '1')
 
+    @skipUnlessGIVersion(3, 4)
     def test_function(self):
         # g_thread_yield()
         self.assertEqual(GLib.Thread.yield_(), None)
 
+    @skipUnlessGIVersion(3, 4)
     def test_struct_method(self):
         # g_timer_continue()
         # we cannot currently instantiate GLib.Timer objects, so just ensure
@@ -1610,7 +1620,7 @@ class TestKeywords(unittest.TestCase):
         self.assertEqual(GLib.IOCondition.IN.value_nicks, ['in'])
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestModule(unittest.TestCase):
     def test_path(self):
         self.assertTrue(GIMarshallingTests.__path__.endswith('GIMarshallingTests-1.0.typelib'),
@@ -1620,6 +1630,7 @@ class TestModule(unittest.TestCase):
         self.assertTrue("'GIMarshallingTests' from '" in str(GIMarshallingTests),
                         str(GIMarshallingTests))
 
+    @skipUnlessGIVersion(3, 4)
     def test_dir(self):
         _dir = dir(GIMarshallingTests)
         self.assertGreater(len(_dir), 10)
@@ -1634,7 +1645,8 @@ class TestModule(unittest.TestCase):
             item = getattr(GIMarshallingTests, item_name)
             self.assertTrue(hasattr(item, '__class__'))
 
-    @unittest.skipIf(is_pypy, "FIXME: pypy gets confused by some __path__")
+    @skipUnlessGIVersion(3, 4)
+    @skipIfPyPy("pypy gets confused by some __path__")
     def test_help(self):
         orig_stdout = sys.stdout
         try:
@@ -1652,7 +1664,7 @@ class TestModule(unittest.TestCase):
         self.assertTrue('method_array_inout' in output, output)
 
 
-@unittest.skipUnless(GIMarshallingTests, "")
+@skipUnlessGIMarshallingTests
 class TestGStrv(unittest.TestCase):
 
     def test_gstrv_return(self):

@@ -7,13 +7,13 @@
 
 import unittest
 
-from tests import is_gi
+from tests import skipUnlessGIVersion, skipIfGI
 from gi.repository import Gtk, GLib, GObject, Pango
 
 
 class FuncsTest(unittest.TestCase):
 
-    @unittest.skipIf(is_gi, "bug in gi")
+    @skipIfGI
     def test_escape_name(self):
         self.failUnless(Pango.break_)
         self.failUnless(Pango.break_.__doc__.startswith("break_("))
@@ -220,7 +220,7 @@ class FuncsTest(unittest.TestCase):
         self.assertRaises(ValueError, v.set_float, 10**39)
         self.assertRaises(ValueError, v.set_float, -10**39)
 
-    @unittest.skipIf(is_gi, "gi doesn't support +/-inf")
+    @skipUnlessGIVersion(3, 6)
     def test_value_float_inf(self):
         v = GObject.Value()
         v.init(GObject.TYPE_FLOAT)
@@ -318,7 +318,6 @@ class FuncsTest(unittest.TestCase):
 
         self.assertEqual(f(GObject.TYPE_DOUBLE), 0)
         self.assertEqual(f(GObject.TYPE_FLOAT), 0)
-        self.assertEqual(f(GObject.TYPE_GTYPE), GObject.TYPE_INVALID)
         self.assertEqual(f(GObject.TYPE_INT), 0)
         self.assertEqual(f(GObject.TYPE_INT64), 0)
         self.assertEqual(f(GObject.TYPE_LONG), 0)
@@ -327,6 +326,12 @@ class FuncsTest(unittest.TestCase):
         self.assertEqual(f(GObject.TYPE_UCHAR), '\x00')
         self.assertEqual(f(GObject.TYPE_UINT), 0)
         self.assertEqual(f(GObject.TYPE_ULONG), 0)
+
+    @skipUnlessGIVersion(3, 4)
+    def gvalue_return_gtype(self):
+        f = lambda t: GObject.Value().init(t)
+
+        self.assertEqual(f(GObject.TYPE_GTYPE), GObject.TYPE_INVALID)
 
     def test_float_misc(self):
         Gtk.Button().set_alignment(0.2, 0.4)

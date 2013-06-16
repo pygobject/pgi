@@ -14,7 +14,7 @@ try:
 except ImportError:
     Clutter = None
 
-from tests import is_gi
+from tests import skipIfGI, FIXME
 
 
 class ObjectTest(unittest.TestCase):
@@ -161,12 +161,12 @@ class ObjectTest(unittest.TestCase):
         x.set_property("orientation", Gtk.Orientation.VERTICAL)
         self.assertEqual(x.props.orientation, Gtk.Orientation.VERTICAL)
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_get_property_unknown(self):
         x = Gtk.HBox()
         self.assertRaises(TypeError, x.get_property, "foobar12")
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_get_property(self):
         w = Gtk.Window()
         w.props.title = "foobar"
@@ -202,7 +202,7 @@ class GObjectConstructTest(unittest.TestCase):
         self.assertRaises(TypeError,
                           lambda x: Gtk.ScrolledWindow(**x), dict(foo=3))
 
-    @unittest.skipIf(is_gi, "no gi clutter overrides")
+    @skipIfGI("no gi clutter overrides")
     @unittest.skipUnless(Clutter, "no clutter")
     def test_struct(self):
         Clutter.Text("Mono Bold 24px", "",

@@ -8,7 +8,7 @@
 import sys
 import unittest
 
-from tests import is_gi
+from tests import skipIfGI
 from gi.repository import Gtk, GObject
 
 
@@ -32,7 +32,7 @@ class EnumTest(unittest.TestCase):
         self.assertRaises(TypeError, Gtk.WindowPosition, [])
         self.assertRaises(TypeError, Gtk.WindowPosition, 3.0)
 
-    @unittest.skipIf(is_gi, "no enum methods in gi")
+    @skipIfGI("no enum methods in gi")
     def test_methods(self):
         self.assertTrue("from_name" in dir(Gtk.IconSize))
         self.assertEqual(Gtk.IconSize.from_name("gtk-menu"), 1)
@@ -47,6 +47,6 @@ class EnumTest(unittest.TestCase):
         self.assertEqual(GObject.GEnum.__gtype__,
                          GObject.GType.from_name("GEnum"))
 
-    @unittest.skipIf(is_gi, "doesn't work in gi")
+    @skipIfGI("doesn't work in gi")
     def test_enum_gtype2(self):
         self.assertEqual(Gtk.IconSize.__gtype__.parent.pytype, GObject.GEnum)

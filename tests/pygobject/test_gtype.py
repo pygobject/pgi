@@ -7,7 +7,7 @@
 
 import unittest
 
-from tests import is_gi
+from tests import skipIfGI
 
 from gi.repository import GObject, Gtk
 
@@ -30,7 +30,7 @@ class GTypeTest(unittest.TestCase):
         self.assertRaises(TypeError, GObject.GType.from_name, [])
         GObject.GType.from_name(u"void")
 
-    @unittest.skipIf(is_gi, "no basic pytype in gi.. ask for it?")
+    @skipIfGI("no basic pytype in gi.. ask for it?")
     def test_pytype(self):
         self.assertTrue(GObject.type_from_name("gint").pytype is int)
 

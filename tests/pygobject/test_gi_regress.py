@@ -25,11 +25,17 @@ try:
 except ImportError:
     Everything = None
 
+from tests import FIXME
 
-@unittest.skipUnless(Everything, "no Regress")
+
+def skipUnlessRegress(func):
+    return unittest.skipUnless(Everything, "Regress missing")(func)
+
+
+@skipUnlessRegress
 class TestEverything(unittest.TestCase):
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_cairo_context(self):
         context = Everything.test_cairo_context_full_return()
         self.assertTrue(isinstance(context, cairo.Context))
@@ -38,7 +44,7 @@ class TestEverything(unittest.TestCase):
         context = cairo.Context(surface)
         Everything.test_cairo_context_none_in(context)
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_cairo_surface(self):
         surface = Everything.test_cairo_surface_none_return()
         self.assertTrue(isinstance(surface, cairo.ImageSurface))
@@ -182,7 +188,7 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(Everything.test_timet(42), 42)
         self.assertRaises(ValueError, Everything.test_timet, GObject.G_MAXUINT64 + 1)
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_unichar(self):
         self.assertEqual("c", Everything.test_unichar("c"))
 
@@ -209,12 +215,12 @@ class TestEverything(unittest.TestCase):
         self.assertAlmostEqual(two, 5.0)
         self.assertAlmostEqual(three, 7.5)
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_value(self):
         self.assertEqual(Everything.test_int_value_arg(GObject.G_MAXINT), GObject.G_MAXINT)
         self.assertEqual(Everything.test_value_return(GObject.G_MAXINT), GObject.G_MAXINT)
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_variant(self):
         v = Everything.test_gvariant_i()
         self.assertEqual(v.get_type_string(), 'i')
@@ -242,7 +248,7 @@ class TestEverything(unittest.TestCase):
         timeout = v.lookup_value('timeout', None)
         self.assertEqual(timeout.get_int32(), 10)
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_string(self):
         const_str = b'const \xe2\x99\xa5 utf8'
         if sys.version_info >= (3, 0):
@@ -271,8 +277,7 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(Everything.test_enum_param(Everything.TestEnum.VALUE3), 'value3')
         self.assertRaises(TypeError, Everything.test_enum_param, 'hello')
 
-    @unittest.skip("FIXME")
-    @unittest.expectedFailure
+    @FIXME
     def test_enum_unsigned(self):
         self.assertEqual(Everything.test_unsigned_enum_param(Everything.TestEnumUnsigned.VALUE1), 'value1')
         self.assertEqual(Everything.test_unsigned_enum_param(Everything.TestEnumUnsigned.VALUE3), 'value3')
@@ -284,7 +289,7 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(type(result), Everything.TestFlags)
         self.assertEqual(result, Everything.TestFlags.FLAG1 | Everything.TestFlags.FLAG3)
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_floating(self):
         e = Everything.TestFloating()
         self.assertEqual(e.__grefcount__, 1)
@@ -295,21 +300,20 @@ class TestEverything(unittest.TestCase):
         e = Everything.TestFloating.new()
         self.assertEqual(e.__grefcount__, 1)
 
-
-@unittest.skipUnless(Everything, "no Regress")
+@skipUnlessRegress
 class TestNullableArgs(unittest.TestCase):
-    @unittest.skip("FIXME")
+    @FIXME
     def test_in_nullable_hash(self):
         Everything.test_ghash_null_in(None)
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_in_nullable_list(self):
         Everything.test_gslist_null_in(None)
         Everything.test_glist_null_in(None)
         Everything.test_gslist_null_in([])
         Everything.test_glist_null_in([])
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_in_nullable_array(self):
         Everything.test_array_int_null_in(None)
         Everything.test_array_int_null_in([])
@@ -320,11 +324,11 @@ class TestNullableArgs(unittest.TestCase):
     def test_in_nullable_object(self):
         Everything.func_obj_null_in(None)
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_out_nullable_hash(self):
         self.assertEqual(None, Everything.test_ghash_null_out())
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_out_nullable_list(self):
         self.assertEqual([], Everything.test_gslist_null_out())
         self.assertEqual([], Everything.test_glist_null_out())
@@ -339,7 +343,7 @@ class TestNullableArgs(unittest.TestCase):
         self.assertEqual(None, Everything.TestObj.null_out())
 
 
-@unittest.skipUnless(Everything, "no Regress")
+@skipUnlessRegress
 class TestTortureProfile(unittest.TestCase):
     def test_torture_profile(self):
         import time
@@ -403,7 +407,7 @@ class TestTortureProfile(unittest.TestCase):
         print("\tTotal: %f sec" % total_time)
 
 
-@unittest.skipUnless(Everything, "no Regress")
+@skipUnlessRegress
 class TestSignals(unittest.TestCase):
     def test_object_param_signal(self):
         obj = Everything.TestObj()
@@ -418,7 +422,7 @@ class TestSignals(unittest.TestCase):
         obj.emit_sig_with_obj()
         self.assertTrue(obj.called)
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_int64_param_from_py(self):
         obj = Everything.TestObj()
 
@@ -432,7 +436,7 @@ class TestSignals(unittest.TestCase):
         self.assertEqual(rv, GObject.G_MAXINT64)
         self.assertEqual(obj.callback_i, GObject.G_MAXINT64)
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_uint64_param_from_py(self):
         obj = Everything.TestObj()
 
@@ -446,7 +450,7 @@ class TestSignals(unittest.TestCase):
         self.assertEqual(rv, GObject.G_MAXUINT64)
         self.assertEqual(obj.callback_i, GObject.G_MAXUINT64)
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_int64_param_from_c(self):
         obj = Everything.TestObj()
 
@@ -460,7 +464,7 @@ class TestSignals(unittest.TestCase):
         obj.emit_sig_with_int64()
         self.assertEqual(obj.callback_i, GObject.G_MAXINT64)
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_uint64_param_from_c(self):
         obj = Everything.TestObj()
 
@@ -474,7 +478,7 @@ class TestSignals(unittest.TestCase):
         obj.emit_sig_with_uint64()
         self.assertEqual(obj.callback_i, GObject.G_MAXUINT64)
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_intarray_ret(self):
         obj = Everything.TestObj()
 

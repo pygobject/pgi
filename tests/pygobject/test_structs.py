@@ -9,12 +9,12 @@ import unittest
 
 from gi.repository import Gtk, Gdk
 
-from tests import is_gi, has_cairo
+from tests import FIXME, skipUnlessCairo
 
 
 class StructTest(unittest.TestCase):
 
-    @unittest.skipUnless(has_cairo, "")
+    @skipUnlessCairo
     def test_foreign_cairo(self):
         window = Gtk.OffscreenWindow()
         area = Gtk.DrawingArea()
@@ -35,7 +35,7 @@ class StructTest(unittest.TestCase):
         self.assertTrue(req)
         self.assertTrue(isinstance(req.height, int))
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_struct_out_simple_leak(self):
         button = Gtk.Button()
         req = button.size_request()
@@ -55,7 +55,7 @@ class StructTest(unittest.TestCase):
         self.failUnlessEqual(new.stamp, 4)
         self.failUnlessEqual(iter_.stamp, 999)
 
-    @unittest.skip("FIXME")
+    @FIXME
     def test_foo(self):
         event = Gdk.Event.new(Gdk.EventType.BUTTON_PRESS)
         event.state

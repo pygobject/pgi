@@ -8,7 +8,7 @@
 import sys
 import unittest
 
-from tests import is_gi
+from tests import skipIfGI
 from gi.repository import Gtk, GLib
 
 
@@ -34,7 +34,7 @@ class FlagsTest(unittest.TestCase):
         self.assertTrue("0" in repr(Gtk.RcFlags(0)))
         self.assertTrue("RcFlags" in repr(Gtk.RcFlags.BASE))
 
-    @unittest.skipIf(is_gi, "")
+    @skipIfGI
     def test_repr_2(self):
         self.assertTrue("NONE" in repr(Gtk.JunctionSides.NONE))
 
@@ -44,7 +44,7 @@ class FlagsTest(unittest.TestCase):
         self.assertRaises(TypeError, Gtk.RcFlags, None)
         self.assertRaises(TypeError, Gtk.RcFlags, 1.1)
 
-    @unittest.skipIf(is_gi, "broken since gi 3.8")
+    @skipIfGI("broken since gi 3.8")
     def test_overflow(self):
         # https://bugzilla.gnome.org/show_bug.cgi?id=698765
         self.assertRaises(OverflowError, Gtk.RcFlags, sys.maxsize + 1)

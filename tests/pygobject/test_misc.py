@@ -8,7 +8,7 @@
 import unittest
 import sys
 
-from tests import is_gi
+from tests import skipIfGI
 
 from gi import get_required_version, require_version
 from gi.repository import Gtk, GObject, GLib, Gdk
@@ -60,7 +60,7 @@ class MiscTest(unittest.TestCase):
         clipboard.set_text('hello', 5)
         self.assertRaises(TypeError, Gtk.Clipboard.get, 'CLIPBOARD')
 
-    @unittest.skipIf(is_gi, "")
+    @skipIfGI
     def test_base_types_class(self):
         c = GObject.GError
         self.assertTrue("GObject" in c.__module__)
@@ -78,7 +78,7 @@ class MiscTest(unittest.TestCase):
         self.assertTrue("GObject" in c.__module__)
         self.assertTrue("GInterface" in c.__name__)
 
-    @unittest.skipIf(is_gi, "")
+    @skipIfGI
     def test_override_new_class(self):
         c = Gdk.EventProperty
         self.assertTrue("override" not in c.__module__)
