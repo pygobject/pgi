@@ -15,7 +15,7 @@ import os
 import sys
 from io import StringIO, BytesIO
 
-from tests import is_gi, skipUnlessGIVersion, skipIfGI, FIXME, skipIfPyPy
+from tests import _is_gi, skipUnlessGIVersion, skipIfGI, FIXME, skipIfPyPy
 
 try:
     from gi.repository import GIMarshallingTests
@@ -1354,7 +1354,7 @@ class TestGErrorOutTransferNone(unittest.TestCase):
 @skipUnlessGIMarshallingTests
 class TestInterfaces(unittest.TestCase):
 
-    if GIMarshallingTests and not is_gi:
+    if GIMarshallingTests and not _is_gi:
         class TestInterfaceImpl(GObject.GObject, GIMarshallingTests.Interface):
             def __init__(self):
                 GObject.GObject.__init__(self)
@@ -1550,7 +1550,7 @@ class TestKeywordArgs(unittest.TestCase):
                                  GIMarshallingTests.int_three_in_three_out, *())
         self.assertRaisesMessage(TypeError, "int_three_in_three_out() takes exactly 3 arguments (0 given)",
                                  GIMarshallingTests.int_three_in_three_out, *(), **{})
-        if is_gi:
+        if _is_gi:
             self.assertRaisesMessage(TypeError, "int_three_in_three_out() takes exactly 3 non-keyword arguments (0 given)",
                                      GIMarshallingTests.int_three_in_three_out, *(), **{'c': 4})
         else:
@@ -1560,7 +1560,7 @@ class TestKeywordArgs(unittest.TestCase):
         # test too many args
         self.assertRaisesMessage(TypeError, "int_three_in_three_out() takes exactly 3 arguments (4 given)",
                                  GIMarshallingTests.int_three_in_three_out, *(1, 2, 3, 4))
-        if is_gi:
+        if _is_gi:
             self.assertRaisesMessage(TypeError, "int_three_in_three_out() takes exactly 3 non-keyword arguments (4 given)",
                                      GIMarshallingTests.int_three_in_three_out, *(1, 2, 3, 4), c=6)
         else:
