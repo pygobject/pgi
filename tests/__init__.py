@@ -104,7 +104,7 @@ def test(load_gi, backend=None, strict=False, filter_=None):
     if load_gi:
         _has_cairo = True
     else:
-        gi.check_foreign("cairo", "Context")
+        _has_cairo = gi.check_foreign("cairo", "Context") is not None
 
     # gi uses logging
     logging.disable(logging.ERROR)

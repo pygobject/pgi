@@ -26,6 +26,7 @@ def _get_foreign(namespace, name):
         return
 
     try:
+        import cffi
         import cairocffi
     except ImportError:
         return
@@ -34,7 +35,6 @@ def _get_foreign(namespace, name):
     if isinstance(cairocffi.FORMAT_ARGB32, basestring):
         return
 
-    import cffi
     ffi = cffi.FFI()
 
     if namespace == "cairo" and name == "Context":
