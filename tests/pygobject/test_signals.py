@@ -76,7 +76,7 @@ class SignalReturnTest(unittest.TestCase):
         area.connect("draw", foo)
         area.connect("draw", foo)
         window.show_all()
-        while Gtk.events_pending():
-            Gtk.main_iteration()
+        for x in xrange(100):
+            Gtk.main_iteration_do(False)
         window.destroy()
         self.assertEqual(called[0], 1)
