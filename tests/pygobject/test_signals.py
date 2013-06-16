@@ -11,6 +11,8 @@ import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 
+from tests import FIXME
+
 
 class SignalTest(unittest.TestCase):
 
@@ -65,6 +67,7 @@ class SignalTest(unittest.TestCase):
 
 class SignalReturnTest(unittest.TestCase):
 
+    @FIXME("some rare random fails..")
     def test_bool(self):
         window = Gtk.OffscreenWindow()
         area = Gtk.DrawingArea()
