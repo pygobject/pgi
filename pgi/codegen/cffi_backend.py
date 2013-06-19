@@ -33,7 +33,7 @@ typedef uint8_t guint8;
 typedef unsigned int guint;
 typedef unsigned long gulong;
 typedef unsigned short gushort;
-typedef void* gpointer;
+typedef intptr_t gpointer;
 typedef gulong GType;
 """
 
@@ -279,7 +279,7 @@ class CFFIBackend(Backend):
         if method:
             cdef_types.append("gpointer")
             self_block, var = self.parse("""
-$new_self = ffi.cast('gpointer', $sself._obj)
+$new_self = $sself._obj
 """, sself=self_name)
             block.add_dependency("ffi", self._ffi)
             self_block.write_into(block)
