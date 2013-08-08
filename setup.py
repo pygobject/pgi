@@ -6,6 +6,8 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
+from __future__ import print_function
+
 import os
 import sys
 import glob
@@ -67,21 +69,21 @@ class CoverageCommand(Command):
             percent = 100.0 * (total_lines - bad_lines) / float(total_lines)
             stats.append((percent, filename, total_lines, bad_lines))
         stats.sort(reverse=True)
-        print "#" * 80
-        print "COVERAGE"
-        print "#" * 80
+        print("#" * 80)
+        print("COVERAGE")
+        print("#" * 80)
         total_sum = 0
         bad_sum = 0
         for s in stats:
             p, f, t, b = s
             total_sum += t
             bad_sum += b
-            print "%6.2f%% %s" % (p, os.path.basename(f))
-        print "-" * 80
-        print "Coverage data written to", coverage, "(%d/%d, %0.2f%%)" % (
+            print("%6.2f%% %s" % (p, os.path.basename(f)))
+        print("-" * 80)
+        print("Coverage data written to", coverage, "(%d/%d, %0.2f%%)" % (
             total_sum - bad_sum, total_sum,
-            100.0 * (total_sum - bad_sum) / float(total_sum))
-        print "#" * 80
+            100.0 * (total_sum - bad_sum) / float(total_sum)))
+        print("#" * 80)
 
 
 def set_test_environ():
@@ -91,7 +93,7 @@ def set_test_environ():
 
     paths = os.environ.get("LD_LIBRARY_PATH", "")
     if ld_path not in paths.split(os.pathsep):
-        print "Testlibs not in LD_LIBRARY_PATH: exec self with new environ"
+        print("Testlibs not in LD_LIBRARY_PATH: exec self with new environ")
         paths = ld_path + os.pathsep + paths
         os.environ["LD_LIBRARY_PATH"] = paths
         # restart the interpreter so dlopen gets te right environ
@@ -99,7 +101,7 @@ def set_test_environ():
 
     typelib_paths = os.environ.get("GI_TYPELIB_PATH", "")
     if ld_path not in typelib_paths.split(os.pathsep):
-        print "Adding %r to GI_TYPELIB_PATH" % ld_path
+        print("Adding %r to GI_TYPELIB_PATH" % ld_path)
         typelib_paths = ld_path + os.pathsep + typelib_paths
         os.environ["GI_TYPELIB_PATH"] = typelib_paths
 

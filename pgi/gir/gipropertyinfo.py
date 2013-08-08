@@ -6,9 +6,9 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from pgi.gobject import GParamFlags
-from gibaseinfo import GIBaseInfo, GIBaseInfoPtr
-from gitypeinfo import GITypeInfoPtr, GIInfoType
-from giarginfo import GITransfer
+from .gibaseinfo import GIBaseInfo, GIBaseInfoPtr
+from .gitypeinfo import GITypeInfoPtr, GIInfoType
+from .giarginfo import GITransfer
 from pgi.ctypesutil import find_library, wrap_class
 
 _gir = find_library("girepository-1.0")

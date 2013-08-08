@@ -6,8 +6,8 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from pgi.glib import Enum, gboolean, gint
-from gitypeinfo import GITypeInfoPtr
-from gibaseinfo import GIBaseInfo, GIBaseInfoPtr, GIInfoType
+from .gitypeinfo import GITypeInfoPtr
+from .gibaseinfo import GIBaseInfo, GIBaseInfoPtr, GIInfoType
 from pgi.ctypesutil import find_library, wrap_class
 
 _gir = find_library("girepository-1.0")

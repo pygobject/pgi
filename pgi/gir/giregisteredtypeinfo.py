@@ -7,7 +7,7 @@
 
 from pgi.glib import gchar_p
 from pgi.gobject import GType
-from gibaseinfo import GIBaseInfo, GIBaseInfoPtr, GIInfoType
+from .gibaseinfo import GIBaseInfo, GIBaseInfoPtr, GIInfoType
 from pgi.ctypesutil import find_library, wrap_class
 
 _gir = find_library("girepository-1.0")

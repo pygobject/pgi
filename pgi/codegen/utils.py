@@ -9,6 +9,8 @@ import sys
 import string
 import collections
 
+from pgi import _compat
+
 
 class CodeBlock(object):
     """A piece of code with global dependencies"""
@@ -63,7 +65,7 @@ class CodeBlock(object):
         code = compile(str(self), "<string>", "exec")
         global_dict = dict(self._deps)
         global_dict.update(kwargs)
-        exec code in global_dict
+        _compat.exec_(code, global_dict)
         return global_dict
 
     def pprint(self, file_=sys.stdout):

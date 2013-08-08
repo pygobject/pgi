@@ -8,9 +8,9 @@
 from ctypes import POINTER
 
 from pgi.glib import gint
-from gibaseinfo import GIBaseInfo, GIBaseInfoPtr, GIInfoType
-from gitypeinfo import GITypeInfoPtr
-from giargument import GIArgument
+from .gibaseinfo import GIBaseInfo, GIBaseInfoPtr, GIInfoType
+from .gitypeinfo import GITypeInfoPtr
+from .giargument import GIArgument
 from pgi.ctypesutil import find_library, wrap_class
 
 _gir = find_library("girepository-1.0")

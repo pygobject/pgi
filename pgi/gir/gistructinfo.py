@@ -6,10 +6,10 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from pgi.glib import gint, gchar_p, gsize, gboolean
-from gibaseinfo import GIInfoType
-from gifieldinfo import GIFieldInfoPtr
-from gicallableinfo import GIFunctionInfoPtr
-from giregisteredtypeinfo import GIRegisteredTypeInfo, GIRegisteredTypeInfoPtr
+from .gibaseinfo import GIInfoType
+from .gifieldinfo import GIFieldInfoPtr
+from .gicallableinfo import GIFunctionInfoPtr
+from .giregisteredtypeinfo import GIRegisteredTypeInfo, GIRegisteredTypeInfoPtr
 from pgi.ctypesutil import find_library, wrap_class
 
 _gir = find_library("girepository-1.0")

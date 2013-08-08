@@ -189,7 +189,7 @@ def generate_function(info, method=False, throws=False):
         try:
             func = _generate_function(instance, info, arg_infos, arg_types,
                                       return_type, method, throws)
-        except NotImplementedError, e:
+        except NotImplementedError as e:
             messages.append("%s: %s" % (backend.NAME, e.message))
         else:
             break

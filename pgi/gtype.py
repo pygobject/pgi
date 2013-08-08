@@ -7,6 +7,8 @@
 
 from ctypes import byref
 
+from pgi import _compat
+
 from pgi.gir import GIRepository
 from pgi.gobject import GType, GTypeFlags, GTypeFundamentalFlags
 from pgi.glib import guint, free
@@ -45,7 +47,7 @@ class PGType(object):
 
     @classmethod
     def from_name(self, name):
-        if not isinstance(name, basestring):
+        if not isinstance(name, _compat.string_types):
             raise TypeError
         type_ = GType.from_name(name)
         if type_.value == 0:
