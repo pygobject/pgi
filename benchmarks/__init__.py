@@ -113,6 +113,39 @@ def run(load_gi, backend=None):
             times.append(t)
         return times
 
+    def torture_signature_0(rounds):
+        test = Regress.TestObj()
+        func = test.torture_signature_0
+        times = []
+        for i in xrange(rounds):
+            t0 = time.time()
+            func(5000, "foobar", 12345)
+            times.append(time.time() - t0)
+        return times
+
+    def torture_signature_1(rounds):
+        test = Regress.TestObj()
+        func = test.torture_signature_1
+        times = []
+        for i in xrange(rounds):
+            t0 = time.time()
+            func(5000, "foobar", 12344)
+            times.append(time.time() - t0)
+        return times
+
+    def torture_signature_1e(rounds):
+        test = Regress.TestObj()
+        func = test.torture_signature_1
+        times = []
+        for i in xrange(rounds):
+            t0 = time.time()
+            try:
+                func(5000, "foobar", 12345)
+            except:
+                pass
+            times.append(time.time() - t0)
+        return times
+
     bench = [
         (bench_func, 10000),
         (bench_method, 10000),
@@ -120,6 +153,17 @@ def run(load_gi, backend=None):
         (bench_object, 1000),
     ]
 
+    try:
+        from gi.repository import Regress
+    except ImportError:
+        pass
+    else:
+        bench.extend([
+            (torture_signature_0, 10000),
+            (torture_signature_1, 10000),
+            (torture_signature_1e, 10000),
+        ])
+
     for b, n in bench:
         min_time = min(b(n))
-        print "%15s: %5.2f µs" % (b.__name__, min_time * (10 ** 6))
+        print "%20s: %5.2f µs" % (b.__name__, min_time * (10 ** 6))

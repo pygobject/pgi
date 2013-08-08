@@ -202,6 +202,8 @@ class BenchmarkCommand(Command):
         import os
         import platform
 
+        set_test_environ()
+
         is_cpython = platform.python_implementation() == "CPython"
         runs = [(False, "ctypes"), (False, "cffi"), (True, None)]
 
