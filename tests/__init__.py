@@ -5,6 +5,8 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
+from __future__ import print_function
+
 import os
 import unittest
 import logging
@@ -82,7 +84,7 @@ def test(load_gi, backend=None, strict=False, filter_=None):
         try:
             pgi.set_backend(backend)
         except LookupError:
-            print "Couldn't load backend: %r" % backend
+            print("Couldn't load backend: %r" % backend)
             return
 
     def headline(text):
@@ -99,7 +101,7 @@ def test(load_gi, backend=None, strict=False, filter_=None):
             hl = headline("PGI (%s)" % backend)
         else:
             hl = headline("PGI")
-    print hl[:80]
+    print(hl[:80])
 
     if load_gi:
         _has_cairo = True
@@ -142,13 +144,13 @@ def test(load_gi, backend=None, strict=False, filter_=None):
         tests = filter(lambda t: filter_(t.__class__.__name__), tests)
 
     # collected by the FIXME decorator
-    print headline("FIXME")
+    print(headline("FIXME"))
     for item, desc in sorted(_fixme.items()):
-        print " -> %s.%s" % (item.__module__, item.__name__),
+        print(" -> %s.%s" % (item.__module__, item.__name__), end="")
         if desc:
-            print "(%s)" % desc
+            print("(%s)" % desc)
         else:
-            print
+            print()
 
     run = unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite(tests))
 

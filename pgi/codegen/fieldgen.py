@@ -76,7 +76,7 @@ def _generate_field_access(info, setter=True):
                 func = _generate_field_setter(info, info_type, instance)
             else:
                 func = _generate_field_getter(info, info_type, instance)
-        except NotImplementedError, e:
+        except NotImplementedError as e:
             messages.append("%s: %s" % (backend.NAME, e.message))
         else:
             break

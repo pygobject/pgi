@@ -10,6 +10,8 @@ import types
 import sys
 import imp
 
+from pgi import _compat
+
 
 _overrides = []
 _active_module = []
@@ -54,7 +56,7 @@ def load(namespace, module):
         else:
             if fp:
                 fp.close()
-            raise ImportError, err, sys.exc_info()[2]
+            _compat.reraise(ImportError, err, sys.exc_info()[2])
     else:
         # FIXME!!! we need a real non-override module somewhere
 

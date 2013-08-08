@@ -21,7 +21,7 @@ class PGType(object):
     _REGISTRY = {}
 
     def __init__(self, type_):
-        if isinstance(type_, (int, long)):
+        if isinstance(type_, _compat.integer_types):
             type_ = GType(type_)
         elif isinstance(type_, type(self)):
             type_ = type_._type
@@ -47,7 +47,9 @@ class PGType(object):
 
     @classmethod
     def from_name(self, name):
-        if not isinstance(name, _compat.string_types):
+        if isinstance(name, _compat.text_type):
+            name = name.encode("ascii")
+        if not isinstance(name, _compat.byte_type):
             raise TypeError
         type_ = GType.from_name(name)
         if type_.value == 0:

@@ -7,15 +7,37 @@
 
 import sys
 
+
 PY2 = sys.version_info[0] == 2
 PY3 = not PY2
 
+
 if PY3:
+    string_types = (str,)
+    text_type = str
+    byte_type = bytes
+    integer_types = (int,)
+
     import builtins
     exec_ = getattr(builtins, "exec")
-else:
+
+    def reraise(tp, value, tb=None):
+        if value.__traceback__ is not tb:
+            raise value.with_traceback(tb)
+        raise value
+
+    iterkeys = lambda d: iter(d.keys())
+    itervalues = lambda d: iter(d.values())
+    iteritems = lambda d: iter(d.items())
+
+    from io import StringIO
+elif PY2:
+    string_types = (str, unicode)
+    text_type = unicode
+    byte_type = str
+    integer_types = (int, long)
+
     def exec_(_code_, _globs_=None, _locs_=None):
-        """Execute code in a namespace."""
         if _globs_ is None:
             frame = sys._getframe(1)
             _globs_ = frame.f_globals
@@ -26,8 +48,12 @@ else:
             _locs_ = _globs_
         exec("""exec _code_ in _globs_, _locs_""")
 
+    exec('def reraise(tp, value, tb=None):\n raise tp, value, tb')
 
-if PY3:
-    string_types = (str,)
+    iterkeys = lambda d: d.iterkeys()
+    itervalues = lambda d: d.itervalues()
+    iteritems = lambda d: d.iteritems()
+
+    from StringIO import StringIO
 else:
-    string_types = (str, unicode)
+    assert 0

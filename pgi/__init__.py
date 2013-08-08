@@ -6,6 +6,7 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from pgi import const
+from pgi._compat import iterkeys
 from pgi.importer import require_version, get_required_version
 from pgi.codegen import set_backend
 from pgi import foreign
@@ -40,7 +41,7 @@ def install_as_gi():
         return
 
     # make sure gi isn't loaded first
-    for mod in sys.modules.iterkeys():
+    for mod in iterkeys(sys.modules):
         if mod == "gi" or mod.startswith("gi."):
             raise AssertionError("pgi has to be imported before gi")
 

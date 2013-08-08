@@ -6,7 +6,8 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 import unittest
-import StringIO
+
+from pgi._compat import StringIO
 
 from pgi.codegen import ctypes_backend
 try:
@@ -47,7 +48,7 @@ class PGIMisc(unittest.TestCase):
         self.assertRaises(ValueError, a.add_dependency, "a", object())
 
     def test_codeblock_print(self):
-        f = StringIO.StringIO()
+        f = StringIO()
         a = CodeBlock()
         a.write_line("abc")
         a.pprint(f)

@@ -16,7 +16,7 @@ def run(load_gi, backend=None):
         try:
             pgi.set_backend(backend)
         except LookupError:
-            print "Couldn't load backend: %r" % backend
+            print("Couldn't load backend: %r" % backend)
             return
 
     import gi
@@ -30,7 +30,7 @@ def run(load_gi, backend=None):
             hl = "### PGI (%s) " % backend + "#" * 100
         else:
             hl = "### PGI " + "#" * 100
-    print hl[:80]
+    print(hl[:80])
 
     t = time.time()
     from gi.repository import Gtk, GObject, GLib, Gio, Pango, Gdk
@@ -39,7 +39,7 @@ def run(load_gi, backend=None):
     Pango = Pango
     Gdk = Gdk
     t = time.time() - t
-    print "%15s: %5.2f ms" % ("import", t * (10 ** 3))
+    print("%15s: %5.2f ms" % ("import", t * (10 ** 3)))
 
     def bench_flags(n):
         times = []
@@ -166,4 +166,4 @@ def run(load_gi, backend=None):
 
     for b, n in bench:
         min_time = min(b(n))
-        print "%20s: %5.2f µs" % (b.__name__, min_time * (10 ** 6))
+        print("%20s: %5.2f µs" % (b.__name__, min_time * (10 ** 6)))
