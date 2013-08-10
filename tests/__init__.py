@@ -27,7 +27,8 @@ def skipIfGI(func):
     if callable(func):
         return unittest.skipIf(_is_gi, "not supported by gi")(func)
     else:
-        assert isinstance(func, basestring)
+        from pgi import _compat
+        assert isinstance(func, _compat.string_types)
 
         def wrap(f):
             return unittest.skipIf(_is_gi, func)(f)
@@ -51,7 +52,8 @@ def FIXME(func):
         _fixme[func] = None
         return unittest.skip("FIXME")(func)
     else:
-        assert isinstance(func, basestring)
+        from pgi import _compat
+        assert isinstance(func, _compat.string_types)
 
         def wrap(f):
             _fixme[f] = func
@@ -145,7 +147,7 @@ def test(load_gi, backend=None, strict=False, filter_=None):
 
     # collected by the FIXME decorator
     print(headline("FIXME"))
-    for item, desc in sorted(_fixme.items()):
+    for item, desc in sorted(_fixme.items(), key=lambda x: repr(x)):
         print(" -> %s.%s" % (item.__module__, item.__name__), end="")
         if desc:
             print("(%s)" % desc)

@@ -267,7 +267,7 @@ class GTypeTest(unittest.TestCase):
     def test_check_missing(self):
         t = GObject.GObject.__gtype__
         dfilter = lambda x: not x.startswith("_")
-        self.assertEqual(len(filter(dfilter, dir(t))), 18)
+        self.assertEqual(len(list(filter(dfilter, dir(t)))), 18)
 
     def test_ptype(self):
         wt = Gtk.Widget.__gtype__

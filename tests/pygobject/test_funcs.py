@@ -11,6 +11,7 @@ from tests import skipUnlessGIVersion, skipIfGI
 import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GLib, GObject, Pango
+from pgi import _compat
 
 
 class FuncsTest(unittest.TestCase):
@@ -31,11 +32,13 @@ class FuncsTest(unittest.TestCase):
         self.assertEqual(GLib.basename(u"/omg/foo/test"), "test")
 
     def test_return_guint(self):
-        self.assertTrue(isinstance(Gtk.get_binary_age(), (long, int)))
+        self.assertTrue(isinstance(Gtk.get_binary_age(),
+                        _compat.integer_types))
 
     def test_return_misc(self):
         self.assertTrue(
-            isinstance(Gtk.icon_size_register("foo", 1, 2), (int, long)))
+            isinstance(Gtk.icon_size_register("foo", 1, 2),
+                       _compat.integer_types))
         self.assertEqual(Gtk.icon_size_get_name(Gtk.IconSize.MENU),
                          "gtk-menu")
 
@@ -115,7 +118,7 @@ class FuncsTest(unittest.TestCase):
         a.set_padding(1, 2, 3, 4)
         self.assertEqual(a.get_padding(), (1, 2, 3, 4))
         a.set_padding(1, 2, 3, 2**32-1)
-        a.set_padding(1, 2, 3, 4L)
+        a.set_padding(1, 2, 3, _compat.long_type(4))
         a.set_padding(1, 2, 3, 1.9)
         self.assertEqual(a.get_padding(), (1, 2, 3, 1))
         self.assertRaises(TypeError, a.set_padding, 1, 2, 3, "")
@@ -137,7 +140,7 @@ class FuncsTest(unittest.TestCase):
     def test_double_in_out(self):
         a = Gtk.HSV()
         a.set_color(0.25, 0.5, 1)
-        a.set_color(0.25, 0.5, 1L)
+        a.set_color(0.25, 0.5, _compat.long_type(1))
         a.set_color(0.25, 0.5, 0.75)
         a.set_color(0.25, 0.5, True)
         self.assertRaises(TypeError, a.set_color, 0, 0, "")
@@ -281,7 +284,7 @@ class FuncsTest(unittest.TestCase):
         v.set_uchar(0)
         self.assertRaises(ValueError, v.set_uchar, 2**8)
         self.assertRaises(ValueError, v.set_uchar, -1)
-        v.set_uchar("a")
+        v.set_uchar(b"a")
         self.assertRaises(TypeError, v.set_uchar, "")
 
     def test_value_pointer(self):
@@ -325,7 +328,7 @@ class FuncsTest(unittest.TestCase):
         self.assertEqual(f(GObject.TYPE_LONG), 0)
         self.assertEqual(f(GObject.TYPE_OBJECT), None)
         self.assertEqual(f(GObject.TYPE_CHAR), '\x00')
-        self.assertEqual(f(GObject.TYPE_UCHAR), '\x00')
+        self.assertEqual(f(GObject.TYPE_UCHAR), b'\x00')
         self.assertEqual(f(GObject.TYPE_UINT), 0)
         self.assertEqual(f(GObject.TYPE_ULONG), 0)
 

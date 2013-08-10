@@ -17,6 +17,7 @@ if PY3:
     text_type = str
     byte_type = bytes
     integer_types = (int,)
+    long_type = int
 
     import builtins
     exec_ = getattr(builtins, "exec")
@@ -36,6 +37,7 @@ elif PY2:
     text_type = unicode
     byte_type = str
     integer_types = (int, long)
+    long_type = long
 
     def exec_(_code_, _globs_=None, _locs_=None):
         if _globs_ is None:

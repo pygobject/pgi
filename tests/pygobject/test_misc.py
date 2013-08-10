@@ -13,6 +13,7 @@ from tests import skipIfGI
 from gi import get_required_version, require_version
 require_version("Gtk", "3.0")
 from gi.repository import Gtk, GObject, GLib, Gdk
+from pgi import _compat
 
 
 class MiscTest(unittest.TestCase):
@@ -20,7 +21,10 @@ class MiscTest(unittest.TestCase):
         # make sure all descriptors show up in dir(module)
         self.assertTrue(len(dir(Gtk)) > 750)
 
-        self.assertEqual(sys.getdefaultencoding(), "ascii")
+        if _compat.PY2:
+            self.assertEqual(sys.getdefaultencoding(), "ascii")
+        else:
+            self.assertEqual(sys.getdefaultencoding(), "utf-8")
 
         self.assertEqual(Gtk._version, "3.0")
         self.assertEqual(GObject._version, "2.0")

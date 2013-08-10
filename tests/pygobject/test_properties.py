@@ -10,6 +10,7 @@ import unittest
 import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk
+from pgi import _compat
 
 
 class PropertiesTest(unittest.TestCase):
@@ -42,12 +43,15 @@ class PropertiesTest(unittest.TestCase):
         w = Gtk.Window()
         self.assertEqual(w.props.title, None)
         self.assertTrue(hasattr(w.props, "double_buffered"))
-        props = [p for p in dir(w.props) if not p.startswith("_")]
-        self.assertTrue(len(props) >= 70)
+        if _compat.PY2:
+            # https://bugzilla.gnome.org/show_bug.cgi?id=705754
+            props = [p for p in dir(w.props) if not p.startswith("_")]
+            self.assertTrue(len(props) >= 70)
 
         w = Gtk.Window
         specs = [p for p in dir(w.props) if not p.startswith("_")]
-        self.assertTrue(len(props) >= 70)
+        if _compat.PY2:
+            self.assertTrue(len(specs) >= 70)
         self.assertEqual(w.props.double_buffered.name, "double-buffered")
 
     def test_set_basic(self):
@@ -63,8 +67,12 @@ class PropertiesTest(unittest.TestCase):
 
     def test_unicode(self):
         w = Gtk.Window()
+        orig = u'\xf6\xe4\xfc'
         w.props.title = u'\xf6\xe4\xfc'
-        self.assertEqual(w.props.title, '\xc3\xb6\xc3\xa4\xc3\xbc')
+        if _compat.PY2:
+            self.assertEqual(w.props.title, orig.encode("utf-8"))
+        else:
+            self.assertEqual(w.props.title, orig)
 
     def test_instance(self):
         w = Gtk.Window()

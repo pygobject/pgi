@@ -10,6 +10,7 @@ import unittest
 import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
+from pgi import _compat
 
 from tests import FIXME
 
@@ -19,13 +20,13 @@ class SignalTest(unittest.TestCase):
     def test_connect(self):
         w = Gtk.Window()
         id_ = w.connect("map", lambda *x: None)
-        self.assertTrue(isinstance(id_, (long, int)))
+        self.assertTrue(isinstance(id_, _compat.integer_types))
         w.disconnect(id_)
 
     def test_connect_after(self):
         w = Gtk.Window()
         id_ = w.connect_after("map", lambda *x: None)
-        self.assertTrue(isinstance(id_, (long, int)))
+        self.assertTrue(isinstance(id_, _compat.integer_types))
         w.disconnect(id_)
 
     def test_handler_block(self):
