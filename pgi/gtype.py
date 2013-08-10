@@ -49,7 +49,7 @@ class PGType(object):
     def from_name(self, name):
         if isinstance(name, _compat.text_type):
             name = name.encode("ascii")
-        if not isinstance(name, _compat.byte_type):
+        if not isinstance(name, bytes):
             raise TypeError
         type_ = GType.from_name(name)
         if type_.value == 0:

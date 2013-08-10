@@ -15,7 +15,6 @@ PY3 = not PY2
 if PY3:
     string_types = (str,)
     text_type = str
-    byte_type = bytes
     integer_types = (int,)
     long_type = int
 
@@ -35,7 +34,6 @@ if PY3:
 elif PY2:
     string_types = (str, unicode)
     text_type = unicode
-    byte_type = str
     integer_types = (int, long)
     long_type = long
 
