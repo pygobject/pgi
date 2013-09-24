@@ -18,6 +18,8 @@ _is_pypy = False
 _has_cairo = False
 _fixme = {}
 
+GIOverflowError = None
+
 
 def skipUnlessGIVersion(*version):
     return unittest.skipIf(_is_gi and _gi_version < version, "gi too old")
@@ -70,7 +72,7 @@ def test(load_gi, backend=None, strict=False, filter_=None):
     filter_ -- filter for test names (class names)
     """
 
-    global _is_gi, _is_pypy, _has_cairo, _gi_version
+    global _is_gi, _is_pypy, _has_cairo, _gi_version, GIOverflowError
 
     _is_gi = load_gi
     _is_pypy = platform.python_implementation() == "PyPy"
@@ -95,7 +97,16 @@ def test(load_gi, backend=None, strict=False, filter_=None):
     import gi
     if load_gi:
         assert gi.__name__ == "gi"
-        _gi_version = gi._gobject.pygobject_version
+        try:
+            _gi_version = gi.version_info
+        except AttributeError:
+            _gi_version = gi._gobject.pygobject_version
+
+        if _gi_version < (3, 10):
+            GIOverflowError = ValueError
+        else:
+            GIOverflowError = OverflowError
+
         hl = headline("GI")
     else:
         assert gi.__name__ == "pgi"
@@ -103,6 +114,8 @@ def test(load_gi, backend=None, strict=False, filter_=None):
             hl = headline("PGI (%s)" % backend)
         else:
             hl = headline("PGI")
+
+        GIOverflowError = OverflowError
     print(hl[:80])
 
     if load_gi:

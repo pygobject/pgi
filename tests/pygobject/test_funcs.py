@@ -7,6 +7,7 @@
 
 import unittest
 
+import tests
 from tests import skipUnlessGIVersion, skipIfGI
 import gi
 gi.require_version("Gtk", "3.0")
@@ -125,9 +126,9 @@ class FuncsTest(unittest.TestCase):
         self.assertRaises(TypeError, a.set_padding, 1, 2, 3, "1")
         self.assertRaises(TypeError, a.set_padding, 1, 2, 3, [])
         self.assertRaises(TypeError, a.set_padding, 1, 2, 3, None)
-        self.assertRaises(OverflowError, a.set_padding, 1, 2, 3, -1)
+        self.assertRaises(tests.GIOverflowError, a.set_padding, 1, 2, 3, -1)
         self.assertRaises(TypeError, a.set_padding, 1, 2, 3, 2+1j)
-        self.assertRaises(OverflowError, a.set_padding, 1, 2, 3, 2**32)
+        self.assertRaises(tests.GIOverflowError, a.set_padding, 1, 2, 3, 2**32)
 
     def test_array_c_in(self):
         Gtk.ListStore().set_column_types([])
@@ -184,7 +185,7 @@ class FuncsTest(unittest.TestCase):
         self.assertEqual(v.get_char(), 97)
         self.assertRaises(TypeError, v.set_char, u"a")
         self.assertRaises(TypeError, v.set_char, "ab")
-        self.assertRaises(OverflowError, v.set_char, 9999)
+        self.assertRaises(tests.GIOverflowError, v.set_char, 9999)
         v.set_char(103.5)
         self.assertEqual(v.get_char(), 103)
 
@@ -222,8 +223,8 @@ class FuncsTest(unittest.TestCase):
         self.assertEqual(v.get_float(), 42)
         self.assertRaises(TypeError, v.set_float, "a")
         self.assertRaises(TypeError, v.set_float, [])
-        self.assertRaises(OverflowError, v.set_float, 10**39)
-        self.assertRaises(OverflowError, v.set_float, -10**39)
+        self.assertRaises(tests.GIOverflowError, v.set_float, 10**39)
+        self.assertRaises(tests.GIOverflowError, v.set_float, -10**39)
 
     @skipUnlessGIVersion(3, 6)
     def test_value_float_inf(self):
@@ -242,8 +243,8 @@ class FuncsTest(unittest.TestCase):
         v.set_int(42.50)
         self.assertEqual(v.get_int(), 42)
         self.assertRaises(TypeError, v.set_int, "a")
-        self.assertRaises(OverflowError, v.set_int, 2**31)
-        self.assertRaises(OverflowError, v.set_int, -(2**31+1))
+        self.assertRaises(tests.GIOverflowError, v.set_int, 2**31)
+        self.assertRaises(tests.GIOverflowError, v.set_int, -(2**31+1))
 
     def test_value_int64(self):
         v = GObject.Value()
@@ -253,8 +254,8 @@ class FuncsTest(unittest.TestCase):
         v.set_int64(42.50)
         self.assertEqual(v.get_int64(), 42)
         self.assertRaises(TypeError, v.set_int64, "a")
-        self.assertRaises(OverflowError, v.set_int64, 2**63)
-        self.assertRaises(OverflowError, v.set_int64, -(2**63+1))
+        self.assertRaises(tests.GIOverflowError, v.set_int64, 2**63)
+        self.assertRaises(tests.GIOverflowError, v.set_int64, -(2**63+1))
 
     def test_value_long(self):
         v = GObject.Value()
@@ -264,8 +265,8 @@ class FuncsTest(unittest.TestCase):
         v.set_long(42.50)
         self.assertEqual(v.get_long(), 42)
         self.assertRaises(TypeError, v.set_long, "a")
-        self.assertRaises(OverflowError, v.set_long, GObject.G_MAXLONG + 1)
-        self.assertRaises(OverflowError, v.set_long, GObject.G_MINLONG - 1)
+        self.assertRaises(tests.GIOverflowError, v.set_long, GObject.G_MAXLONG + 1)
+        self.assertRaises(tests.GIOverflowError, v.set_long, GObject.G_MINLONG - 1)
 
     def test_value_object(self):
         b = Gtk.Button()
@@ -282,8 +283,8 @@ class FuncsTest(unittest.TestCase):
         v.init(GObject.TYPE_UCHAR)
         v.set_uchar(2**8-1)
         v.set_uchar(0)
-        self.assertRaises(OverflowError, v.set_uchar, 2**8)
-        self.assertRaises(OverflowError, v.set_uchar, -1)
+        self.assertRaises(tests.GIOverflowError, v.set_uchar, 2**8)
+        self.assertRaises(tests.GIOverflowError, v.set_uchar, -1)
         v.set_uchar(b"a")
         self.assertRaises(TypeError, v.set_uchar, "")
 
@@ -303,8 +304,8 @@ class FuncsTest(unittest.TestCase):
         v.set_uint64(42.50)
         self.assertEqual(v.get_uint64(), 42)
         self.assertRaises(TypeError, v.set_uint64, "a")
-        self.assertRaises(OverflowError, v.set_uint64, 2**64)
-        self.assertRaises(OverflowError, v.set_uint64, -1)
+        self.assertRaises(tests.GIOverflowError, v.set_uint64, 2**64)
+        self.assertRaises(tests.GIOverflowError, v.set_uint64, -1)
 
     def test_value_string(self):
         v = GObject.Value()
