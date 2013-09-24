@@ -173,7 +173,7 @@ else:
 
 # overflow check for int8
 if not -2**7 <= $int < 2**7:
-    raise ValueError("Value %r not in range" % $int)
+    raise OverflowError("Value %r not in range" % $int)
 """, value=name)["int"]
 
     def pack(self, name):
@@ -208,7 +208,7 @@ $uint = int($value)
 
 # overflow check for uint8
 if not 0 <= $uint < 2**8:
-    raise ValueError("Value %r not in range" % $uint)
+    raise OverflowError("Value %r not in range" % $uint)
 """, value=name)["uint"]
 
     def pack(self, name):
@@ -236,7 +236,7 @@ else:
 
 # overflow check for int16
 if not -2**15 <= $int < 2**15:
-    raise ValueError("Value %r not in range" % $int)
+    raise OverflowError("Value %r not in range" % $int)
 """, value=name)["int"]
 
     def pack(self, name):
@@ -264,7 +264,7 @@ else:
 
 # overflow check for uint16
 if not 0 <= $int < 2**16:
-    raise ValueError("Value %r not in range" % $int)
+    raise OverflowError("Value %r not in range" % $int)
 """, value=name)["int"]
 
     def pack(self, name):
@@ -292,7 +292,7 @@ else:
     raise TypeError("'$value' not a number")
 
 if not -2**31 <= $int < 2**31:
-    raise ValueError("Value %r not in range" % $int)
+    raise OverflowError("Value %r not in range" % $int)
 """, value=name)["int"]
 
     def pack(self, valid):
@@ -320,7 +320,7 @@ else:
     raise TypeError("'$value' not a number")
 
 if not 0 <= $int < 2**32:
-    raise ValueError("Value %r not in range" % $int)
+    raise OverflowError("Value %r not in range" % $int)
 """, value=name)["int"]
 
     def pack(self, valid):
@@ -348,7 +348,7 @@ else:
     raise TypeError("'$value' not a number")
 
 if not -2**63 <= $int < 2**63:
-    raise ValueError("Value %r not in range" % $int)
+    raise OverflowError("Value %r not in range" % $int)
 """, value=name)["int"]
 
     def pack(self, valid):
@@ -376,7 +376,7 @@ else:
     raise TypeError("'$value' not a number")
 
 if not 0 <= $int < 2**64:
-    raise ValueError("Value %r not in range" % $int)
+    raise OverflowError("Value %r not in range" % $int)
 """, value=name)["int"]
 
     def pack(self, valid):
@@ -404,7 +404,7 @@ $float = float($value)
 $c_float = ctypes.c_float($float)
 $c_value = $c_float.value
 if $c_value != $float and $c_value in (float('inf'), float('-inf'), float('nan')):
-    raise ValueError("%r out of range" % $float)
+    raise OverflowError("%r out of range" % $float)
 """, value=name)["c_float"]
 
     def pack(self, name):
@@ -429,7 +429,7 @@ $double = float($value)
 $c_double = ctypes.c_double($double)
 $c_value = $c_double.value
 if $c_value != $double and $c_value in (float('inf'), float('-inf'), float('nan')):
-    raise ValueError("%f out of range" % $double)
+    raise OverflowError("%f out of range" % $double)
 """, value=name)["c_double"]
 
     def pack(self, name):

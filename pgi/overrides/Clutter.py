@@ -149,9 +149,9 @@ class Color(Clutter.Color):
 
     @classmethod
     def from_string(cls, string):
-        self = cls()
-        Clutter.Color.from_string(self, string)
-        return self
+        ok, instance = Clutter.Color.from_string(string)
+        if ok:
+            return instance
 
     @classmethod
     def from_hls(cls, hue, luminance, saturation):

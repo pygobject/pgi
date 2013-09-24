@@ -173,7 +173,7 @@ else:
     raise TypeError("'$value' not a number")
 
 if not -2**31 <= $int < 2**31:
-    raise ValueError("Value %r not in range" % $int)
+    raise OverflowError("Value %r not in range" % $int)
 """, value=name)["int"]
 
     def pack(self, valid):
