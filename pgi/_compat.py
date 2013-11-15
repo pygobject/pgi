@@ -55,5 +55,6 @@ elif PY2:
     iteritems = lambda d: d.iteritems()
 
     from StringIO import StringIO
+    StringIO = StringIO
 else:
     assert 0

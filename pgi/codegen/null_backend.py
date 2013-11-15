@@ -13,11 +13,9 @@ Example usage: pgi.set_backend("ctypes,cffi,null")
 A working backend is still needed to init some modules (Gtk/Gst.init..)
 """
 
-import collections
-
-from pgi.gir import GITypeTag
-from pgi.codegen.backend import VariableFactory
-from pgi.codegen.utils import CodeBlock, parse_with_objects
+from .backend import VariableFactory
+from pgi.clib.gir import GITypeTag
+from .utils import CodeBlock, parse_with_objects
 
 
 class BaseType(object):
@@ -41,7 +39,7 @@ class BaseType(object):
         return name
 
     def new(self, *args):
-        if self.type.tag.value== GITypeTag.ARRAY:
+        if self.type.tag.value == GITypeTag.ARRAY:
             return ("new", "new2")
         return "new"
 

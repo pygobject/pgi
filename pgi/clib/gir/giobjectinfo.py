@@ -7,8 +7,8 @@
 
 from ctypes import c_char_p, CFUNCTYPE, c_void_p
 
-from pgi.glib import gchar_p, gboolean, gint
-from pgi.gobject import GValuePtr
+from ..glib import gchar_p, gboolean, gint
+from ..gobject import GValuePtr
 from .gibaseinfo import GIInfoType
 from .giinterfaceinfo import GIInterfaceInfoPtr
 from .gifieldinfo import GIFieldInfoPtr
@@ -17,7 +17,7 @@ from .gicallableinfo import GIFunctionInfoPtr, GISignalInfoPtr, GIVFuncInfoPtr
 from .giregisteredtypeinfo import GIRegisteredTypeInfo, GIRegisteredTypeInfoPtr
 from .giconstantinfo import GIConstantInfoPtr
 from .gistructinfo import GIStructInfoPtr
-from pgi.ctypesutil import find_library, wrap_class
+from ..ctypesutil import find_library, wrap_class
 
 _gir = find_library("girepository-1.0")
 

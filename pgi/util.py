@@ -9,9 +9,9 @@ import keyword
 import re
 from ctypes import cast, POINTER, c_void_p
 
-from pgi import const
-from pgi.gir import GITypeTag, GIInfoType
-from pgi.glib import free
+from . import const
+from .clib.gir import GITypeTag, GIInfoType
+from .clib.glib import free
 
 
 class Super(object):
@@ -222,6 +222,7 @@ def escape_builtin(text):
 
 
 _KWD_RE = re.compile("^(%s)$" % "|".join(keyword.kwlist))
+
 
 def escape_keyword(text, reg=_KWD_RE):
     return reg.sub(r"\1_", text)

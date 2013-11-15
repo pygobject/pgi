@@ -10,9 +10,9 @@
 import sys
 from ctypes import c_char_p, byref, CDLL
 
-from pgi.gir import GIRepositoryPtr
-from pgi.glib import GErrorPtr
-from pgi import const, module, util, overrides
+from .clib.gir import GIRepositoryPtr
+from .clib.glib import GErrorPtr
+from . import const, module, util, overrides
 
 _versions = {}
 

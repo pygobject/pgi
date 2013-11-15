@@ -8,16 +8,16 @@
 BACKENDS = []
 
 try:
-    from pgi.codegen.cffi_backend import CFFIBackend
+    from .cffi_backend import CFFIBackend
 except ImportError:
     pass
 else:
     BACKENDS.append(CFFIBackend)
 
-from pgi.codegen.ctypes_backend import CTypesBackend
+from .ctypes_backend import CTypesBackend
 BACKENDS.append(CTypesBackend)
 
-from pgi.codegen.null_backend import NullBackend
+from .null_backend import NullBackend
 
 
 ACTIVE_BACKENDS = BACKENDS[:]

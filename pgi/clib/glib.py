@@ -6,7 +6,7 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from ctypes import *
-from pgi.ctypesutil import wrap_class, wrap_setup, find_library
+from .ctypesutil import wrap_class, wrap_setup, find_library
 
 _glib = find_library("glib-2.0")
 

@@ -9,21 +9,21 @@ import itertools
 from ctypes import cast
 import weakref
 
-from pgi import gobject
-from pgi.gobject import GClosureNotify, signal_connect_data
-from pgi.gobject import signal_handler_unblock, signal_handler_block
-from pgi.gobject import GConnectFlags, signal_handler_disconnect
-from pgi.gir import GIInterfaceInfoPtr, GIFunctionInfoFlags, GIObjectInfoPtr
+from .clib import gobject
+from .clib.gobject import GClosureNotify, signal_connect_data
+from .clib.gobject import signal_handler_unblock, signal_handler_block
+from .clib.gobject import GConnectFlags, signal_handler_disconnect
+from .clib.gir import GIInterfaceInfoPtr, GIFunctionInfoFlags, GIObjectInfoPtr
 
-from pgi.ctypesutil import gicast
-from pgi.util import import_attribute, Super, escape_name
-from pgi.gtype import PGType
-from pgi.properties import PropertyAttribute, PROPS_NAME
-from pgi.constant import ConstantAttribute
-from pgi.signals import SignalsAttribute
-from pgi.codegen.construct import generate_constructor
-from pgi.codegen.funcgen import generate_function
-from pgi.codegen.siggen import generate_signal_callback
+from .clib.ctypesutil import gicast
+from .util import import_attribute, Super, escape_name
+from .gtype import PGType
+from .properties import PropertyAttribute, PROPS_NAME
+from .constant import ConstantAttribute
+from .signals import SignalsAttribute
+from .codegen.construct import generate_constructor
+from .codegen.funcgen import generate_function
+from .codegen.siggen import generate_signal_callback
 
 
 class _Object(object):

@@ -51,6 +51,7 @@ class SignalTest(unittest.TestCase):
         class A(Gtk.Window):
             def __init__(self):
                 Gtk.Window.__init__(self)
+
         class B(A):
             def __init__(self):
                 A.__init__(self)
@@ -60,10 +61,10 @@ class SignalTest(unittest.TestCase):
         x.disconnect(id_)
 
     def test_name_under(self):
-         w = Gtk.Window()
-         for name in ["scroll-event", "scroll_event"]:
-             id_ = w.connect("scroll_event", lambda *x: None)
-             self.failUnless(id_ is not None)
+        w = Gtk.Window()
+        for name in ["scroll-event", "scroll_event"]:
+            id_ = w.connect("scroll_event", lambda *x: None)
+            self.failUnless(id_ is not None)
 
 
 class SignalReturnTest(unittest.TestCase):
@@ -74,6 +75,7 @@ class SignalReturnTest(unittest.TestCase):
         area = Gtk.DrawingArea()
         window.add(area)
         called = [0]
+
         def foo(area, context):
             called[0] += 1
             return True

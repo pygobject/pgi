@@ -18,7 +18,7 @@ except ImportError:
 from pgi.util import escape_name, unescape_name, escape_builtin
 from pgi.codegen.utils import CodeBlock, parse_code
 from pgi.gtype import PGType
-from pgi.gobject import GType
+from pgi.clib.gobject import GType
 from pgi.repository import Gtk
 
 
@@ -62,7 +62,7 @@ class PGIMisc(unittest.TestCase):
         n, v = parse_code("""
 if 2:
     $doit
-""", None, doit = b)
+""", None, doit=b)
 
         self.assertEqual(str(n), "if 2:\n    if 1:\n        do()")
         self.assertTrue("test" in n.get_dependencies())

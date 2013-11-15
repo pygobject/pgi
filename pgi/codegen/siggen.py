@@ -5,10 +5,10 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from pgi.codegen import ACTIVE_BACKENDS
-from pgi.codegen.utils import CodeBlock
-from pgi.codegen.cbargs import get_cbarg_class
-from pgi.codegen.cbreturn import get_cbreturn_class
+from . import ACTIVE_BACKENDS
+from .utils import CodeBlock
+from .cbargs import get_cbarg_class
+from .cbreturn import get_cbreturn_class
 from pgi.util import escape_name, escape_builtin
 
 

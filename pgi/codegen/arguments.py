@@ -5,7 +5,9 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from pgi.gir import GIDirection, GIArrayType, GITypeTag, GIInfoType, GITransfer
+from pgi.clib.gir import GIDirection, GIArrayType, GITypeTag, GIInfoType
+from pgi.clib.gir import GITransfer
+from pgi.clib.gobject import GCallback
 from pgi.gtype import PGType
 from pgi.gerror import PGError
 
@@ -241,7 +243,6 @@ class CallbackArgument(BaseInterfaceArgument):
         self.call_var = var.pack(var.check(self.name))
 
         if self._destroy:
-            from pgi.gobject import GCallback
             var.block.add_dependency("GCallback", GCallback)
             self._destroy.call_var = "GCallback()"
 

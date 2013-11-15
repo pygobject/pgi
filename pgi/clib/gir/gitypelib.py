@@ -7,9 +7,9 @@
 
 from ctypes import POINTER, Structure
 
-from pgi.glib import guint8, gsize, gboolean, gchar_p, gpointer
-from pgi.glib import GError, GMappedFilePtr
-from pgi.ctypesutil import wrap_class, find_library
+from ..glib import guint8, gsize, gboolean, gchar_p, gpointer
+from ..glib import GError, GMappedFilePtr
+from ..ctypesutil import wrap_class, find_library
 
 _gir = find_library("girepository-1.0")
 

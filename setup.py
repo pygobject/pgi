@@ -226,8 +226,14 @@ setup(name='pgi',
       author='Christoph Reiter',
       author_email='reiter.christoph@gmail.com',
       url='https://github.com/lazka/pgi',
-      packages=['pgi', 'pgi.gir', 'pgi.glib', 'pgi.gobject',
-                'pgi.overrides', 'pgi.repository', 'pgi.codegen'],
+      packages=[
+         'pgi',
+         'pgi.clib',
+         'pgi.clib.gir',
+         'pgi.overrides',
+         'pgi.repository',
+         'pgi.codegen'
+      ],
       license='LGPL-2.1+',
       classifiers=[
         'Development Status :: 2 - Pre-Alpha',

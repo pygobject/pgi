@@ -7,12 +7,11 @@
 
 from ctypes import byref
 
-from pgi import _compat
-
-from pgi.gir import GIRepository
-from pgi.gobject import GType, GTypeFlags, GTypeFundamentalFlags
-from pgi.glib import guint, free
-from pgi.util import import_attribute, cached_property
+from . import _compat
+from .clib.gir import GIRepository
+from .clib.gobject import GType, GTypeFlags, GTypeFundamentalFlags
+from .clib.glib import guint, free
+from .util import import_attribute, cached_property
 
 
 class PGType(object):
@@ -161,7 +160,7 @@ PGType._PYTYPES = {
     "gfloat": float,
     "gdouble": float,
     "GStrv": list,
-    "gpointer": int, # ?
+    "gpointer": int,  # ?
     "gulong": int,
     "gint64": int,
     "GType": PGType,

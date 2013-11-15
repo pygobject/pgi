@@ -6,7 +6,7 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 import os
-from ctypes import cdll, c_void_p, cast, cdll, c_size_t
+from ctypes import cdll, c_void_p, cast, c_size_t
 
 
 if os.name == "nt":
@@ -33,6 +33,8 @@ memcpy.argtypes = [c_void_p, c_void_p, c_size_t]
 memcpy.restype = c_void_p
 
 _internal = {}
+
+
 def find_library(name, cached=True, internal=True):
     """
         cached: Return a new instance

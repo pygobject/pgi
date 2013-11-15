@@ -7,8 +7,8 @@
 
 from ctypes import POINTER, Structure, c_char_p, cast
 
-from pgi.glib import gchar_p, Enum, gboolean
-from pgi.ctypesutil import wrap_class, find_library
+from ..glib import gchar_p, Enum, gboolean
+from ..ctypesutil import wrap_class, find_library
 from .gitypelib import GITypelibPtr
 
 _gir = find_library("girepository-1.0")

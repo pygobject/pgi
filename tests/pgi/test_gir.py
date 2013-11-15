@@ -8,9 +8,9 @@
 import unittest
 from ctypes import byref, cast
 
-from pgi.gir import *
-from pgi.gobject import *
-from pgi.glib import *
+from pgi.clib.gir import *
+from pgi.clib.gobject import *
+from pgi.clib.glib import *
 
 
 class GITypesTest(unittest.TestCase):

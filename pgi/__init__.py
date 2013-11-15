@@ -5,11 +5,12 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from pgi import const
-from pgi._compat import iterkeys
-from pgi.importer import require_version, get_required_version
-from pgi.codegen import set_backend
-from pgi import foreign
+from . import const
+from ._compat import iterkeys
+from .importer import require_version, get_required_version
+from .codegen import set_backend
+from . import foreign
+
 
 require_version = require_version
 get_required_version = get_required_version

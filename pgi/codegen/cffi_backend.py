@@ -7,9 +7,9 @@
 
 from cffi import FFI
 
-from pgi.gir import GIRepositoryPtr, GITypeTag, GIInfoType
-from pgi.codegen.backend import Backend, VariableFactory
-from pgi.codegen.utils import CodeBlock, parse_with_objects
+from pgi.clib.gir import GIRepositoryPtr, GITypeTag, GIInfoType
+from .backend import Backend, VariableFactory
+from .utils import CodeBlock, parse_with_objects
 
 
 _glib_defs = """

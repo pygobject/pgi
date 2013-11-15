@@ -5,10 +5,10 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from pgi.glib import gchar_p
-from pgi.gobject import GType
+from ..glib import gchar_p
+from ..gobject import GType
 from .gibaseinfo import GIBaseInfo, GIBaseInfoPtr, GIInfoType
-from pgi.ctypesutil import find_library, wrap_class
+from ..ctypesutil import find_library, wrap_class
 
 _gir = find_library("girepository-1.0")
 

@@ -5,9 +5,9 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from pgi.codegen.fields import get_field_class
-from pgi.codegen import ACTIVE_BACKENDS
-from pgi.codegen.utils import CodeBlock
+from .fields import get_field_class
+from . import ACTIVE_BACKENDS
+from .utils import CodeBlock
 
 
 def _generate_field_setter(info, info_type, backend):

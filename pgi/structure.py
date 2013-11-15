@@ -5,12 +5,12 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from pgi.ctypesutil import gicast, memcpy
-from pgi.codegen.fieldgen import generate_field_getter, generate_field_setter
-from pgi.gir import GIUnionInfoPtr, GIFieldInfoFlags, GIStructInfoPtr
-from pgi.glib import g_try_malloc0, free
-from pgi.gtype import PGType
-from pgi.obj import add_method
+from .clib.ctypesutil import gicast, memcpy
+from .codegen.fieldgen import generate_field_getter, generate_field_setter
+from .clib.gir import GIUnionInfoPtr, GIFieldInfoFlags, GIStructInfoPtr
+from .clib.glib import g_try_malloc0, free
+from .gtype import PGType
+from .obj import add_method
 
 
 class _DummyInfo(object):

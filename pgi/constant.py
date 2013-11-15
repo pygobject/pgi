@@ -8,8 +8,8 @@
 from warnings import warn
 from ctypes import byref
 
-from pgi.ctypesutil import gicast
-from pgi.gir import GIConstantInfoPtr, GIArgument
+from .clib.ctypesutil import gicast
+from .clib.gir import GIConstantInfoPtr, GIArgument
 
 
 _union_access = [None, "v_boolean", "v_int8", "v_uint8", "v_int16",

@@ -6,9 +6,9 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from ctypes import Union
-from pgi.glib import gboolean, gint8, guint8, gint16, guint16, gint32, guint32
-from pgi.glib import gint64, guint64, gfloat, gdouble, gshort, gushort, gint
-from pgi.glib import guint, glong, gulong, gsize, gchar_p, gpointer
+from ..glib import gboolean, gint8, guint8, gint16, guint16, gint32, guint32
+from ..glib import gint64, guint64, gfloat, gdouble, gshort, gushort, gint
+from ..glib import guint, glong, gulong, gsize, gchar_p, gpointer
 
 
 class GIArgument(Union):

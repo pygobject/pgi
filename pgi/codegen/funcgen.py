@@ -5,11 +5,11 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from pgi.codegen import ACTIVE_BACKENDS
-from pgi.codegen.utils import CodeBlock
-from pgi.util import escape_name, escape_builtin, escape_keyword
-from pgi.codegen.arguments import get_argument_class, ErrorArgument
-from pgi.codegen.returnvalues import get_return_class
+from . import ACTIVE_BACKENDS
+from .utils import CodeBlock
+from pgi.util import escape_name, escape_builtin
+from .arguments import get_argument_class, ErrorArgument
+from .returnvalues import get_return_class
 
 
 def build_docstring(func_name, args, ret, throws):
@@ -101,8 +101,8 @@ def _generate_function(backend, info, arg_infos, arg_types,
     lib = backend.get_library(info.namespace)
     symbol = info.symbol
     block, svar, func = backend.get_function(lib, symbol, args,
-                                                    return_value, method,
-                                                    "self", throws)
+                                             return_value, method,
+                                             "self", throws)
     if block:
         block.write_into(body)
 

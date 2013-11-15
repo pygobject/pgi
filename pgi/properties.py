@@ -8,14 +8,14 @@
 from warnings import warn
 import ctypes
 
-from pgi import gobject
-from pgi.gobject import GValue, GValuePtr, G_TYPE_FROM_INSTANCE
-from pgi.gobject import GObjectClassPtr
-from pgi.gir import GIInfoType, GITypeTag
+from .clib import gobject
+from .clib.gobject import GValue, GValuePtr, G_TYPE_FROM_INSTANCE
+from .clib.gobject import GObjectClassPtr
+from .clib.gir import GIInfoType, GITypeTag
 
-from pgi.util import escape_name, unescape_name, InfoIterWrapper
-from pgi.util import import_attribute, set_gvalue_from_py
-from pgi.gtype import PGType
+from .util import escape_name, unescape_name, InfoIterWrapper
+from .util import import_attribute, set_gvalue_from_py
+from .gtype import PGType
 
 
 PROPS_NAME = "props"

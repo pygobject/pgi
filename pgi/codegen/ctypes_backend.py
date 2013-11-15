@@ -7,19 +7,20 @@
 
 import ctypes
 
-from pgi.codegen.backend import Backend, VariableFactory
-from pgi.codegen.utils import CodeBlock, parse_with_objects
-from pgi.gir import GIRepositoryPtr, GITypeTag, GIInfoType, GIArrayType
-from pgi.gir import GICallableInfoPtr, GIStructInfoPtr
-from pgi import glib
-from pgi.glib import *
-from pgi.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr, GType
-from pgi.gobject import GCallback
-from pgi.gtype import PGType
+from .backend import Backend, VariableFactory
+from .utils import CodeBlock, parse_with_objects
+
+from pgi.clib.ctypesutil import gicast, find_library
+from pgi.clib.gir import GICallableInfoPtr, GIStructInfoPtr
+from pgi.clib.gir import GIRepositoryPtr, GITypeTag, GIInfoType, GIArrayType
+from pgi.clib.glib import *
+from pgi.clib.gobject import GCallback
+from pgi.clib.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr, GType
+from pgi.clib import glib
 from pgi.gerror import PGError
-from pgi.util import import_attribute
-from pgi.ctypesutil import gicast, find_library
+from pgi.gtype import PGType
 from pgi import foreign
+from pgi.util import import_attribute
 
 
 def typeinfo_to_ctypes(info, return_value=False):
@@ -403,7 +404,8 @@ if isinstance($value, basestring):
 $float = float($value)
 $c_float = ctypes.c_float($float)
 $c_value = $c_float.value
-if $c_value != $float and $c_value in (float('inf'), float('-inf'), float('nan')):
+if $c_value != $float and \\
+        $c_value in (float('inf'), float('-inf'), float('nan')):
     raise OverflowError("%r out of range" % $float)
 """, value=name)["c_float"]
 
@@ -428,7 +430,8 @@ if isinstance($value, basestring):
 $double = float($value)
 $c_double = ctypes.c_double($double)
 $c_value = $c_double.value
-if $c_value != $double and $c_value in (float('inf'), float('-inf'), float('nan')):
+if $c_value != $double and \\
+        $c_value in (float('inf'), float('-inf'), float('nan')):
     raise OverflowError("%f out of range" % $double)
 """, value=name)["c_double"]
 
@@ -564,12 +567,14 @@ class Object(BaseInterface):
         if self.may_be_null:
             return self.parse("""
 if $obj is not None and not isinstance($obj, $type_class):
-    raise TypeError("argument $obj: Expected %s, got %s" % ($type_class.__name__, $obj.__class__.__name__))
+    raise TypeError("argument $obj: Expected %s, got %s" %
+                    ($type_class.__name__, $obj.__class__.__name__))
 """, obj=name, type_class=self._import_type())["obj"]
 
         return self.parse("""
 if not isinstance($obj, $type_class):
-    raise TypeError("argument $obj: Expected %s, got %s" % ($type_class.__name__, $obj.__class__.__name__))
+    raise TypeError("argument $obj: Expected %s, got %s" %
+                    ($type_class.__name__, $obj.__class__.__name__))
 """, obj=name, type_class=self._import_type())["obj"]
 
     def pack(self, name):
@@ -795,7 +800,8 @@ if not isinstance($value, basestring) and not int($value):
 elif isinstance($value, $base_type):
     $out = int($value)
 else:
-    raise TypeError("Expected %r but got %r" % ($base_type.__name__, type($value).__name__))
+    raise TypeError("Expected %r but got %r" %
+                    ($base_type.__name__, type($value).__name__))
 """, base_type=self._import_type(), value=name)["out"]
 
     def pack(self, name):
@@ -827,8 +833,7 @@ class Struct(BaseInterface):
         return self.parse("""
 if not isinstance($obj, ($struct_class, $obj_class)):
     raise TypeError("%r is not a structure object" % $obj)
-""", obj_class=base_obj,
-     struct_class=self._import_type(), obj=name)["obj"]
+""", obj_class=base_obj, struct_class=self._import_type(), obj=name)["obj"]
 
     def pack(self, name):
         return self.parse("""
@@ -1097,7 +1102,7 @@ class CTypesBackend(Backend):
         return self._libs[namespace]
 
     def get_function(self, lib, symbol, args, ret,
-                            method=False, self_name="", throws=False):
+                     method=False, self_name="", throws=False):
         try:
             h = getattr(lib, symbol)
         except AttributeError:

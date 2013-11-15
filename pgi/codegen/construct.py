@@ -12,9 +12,9 @@ Compared to g_object_newv, this saves us two function calls per parameter.
 """
 
 
-from pgi.codegen import ACTIVE_BACKENDS
-from pgi.codegen.utils import CodeBlock
-from pgi.gir import GITypeTag, GIInfoType
+from . import ACTIVE_BACKENDS
+from .utils import CodeBlock
+from pgi.clib.gir import GITypeTag, GIInfoType
 from pgi.util import escape_builtin, unescape_name
 
 

@@ -5,7 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from pgi.gir import GIInfoType, GITypeTag
+from pgi.clib.gir import GIInfoType, GITypeTag
 
 
 class Field(object):

@@ -7,12 +7,12 @@
 
 from ctypes import Structure, POINTER, c_char_p
 
-from pgi.glib import guint, gchar_p, GErrorPtr, gboolean, gint
-from pgi.glib import GSListPtr, GOptionGroupPtr, GListPtr
-from pgi.gobject import GType
+from ..glib import guint, gchar_p, GErrorPtr, gboolean, gint
+from ..glib import GSListPtr, GOptionGroupPtr, GListPtr
+from ..gobject import GType
 from .gibaseinfo import GIBaseInfoPtr
 from .gitypelib import GITypelibPtr
-from pgi.ctypesutil import find_library, wrap_class
+from ..ctypesutil import find_library, wrap_class
 
 _gir = find_library("girepository-1.0")
 

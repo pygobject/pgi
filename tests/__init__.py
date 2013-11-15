@@ -12,6 +12,15 @@ import unittest
 import logging
 import platform
 
+# https://pypi.python.org/pypi/faulthandler/
+try:
+    import faulthandler
+except ImportError:
+    pass
+else:
+    faulthandler.enable()
+
+
 _gi_version = (-1)
 _is_gi = False
 _is_pypy = False

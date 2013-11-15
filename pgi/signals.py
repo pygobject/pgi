@@ -7,10 +7,10 @@
 
 from ctypes import byref
 
-from pgi.util import cached_property, escape_name
-from pgi.glib import guint
-from pgi.gobject import signal_list_ids, signal_query, GSignalQuery
-from pgi.gtype import PGType
+from .util import cached_property, escape_name
+from .clib.glib import guint
+from .clib.gobject import signal_list_ids, signal_query, GSignalQuery
+from .gtype import PGType
 
 
 class GSignal(object):

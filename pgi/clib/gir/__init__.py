@@ -22,6 +22,6 @@ from .giunioninfo import *
 from .giarginfo import *
 from .gipropertyinfo import *
 
-from pgi.ctypesutil import wrap_setup
+from ..ctypesutil import wrap_setup
 
 wrap_setup()

@@ -7,12 +7,12 @@
 
 import ctypes
 
-from pgi.gobject import GEnumClassPtr, GFlagsClassPtr
-from pgi.ctypesutil import gicast
-from pgi.gir import GIEnumInfoPtr
-from pgi.gtype import PGType
-from pgi.util import cached_property, escape_name
-from pgi.obj import add_method
+from .clib.gobject import GEnumClassPtr, GFlagsClassPtr
+from .clib.ctypesutil import gicast
+from .clib.gir import GIEnumInfoPtr
+from .gtype import PGType
+from .util import cached_property, escape_name
+from .obj import add_method
 
 
 class EnumBase(int):

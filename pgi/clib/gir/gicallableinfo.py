@@ -7,15 +7,15 @@
 
 from ctypes import c_char_p, POINTER, c_int
 
-from pgi.glib import gint, Enum, gboolean, gchar_p, GError, Flags
-from pgi.gobject import GSignalFlags
+from ..glib import gint, Enum, gboolean, gchar_p, GError, Flags
+from ..gobject import GSignalFlags
 from .gibaseinfo import GIBaseInfo, GIBaseInfoPtr
 from .gibaseinfo import GIAttributeIterPtr, GIInfoType
 from .gitypeinfo import GITypeInfoPtr
 from .giarginfo import GITransfer, GIArgInfoPtr
 from .gipropertyinfo import GIPropertyInfoPtr
 from .giargument import GIArgument
-from pgi.ctypesutil import find_library, wrap_class
+from ..ctypesutil import find_library, wrap_class
 
 _gir = find_library("girepository-1.0")
 

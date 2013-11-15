@@ -114,8 +114,8 @@ def parse_code(code, var_factory, **kwargs):
 
     Returns a CodeBlock and the resulting variable mapping.
 
-    >>> parse("$foo = $foo + $bar", bar="1")
-    >>> ("t1 = t1 + 1", {'foo': 't1', 'bar': '1'})
+    parse("$foo = $foo + $bar", bar="1")
+    ("t1 = t1 + 1", {'foo': 't1', 'bar': '1'})
     """
 
     block = CodeBlock()

@@ -265,8 +265,10 @@ class FuncsTest(unittest.TestCase):
         v.set_long(42.50)
         self.assertEqual(v.get_long(), 42)
         self.assertRaises(TypeError, v.set_long, "a")
-        self.assertRaises(tests.GIOverflowError, v.set_long, GObject.G_MAXLONG + 1)
-        self.assertRaises(tests.GIOverflowError, v.set_long, GObject.G_MINLONG - 1)
+        self.assertRaises(
+            tests.GIOverflowError, v.set_long, GObject.G_MAXLONG + 1)
+        self.assertRaises(
+            tests.GIOverflowError, v.set_long, GObject.G_MINLONG - 1)
 
     def test_value_object(self):
         b = Gtk.Button()

@@ -9,11 +9,11 @@ from ctypes import byref
 import sys
 sys.path.insert(0, '..')
 
-from pgi.ctypesutil import gicast
-from pgi.gir import GIRepository, GIRepositoryLoadFlags, GIFunctionInfoPtr
-from pgi.gir import GIArgument
-from pgi.glib import GErrorPtr
-from pgi.gobject import g_type_init
+from pgi.clib.ctypesutil import gicast
+from pgi.clib.gir import GIRepository, GIRepositoryLoadFlags, GIFunctionInfoPtr
+from pgi.clib.gir import GIArgument
+from pgi.clib.glib import GErrorPtr
+from pgi.clib.gobject import g_type_init
 
 g_type_init()
 
