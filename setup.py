@@ -66,7 +66,11 @@ class CoverageCommand(Command):
             lines = filter(None, map(str.strip, lines))
             total_lines = len(lines)
             bad_lines = len([l for l in lines if l.startswith(">>>>>>")])
-            percent = 100.0 * (total_lines - bad_lines) / float(total_lines)
+            try:
+                percent = 100.0 * (
+                    total_lines - bad_lines) / float(total_lines)
+            except ZeroDivisionError:
+                percent = 100.0
             stats.append((percent, filename, total_lines, bad_lines))
         stats.sort(reverse=True)
         print("#" * 80)
