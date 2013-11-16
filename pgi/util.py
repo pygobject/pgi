@@ -234,25 +234,6 @@ def unescape_name(text):
         return text[:-1]
     return text.replace("_", "-")
 
-try:
-    import pypyjit
-except ImportError:
-    no_jit = lambda f: f
-else:
-    def no_jit(f):
-        def wrap(*args, **kwargs):
-            try:
-                if no_jit.c == 0:
-                    pypyjit.set_param("off")
-                no_jit.c += 1
-                return f(*args, **kwargs)
-            finally:
-                no_jit.c -= 1
-                if no_jit.c == 0:
-                    pypyjit.set_param("default")
-        return wrap
-    no_jit.c = 0
-
 
 class cached_property(object):
     """A read-only @property that is only evaluated once."""

@@ -83,7 +83,6 @@ class Importer(object):
             if GIRepositoryPtr().enumerate_versions(namespace):
                 return self
 
-    @util.no_jit
     def load_module(self, fullname):
         global _versions
 
