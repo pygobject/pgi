@@ -39,18 +39,7 @@ def run(load_gi, backend=None):
     Pango = Pango
     Gdk = Gdk
     t = time.time() - t
-    print("%15s: %5.2f ms" % ("import", t * (10 ** 3)))
-
-    def bench_flags(n):
-        times = []
-        for i in xrange(n):
-            t = time.time()
-            Gtk.RcFlags(1 | 1 << 10)
-            Gtk.RcFlags.TEXT - 1
-            Gtk.RcFlags.BASE | Gtk.RcFlags.FG
-            t = time.time() - t
-            times.append(t)
-        return times
+    print("%20s: %6.2f ms" % ("import", t * (10 ** 3)))
 
     def bench_func(n):
         times = []
@@ -147,10 +136,10 @@ def run(load_gi, backend=None):
         return times
 
     bench = [
-        (bench_func, 10000),
-        (bench_method, 10000),
-        (bench_gvalue, 1000),
-        (bench_object, 1000),
+        (bench_func, 100000),
+        (bench_method, 100000),
+        (bench_gvalue, 10000),
+        (bench_object, 10000),
     ]
 
     try:
@@ -166,4 +155,4 @@ def run(load_gi, backend=None):
 
     for b, n in bench:
         min_time = min(b(n))
-        print("%20s: %5.2f µs" % (b.__name__, min_time * (10 ** 6)))
+        print("%20s: %6.2f µs" % (b.__name__, min_time * (10 ** 6)))
