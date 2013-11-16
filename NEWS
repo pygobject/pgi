@@ -1,17 +1,32 @@
+0.0.6.2 (2013-11-16)
+~~~~~~~~~~~~~~~~~~~~
+
+* Various fixes for new cffi/pygobject releases
+
 0.0.6.1 (2013-04-24)
-    * Fix packaging
+~~~~~~~~~~~~~~~~~~~~
+
+* Fix packaging
 
 0.0.6 (2013-04-24)
-    * Basic cairo support (using cairocffi)
-    * Faster object creation
-    * Basic argument marshaling with signals
-    * New API documentation: http://lazka.github.io/pgi-docs/
+~~~~~~~~~~~~~~~~~~
+
+* Basic cairo support (using cairocffi)
+* Faster object creation
+* Basic argument marshaling with signals
+* New API documentation: http://lazka.github.io/pgi-docs/
 
 0.0.5 (2013-03-20)
-    * Various fixes
+~~~~~~~~~~~~~~~~~~
+
+* Various fixes
 
 0.0.4 (2013-02-04)
-    * Various fixes
+~~~~~~~~~~~~~~~~~~
+
+* Various fixes
 
 0.0.3 (2013-02-02)
-    * Initial release
+~~~~~~~~~~~~~~~~~~
+
+* Initial release
