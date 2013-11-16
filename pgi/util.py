@@ -14,34 +14,6 @@ from .clib.gir import GITypeTag, GIInfoType
 from .clib.glib import free
 
 
-class Super(object):
-    """Biggest hack ever?"""
-
-    def __init__(self, self_name, name):
-        self.__name = name
-        self.__self_name = self_name
-        self.__instances = {}
-
-    def __get__(self, instance, owner):
-        if instance not in self.__instances:
-            while not owner.__dict__.get(self.__self_name):
-                if owner is object:
-                    return lambda *args, **kwargs: True
-                owner = owner.__mro__[1]
-            self.__instances[instance] = owner
-            cls = owner
-        else:
-            cls = self.__instances[instance]
-
-        next_cls = cls.__mro__[1]
-        if next_cls is not object:
-            func = getattr(next_cls, self.__name)
-            self.__instances[instance] = next_cls
-            return lambda *args, **kwargs: func(instance, *args, **kwargs)
-        del self.__instances[instance]
-        return lambda *args, **kwargs: True
-
-
 class InfoIterWrapper(object):
     """Allow fast name lookup for gi structs.
 

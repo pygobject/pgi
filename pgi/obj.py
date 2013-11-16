@@ -16,7 +16,7 @@ from .clib.gobject import GConnectFlags, signal_handler_disconnect
 from .clib.gir import GIInterfaceInfoPtr, GIFunctionInfoFlags, GIObjectInfoPtr
 
 from .clib.ctypesutil import gicast
-from .util import import_attribute, Super, escape_name
+from .util import import_attribute, escape_name
 from .gtype import PGType
 from .properties import PropertyAttribute, PROPS_NAME
 from .constant import ConstantAttribute
@@ -30,30 +30,7 @@ class _Object(object):
     _obj = 0
     __gtype__ = None
     __signal_cb_ref = {}
-    __weak = {}
     __cls = None
-
-    __super__ = Super("__super__", "__init__")
-
-    def __init__(self, *args, **kwargs):
-        if not self.__super__(*args, **kwargs):
-            return
-
-        if self.__gtype__.is_abstract():
-            raise TypeError("cannot create instance of abstract type %r" %
-                            self.__gtype__.name)
-
-        names = kwargs.keys()
-        specs = type(self).props
-        constructor = generate_constructor(self.__gtype__, specs, names)
-        obj = constructor(*kwargs.values())
-
-        # sink unowned objects
-        if self._unowned:
-            gobject.ref_sink(obj)
-
-        self.__weak[weakref.ref(self, self.__destroy)] = obj
-        self._obj = obj
 
     def _ref(self):
         gobject.ref_sink(self._obj)
@@ -66,10 +43,6 @@ class _Object(object):
 
     def __cmp__(self, other):
         return cmp(self._obj, other._obj)
-
-    @classmethod
-    def __destroy(cls, ref):
-        gobject.unref(cls.__weak.pop(ref))
 
     def __repr__(self):
         form = "<%s object at 0x%x (%s at 0x%x)>"
@@ -133,6 +106,32 @@ class _Object(object):
     @property
     def __grefcount__(self):
         return cast(self._obj, gobject.GObjectPtr).contents.ref_count
+
+
+class Object(_Object):
+
+    __weak = {}
+
+    def __init__(self, *args, **kwargs):
+        if self.__gtype__.is_abstract():
+            raise TypeError("cannot create instance of abstract type %r" %
+                            self.__gtype__.name)
+
+        names = kwargs.keys()
+        specs = type(self).props
+        constructor = generate_constructor(self.__gtype__, specs, names)
+        obj = constructor(*kwargs.values())
+
+        # sink unowned objects
+        if self._unowned:
+            gobject.ref_sink(obj)
+
+        self.__weak[weakref.ref(self, self.__destroy)] = obj
+        self._obj = obj
+
+    @classmethod
+    def __destroy(cls, ref):
+        gobject.unref(cls.__weak.pop(ref))
 
 
 class MethodAttribute(object):
@@ -244,31 +243,35 @@ def ObjectAttribute(obj_info):
 
     obj_info = gicast(obj_info, GIObjectInfoPtr)
 
-    # Get the parent class
-    parent_obj = obj_info.get_parent()
-    if parent_obj:
-        attr = import_attribute(parent_obj.namespace, parent_obj.name)
-        bases = (attr,)
+    if obj_info.name == "Object" and obj_info.namespace == "GObject":
+        cls = Object
     else:
-        bases = _Object.__bases__
-
-    # Get all object interfaces
-    ifaces = []
-    for interface in obj_info.get_interfaces():
-        attr = import_attribute(interface.namespace, interface.name)
-        # only add interfaces if the base classes don't have it
-        for base in bases:
-            if attr in base.__mro__:
-                break
+        # Get the parent class
+        parent_obj = obj_info.get_parent()
+        if parent_obj:
+            attr = import_attribute(parent_obj.namespace, parent_obj.name)
+            bases = (attr,)
         else:
-            ifaces.append(attr)
+            bases = _Object.__bases__
 
-    # Combine them to a base class list
-    if ifaces:
-        bases = tuple(list(bases) + ifaces)
+        # Get all object interfaces
+        ifaces = []
+        for interface in obj_info.get_interfaces():
+            attr = import_attribute(interface.namespace, interface.name)
+            # only add interfaces if the base classes don't have it
+            for base in bases:
+                if attr in base.__mro__:
+                    break
+            else:
+                ifaces.append(attr)
 
-    # Create a new class
-    cls = type(obj_info.name, bases, dict(_Object.__dict__))
+        # Combine them to a base class list
+        if ifaces:
+            bases = tuple(list(bases) + ifaces)
+
+        # Create a new class
+        cls = type(obj_info.name, bases, dict(_Object.__dict__))
+
     cls.__module__ = obj_info.namespace
 
     # Set root to unowned= False and InitiallyUnowned=True
