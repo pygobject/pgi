@@ -5,6 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
+from .._compat import xrange
 from ..glib import gint, gboolean, gchar_p, gsize
 from .gibaseinfo import GIInfoType
 from .gifieldinfo import GIFieldInfoPtr

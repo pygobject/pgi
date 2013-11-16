@@ -7,6 +7,7 @@
 
 from ctypes import c_char_p, CFUNCTYPE, c_void_p
 
+from .._compat import xrange
 from ..glib import gchar_p, gboolean, gint
 from ..gobject import GValuePtr
 from .gibaseinfo import GIInfoType

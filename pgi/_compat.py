@@ -30,7 +30,10 @@ if PY3:
     itervalues = lambda d: iter(d.values())
     iteritems = lambda d: iter(d.items())
 
+    xrange = range
+
     from io import StringIO
+    import builtins
 elif PY2:
     string_types = (str, unicode)
     text_type = unicode
@@ -54,7 +57,11 @@ elif PY2:
     itervalues = lambda d: d.itervalues()
     iteritems = lambda d: d.iteritems()
 
+    xrange = xrange
+
     from StringIO import StringIO
     StringIO = StringIO
+
+    import __builtin__ as builtins
 else:
     assert 0

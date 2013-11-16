@@ -32,7 +32,7 @@ def _get_foreign(namespace, name):
         return
 
     # check for a cairocffi that supports cffi 0.6
-    if isinstance(cairocffi.FORMAT_ARGB32, basestring):
+    if isinstance(cairocffi.FORMAT_ARGB32, str):
         return
 
     ffi = cffi.FFI()

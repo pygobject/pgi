@@ -19,7 +19,6 @@ from pgi.util import escape_name, unescape_name, escape_builtin
 from pgi.codegen.utils import CodeBlock, parse_code
 from pgi.gtype import PGType
 from pgi.clib.gobject import GType
-from pgi.repository import Gtk
 
 
 class PGIMisc(unittest.TestCase):
@@ -79,6 +78,7 @@ if 2:
         self.assertFalse(set(cffi) - set(ct))
 
     def test_docstring(self):
+        from pgi.repository import Gtk
         self.assertTrue("get_label" in Gtk.Button.get_label.__doc__)
         self.assertTrue("-> str" in Gtk.Button.get_label.__doc__)
         self.assertTrue("set_label" in Gtk.Button.set_label.__doc__)
@@ -86,6 +86,7 @@ if 2:
         self.assertTrue("label: str" in Gtk.Button.set_label.__doc__)
 
     def test_signal_property_object(self):
+        from pgi.repository import Gtk
         sigs = Gtk.Window.signals
         sig = sigs.set_focus
         self.assertEqual(sig.name, "set-focus")
@@ -95,6 +96,7 @@ if 2:
         self.assertEqual(sig.return_type, PGType.from_name("void"))
 
     def test_signal_property_interface(self):
+        from pgi.repository import Gtk
         sigs = Gtk.TreeModel.signals
         sig = sigs.row_changed
         self.assertEqual(sig.name, "row-changed")

@@ -42,7 +42,7 @@ class CodeBlock(object):
         for line, l in self._lines:
             block.write_line(line, level + l)
 
-        for name, obj in self._deps.iteritems():
+        for name, obj in _compat.iteritems(self._deps):
             block.add_dependency(name, obj)
 
     def write_line(self, line, level=0):
@@ -76,7 +76,7 @@ class CodeBlock(object):
         code = []
         if self._deps:
             code.append("# dependencies:")
-        for k, v in self._deps.iteritems():
+        for k, v in _compat.iteritems(self._deps):
             code.append("#   %s: %r" % (k, v))
         code.append(str(self))
         code = "\n".join(code)

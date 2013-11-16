@@ -10,6 +10,7 @@ import re
 from ctypes import cast, POINTER, c_void_p
 
 from . import const
+from ._compat import builtins
 from .clib.gir import GITypeTag, GIInfoType
 from .clib.glib import free
 
@@ -187,8 +188,7 @@ def import_module(namespace):
 
 def escape_builtin(text):
     """Escape a name so it doesn't shadow a builtin"""
-    import __builtin__
-    while text in dir(__builtin__):
+    while text in dir(builtins):
         text = text + "_"
     return text
 
@@ -198,6 +198,12 @@ _KWD_RE = re.compile("^(%s)$" % "|".join(keyword.kwlist))
 
 def escape_keyword(text, reg=_KWD_RE):
     return reg.sub(r"\1_", text)
+
+
+def encode(string):
+    if not isinstance(string, bytes):
+        return string.encode("utf-8")
+    return string
 
 
 def unescape_keyword(text):

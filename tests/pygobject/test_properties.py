@@ -8,7 +8,7 @@
 import unittest
 
 import gi
-gi.require_version("Gtk", "3.0")
+gi.require_version(b"Gtk", b"3.0")
 from gi.repository import Gtk, Gdk
 from pgi import _compat
 

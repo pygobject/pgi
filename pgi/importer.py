@@ -27,6 +27,8 @@ def require_version(namespace, version):
 
     repo = GIRepositoryPtr()
 
+    namespace = util.encode(namespace)
+    version = util.encode(version)
     namespaces = util.array_to_list(repo.get_loaded_namespaces())
 
     if namespace in namespaces:
@@ -77,6 +79,7 @@ class Importer(object):
     def find_module(self, fullname, path):
         namespace = extract_namespace(fullname)
         if namespace:
+            namespace = util.encode(namespace)
             if GIRepositoryPtr().enumerate_versions(namespace):
                 return self
 
@@ -84,7 +87,7 @@ class Importer(object):
     def load_module(self, fullname):
         global _versions
 
-        namespace = extract_namespace(fullname)
+        namespace = util.encode(extract_namespace(fullname))
         repository = GIRepositoryPtr()
 
         if namespace in _versions:
@@ -107,7 +110,7 @@ class Importer(object):
         # No strictly needed here, but most things will fail during use
         library = repository.get_shared_library(namespace)
         if library:
-            library = library.split(",")[0]
+            library = library.split(b",")[0]
             try:
                 CDLL(library)
             except OSError:
