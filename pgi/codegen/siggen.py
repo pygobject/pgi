@@ -5,7 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from . import ACTIVE_BACKENDS
+from .backend import get_backend
 from .utils import CodeBlock
 from .cbargs import get_cbarg_class
 from .cbreturn import get_cbreturn_class
@@ -24,10 +24,7 @@ def build_docstring(cb_name, args):
 
 
 def generate_callback(info):
-    for backend in ACTIVE_BACKENDS:
-        if backend.NAME == "ctypes":
-            break
-    backend = backend()
+    backend = get_backend("ctypes")()
 
     args = info.get_args()
     arg_types = [a.get_type() for a in args]
@@ -141,16 +138,13 @@ def $cb_wrapper($dummy, $args):
 
 
 def generate_signal_callback(info):
-    for backend in ACTIVE_BACKENDS:
-        if backend.NAME == "ctypes":
-            break
-
     args = info.get_args()
     arg_types = [a.get_type() for a in args]
+    backend = get_backend("ctypes")()
 
     cb_func = None
     try:
-        cb_func = _generate_signal_callback(backend(), info, args, arg_types)
+        cb_func = _generate_signal_callback(backend, info, args, arg_types)
     except NotImplementedError:
         raise
 

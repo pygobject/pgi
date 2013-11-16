@@ -7,8 +7,12 @@
 
 import unittest
 
+from tests import skipUnlessCairo
+
+import pgi
 from pgi._compat import StringIO
 
+from pgi.foreign import get_foreign
 from pgi.codegen import ctypes_backend
 try:
     from pgi.codegen import cffi_backend
@@ -105,3 +109,11 @@ if 2:
         self.assertEqual(sig.instance_type, Gtk.TreeModel.__gtype__)
         self.assertEqual(sig.flags, 2)
         self.assertEqual(sig.return_type, PGType.from_name("void"))
+
+    def test_check_foreign(self):
+        self.assertRaises(ValueError, pgi.check_foreign, "foo", "bar")
+
+    @skipUnlessCairo
+    def test_get_foreing(self):
+        foreign = get_foreign("cairo", "Context")
+        self.assertTrue(foreign)

@@ -6,7 +6,7 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from .fields import get_field_class
-from . import ACTIVE_BACKENDS
+from .backend import list_backends
 from .utils import CodeBlock
 
 
@@ -69,7 +69,7 @@ def _generate_field_access(info, setter=True):
 
     func = None
     messages = []
-    for backend in ACTIVE_BACKENDS:
+    for backend in list_backends():
         instance = backend()
         try:
             if setter:

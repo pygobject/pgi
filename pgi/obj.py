@@ -21,9 +21,8 @@ from .gtype import PGType
 from .properties import PropertyAttribute, PROPS_NAME
 from .constant import ConstantAttribute
 from .signals import SignalsAttribute
-from .codegen.construct import generate_constructor
-from .codegen.funcgen import generate_function
-from .codegen.siggen import generate_signal_callback
+from .codegen import generate_function, generate_constructor
+from .codegen import generate_signal_callback
 
 
 class _Object(object):

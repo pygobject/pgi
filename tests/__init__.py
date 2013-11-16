@@ -57,7 +57,7 @@ def skipIfPyPy(message):
 
 
 def skipUnlessCairo(func):
-    return unittest.skipIf(_has_cairo, "not cairo")(func)
+    return unittest.skipUnless(_has_cairo, "not cairo")(func)
 
 
 def FIXME(func):
@@ -113,13 +113,14 @@ def test(load_gi, backend=None, strict=False, filter_=None):
 
     _is_gi = load_gi
     _is_pypy = platform.python_implementation() == "PyPy"
+    _has_cairo = True
 
     if not load_gi:
         try:
             import cairocffi
             cairocffi.install_as_pycairo()
         except ImportError:
-            pass
+            _has_cairo = False
         import pgi
         pgi.install_as_gi()
         try:
@@ -154,11 +155,6 @@ def test(load_gi, backend=None, strict=False, filter_=None):
 
         GIOverflowError = OverflowError
     print(hl[:80])
-
-    if load_gi:
-        _has_cairo = True
-    else:
-        _has_cairo = gi.check_foreign("cairo", "Context") is not None
 
     # gi uses logging
     logging.disable(logging.ERROR)

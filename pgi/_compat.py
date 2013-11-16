@@ -34,6 +34,7 @@ if PY3:
 
     from io import StringIO
     import builtins
+    builtins = builtins
 elif PY2:
     string_types = (str, unicode)
     text_type = unicode
@@ -63,5 +64,6 @@ elif PY2:
     StringIO = StringIO
 
     import __builtin__ as builtins
+    builtins = builtins
 else:
     assert 0

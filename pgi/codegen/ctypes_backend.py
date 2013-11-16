@@ -7,6 +7,7 @@
 
 import ctypes
 
+from . import generate_callback
 from .backend import Backend, VariableFactory
 from .utils import CodeBlock, parse_with_objects
 
@@ -24,6 +25,12 @@ from pgi.util import import_attribute
 
 
 def typeinfo_to_ctypes(info, return_value=False):
+    """Maps a GITypeInfo() to a ctypes type.
+
+    The ctypes types have to be different in the case of return values
+    since ctypes does 'auto unboxing' in some cases which gives
+    us no chance to free memory if there is a ownership transfer.
+    """
 
     tag = info.tag.value
     ptr = info.is_pointer
@@ -923,7 +930,6 @@ if not callable($py_cb):
 """, py_cb=name)["py_cb"]
 
     def pack(self, name):
-        from pgi.codegen.siggen import generate_callback
         interface = gicast(self.type.get_interface(), GICallableInfoPtr)
         pack_func, docstring = generate_callback(interface)
 

@@ -9,22 +9,25 @@ from . import const
 from ._compat import iterkeys
 from .importer import require_version, get_required_version
 from .codegen import set_backend
-from . import foreign
+from .foreign import check_foreign
 
 
 require_version = require_version
 get_required_version = get_required_version
 set_backend = set_backend
+check_foreign = check_foreign
 
 version_info = const.VERSION
 __version__ = ".".join(map(str, version_info))
 
 
-def check_foreign(namespace, name):
-    return foreign.get_foreign(namespace, name) is not None
-
-
 def check_version(version):
+    """Takes a version string or tuple and raises ValueError in case
+    the passed version is newer than the current version of pgi.
+
+    Keep in mind that the pgi version is different from the pygobject one.
+    """
+
     if isinstance(version, basestring):
         version = tuple(map(int, version.split(".")))
 

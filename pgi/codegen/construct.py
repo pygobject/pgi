@@ -12,7 +12,7 @@ Compared to g_object_newv, this saves us two function calls per parameter.
 """
 
 
-from . import ACTIVE_BACKENDS
+from .backend import get_backend
 from .utils import CodeBlock
 from pgi.clib.gir import GITypeTag, GIInfoType
 from pgi.util import escape_builtin, unescape_name
@@ -178,17 +178,18 @@ def init($values):
 
 
 def generate_constructor(gtype, specs, names, _cache={}):
+    # The generated code depends on the gtype / class and the order
+    # of the arguments that can be passed to it. Cache the globally here.
+    # Todo: Better cache fewer in each class.
+
     key = tuple([gtype] + names)
     if key in _cache:
         return _cache[key]
     elif len(_cache) > 30:
         _cache.clear()
 
-    for backend in ACTIVE_BACKENDS:
-        if backend.NAME == "ctypes":
-            break
-    backend = backend()
-
+    backend = get_backend("ctypes")()
     func = _generate_constructor(gtype, specs, names, backend)
+
     _cache[key] = func
     return func

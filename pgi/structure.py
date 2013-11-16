@@ -6,7 +6,7 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from .clib.ctypesutil import gicast, memcpy
-from .codegen.fieldgen import generate_field_getter, generate_field_setter
+from .codegen import generate_field_getter, generate_field_setter
 from .clib.gir import GIUnionInfoPtr, GIFieldInfoFlags, GIStructInfoPtr
 from .clib.glib import g_try_malloc0, free
 from .gtype import PGType

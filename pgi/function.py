@@ -7,7 +7,7 @@
 
 from .clib.ctypesutil import gicast
 from .clib.gir import GIFunctionInfoPtr, GIFunctionInfoFlags
-from .codegen.funcgen import generate_function
+from .codegen import generate_function
 
 
 def FunctionAttribute(info):
