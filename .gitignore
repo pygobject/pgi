@@ -8,3 +8,4 @@
 *.o
 .libs
 docs/_html
+MANIFEST

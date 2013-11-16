@@ -8,6 +8,8 @@
 from __future__ import print_function
 
 import os
+import sys
+import inspect
 import unittest
 import logging
 import platform
@@ -70,6 +72,32 @@ def FIXME(func):
             _fixme[f] = func
             return unittest.skip("FIXME")(f)
         return wrap
+
+
+def discover(base, dir_):
+    """Discover test subclasses.
+
+    base gets added to sys.path; dir_ is the package name.
+    """
+
+    test_classes = []
+
+    sys.path.insert(0, base)
+    for entry in os.listdir(os.path.join(base, dir_)):
+        if not entry.startswith("test_") or not entry.endswith(".py"):
+            continue
+        mod = dir_ + "." + entry[:-3]
+        loaded = getattr(__import__(mod), entry[:-3])
+        var = vars(loaded)
+        for key in var:
+            value = getattr(loaded, key)
+            if not inspect.isclass(value):
+                continue
+            if issubclass(value, unittest.TestCase):
+                test_classes.append(value)
+    sys.path.pop(0)
+
+    return test_classes
 
 
 def test(load_gi, backend=None, strict=False, filter_=None):
@@ -144,26 +172,11 @@ def test(load_gi, backend=None, strict=False, filter_=None):
             GLib.LogLevelFlags.LEVEL_WARNING)
 
     current_dir = os.path.join(os.path.dirname(__file__))
-
-    tests = []
-
-    loader = unittest.TestLoader()
-    tests.extend(loader.discover(os.path.join(current_dir, "pygobject")))
-
+    tests = discover(current_dir, "tests_pygobject")
     if not load_gi:
-        loader = unittest.TestLoader()
-        tests.extend(loader.discover(os.path.join(current_dir, "pgi")))
+        tests.extend(discover(current_dir, "tests_pgi"))
+    tests = [unittest.makeSuite(t) for t in tests]
 
-    def flatten_tests(suites):
-        tests = []
-        try:
-            for suite in suites:
-                tests.extend(flatten_tests(suite))
-        except TypeError:
-            return [suites]
-        return tests
-
-    tests = flatten_tests(tests)
     if filter_ is not None:
         tests = filter(lambda t: filter_(t.__class__.__name__), tests)
 
