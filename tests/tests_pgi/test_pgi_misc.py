@@ -20,7 +20,7 @@ try:
 except ImportError:
     cffi_backend = None
 from pgi.util import escape_name, unescape_name, escape_builtin
-from pgi.codegen.utils import CodeBlock, parse_code
+from pgi.codegen.utils import CodeBlock, parse_code, parse_with_objects
 from pgi.gtype import PGType
 from pgi.clib.gobject import GType
 
@@ -69,6 +69,15 @@ if 2:
 
         self.assertEqual(str(n), "if 2:\n    if 1:\n        do()")
         self.assertTrue("test" in n.get_dependencies())
+
+    def test_parse_with_objects(self):
+        some_obj = object()
+        some_int = 42
+        block, mapping = parse_with_objects(
+            "$foo=$bar", lambda: "X", foo=some_obj, bar=some_int)
+
+        self.assertEqual(str(block), "X=42")
+        self.assertEqual(block.get_dependencies().items(), [("X", some_obj)])
 
     def test_gtype(self):
         self.assertEqual(PGType(0), PGType(GType(0)))

@@ -955,7 +955,7 @@ class CArray(BaseArray):
 
     def check(self, name):
         if self.type.array_fixed_size != -1:
-            length = str(self.type.array_fixed_size)
+            length = self.type.array_fixed_size
             self.parse("""
 if len($l) != $length:
     raise ValueError("Expected list of length %d, got $length" % len($l))
@@ -970,7 +970,7 @@ if len($l) != $length:
             packed_length = l.pack(length)
             l.block.write_into(self.block)
         elif self.type.array_fixed_size != -1:
-            length = str(self.type.array_fixed_size)
+            length = self.type.array_fixed_size
             packed_length = ""
         else:
             length = self.parse("$len = len($inp)", inp=name)["len"]
@@ -1022,7 +1022,7 @@ $out = $array[:$length.value]
         elif self.type.array_fixed_size != -1:
             return self.parse("""
 $out = $array[:$length]
-""", array=data, length=str(self.type.array_fixed_size))["out"]
+""", array=data, length=self.type.array_fixed_size)["out"]
         else:
             return self.parse("""
 $list = []
@@ -1049,7 +1049,7 @@ $array = ctypes.c_void_p()
         elif self.type.array_fixed_size != -1:
             param_type = self.type.get_param_type(0)
             ctypes_type = typeinfo_to_ctypes(param_type)
-            length = str(self.type.array_fixed_size)
+            length = self.type.array_fixed_size
 
             return self.parse("""
 $data = ($ctypes_type * $length)()

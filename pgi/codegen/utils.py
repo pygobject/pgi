@@ -152,10 +152,17 @@ def parse_code(code, var_factory, **kwargs):
 def parse_with_objects(code, var, **kwargs):
     """Parse code and include non string/codeblock kwargs as
     dependencies.
+
+    int/long will be inlined.
+
+    Returns a CodeBlock and the resulting variable mapping.
     """
 
     deps = {}
     for key, value in kwargs.items():
+        if isinstance(value, (int, long)):
+            value = str(value)
+
         if not isinstance(value, (basestring, CodeBlock)):
             new_var = var()
             deps[new_var] = value
