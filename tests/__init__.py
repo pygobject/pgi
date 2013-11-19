@@ -171,19 +171,22 @@ def test(load_gi, backend=None, strict=False, filter_=None):
     tests = discover(current_dir, "tests_pygobject")
     if not load_gi:
         tests.extend(discover(current_dir, "tests_pgi"))
-    tests = [unittest.makeSuite(t) for t in tests]
 
     if filter_ is not None:
-        tests = filter(lambda t: filter_(t.__class__.__name__), tests)
+        tests = filter(lambda t: filter_(t.__name__), tests)
 
-    # collected by the FIXME decorator
-    print(headline("FIXME"))
-    for item, desc in sorted(_fixme.items(), key=lambda x: repr(x)):
-        print(" -> %s.%s" % (item.__module__, item.__name__), end="")
-        if desc:
-            print("(%s)" % desc)
-        else:
-            print()
+    tests = [unittest.makeSuite(t) for t in tests]
+
+    # only in case all get run, so filtered results don't get spammed
+    if filter_ is None:
+        # collected by the FIXME decorator
+        print(headline("FIXME"))
+        for item, desc in sorted(_fixme.items(), key=lambda x: repr(x)):
+            print(" -> %s.%s" % (item.__module__, item.__name__), end="")
+            if desc:
+                print("(%s)" % desc)
+            else:
+                print()
 
     run = unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite(tests))
 
