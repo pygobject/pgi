@@ -65,6 +65,8 @@ def typeinfo_to_ctypes(info, return_value=False):
             return gpointer
         elif tag == GITypeTag.ERROR:
             return GErrorPtr
+        elif tag == GITypeTag.GLIST:
+            return GListPtr
         else:
             if tag in mapping:
                 return ctypes.POINTER(mapping[tag])
@@ -638,6 +640,34 @@ class Union(BaseInterface):
 $union = object.__new__($union_class)
 $union._obj = $value
 """, union_class=self._import_type(), value=name)["union"]
+
+
+class GList(BaseType):
+    GI_TYPE_TAG = GITypeTag.GLIST
+
+    def check(self, name):
+        pass
+
+    def pack(self, name):
+        raise NotImplementedError
+
+    def unpack(self, name):
+        param_type = self.type.get_param_type(0)
+        ctypes_type = typeinfo_to_ctypes(param_type)
+
+        return self.parse("""
+$out = []
+$elm = $in_
+while $elm:
+    $entry = $elm.contents
+    $out.append($ctypes_type($entry.data or 0).value)
+    $elm = $entry.next
+""", in_=name, ctypes_type=ctypes_type)["out"]
+
+    def free(self, name):
+        return self.parse("""
+$list_.free()
+""", list_=name)
 
 
 class Void(BaseType):

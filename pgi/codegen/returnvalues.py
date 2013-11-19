@@ -199,6 +199,17 @@ class GListReturn(ReturnValue):
     TAG = GITypeTag.GLIST
     py_type = list
 
+    def post_call(self, name):
+        var = self.get_type()
+        out = var.unpack(name)
+        if self.transfer_container():
+            var.free(name)
+        elif self.transfer_everything():
+            #FIXME: leaking
+            var.free(name)
+
+        return var.block, out
+
 
 class FilenameReturnValue(Utf8ReturnValue):
     TAG = GITypeTag.FILENAME

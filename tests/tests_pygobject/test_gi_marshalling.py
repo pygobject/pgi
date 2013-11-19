@@ -1679,3 +1679,63 @@ class TestGStrv(unittest.TestCase):
 
     def test_gstrv_inout(self):
         self.assertEqual(['-1', '0', '1', '2'], GIMarshallingTests.gstrv_inout(['0', '1', '2']))
+
+
+@skipUnlessGIMarshallingTests
+class TestGList(unittest.TestCase):
+
+    def test_glist_int_none_return(self):
+        self.assertEqual([-1, 0, 1, 2], GIMarshallingTests.glist_int_none_return())
+
+    def test_glist_uint32_none_return(self):
+        self.assertEqual([0, GObject.G_MAXUINT32], GIMarshallingTests.glist_uint32_none_return())
+
+    def test_glist_utf8_none_return(self):
+        self.assertEqual(['0', '1', '2'], GIMarshallingTests.glist_utf8_none_return())
+
+    def test_glist_utf8_container_return(self):
+        self.assertEqual(['0', '1', '2'], GIMarshallingTests.glist_utf8_container_return())
+
+    def test_glist_utf8_full_return(self):
+        self.assertEqual(['0', '1', '2'], GIMarshallingTests.glist_utf8_full_return())
+
+    @FIXME
+    def test_glist_int_none_in(self):
+        GIMarshallingTests.glist_int_none_in(Sequence((-1, 0, 1, 2)))
+
+        self.assertRaises(TypeError, GIMarshallingTests.glist_int_none_in, Sequence((-1, '0', 1, 2)))
+
+        self.assertRaises(TypeError, GIMarshallingTests.glist_int_none_in, 42)
+        self.assertRaises(TypeError, GIMarshallingTests.glist_int_none_in, None)
+
+    @FIXME
+    def test_glist_uint32_none_in(self):
+        GIMarshallingTests.glist_uint32_none_in(Sequence((0, GObject.G_MAXUINT32)))
+
+    @FIXME
+    def test_glist_utf8_none_in(self):
+        GIMarshallingTests.glist_utf8_none_in(Sequence(('0', '1', '2')))
+
+    @FIXME
+    def test_glist_utf8_none_out(self):
+        self.assertEqual(['0', '1', '2'], GIMarshallingTests.glist_utf8_none_out())
+
+    @FIXME
+    def test_glist_utf8_container_out(self):
+        self.assertEqual(['0', '1', '2'], GIMarshallingTests.glist_utf8_container_out())
+
+    @FIXME
+    def test_glist_utf8_full_out(self):
+        self.assertEqual(['0', '1', '2'], GIMarshallingTests.glist_utf8_full_out())
+
+    @FIXME
+    def test_glist_utf8_none_inout(self):
+        self.assertEqual(['-2', '-1', '0', '1'], GIMarshallingTests.glist_utf8_none_inout(Sequence(('0', '1', '2'))))
+
+    @FIXME
+    def test_glist_utf8_container_inout(self):
+        self.assertEqual(['-2', '-1', '0', '1'], GIMarshallingTests.glist_utf8_container_inout(('0', '1', '2')))
+
+    @FIXME
+    def test_glist_utf8_full_inout(self):
+        self.assertEqual(['-2', '-1', '0', '1'], GIMarshallingTests.glist_utf8_full_inout(('0', '1', '2')))

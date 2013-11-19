@@ -440,6 +440,10 @@ class GListArgument(GIArgument):
     TAG = GITypeTag.GLIST
     py_type = list
 
+    def pre_call(self):
+        var = self.get_type()
+        return var.block
+
 
 class Utf8Argument(GIArgument):
     TAG = GITypeTag.UTF8
