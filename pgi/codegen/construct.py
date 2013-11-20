@@ -173,23 +173,23 @@ def init($values):
         func_body=body, return_var=return_var)
 
     func = main.compile()["init"]
+    func._code = main
 
     return func
 
 
-def generate_constructor(gtype, specs, names, _cache={}):
+def generate_constructor(cls, names):
     # The generated code depends on the gtype / class and the order
-    # of the arguments that can be passed to it. Cache the globally here.
-    # Todo: Better cache fewer in each class.
+    # of the arguments that can be passed to it.
 
-    key = tuple([gtype] + names)
-    if key in _cache:
-        return _cache[key]
-    elif len(_cache) > 30:
-        _cache.clear()
+    cache = cls._constructors
+    if names in cache:
+        return cache[names]
+    elif len(cache) > 3:
+        cache.clear()
 
     backend = get_backend("ctypes")()
-    func = _generate_constructor(gtype, specs, names, backend)
+    func = _generate_constructor(cls.__gtype__, cls.props, names, backend)
 
-    _cache[key] = func
+    cache[names] = func
     return func

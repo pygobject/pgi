@@ -26,10 +26,9 @@ from .codegen import generate_signal_callback
 
 
 class _Object(object):
-    _obj = 0
+
     __gtype__ = None
     __signal_cb_ref = {}
-    __cls = None
 
     def _ref(self):
         gobject.ref_sink(self._obj)
@@ -109,17 +108,20 @@ class _Object(object):
 
 class Object(_Object):
 
+    _obj = 0
     __weak = {}
+    _constructors = None
 
-    def __init__(self, *args, **kwargs):
-        if self.__gtype__.is_abstract():
-            raise TypeError("cannot create instance of abstract type %r" %
-                            self.__gtype__.name)
+    def __init__(self, **kwargs):
+        cls = type(self)
+        gtype = cls.__gtype__
+
+        if gtype.is_abstract():
+            raise TypeError("Cannot create instance of abstract type %r" %
+                            gtype.name)
 
         names = kwargs.keys()
-        specs = type(self).props
-        constructor = generate_constructor(self.__gtype__, specs, names)
-        obj = constructor(*kwargs.values())
+        obj = generate_constructor(cls, tuple(names))(*kwargs.values())
 
         # sink unowned objects
         if self._unowned:
@@ -282,6 +284,9 @@ def ObjectAttribute(obj_info):
 
     # GType
     cls.__gtype__ = PGType(obj_info.g_type)
+
+    # Constructor cache
+    cls._constructors = {}
 
     # Properties
     setattr(cls, PROPS_NAME, PropertyAttribute(obj_info))
