@@ -1699,7 +1699,6 @@ class TestGList(unittest.TestCase):
     def test_glist_utf8_full_return(self):
         self.assertEqual(['0', '1', '2'], GIMarshallingTests.glist_utf8_full_return())
 
-    @FIXME
     def test_glist_int_none_in(self):
         GIMarshallingTests.glist_int_none_in(Sequence((-1, 0, 1, 2)))
 
@@ -1708,7 +1707,6 @@ class TestGList(unittest.TestCase):
         self.assertRaises(TypeError, GIMarshallingTests.glist_int_none_in, 42)
         self.assertRaises(TypeError, GIMarshallingTests.glist_int_none_in, None)
 
-    @FIXME
     def test_glist_uint32_none_in(self):
         GIMarshallingTests.glist_uint32_none_in(Sequence((0, GObject.G_MAXUINT32)))
 

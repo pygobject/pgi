@@ -441,7 +441,17 @@ class GListArgument(GIArgument):
     py_type = list
 
     def pre_call(self):
+        if self.is_direction_in():
+            var = self.get_type()
+            self.call_var = var.pack(self.name)
+            return var.block
+        else:
+            raise NotImplementedError
+
+    def post_call(self):
         var = self.get_type()
+        if self.transfer_nothing():
+            var.free(self.call_var)
         return var.block
 
 

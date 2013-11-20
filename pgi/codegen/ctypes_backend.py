@@ -11,6 +11,7 @@ from . import generate_callback
 from .backend import Backend, VariableFactory
 from .utils import CodeBlock, parse_with_objects
 
+from pgi.clib import glib
 from pgi.clib.ctypesutil import gicast, find_library
 from pgi.clib.gir import GICallableInfoPtr, GIStructInfoPtr
 from pgi.clib.gir import GIRepositoryPtr, GITypeTag, GIInfoType, GIArrayType
@@ -144,6 +145,16 @@ glib.free($ptr)
 """, ptr=name)
 
         self.block.add_dependency("glib", glib)
+
+    def pack_pointer(self, name):
+        """Returns a pointer containing the value.
+
+        This only works for int32/uint32/utf-8..
+        """
+
+        return self.parse("""
+raise TypeError('Can\\'t convert %(type_name)s to pointer: %%r' %% $in_)
+""" % {"type_name": type(self).__name__}, in_=name)["in_"]
 
 
 class BasicType(BaseType):
@@ -317,6 +328,11 @@ $c_value = ctypes.c_int32($value)
 $value = ctypes.c_int32()
 """)["value"]
 
+    def pack_pointer(self, name):
+        return self.parse("""
+$ptr = $in_
+""", in_=name)["ptr"]
+
 
 class UInt32(BasicType):
     GI_TYPE_TAG = GITypeTag.UINT32
@@ -344,6 +360,11 @@ $c_value = ctypes.c_uint32($value)
 # new uint32
 $value = ctypes.c_uint32()
 """)["value"]
+
+    def pack_pointer(self, name):
+        return self.parse("""
+$ptr = $in_
+""", in_=name)["ptr"]
 
 
 class Int64(BasicType):
@@ -649,7 +670,20 @@ class GList(BaseType):
         pass
 
     def pack(self, name):
-        raise NotImplementedError
+        param_type_info = self.type.get_param_type(0)
+        param_type = self.get_type(param_type_info)
+
+        param_in = self.var()
+        param_out = param_type.pack_pointer(param_type.check(param_in))
+
+        return self.parse("""
+$new = $GListPtr()
+for $item in $seq:
+    $param_check_pack
+    $new = $new.prepend($item_out)
+$new = $new.reverse()
+""", seq=name, GListPtr=glib.GListPtr, item=param_in,
+param_check_pack=param_type.block, item_out=param_out)["new"]
 
     def unpack(self, name):
         param_type = self.type.get_param_type(0)
@@ -763,6 +797,9 @@ else:
     $string = $value
 """, value=name)["string"]
 
+    def pack_in(self, name):
+        return name
+
     def pack(self, name):
         return self.parse("""
 $c_value = ctypes.c_char_p($value)
@@ -793,6 +830,11 @@ $str_value = ctypes.c_char_p($value).value
         return self.parse("""
 $value = ctypes.c_char_p()
 """)["value"]
+
+    def pack_pointer(self, name):
+        return self.parse("""
+$ptr = ord($in_)
+""", in_=name)["ptr"]
 
 
 class Filename(Utf8):
