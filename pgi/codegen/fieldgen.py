@@ -5,6 +5,8 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
+import traceback
+
 from .fields import get_field_class
 from .backend import list_backends
 from .utils import CodeBlock
@@ -76,8 +78,8 @@ def _generate_field_access(info, setter=True):
                 func = _generate_field_setter(info, info_type, instance)
             else:
                 func = _generate_field_getter(info, info_type, instance)
-        except NotImplementedError as e:
-            messages.append("%s: %s" % (backend.NAME, e.message))
+        except NotImplementedError:
+            messages.append("%s: %s" % (backend.NAME, traceback.format_exc()))
         else:
             break
 

@@ -5,6 +5,8 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
+import traceback
+
 from .backend import list_backends
 from .utils import CodeBlock
 from pgi.util import escape_name, escape_builtin
@@ -189,8 +191,8 @@ def generate_function(info, method=False, throws=False):
         try:
             func = _generate_function(instance, info, arg_infos, arg_types,
                                       return_type, method, throws)
-        except NotImplementedError as e:
-            messages.append("%s: %s" % (backend.NAME, e.message))
+        except NotImplementedError:
+            messages.append("%s: %s" % (backend.NAME, traceback.format_exc()))
         else:
             break
 
