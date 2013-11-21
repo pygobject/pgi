@@ -10,6 +10,7 @@ from pgi.clib.gir import GITransfer
 from pgi.clib.gobject import GCallback
 from pgi.gtype import PGType
 from pgi.gerror import PGError
+from pgi.util import import_attribute
 
 
 class Argument(object):
@@ -72,6 +73,7 @@ class ErrorArgument(Argument):
 class GIArgument(Argument):
 
     TAG = None
+    py_type = None
 
     def __init__(self, name, arguments, backend, info, type_):
         Argument.__init__(self, arguments, backend)
@@ -80,13 +82,29 @@ class GIArgument(Argument):
         self.name = name
         self.type = type_
         self.call_var = name
-        self.direction = self.info.direction.value
+
+        # param type case
+        if self.info is not None:
+            self.direction = self.info.direction.value
+        else:
+            self.direction = None
 
         if self.is_direction_in():
             self.in_var = name
 
     def get_type(self):
         return self.backend.get_type(self.type, self.info.may_be_null)
+
+    def get_param_type(self, index):
+        """Returns a ReturnValue instance for param type 'index'"""
+
+        assert index in (0, 1)
+
+        type_info = self.type.get_param_type(index)
+        type_cls = get_argument_class(type_info)
+        instance = type_cls(None, [], self.backend, None, type_info)
+        instance.setup()
+        return instance
 
     def is_direction_in(self):
         return self.direction in (GIDirection.INOUT, GIDirection.IN)
@@ -142,6 +160,9 @@ class ArrayArgument(GIArgument):
     TAG = GITypeTag.ARRAY
     py_type = list
 
+    def setup(self):
+        self.py_type = [self.get_param_type(0).py_type]
+
     @classmethod
     def get_class(cls, type_):
         type_ = type_.array_type.value
@@ -155,6 +176,8 @@ class ArrayArgument(GIArgument):
 class CArrayArgument(ArrayArgument):
 
     def setup(self):
+        super(CArrayArgument, self).setup()
+
         # mark other arg as aux so we handle it alone
         if self.type.array_length != -1:
             aux = self.args[self.type.array_length]
@@ -205,6 +228,14 @@ class BaseInterfaceArgument(GIArgument):
     TAG = GITypeTag.INTERFACE
     py_type = object
 
+    def setup(self):
+        iface = self.type.get_interface()
+        try:
+            self.py_type = import_attribute(iface.namespace, iface.name)
+        except NotImplementedError:
+            # fall back to object
+            pass
+
     @classmethod
     def get_class(cls, type_):
         iface = type_.get_interface()
@@ -228,6 +259,8 @@ class CallbackArgument(BaseInterfaceArgument):
     py_type = type(lambda: None)
 
     def setup(self):
+        super(CallbackArgument, self).setup()
+
         self._user_data = None
         if self.info.closure != -1:
             self._user_data = self.args[self.info.closure]
@@ -439,6 +472,9 @@ class VoidArgument(GIArgument):
 class GListArgument(GIArgument):
     TAG = GITypeTag.GLIST
     py_type = list
+
+    def setup(self):
+        self.py_type = [self.get_param_type(0).py_type]
 
     def pre_call(self):
         if self.is_direction_in():

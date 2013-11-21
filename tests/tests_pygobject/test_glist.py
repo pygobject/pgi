@@ -27,7 +27,7 @@ class GListTest(unittest.TestCase):
 
     def test_corner_cases(self):
         self.assertRaises(
-            TypeError,GIMarshallingTests.glist_int_none_in, [object()])
+            TypeError, GIMarshallingTests.glist_int_none_in, [object()])
 
         self.assertRaises(tests.GIOverflowError,
             GIMarshallingTests.glist_int_none_in, [GObject.G_MAXUINT64])

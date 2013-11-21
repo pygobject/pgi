@@ -14,22 +14,41 @@ from .arguments import get_argument_class, ErrorArgument
 from .returnvalues import get_return_class
 
 
+def get_type_name(type_):
+    """Gives a name for a type that is suitable for a docstring.
+
+    int -> "int"
+    Gtk.Window -> "Gtk.Window"
+    [int] -> "[int]"
+    {int: Gtk.Button} -> "{int: Gtk.Button}"
+    """
+
+    if isinstance(type_, basestring):
+        return type_
+    elif isinstance(type_, list):
+        assert len(type_) == 1
+        return "[%s]" % get_type_name(type_[0])
+    elif isinstance(type_, dict):
+        assert len(type_) == 1
+        key, value = type_.popitem()
+        return "{%s: %s}" % (get_type_name(key), get_type_name(value))
+    elif type_.__module__ in "__builtin__":
+        return type_.__name__
+    else:
+        return "%s.%s" % (type_.__module__, type_.__name__)
+
+
 def build_docstring(func_name, args, ret, throws):
     """Create a docstring in the form:
         name(in_name: type) -> (ret_type, out_name: type)
     """
-
-    def get_type_name(x):
-        if isinstance(x.py_type, basestring):
-            return x.py_type
-        return x.py_type.__name__
 
     out_args = []
     if ret:
         if ret.py_type is None:
             out_args.append("unknown")
         else:
-            out_args.append(get_type_name(ret))
+            out_args.append(get_type_name(ret.py_type))
 
     in_args = []
     for arg in args:
@@ -40,13 +59,15 @@ def build_docstring(func_name, args, ret, throws):
             if arg.py_type is None:
                 in_args.append(arg.in_var)
             else:
-                in_args.append("%s: %s" % (arg.in_var, get_type_name(arg)))
+                in_args.append(
+                    "%s: %s" % (arg.in_var, get_type_name(arg.py_type)))
 
         if arg.out_var:
             if arg.py_type is None:
                 out_args.append(arg.name)
             else:
-                out_args.append("%s: %s" % (arg.name, get_type_name(arg)))
+                out_args.append(
+                    "%s: %s" % (arg.name, get_type_name(arg.py_type)))
 
     in_def = ", ".join(in_args)
 

@@ -8,11 +8,12 @@
 from pgi.clib.gir import GITypeTag, GIInfoType, GITransfer, GIArrayType
 from pgi.gtype import PGType
 from pgi.gerror import PGError
+from pgi.util import import_attribute
 
 
 class ReturnValue(object):
-    TAG = None
 
+    TAG = None
     py_type = None
 
     def __init__(self, info, type_, args, backend):
@@ -31,6 +32,17 @@ class ReturnValue(object):
 
     def setup(self):
         pass
+
+    def get_param_type(self, index):
+        """Returns a ReturnValue instance for param type 'index'"""
+
+        assert index in (0, 1)
+
+        type_info = self.type.get_param_type(index)
+        type_cls = get_return_class(type_info)
+        instance = type_cls(None, type_info, [], self.backend)
+        instance.setup()
+        return instance
 
     def pre_call(self):
         pass
@@ -53,7 +65,6 @@ class ReturnValue(object):
 
 class BooleanReturnValue(ReturnValue):
     TAG = GITypeTag.BOOLEAN
-
     py_type = bool
 
     def post_call(self, name):
@@ -83,6 +94,9 @@ class ArrayReturn(ReturnValue):
     TAG = GITypeTag.ARRAY
     py_type = list
 
+    def setup(self):
+        self.py_type = [self.get_param_type(0).py_type]
+
     @classmethod
     def get_class(cls, type_):
         value = type_.array_type.value
@@ -96,6 +110,8 @@ class ArrayReturn(ReturnValue):
 class CArrayReturn(ArrayReturn):
 
     def setup(self):
+        super(CArrayReturn, self).setup()
+
         if self.type.array_length != -1:
             aux = self.args[self.type.array_length]
             aux.is_aux = True
@@ -199,6 +215,9 @@ class GListReturn(ReturnValue):
     TAG = GITypeTag.GLIST
     py_type = list
 
+    def setup(self):
+        self.py_type = [self.get_param_type(0).py_type]
+
     def post_call(self, name):
         var = self.get_type()
         out = var.unpack(name)
@@ -219,6 +238,14 @@ class FilenameReturnValue(Utf8ReturnValue):
 class BaseInterfaceReturn(ReturnValue):
     TAG = GITypeTag.INTERFACE
     py_type = object
+
+    def setup(self):
+        iface = self.type.get_interface()
+        try:
+            self.py_type = import_attribute(iface.namespace, iface.name)
+        except NotImplementedError:
+            # fall back to object
+            pass
 
     @classmethod
     def get_class(cls, type_):

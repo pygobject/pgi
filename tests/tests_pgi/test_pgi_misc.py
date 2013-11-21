@@ -126,3 +126,31 @@ if 2:
     def test_get_foreing(self):
         foreign = get_foreign("cairo", "Context")
         self.assertTrue(foreign)
+
+    def test_doc_strings(self):
+        from pgi.repository import Gtk
+
+        self.assertEqual(Gtk.init.__doc__, "init(argv: [str]) -> argv: [str]")
+
+        self.assertEqual(
+            Gtk.accelerator_get_label.__doc__,
+            "accelerator_get_label(accelerator_key: int, "
+            "accelerator_mods: Gdk.ModifierType) -> str")
+
+        self.assertEqual(
+            Gtk.accelerator_get_default_mod_mask.__doc__,
+            "accelerator_get_default_mod_mask() -> Gdk.ModifierType")
+
+        self.assertEqual(
+            Gtk.rc_get_default_files.__doc__,
+            "rc_get_default_files() -> [str]")
+
+        self.assertEqual(
+            Gtk.target_table_new_from_list.__doc__,
+            "target_table_new_from_list(list_: Gtk.TargetList) -> "
+            "[Gtk.TargetEntry]")
+
+        self.assertEqual(
+            Gtk.targets_include_image.__doc__,
+            "targets_include_image(targets: [Gdk.Atom], writable: bool) "
+            "-> bool")
