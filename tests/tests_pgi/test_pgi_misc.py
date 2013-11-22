@@ -156,11 +156,19 @@ if 2:
             "targets_include_image(targets: [Gdk.Atom], writable: bool) "
             "-> bool")
 
-        self.assertEqual(
-            Gtk.init_with_args.__doc__,
-            "init_with_args(argv: [str] or None, "
-            "parameter_string: str or None, entries: [GLib.OptionEntry], "
-            "translation_domain: str) raises -> (bool, argv: [str])")
+        try:
+            self.assertEqual(
+                Gtk.init_with_args.__doc__,
+                "init_with_args(argv: [str] or None, "
+                "parameter_string: str or None, entries: [GLib.OptionEntry], "
+                "translation_domain: str) raises -> (bool, argv: [str])")
+        except:
+            # Gtk+ 3.2
+            self.assertEqual(
+                Gtk.init_with_args.__doc__,
+                "init_with_args(argv: [str] or None, "
+                "parameter_string: str, entries: [GLib.OptionEntry], "
+                "translation_domain: str) raises -> (bool, argv: [str])")
 
         self.assertEqual(
             Gtk.FileChooser.get_filenames.__doc__,
