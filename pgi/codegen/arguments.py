@@ -92,8 +92,12 @@ class GIArgument(Argument):
         if self.is_direction_in():
             self.in_var = name
 
+    @property
+    def may_be_null(self):
+        return self.info.may_be_null
+
     def get_type(self):
-        return self.backend.get_type(self.type, self.info.may_be_null)
+        return self.backend.get_type(self.type, self.may_be_null)
 
     def get_param_type(self, index):
         """Returns a ReturnValue instance for param type 'index'"""

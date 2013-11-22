@@ -27,8 +27,12 @@ class ReturnValue(object):
     def get_class(cls, type_):
         return cls
 
+    @property
+    def may_return_null(self):
+        return self.info.may_return_null
+
     def get_type(self):
-        return self.backend.get_type(self.type, self.info.may_return_null)
+        return self.backend.get_type(self.type, self.may_return_null)
 
     def setup(self):
         pass

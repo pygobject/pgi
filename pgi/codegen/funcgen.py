@@ -48,7 +48,10 @@ def build_docstring(func_name, args, ret, throws):
         if ret.py_type is None:
             out_args.append("unknown")
         else:
-            out_args.append(get_type_name(ret.py_type))
+            tname = get_type_name(ret.py_type)
+            if ret.may_return_null:
+                tname += " or None"
+            out_args.append(tname)
 
     in_args = []
     for arg in args:
@@ -59,15 +62,18 @@ def build_docstring(func_name, args, ret, throws):
             if arg.py_type is None:
                 in_args.append(arg.in_var)
             else:
-                in_args.append(
-                    "%s: %s" % (arg.in_var, get_type_name(arg.py_type)))
+                tname = get_type_name(arg.py_type)
+                if arg.may_be_null:
+                    tname += " or None"
+                in_args.append("%s: %s" % (arg.in_var, tname))
 
         if arg.out_var:
             if arg.py_type is None:
                 out_args.append(arg.name)
             else:
-                out_args.append(
-                    "%s: %s" % (arg.name, get_type_name(arg.py_type)))
+                tname = get_type_name(arg.py_type)
+                # When can we assume that out args return None?
+                out_args.append("%s: %s" % (arg.name, tname))
 
     in_def = ", ".join(in_args)
 

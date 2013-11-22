@@ -128,9 +128,9 @@ if 2:
         self.assertTrue(foreign)
 
     def test_doc_strings(self):
-        from pgi.repository import Gtk
+        from pgi.repository import Gtk, GLib
 
-        self.assertEqual(Gtk.init.__doc__, "init(argv: [str]) -> argv: [str]")
+        self.assertEqual(Gtk.init.__doc__, "init(argv: [str] or None) -> argv: [str]")
 
         self.assertEqual(
             Gtk.accelerator_get_label.__doc__,
