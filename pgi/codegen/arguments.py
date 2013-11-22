@@ -495,6 +495,14 @@ class GListArgument(GIArgument):
         return var.block
 
 
+class GSListArgument(GIArgument):
+    TAG = GITypeTag.GSLIST
+    py_type = list
+
+    def setup(self):
+        self.py_type = [self.get_param_type(0).py_type]
+
+
 class Utf8Argument(GIArgument):
     TAG = GITypeTag.UTF8
     py_type = str

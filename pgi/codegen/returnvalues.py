@@ -234,6 +234,19 @@ class GListReturn(ReturnValue):
         return var.block, out
 
 
+class GSListReturn(ReturnValue):
+    TAG = GITypeTag.GSLIST
+    py_type = list
+
+    def setup(self):
+        self.py_type = [self.get_param_type(0).py_type]
+
+    def post_call(self, name):
+        # FIXME
+        var = self.get_type()
+        return var.block, name
+
+
 class FilenameReturnValue(Utf8ReturnValue):
     TAG = GITypeTag.FILENAME
     py_type = str

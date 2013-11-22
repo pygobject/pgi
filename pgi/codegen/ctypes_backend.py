@@ -68,6 +68,8 @@ def typeinfo_to_ctypes(info, return_value=False):
             return GErrorPtr
         elif tag == GITypeTag.GLIST:
             return GListPtr
+        elif tag == GITypeTag.GSLIST:
+            return GSListPtr
         else:
             if tag in mapping:
                 return ctypes.POINTER(mapping[tag])
@@ -702,6 +704,10 @@ while $elm:
         return self.parse("""
 $list_.free()
 """, list_=name)
+
+
+class GSList(BaseType):
+    GI_TYPE_TAG = GITypeTag.GSLIST
 
 
 class Void(BaseType):

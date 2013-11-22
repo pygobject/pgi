@@ -130,7 +130,8 @@ if 2:
     def test_doc_strings(self):
         from pgi.repository import Gtk, GLib
 
-        self.assertEqual(Gtk.init.__doc__, "init(argv: [str] or None) -> argv: [str]")
+        self.assertEqual(Gtk.init.__doc__,
+            "init(argv: [str] or None) -> argv: [str]")
 
         self.assertEqual(
             Gtk.accelerator_get_label.__doc__,
@@ -154,3 +155,13 @@ if 2:
             Gtk.targets_include_image.__doc__,
             "targets_include_image(targets: [Gdk.Atom], writable: bool) "
             "-> bool")
+
+        self.assertEqual(
+            Gtk.init_with_args.__doc__,
+            "init_with_args(argv: [str] or None, "
+            "parameter_string: str or None, entries: [GLib.OptionEntry], "
+            "translation_domain: str) raises -> (bool, argv: [str])")
+
+        self.assertEqual(
+            Gtk.FileChooser.get_filenames.__doc__,
+            "get_filenames() -> [str]")
