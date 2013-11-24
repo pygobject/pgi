@@ -135,6 +135,21 @@ def run(load_gi, backend=None):
             times.append(time.time() - t0)
         return times
 
+    def bench_arrays(rounds):
+        times = []
+        for i in xrange(rounds):
+            t0 = time.time()
+            GIMarshallingTests.array_fixed_int_return()
+            GIMarshallingTests.array_fixed_short_return()
+            GIMarshallingTests.array_fixed_int_in([-1, 0, 1, 2])
+            GIMarshallingTests.array_fixed_out()
+            GIMarshallingTests.array_fixed_inout([-1, 0, 1, 2])
+            GIMarshallingTests.array_return()
+            GIMarshallingTests.array_return_etc(5, 9)
+            GIMarshallingTests.array_string_in(['foo', 'bar'])
+            times.append(time.time() - t0)
+        return times
+
     bench = [
         (bench_func, 100000),
         (bench_method, 100000),
@@ -151,6 +166,15 @@ def run(load_gi, backend=None):
             (torture_signature_0, 10000),
             (torture_signature_1, 10000),
             (torture_signature_1e, 10000),
+        ])
+
+    try:
+        from gi.repository import GIMarshallingTests
+    except ImportError:
+        pass
+    else:
+        bench.extend([
+            (bench_arrays, 10000),
         ])
 
     for b, n in bench:
