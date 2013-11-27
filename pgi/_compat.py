@@ -33,6 +33,8 @@ if PY3:
     xrange = range
 
     from io import StringIO
+    StringIO = StringIO
+
     import builtins
     builtins = builtins
 elif PY2:
