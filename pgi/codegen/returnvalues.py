@@ -205,6 +205,16 @@ class Utf8ReturnValue(ReturnValue):
         return var.block, out
 
 
+class UniCharReturnValue(BasicReturnValue):
+    TAG = GITypeTag.UNICHAR
+    py_type = unicode
+
+    def post_call(self, name):
+        var = self.get_type()
+        out = var.unpack_return(name)
+        return var.block, out
+
+
 class ErrorReturn(ReturnValue):
     TAG = GITypeTag.ERROR
     py_type = PGError

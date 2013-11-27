@@ -90,7 +90,7 @@ def get_type(type_, gen, may_be_null, may_return_null):
                 cls = obj
                 break
     else:
-        raise NotImplementedError("type: %r", type_.tag)
+        raise NotImplementedError("type: %r" % type_.tag)
 
     cls = cls.get_class(type_)
     return cls(gen, type_, may_be_null, may_return_null)

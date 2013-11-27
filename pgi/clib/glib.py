@@ -33,6 +33,7 @@ glong = c_long
 gulong = c_ulong
 gsize = c_size_t
 gconstpointer = c_void_p
+gunichar = guint32
 
 g_malloc0 = _glib.g_malloc0
 g_malloc0.argtypes = [gsize]
@@ -251,6 +252,6 @@ __all__ = ["gchar_p", "guint", "gpointer", "gint32", "guint32", "gint",
            "glong", "gulong", "gsize", "Enum", "Flags", "gchar", "guchar",
            "GError", "GErrorPtr", "free", "g_try_malloc0", "g_strdup",
            "GMappedFile", "GMappedFilePtr", "gconstpointer", "g_malloc0",
-           "GOptionGroup", "GOptionGroupPtr",
+           "GOptionGroup", "GOptionGroupPtr", "gunichar",
            "GSList", "GSListPtr",
            "GList", "GListPtr"]

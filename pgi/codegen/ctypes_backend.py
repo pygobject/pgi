@@ -50,12 +50,13 @@ def typeinfo_to_ctypes(info, return_value=False):
         GITypeTag.DOUBLE: gdouble,
         GITypeTag.VOID: None,
         GITypeTag.GTYPE: GType,
+        GITypeTag.UNICHAR: gunichar,
     }
 
     if ptr:
         if tag == GITypeTag.INTERFACE:
             return gpointer
-        elif tag == GITypeTag.UTF8 or tag == GITypeTag.FILENAME:
+        elif tag in (GITypeTag.UTF8, GITypeTag.FILENAME):
             if return_value:
                 # ctypes does auto conversion to str and gives us no chance
                 # to free the pointer if transfer=everything
@@ -857,6 +858,45 @@ $ptr = ord($in_)
 
 class Filename(Utf8):
     GI_TYPE_TAG = GITypeTag.FILENAME
+
+
+class UniChar(BasicType):
+    GI_TYPE_TAG = GITypeTag.UNICHAR
+
+    def check(self, name):
+        return self.parse("""
+if isinstance($value, str):
+    $value = $value.decode("utf-8")
+elif not isinstance($value, unicode):
+    raise TypeError
+
+$int = ord($value)
+
+if not 0 <= $int < 2**32:
+    raise OverflowError("Value %r not in range" % $int)
+""", value=name)["int"]
+
+    def pack(self, valid):
+        return self.parse("""
+# to ctypes
+$c_value = ctypes.c_uint32($value)
+""", value=valid)["c_value"]
+
+    def unpack_return(self, name):
+        return self.parse("""
+$out = unichr($value).encode("utf-8")
+""", value=name)["out"]
+
+    def new(self):
+        return self.parse("""
+# new uint32
+$value = ctypes.c_uint32()
+""")["value"]
+
+    def pack_pointer(self, name):
+        return self.parse("""
+$ptr = $in_
+""", in_=name)["ptr"]
 
 
 class Enum(BaseInterface):

@@ -30,6 +30,12 @@ except ImportError:
 import tests
 from tests import FIXME, skipUnlessCairo
 
+if sys.version_info < (3, 0):
+    UNICHAR = "\xe2\x99\xa5"
+    PY2_UNICODE_UNICHAR = unicode(UNICHAR, 'UTF-8')
+else:
+    UNICHAR = "♥"
+
 
 def skipUnlessRegress(func):
     return unittest.skipUnless(Everything, "Regress missing")(func)
@@ -191,7 +197,6 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(Everything.test_timet(42), 42)
         self.assertRaises(tests.GIOverflowError, Everything.test_timet, GObject.G_MAXUINT64 + 1)
 
-    @FIXME
     def test_unichar(self):
         self.assertEqual("c", Everything.test_unichar("c"))
 

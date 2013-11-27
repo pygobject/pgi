@@ -541,6 +541,11 @@ class FilenameArgument(Utf8Argument):
     TAG = GITypeTag.FILENAME
 
 
+class UniCharArgument(BasicTypeArgument):
+    TAG = GITypeTag.UNICHAR
+    py_type = unicode
+
+
 _classes = {}
 
 
