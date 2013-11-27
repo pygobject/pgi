@@ -10,6 +10,7 @@ libraries. For example it allows functions to take cairo structs created
 with cairocffi.
 """
 
+
 class ForeignStruct(object):
     """The foreign struct interface"""
 

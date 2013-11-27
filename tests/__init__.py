@@ -86,8 +86,13 @@ def discover(base, dir_):
     for entry in os.listdir(os.path.join(base, dir_)):
         if not entry.startswith("test_") or not entry.endswith(".py"):
             continue
-        mod = dir_ + "." + entry[:-3]
-        loaded = getattr(__import__(mod), entry[:-3])
+        mod = entry[:-3]
+        if dir_:
+            mor = dir_ + "." + mod
+            loaded = getattr(__import__(mod), entry[:-3])
+        else:
+            loaded = __import__(mod)
+
         var = vars(loaded)
         for key in var:
             value = getattr(loaded, key)
@@ -98,6 +103,21 @@ def discover(base, dir_):
     sys.path.pop(0)
 
     return test_classes
+
+
+def test_pep8():
+    """Run pep8 pyflakes tests"""
+
+    import pgi
+    pgi.install_as_gi()
+
+    current_dir = os.path.join(os.path.dirname(__file__))
+    tests = discover(current_dir, "")
+    tests = [unittest.makeSuite(t) for t in tests]
+
+    run = unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite(tests))
+
+    return len(run.failures) + len(run.errors)
 
 
 def test(load_gi, backend=None, strict=False, filter_=None):
