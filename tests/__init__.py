@@ -88,7 +88,7 @@ def discover(base, dir_):
             continue
         mod = entry[:-3]
         if dir_:
-            mor = dir_ + "." + mod
+            mod = dir_ + "." + mod
             loaded = getattr(__import__(mod), entry[:-3])
         else:
             loaded = __import__(mod)
