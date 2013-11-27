@@ -57,7 +57,7 @@ def _get_foreign(namespace, name):
                 return cairocffi.Context._from_pointer(pointer, True)
 
             def to_pointer(self, instance):
-                return instance._pointer
+                return int(ffi.cast("intptr_t", instance._pointer))
 
             def get_type(self):
                 return cairocffi.Context

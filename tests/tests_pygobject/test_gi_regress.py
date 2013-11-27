@@ -38,7 +38,6 @@ def skipUnlessRegress(func):
 @skipUnlessRegress
 class TestEverything(unittest.TestCase):
 
-    @FIXME
     def test_cairo_context(self):
         context = Everything.test_cairo_context_full_return()
         self.assertTrue(isinstance(context, cairo.Context))

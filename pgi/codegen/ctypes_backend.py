@@ -588,6 +588,18 @@ class BaseInterface(BaseType):
 
         raise NotImplementedError("Iface not implemented: %r" % iface.type)
 
+    def _import_foreign(self):
+        """Gives a ForeignStruct implementation or None"""
+
+        iface = self.type.get_interface()
+        assert iface.type.value == GIInfoType.STRUCT
+
+        struct_info = gicast(self.type.get_interface(), GIStructInfoPtr)
+        if not struct_info.is_foreign:
+            return
+
+        return foreign.get_foreign(struct_info.namespace, struct_info.name)
+
     def _import_type(self):
         iface = self.type.get_interface()
         return import_attribute(iface.namespace, iface.name)
@@ -915,15 +927,33 @@ class Struct(BaseInterface):
     def check(self, name):
         base_obj = import_attribute("GObject", "Object")
 
-        return self.parse("""
+        foreign_struct = self._import_foreign()
+
+        if foreign_struct:
+            foreign_type = foreign_struct.get_type()
+            return self.parse("""
+if not isinstance($obj, $struct_class):
+    raise TypeError("%r is not a %r" % ($obj, $struct_class))
+""", struct_class=foreign_type, obj=name)["obj"]
+        else:
+            return self.parse("""
 if not isinstance($obj, ($struct_class, $obj_class)):
     raise TypeError("%r is not a structure object" % $obj)
-""", obj_class=base_obj, struct_class=self._import_type(), obj=name)["obj"]
+    """, obj_class=base_obj, struct_class=self._import_type(), obj=name)["obj"]
 
     def pack(self, name):
-        return self.parse("""
+
+        foreign_struct = self._import_foreign()
+
+        if not foreign_struct:
+            return self.parse("""
 $out = ctypes.c_void_p($obj._obj)
-""", obj=name)["out"]
+    """, obj=name)["out"]
+        else:
+            return self.parse("""
+print $foreign_struct.to_pointer($obj)
+$out = ctypes.c_void_p($foreign_struct.to_pointer($obj))
+""", foreign_struct=foreign_struct, obj=name)["out"]
 
     def pre_unpack(self, name):
         return self.parse("""
