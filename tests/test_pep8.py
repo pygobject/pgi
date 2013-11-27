@@ -12,7 +12,6 @@ import unittest
 
 PEP8_NAME = "pep8"
 
-
 has_pep8 = True
 try:
     subprocess.check_output([PEP8_NAME, "--version"], stderr=subprocess.STDOUT)
@@ -23,45 +22,53 @@ except OSError:
 @unittest.skipUnless(has_pep8, "no pep8")
 class TPEP8(unittest.TestCase):
     # don't care..
-    IGNORE_ERROROS = "E12,E261,W603"
+    IGNORE = ["E12", "E261"]
     PACKAGES = []
 
-    def _run(self, path):
+    def _run(self, path, ignore=None):
+        if ignore is None:
+            ignore = []
+        ignore += self.IGNORE
+
         p = subprocess.Popen(
-            [PEP8_NAME, "--ignore=" + self.IGNORE_ERROROS, path],
+            [PEP8_NAME, "--ignore=" + ",".join(ignore), path],
             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         if p.wait() != 0:
             o, e = p.communicate()
             raise Exception("\n" + o)
 
-    def test_main_package(self):
-        import gi
-        path = gi.__path__[0]
+    def _run_package(self, mod, ignore=None):
+        path = mod.__path__[0]
         files = glob.glob(os.path.join(path, "*.py"))
         assert files
         for file_ in files:
-            self._run(file_)
+            self._run(file_, ignore)
+
+    def test_main_package(self):
+        import gi
+        self._run_package(gi)
+
+    def test_overrides(self):
+        import gi.overrides
+        self._run_package(
+            gi.overrides, ignore=["E501", "E303", "E502", "E302"])
 
     def test_repository(self):
         import gi.repository
-        path = gi.repository.__path__[0]
-        files = glob.glob(os.path.join(path, "*.py"))
-        assert files
-        for file_ in files:
-            self._run(file_)
+        self._run_package(gi.repository)
 
     def test_codegen(self):
         import gi.codegen
-        path = gi.codegen.__path__[0]
-        files = glob.glob(os.path.join(path, "*.py"))
-        assert files
-        for file_ in files:
-            self._run(file_)
+        self._run_package(gi.codegen)
 
     def test_clib(self):
         import gi.clib
-        path = gi.clib.__path__[0]
-        files = glob.glob(os.path.join(path, "*.py"))
-        assert files
-        for file_ in files:
-            self._run(file_)
+        self._run_package(gi.clib)
+
+    def test_clib_gir(self):
+        import gi.clib.gir
+        self._run_package(gi.clib.gir)
+
+    def test_clib_gir(self):
+        import gi.clib.gir
+        self._run_package(gi.clib.gir)

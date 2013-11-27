@@ -18,7 +18,6 @@ from pgi.clib.gir import GIRepositoryPtr, GITypeTag, GIInfoType, GIArrayType
 from pgi.clib.glib import *
 from pgi.clib.gobject import GCallback
 from pgi.clib.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr, GType
-from pgi.clib import glib
 from pgi.gerror import PGError
 from pgi.gtype import PGType
 from pgi import foreign
