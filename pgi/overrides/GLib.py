@@ -15,7 +15,7 @@ __all__ = []
 
 def idle_add(function, **kwargs):
     priority = kwargs.get('priority', GLib.PRIORITY_DEFAULT_IDLE)
-    return GLib.idle_add(priority, function)
+    return GLib.idle_add(priority, function, None)
 
 __all__.append('idle_add')
 

@@ -41,6 +41,10 @@ class UInt64Return(CallbackReturn):
     TAG = GITypeTag.UINT64
 
 
+class Int32Return(CallbackReturn):
+    TAG = GITypeTag.INT32
+
+
 class VoidReturn(CallbackReturn):
     TAG = GITypeTag.VOID
 

@@ -116,7 +116,7 @@ def _generate_function(backend, info, arg_infos, arg_types,
 
     # pre call
     for arg in args:
-        if arg.is_aux:
+        if arg.is_aux or arg.ignore:
             continue
         block = arg.pre_call()
         if block:
@@ -162,7 +162,7 @@ def _generate_function(backend, info, arg_infos, arg_types,
 
     # process out args
     for arg in args:
-        if arg.is_aux:
+        if arg.is_aux or arg.ignore:
             continue
         block = arg.post_call()
         if block:
