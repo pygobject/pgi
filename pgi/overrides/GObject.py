@@ -280,3 +280,9 @@ class Value(GObjectModule.Value):
 
 Value = override(Value)
 __all__.append('Value')
+
+
+def new(gtype_or_similar):
+    return GType(gtype_or_similar).pytype()
+
+__all__.append('new')

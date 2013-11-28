@@ -53,7 +53,6 @@ class TestEverything(unittest.TestCase):
         context = cairo.Context(surface)
         Everything.test_cairo_context_none_in(context)
 
-    #@FIXME
     def test_cairo_surface(self):
         surface = Everything.test_cairo_surface_none_return()
         self.assertTrue(isinstance(surface, cairo.ImageSurface))
@@ -297,7 +296,6 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(type(result), Everything.TestFlags)
         self.assertEqual(result, Everything.TestFlags.FLAG1 | Everything.TestFlags.FLAG3)
 
-    @FIXME
     def test_floating(self):
         e = Everything.TestFloating()
         self.assertEqual(e.__grefcount__, 1)
@@ -307,6 +305,7 @@ class TestEverything(unittest.TestCase):
 
         e = Everything.TestFloating.new()
         self.assertEqual(e.__grefcount__, 1)
+
 
 @skipUnlessRegress
 class TestNullableArgs(unittest.TestCase):
