@@ -20,6 +20,7 @@ from tests import _is_gi, skipUnlessGIVersion, skipIfGI, FIXME, skipIfPyPy
 
 try:
     from gi.repository import GIMarshallingTests
+    GIMarshallingTests
 except ImportError:
     GIMarshallingTests = None
 

@@ -13,6 +13,7 @@ from gi.repository import GObject
 
 try:
     from gi.repository import GIMarshallingTests
+    GIMarshallingTests
 except ImportError:
     GIMarshallingTests = None
 

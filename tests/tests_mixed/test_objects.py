@@ -13,6 +13,7 @@ from gi.repository import Gtk, GObject, Gdk, Gio
 
 try:
     from gi.repository import Clutter
+    Clutter
 except ImportError:
     Clutter = None
 
