@@ -16,7 +16,7 @@ try:
 except ImportError:
     Clutter = None
 
-from tests import skipIfGI, FIXME
+from tests import skipIfGI
 
 
 class ObjectTest(unittest.TestCase):
@@ -163,12 +163,10 @@ class ObjectTest(unittest.TestCase):
         x.set_property("orientation", Gtk.Orientation.VERTICAL)
         self.assertEqual(x.props.orientation, Gtk.Orientation.VERTICAL)
 
-    @FIXME
     def test_get_property_unknown(self):
         x = Gtk.HBox()
         self.assertRaises(TypeError, x.get_property, "foobar12")
 
-    @FIXME
     def test_get_property(self):
         w = Gtk.Window()
         w.props.title = "foobar"
