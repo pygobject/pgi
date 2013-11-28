@@ -112,7 +112,7 @@ def test_pep8():
     pgi.install_as_gi()
 
     current_dir = os.path.join(os.path.dirname(__file__))
-    tests = discover(current_dir, "")
+    tests = discover(current_dir, "misc")
     tests = [unittest.makeSuite(t) for t in tests]
 
     run = unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite(tests))
@@ -189,6 +189,7 @@ def test(load_gi, backend=None, strict=False, filter_=None):
 
     current_dir = os.path.join(os.path.dirname(__file__))
     tests = discover(current_dir, "tests_pygobject")
+    tests += discover(current_dir, "tests_mixed")
     if not load_gi:
         tests.extend(discover(current_dir, "tests_pgi"))
 
