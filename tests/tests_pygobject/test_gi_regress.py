@@ -53,6 +53,7 @@ class TestEverything(unittest.TestCase):
         context = cairo.Context(surface)
         Everything.test_cairo_context_none_in(context)
 
+    @skipUnlessCairo
     def test_cairo_surface(self):
         surface = Everything.test_cairo_surface_none_return()
         self.assertTrue(isinstance(surface, cairo.ImageSurface))
