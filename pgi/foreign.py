@@ -64,6 +64,20 @@ def _get_foreign(namespace, name):
                 return cairocffi.Context
 
         return Context()
+    elif name == "Surface":
+
+        class Surface(ForeignStruct):
+            def from_pointer(self, pointer):
+                pointer = ffi.cast("void*", pointer)
+                return cairocffi.Surface._from_pointer(pointer, True)
+
+            def to_pointer(self, instance):
+                return int(ffi.cast("intptr_t", instance._pointer))
+
+            def get_type(self):
+                return cairocffi.Surface
+
+        return Surface()
     else:
         raise ForeignError("cairo struct %r not supported" % name)
 

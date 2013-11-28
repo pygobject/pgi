@@ -990,7 +990,6 @@ $out = ctypes.c_void_p($obj._obj)
     """, obj=name)["out"]
         else:
             return self.parse("""
-print $foreign_struct.to_pointer($obj)
 $out = ctypes.c_void_p($foreign_struct.to_pointer($obj))
 """, foreign_struct=foreign_struct, obj=name)["out"]
 
