@@ -64,3 +64,15 @@ class TPyFlakes(unittest.TestCase):
     def test_main(self):
         import pgi
         self._run_package(pgi)
+
+    def test_tests_mixed(self):
+        import tests.tests_mixed
+        self._run_package(tests.tests_mixed)
+
+    def test_tests_pgi(self):
+        import tests.tests_pgi
+        self._run_package(tests.tests_pgi)
+
+    def test_tests_pygobject(self):
+        import tests.tests_pygobject
+        self._run_package(tests.tests_pygobject)

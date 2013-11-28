@@ -9,7 +9,7 @@ import unittest
 
 import gi
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, GObject, Atk, Gdk, Gio
+from gi.repository import Gtk, GObject, Gdk, Gio
 
 try:
     from gi.repository import Clutter
@@ -207,80 +207,3 @@ class GObjectConstructTest(unittest.TestCase):
     def test_struct(self):
         Clutter.Text("Mono Bold 24px", "",
                      Clutter.Color.from_string("#33FF33"))
-
-
-class GTypeTest(unittest.TestCase):
-    def test_repr(self):
-        a = GObject.GObject()
-        t = a.__gtype__
-        self.assertTrue("GType" in repr(t))
-        self.assertTrue("80" in repr(t))
-        self.assertTrue("GObject" in repr(t))
-
-    def test_inval(self):
-        a = GObject.GObject()
-        t = a.__gtype__
-        inval = t.parent
-        self.assertEqual(inval, inval.parent)
-        self.assertEqual(inval.name, "invalid")
-        self.assertTrue("invalid" in repr(inval))
-        # pygobject doesn't like it
-        #self.assertEqual(inval.pytype, None)
-
-    def test_from_name(self):
-        GType = type(GObject.GObject.__gtype__)
-        self.assertRaises(RuntimeError, GType.from_name, "foobar")
-        wt = Gtk.Widget.__gtype__
-        self.assertEqual(wt, GType.from_name("GtkWidget"))
-
-    def test_methods(self):
-        wt = Gtk.Widget.__gtype__
-        t = GObject.GObject.__gtype__
-
-        self.assertTrue(wt.is_value_type())
-        self.assertTrue(t.is_value_type())
-        self.assertFalse(wt.is_value_abstract())
-        self.assertTrue(t.has_value_table())
-        self.assertTrue(wt.is_a(t))
-        self.assertFalse(t.is_a(wt))
-
-        self.assertTrue(wt.is_abstract())
-        self.assertTrue(wt.is_classed())
-        self.assertTrue(wt.is_deep_derivable())
-        self.assertTrue(wt.is_derivable())
-        self.assertTrue(wt.is_instantiatable())
-        self.assertFalse(t.is_abstract())
-
-        self.assertFalse(wt.is_interface())
-        self.assertFalse(t.is_interface())
-
-    def test_properties(self):
-        wt = Gtk.Widget.__gtype__
-        t = GObject.GObject.__gtype__
-        self.assertEqual(t.name, "GObject")
-        self.assertEqual(t.depth, 1)
-        self.assertEqual(wt.fundamental, t)
-        self.assertEqual(t.fundamental, t)
-
-    def test_check_missing(self):
-        t = GObject.GObject.__gtype__
-        dfilter = lambda x: not x.startswith("_")
-        self.assertEqual(len(list(filter(dfilter, dir(t)))), 18)
-
-    def test_ptype(self):
-        wt = Gtk.Widget.__gtype__
-        self.assertEqual(wt.parent.parent.pytype, GObject.Object)
-        self.assertEqual(wt.pytype, Gtk.Widget)
-
-    def test_lists(self):
-        wt = Gtk.Window.__gtype__
-        children = set([x.pytype for x in wt.children])
-        self.assertTrue(Gtk.Dialog in children)
-        interfaces = set([x.pytype for x in wt.interfaces])
-        should = set([Atk.ImplementorIface, Gtk.Buildable])
-        self.assertEqual(interfaces, should)
-
-    def test_interfaces(self):
-        t = Gtk.Editable.__gtype__
-        self.assertEqual(t.parent.pytype, None)
-        self.assertTrue(t.is_interface)
