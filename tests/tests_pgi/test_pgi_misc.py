@@ -5,6 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
+import re
 import unittest
 
 from tests import skipUnlessCairo
@@ -126,6 +127,14 @@ if 2:
     def test_get_foreing(self):
         foreign = get_foreign("cairo", "Context")
         self.assertTrue(foreign)
+
+    def test_check_version(self):
+        # make sure the exception mentions both versions in case of an error
+        self.assertRaisesRegexp(ValueError, re.escape("99.99.99"),
+                                pgi.check_version, "99.99.99")
+
+        self.assertRaisesRegexp(ValueError, re.escape(pgi.__version__),
+                                pgi.check_version, "99.99.99")
 
     def test_doc_strings(self):
         from pgi.repository import Gtk, GLib

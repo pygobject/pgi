@@ -32,7 +32,9 @@ def check_version(version):
         version = tuple(map(int, version.split(".")))
 
     if version > version_info:
-        raise ValueError
+        str_version = ".".join(map(str, version))
+        raise ValueError("pgi version '%s' requested, '%s' available" %
+                         (str_version, __version__))
 
 
 def install_as_gi():
