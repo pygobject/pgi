@@ -189,7 +189,7 @@ class TestCommand(Command):
                 exit(tests.test(is_gi, backend, self.strict, filter_tests))
 
 
-class CheckCommand(Command):
+class QualityCommand(Command):
     description = "run pep8 pyflakes"
     user_options = []
 
@@ -268,6 +268,6 @@ setup(name='pgi',
             'test': TestCommand,
             'coverage': CoverageCommand,
             'benchmark': BenchmarkCommand,
-            'check': CheckCommand,
+            'quality': QualityCommand,
       }
      )
