@@ -1,3 +1,10 @@
+0.0.6.3 (2013-11-29)
+~~~~~~~~~~~~~~~~~~~~
+
+* Marshalling fixes: GList[int], gunichar, foreign structs, cairo.Surface,
+* Match pygobject signatures for functions taking a callback
+* Docstring improvements (needed for pgi-docgen)
+
 0.0.6.2 (2013-11-16)
 ~~~~~~~~~~~~~~~~~~~~
 
