@@ -67,7 +67,7 @@ class MiscTest(unittest.TestCase):
     @skipIfGI
     def test_base_types_class(self):
         c = GObject.GError
-        self.assertTrue("GObject" in c.__module__)
+        self.assertTrue("GLib" in c.__module__)
         self.assertTrue("GError" in c.__name__)
 
         c = GObject.GFlags

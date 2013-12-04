@@ -150,6 +150,7 @@ class PGType(object):
         return "<GType %s (%d)>" % (self.name, self._type.value)
 
 PGType.__name__ = "GType"
+PGType.__module__ = "GObject"
 
 PGType._PYTYPES = {
     "gchararray": str,

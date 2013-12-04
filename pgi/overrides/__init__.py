@@ -74,9 +74,11 @@ def load(namespace, module):
             if item:
                 # make sure new classes have a proper __module__
                 try:
-                    item.__module__ = namespace
+                    if item.__module__.split(".")[-1] == namespace:
+                        item.__module__ = namespace
                 except AttributeError:
                     pass
+
                 setattr(module, var, item)
 
     _active_module.pop(-1)
