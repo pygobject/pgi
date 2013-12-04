@@ -26,26 +26,65 @@ from .codegen import generate_signal_callback
 
 
 class _Object(object):
+    pass
+
+
+class Object(object):
 
     __gtype__ = None
+    _obj = 0
+    __weak = {}
+    _constructors = None
     __signal_cb_ref = {}
+
+    def __init__(self, **kwargs):
+        cls = type(self)
+        gtype = cls.__gtype__
+
+        if gtype.is_abstract():
+            raise TypeError("Cannot create instance of abstract type %r" %
+                            gtype.name)
+
+        names = kwargs.keys()
+        obj = generate_constructor(cls, tuple(names))(*kwargs.values())
+
+        # sink unowned objects
+        if self._unowned:
+            gobject.ref_sink(obj)
+
+        self.__weak[weakref.ref(self, self.__destroy)] = obj
+        self._obj = obj
+
+    def set_property(self, name, value):
+        """set_property(property_name: str, value: object)
+
+        Set property *property_name* to *value*.
+        """
+
+        if not hasattr(self.props, name):
+            raise TypeError("Unknown property: %r" % name)
+        setattr(self.props, name, value)
+
+    def get_property(self, name):
+        """get_property(property_name: str) -> object
+
+        Retrieves a property value.
+        """
+
+        if not hasattr(self.props, name):
+            raise TypeError("Unknown property: %r" % name)
+        return getattr(self.props, name)
 
     def _ref(self):
         gobject.ref_sink(self._obj)
 
-    def __hash__(self):
-        return hash(self._obj)
+    @classmethod
+    def __destroy(cls, ref):
+        gobject.unref(cls.__weak.pop(ref))
 
-    def __eq__(self, other):
-        return self._obj == other._obj
-
-    def __cmp__(self, other):
-        return cmp(self._obj, other._obj)
-
-    def __repr__(self):
-        form = "<%s object at 0x%x (%s at 0x%x)>"
-        name = type(self).__name__
-        return form % (name, id(self), self.__gtype__.name, self._obj)
+    @property
+    def __grefcount__(self):
+        return cast(self._obj, gobject.GObjectPtr).contents.ref_count
 
     def __get_signal(self, name):
         name = name.replace("_", "-")
@@ -73,66 +112,134 @@ class _Object(object):
         self.__signal_cb_ref[id_] = (cb, destroy)
         return id_
 
-    def connect(self, name, callback, *args):
-        return self.__connect(0, name, callback, *args)
+    def connect(self, detailed_signal, handler, *args):
+        """connect(detailed_signal: str, handler: function, *args) -> handler_id: int
 
-    def connect_after(self, name, callback, *args):
+        The connect() method adds a function or method (handler) to the end
+        of the list of signal handlers for the named detailed_signal but
+        before the default class signal handler. An optional set of
+        parameters may be specified after the handler parameter. These will
+        all be passed to the signal handler when invoked.
+
+        For example if a function handler was connected to a signal using::
+
+            handler_id = object.connect("signal_name", handler, arg1, arg2, arg3)
+
+        The handler should be defined as::
+
+            def handler(object, arg1, arg2, arg3):
+
+        A method handler connected to a signal using::
+
+            handler_id = object.connect("signal_name", self.handler, arg1, arg2)
+
+        requires an additional argument when defined::
+
+            def handler(self, object, arg1, arg2)
+
+        A TypeError exception is raised if detailed_signal identifies a
+        signal name that is not associated with the object.
+        """
+
+        return self.__connect(0, detailed_signal, handler, *args)
+
+    def connect_after(self, detailed_signal, handler, *args):
+        """connect_after(detailed_signal: str, handler: function, *args) -> handler_id: int
+
+        The connect_after() method is similar to the connect() method
+        except that the handler is added to the signal handler list after
+        the default class signal handler. Otherwise the details of handler
+        definition and invocation are the same.
+        """
+
         flags = GConnectFlags.CONNECT_AFTER
-        return self.__connect(flags, name, callback, *args)
+        return self.__connect(flags, detailed_signal, handler, *args)
 
     def disconnect(self, id_):
         if id_ in self.__signal_cb_ref:
             signal_handler_disconnect(self._obj, id_)
             del self.__signal_cb_ref[id_]
 
-    def handler_block(self, id_):
-        signal_handler_block(self._obj, id_)
+    def handler_block(self, handler_id):
+        """handler_block(handler_id: int) -> None
 
-    def handler_unblock(self, id_):
-        signal_handler_unblock(self._obj, id_)
+        Blocks a handler of an instance so it will not be called during any
+        signal emissions unless :meth:`handler_unblock` is called for that
+        *handler_id*. Thus "blocking" a signal handler means to temporarily
+        deactivate it, a signal handler has to be unblocked exactly the
+        same amount of times it has been blocked before to become active
+        again.
 
-    def set_property(self, name, value):
-        if not hasattr(self.props, name):
-            raise TypeError("Unknown property: %r" % name)
-        setattr(self.props, name, value)
+        It is recommended to use :meth:`handler_block` in conjunction with
+        the *with* statement which will call :meth:`handler_unblock`
+        implicitly at the end of the block::
 
-    def get_property(self, name):
-        if not hasattr(self.props, name):
-            raise TypeError("Unknown property: %r" % name)
-        return getattr(self.props, name)
+            with an_object.handler_block(handler_id):
+                # Do your work here
+                ...
+        """
 
-    @property
-    def __grefcount__(self):
-        return cast(self._obj, gobject.GObjectPtr).contents.ref_count
+        signal_handler_block(self._obj, handler_id)
 
+    def handler_unblock(self, handler_id):
+        """handler_unblock(handler_id: int) -> None"""
 
-class Object(_Object):
+        signal_handler_unblock(self._obj, handler_id)
 
-    _obj = 0
-    __weak = {}
-    _constructors = None
+    def emit(self, signal_name, *args):
+        """emit(signal_name: str, *args) -> None
 
-    def __init__(self, **kwargs):
-        cls = type(self)
-        gtype = cls.__gtype__
+        Emit signal *signal_name*. Signal arguments must follow, e.g. if your
+        signal is of type ``(int,)``, it must be emitted with::
 
-        if gtype.is_abstract():
-            raise TypeError("Cannot create instance of abstract type %r" %
-                            gtype.name)
+            self.emit(signal_name, 42)
+        """
 
-        names = kwargs.keys()
-        obj = generate_constructor(cls, tuple(names))(*kwargs.values())
+        raise NotImplementedError
 
-        # sink unowned objects
-        if self._unowned:
-            gobject.ref_sink(obj)
+    def freeze_notify(self):
+        """freeze_notify() -> None
 
-        self.__weak[weakref.ref(self, self.__destroy)] = obj
-        self._obj = obj
+        This method freezes all the "notify::" signals (which are emitted
+        when any property is changed) until the :meth:`thaw_notify` method
+        is called.
 
-    @classmethod
-    def __destroy(cls, ref):
-        gobject.unref(cls.__weak.pop(ref))
+        It recommended to use the *with* statement when calling
+        :meth:`freeze_notify`, that way it is ensured that
+        :meth:`thaw_notify` is called implicitly at the end of the block::
+
+            with an_object.freeze_notify():
+                # Do your work here
+                ...
+        """
+
+        raise NotImplementedError
+
+    def thaw_notify(self):
+        """thaw_notify() -> None
+
+        Thaw all the "notify::" signals which were thawed by
+        :meth:`freeze_notify`.
+
+        It is recommended to not call :meth:`thaw_notify` explicitly but use
+        :meth:`freeze_notify` together with the *with* statement.
+        """
+
+        raise NotImplementedError
+
+    def __hash__(self):
+        return hash(self._obj)
+
+    def __eq__(self, other):
+        return self._obj == other._obj
+
+    def __cmp__(self, other):
+        return cmp(self._obj, other._obj)
+
+    def __repr__(self):
+        form = "<%s object at 0x%x (%s at 0x%x)>"
+        name = type(self).__name__
+        return form % (name, id(self), self.__gtype__.name, self._obj)
 
 
 class MethodAttribute(object):
@@ -300,9 +407,11 @@ def ObjectAttribute(obj_info):
         attr = ConstantAttribute(constant)
         setattr(cls, constant_name, attr)
 
-    # Add methods
-    for method_info in obj_info.get_methods():
-        add_method(method_info, cls)
+    # we implement the base object ourself
+    if cls is not Object:
+        # Add methods
+        for method_info in obj_info.get_methods():
+            add_method(method_info, cls)
 
     # Signals
     cls.__sigs__ = {}
