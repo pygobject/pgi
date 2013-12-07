@@ -9,7 +9,7 @@ import unittest
 
 import gi
 gi.require_version(b"Gtk", b"3.0")
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk, Gdk, GObject
 from pgi import _compat
 
 
@@ -127,3 +127,14 @@ class PropertiesTest(unittest.TestCase):
         w.hide()
         window = w.get_property("window")
         self.assertTrue(isinstance(window, Gdk.Window))
+
+    def test_list_properties(self):
+        self.assertTrue(len(GObject.list_properties(Gtk.Window)) >= 71)
+        self.assertTrue(len(GObject.list_properties(Gtk.Editable)) == 0)
+
+        self.assertRaises(TypeError, GObject.list_properties, None)
+        self.assertRaises(TypeError, GObject.list_properties, 1)
+        self.assertRaises(TypeError, GObject.list_properties, )
+
+        self.assertEqual(GObject.list_properties(Gtk.Window.__gtype__),
+                         GObject.list_properties(Gtk.Window))

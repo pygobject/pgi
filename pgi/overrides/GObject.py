@@ -27,6 +27,7 @@ import ctypes
 
 from pgi.overrides import get_introspection_module, override
 from pgi.repository import GLib
+from pgi.properties import list_properties
 
 
 GObjectModule = get_introspection_module("GObject")
@@ -286,3 +287,6 @@ def new(gtype_or_similar):
     return GType(gtype_or_similar).pytype()
 
 __all__.append('new')
+
+
+__all__.append("list_properties")

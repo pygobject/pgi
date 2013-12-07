@@ -243,6 +243,29 @@ class _PropsDescriptor(object):
         return attr
 
 
+def list_properties(cls):
+    """list_properties(cls: GObject.Object or GObject.GInterface or GObejct.GType) -> [GObject.ParamSpec]
+
+    Takes a GObject/GInterface subclass or a GType and returns a list of
+    GParamSpecs of all properties.
+    """
+
+    if isinstance(cls, PGType):
+        cls = cls.pytype
+
+    from pgi.obj import Object, InterfaceBase
+
+    if not issubclass(cls, (Object, InterfaceBase)):
+        raise TypeError("Must be a subclass of %s or %s" %
+                        (Object.__name__, InterfaceBase.__name__))
+
+    gparams = []
+    for key in dir(cls.props):
+        if not key.startswith("_"):
+            gparams.append(getattr(cls.props, key))
+    return gparams
+
+
 def PropertyAttribute(obj_info):
     cls = _PropsDescriptor
     cls_dict = dict(cls.__dict__)
