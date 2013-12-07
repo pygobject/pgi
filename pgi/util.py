@@ -178,16 +178,17 @@ def glist_to_list(g, type_):
 
 def import_attribute(namespace, name):
     mod = __import__(const.PREFIX[-1] + "." + namespace, fromlist=[name])
-    return getattr(mod, name)
+    try:
+        return getattr(mod, name)
+    except AttributeError:
+        # callback types
+        raise NotImplementedError
 
 
 def import_module(namespace):
     mod = __import__(const.PREFIX[-1], fromlist=[namespace])
-    try:
-        return getattr(mod, namespace)
-    except AttributeError:
-        # callback types
-        raise NotImplementedError
+    return getattr(mod, namespace)
+
 
 
 def escape_builtin(text):
