@@ -7,7 +7,7 @@
 
 from .clib.ctypesutil import gicast, memcpy
 from .codegen import generate_field_getter, generate_field_setter
-from .codegen.fields import get_field_class
+from .codegen import get_field_type
 from .clib.gir import GIUnionInfoPtr, GIFieldInfoFlags, GIStructInfoPtr
 from .clib.glib import g_try_malloc0, free
 from .gtype import PGType
@@ -109,10 +109,7 @@ class FieldAttribute(object):
 
     @property
     def py_type(self):
-        try:
-            return get_field_class(self._info.get_type()).py_type
-        except NotImplementedError:
-            return
+        return get_field_type(self._info)
 
     def __get__(self, instance, owner):
         if not self._readable:

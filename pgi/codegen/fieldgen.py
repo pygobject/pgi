@@ -98,3 +98,18 @@ def generate_field_getter(info):
 
 def generate_field_setter(info):
     return _generate_field_access(info, setter=True)
+
+
+def get_field_type(info):
+    """A field python type or None"""
+
+    type_ = info.get_type()
+
+    try:
+        cls = get_field_class(type_)
+    except NotImplementedError:
+        return
+
+    field = cls(info, type_, None)
+    field.setup()
+    return field.py_type

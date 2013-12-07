@@ -10,6 +10,7 @@ from .funcgen import generate_function
 from .construct import generate_constructor
 from .siggen import generate_signal_callback, generate_callback
 from .fieldgen import generate_field_getter, generate_field_setter
+from .fieldgen import get_field_type
 
 
 set_backend = set_backend
@@ -17,6 +18,7 @@ generate_function = generate_function
 generate_constructor = generate_constructor
 generate_signal_callback = generate_signal_callback
 generate_callback = generate_callback
+get_field_type = get_field_type
 
 
 from .backend import init_backends

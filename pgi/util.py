@@ -183,7 +183,11 @@ def import_attribute(namespace, name):
 
 def import_module(namespace):
     mod = __import__(const.PREFIX[-1], fromlist=[namespace])
-    return getattr(mod, namespace)
+    try:
+        return getattr(mod, namespace)
+    except AttributeError:
+        # callback types
+        raise NotImplementedError
 
 
 def escape_builtin(text):

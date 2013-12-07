@@ -68,3 +68,5 @@ class StructTest(unittest.TestCase):
         self.assertEqual(Gdk.Color.pixel.name, "pixel")
         self.assertTrue(Gdk.Color.pixel.writeable)
         self.assertTrue(Gdk.Color.pixel.readable)
+
+        self.assertEqual(Gdk.EventButton.device.py_type, Gdk.Device)

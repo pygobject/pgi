@@ -37,7 +37,7 @@ class InterfaceField(Field):
         iface = self.type.get_interface()
         try:
             self.py_type = import_attribute(iface.namespace, iface.name)
-        except (NotImplementedError, AttributeError):
+        except NotImplementedError:
             # fall back to object
             pass
 
