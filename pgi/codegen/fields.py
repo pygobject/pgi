@@ -6,15 +6,21 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from pgi.clib.gir import GIInfoType, GITypeTag
+from pgi.gtype import PGType
+from pgi.util import import_attribute
 
 
 class Field(object):
     TAG = None
+    py_type = None
 
     def __init__(self, info, type, backend):
         self.backend = backend
         self.info = info
         self.type = type
+
+    def setup(self):
+        pass
 
     def get(self, name):
         raise NotImplementedError("no getter implemented")
@@ -25,6 +31,15 @@ class Field(object):
 
 class InterfaceField(Field):
     TAG = GITypeTag.INTERFACE
+    py_type = object
+
+    def setup(self):
+        iface = self.type.get_interface()
+        try:
+            self.py_type = import_attribute(iface.namespace, iface.name)
+        except (NotImplementedError, AttributeError):
+            # fall back to object
+            pass
 
     def get(self, name):
         var = self.backend.get_type(self.type)
@@ -50,6 +65,7 @@ class InterfaceField(Field):
 
 class TypeField(Field):
     TAG = GITypeTag.GTYPE
+    py_type = PGType
 
     def get(self, name):
         var = self.backend.get_type(self.type)
@@ -72,34 +88,42 @@ class BasicField(Field):
 
 class DoubleField(BasicField):
     TAG = GITypeTag.DOUBLE
+    py_type = float
 
 
 class UInt32Field(BasicField):
     TAG = GITypeTag.UINT32
+    py_type = int
 
 
 class UInt8Field(BasicField):
     TAG = GITypeTag.UINT8
+    py_type = int
 
 
 class Int32Field(BasicField):
     TAG = GITypeTag.INT32
+    py_type = int
 
 
 class Int64Field(BasicField):
     TAG = GITypeTag.INT64
+    py_type = int
 
 
 class UInt16Field(BasicField):
     TAG = GITypeTag.UINT16
+    py_type = int
 
 
 class Int16Field(BasicField):
     TAG = GITypeTag.INT16
+    py_type = int
 
 
 class FloatField(BasicField):
     TAG = GITypeTag.FLOAT
+    py_type = float
 
 
 _classes = {}

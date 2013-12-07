@@ -7,10 +7,12 @@
 
 from .clib.ctypesutil import gicast, memcpy
 from .codegen import generate_field_getter, generate_field_setter
+from .codegen.fields import get_field_class
 from .clib.gir import GIUnionInfoPtr, GIFieldInfoFlags, GIStructInfoPtr
 from .clib.glib import g_try_malloc0, free
 from .gtype import PGType
 from .obj import add_method
+from .util import escape_keyword
 
 
 class _DummyInfo(object):
@@ -91,10 +93,26 @@ class FieldAttribute(object):
     _getter = None
     _setter = None
 
-    def __init__(self, info):
+    def __init__(self, name, info):
         self._info = info
+        self.name = name
         self._readable = info.flags.value & GIFieldInfoFlags.IS_READABLE
         self._writeable = info.flags.value & GIFieldInfoFlags.IS_WRITABLE
+
+    @property
+    def writeable(self):
+        return self._writeable
+
+    @property
+    def readable(self):
+        return self._readable
+
+    @property
+    def py_type(self):
+        try:
+            return get_field_class(self._info.get_type()).py_type
+        except NotImplementedError:
+            return
 
     def __get__(self, instance, owner):
         if not self._readable:
@@ -134,7 +152,7 @@ def UnionAttribute(union_info):
     # Add fields
     for field_info in union_info.get_fields():
         field_name = field_info.name
-        attr = FieldAttribute(field_info)
+        attr = FieldAttribute(field_name, field_info)
         setattr(cls, field_name, attr)
 
     return cls
@@ -159,8 +177,8 @@ def StructureAttribute(struct_info):
 
     # Add fields
     for field_info in struct_info.get_fields():
-        field_name = field_info.name
-        attr = FieldAttribute(field_info)
+        field_name = escape_keyword(field_info.name)
+        attr = FieldAttribute(field_name, field_info)
         setattr(cls, field_name, attr)
 
     return cls

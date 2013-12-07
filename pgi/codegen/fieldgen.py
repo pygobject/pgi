@@ -15,6 +15,8 @@ from .utils import CodeBlock
 def _generate_field_setter(info, info_type, backend):
     cls = get_field_class(info_type)
     f = cls(info, info_type, backend)
+    f.setup()
+
     main = CodeBlock()
     main.write_line("def setter(instance, value):")
 
@@ -42,6 +44,7 @@ def _generate_field_setter(info, info_type, backend):
 def _generate_field_getter(info, info_type, backend):
     cls = get_field_class(info_type)
     f = cls(info, info_type, backend)
+    f.setup()
 
     main = CodeBlock()
     main.write_line("def getter(instance):")

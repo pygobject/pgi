@@ -11,7 +11,7 @@ import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk
 
-from tests import FIXME, skipUnlessCairo
+from tests import FIXME, skipUnlessCairo, skipIfGI
 
 
 class StructTest(unittest.TestCase):
@@ -61,3 +61,10 @@ class StructTest(unittest.TestCase):
     def test_foo(self):
         event = Gdk.Event.new(Gdk.EventType.BUTTON_PRESS)
         event.state
+
+    @skipIfGI
+    def test_field_info(self):
+        self.assertEqual(Gdk.Color.pixel.py_type, int)
+        self.assertEqual(Gdk.Color.pixel.name, "pixel")
+        self.assertTrue(Gdk.Color.pixel.writeable)
+        self.assertTrue(Gdk.Color.pixel.readable)
