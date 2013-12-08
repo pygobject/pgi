@@ -5,14 +5,34 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
+import os
 import keyword
 import re
-from ctypes import cast, POINTER, c_void_p
+from ctypes import cast, POINTER, c_void_p, cdll
+from ctypes.util import find_library
 
 from . import const
 from ._compat import builtins
 from .clib.gir import GITypeTag, GIInfoType
 from .clib.glib import free
+
+
+def load_ctypes_library(name):
+    """Takes a library name and calls find_library in case loading fails,
+    since some girs don't include the real .so name.
+
+    Raises OSError like LoadLibrary if loading fails.
+
+    e.g. javascriptcoregtk-3.0 should be libjavascriptcoregtk-3.0.so on unix
+    """
+
+    try:
+        return cdll.LoadLibrary(name)
+    except OSError:
+        name = find_library(name)
+        if name is None:
+            raise
+        return cdll.LoadLibrary(name)
 
 
 class InfoIterWrapper(object):

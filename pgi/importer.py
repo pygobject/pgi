@@ -8,7 +8,7 @@
 """Provides a custom PEP-302 import hook to load GI libraries"""
 
 import sys
-from ctypes import c_char_p, byref, CDLL
+from ctypes import c_char_p, byref
 
 from .clib.gir import GIRepositoryPtr
 from .clib.glib import GErrorPtr
@@ -111,7 +111,7 @@ class Importer(object):
         if library:
             library = library.split(b",")[0]
             try:
-                CDLL(library)
+                util.load_ctypes_library(library)
             except OSError:
                 raise ImportError("Couldn't load shared library %r" % library)
 

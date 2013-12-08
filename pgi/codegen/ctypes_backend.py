@@ -21,7 +21,7 @@ from pgi.clib.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr, GType
 from pgi.gerror import PGError
 from pgi.gtype import PGType
 from pgi import foreign
-from pgi.util import import_attribute
+from pgi.util import import_attribute, load_ctypes_library
 
 
 def typeinfo_to_ctypes(info, return_value=False):
@@ -1249,7 +1249,7 @@ class CTypesBackend(Backend):
             if not paths:
                 return
             path = paths.split(",")[0]
-            lib = ctypes.cdll.LoadLibrary(path)
+            lib = load_ctypes_library(path)
             self._libs[namespace] = lib
         return self._libs[namespace]
 
