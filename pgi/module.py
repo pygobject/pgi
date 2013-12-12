@@ -69,7 +69,10 @@ class _Module(types.ModuleType):
         return implemented_names
 
     def __getattr__(self, name):
-        info = self._wrapper.lookup_name(unescape_identifier(name))
+        info = self._wrapper.lookup_name(name)
+        if not info:
+            info = self._wrapper.lookup_name(unescape_identifier(name))
+
         if not info:
             raise AttributeError("%r module has not attribute %r" %
                                  (self.__class__.__name__, name))
