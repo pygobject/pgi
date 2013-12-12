@@ -19,6 +19,7 @@ from .clib.ctypesutil import gicast
 from .util import import_attribute, escape_identifier
 from .gtype import PGType
 from .properties import PropertyAttribute, PROPS_NAME
+from .field import FieldAttribute
 from .constant import ConstantAttribute
 from .signals import SignalsAttribute
 from .codegen import generate_function, generate_constructor
@@ -406,6 +407,12 @@ def ObjectAttribute(obj_info):
         constant_name = constant.get_name()
         attr = ConstantAttribute(constant)
         setattr(cls, constant_name, attr)
+
+    # Fields
+    for field in obj_info.get_fields():
+        field_name = escape_identifier(field.name)
+        attr = FieldAttribute(field_name, field)
+        setattr(cls, field_name, attr)
 
     # we implement the base object ourself
     if cls is not Object:

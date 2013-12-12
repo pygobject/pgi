@@ -179,6 +179,9 @@ class ObjectTest(unittest.TestCase):
         # make sure the both share the same class
         self.assertEqual(type(instance), type(instance2))
 
+    def test_field(self):
+        self.assertTrue(isinstance(Gtk.Style().xthickness, int))
+
 
 class GObjectConstructTest(unittest.TestCase):
     def test_props_construct(self):
