@@ -129,7 +129,7 @@ class PropertiesTest(unittest.TestCase):
         self.assertTrue(isinstance(window, Gdk.Window))
 
     def test_list_properties(self):
-        self.assertTrue(len(GObject.list_properties(Gtk.Window)) >= 71)
+        self.assertTrue(len(GObject.list_properties(Gtk.Window)) >= 70)
         self.assertTrue(len(GObject.list_properties(Gtk.Editable)) == 0)
 
         self.assertRaises(TypeError, GObject.list_properties, None)
