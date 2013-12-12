@@ -11,7 +11,7 @@ from .clib.gobject import GEnumClassPtr, GFlagsClassPtr
 from .clib.ctypesutil import gicast
 from .clib.gir import GIEnumInfoPtr
 from .gtype import PGType
-from .util import cached_property, escape_name
+from .util import cached_property, escape_identifier
 from .obj import add_method
 
 
@@ -156,7 +156,7 @@ def FlagsAttribute(info):
 
     # create instances for all of them and add to the class
     for num, vname in values:
-        escaped = escape_name(vname)
+        escaped = escape_identifier(vname)
         obj = cls(num)
         if escaped != vname:
             setattr(cls, escaped, obj)
@@ -181,7 +181,7 @@ def EnumAttribute(info):
 
     # create instances for all of them and add to the class
     for num, vname in values:
-        escaped = escape_name(vname)
+        escaped = escape_identifier(vname)
         obj = cls(num)
         if escaped != vname:
             setattr(cls, escaped, obj)

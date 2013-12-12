@@ -20,7 +20,8 @@ try:
     cffi_backend = cffi_backend
 except ImportError:
     cffi_backend = None
-from pgi.util import escape_name, unescape_name, escape_builtin
+from pgi.util import escape_identifier, unescape_identifier
+from pgi.util import escape_parameter, unescape_parameter
 from pgi.codegen.utils import CodeBlock, parse_code, parse_with_objects
 from pgi.gtype import PGType
 from pgi.clib.gobject import GType
@@ -28,17 +29,20 @@ from pgi.clib.gobject import GType
 
 class PGIMisc(unittest.TestCase):
     def test_escape_property(self):
-        self.assertEqual(escape_name("class"), "class_")
-        self.assertEqual(escape_name("cla-ss"), "cla_ss")
-        self.assertEqual(escape_name("2BUTTON_PRESS"), "_2BUTTON_PRESS")
+        self.assertEqual(escape_parameter("class"), "class_")
+        self.assertEqual(escape_parameter("cla-ss"), "cla_ss")
+        self.assertEqual(escape_parameter("2BUTTON_PRESS"), "_2BUTTON_PRESS")
 
     def test_unescape_property(self):
-        self.assertEqual(unescape_name("foo_"), "foo")
-        self.assertEqual(unescape_name("fo_oo"), "fo-oo")
+        self.assertEqual(unescape_parameter("foo_"), "foo")
+        self.assertEqual(unescape_parameter("fo_oo"), "fo-oo")
 
-    def test_escape_builtin(self):
-        self.assertEqual(escape_builtin("type"), "type_")
-        self.assertEqual(escape_builtin("all"), "all_")
+    def test_escape_identifier(self):
+        self.assertEqual(escape_identifier("class"), "class_")
+        self.assertEqual(escape_identifier("2BUTTON_PRESS"), "_2BUTTON_PRESS")
+
+    def test_unescape_identifier(self):
+        self.assertEqual(unescape_identifier("foo_"), "foo")
 
     def test_codeblock(self):
         a = CodeBlock("foo")
@@ -157,7 +161,7 @@ if 2:
 
         self.assertEqual(
             Gtk.target_table_new_from_list.__doc__,
-            "target_table_new_from_list(list_: Gtk.TargetList) -> "
+            "target_table_new_from_list(list: Gtk.TargetList) -> "
             "[Gtk.TargetEntry]")
 
         self.assertEqual(

@@ -5,14 +5,12 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-import os
 import keyword
 import re
 from ctypes import cast, POINTER, c_void_p, cdll
 from ctypes.util import find_library
 
 from . import const
-from ._compat import builtins
 from .clib.gir import GITypeTag, GIInfoType
 from .clib.glib import free
 
@@ -210,54 +208,49 @@ def import_module(namespace):
     return getattr(mod, namespace)
 
 
-
-def escape_builtin(text):
-    """Escape a name so it doesn't shadow a builtin"""
-    while text in dir(builtins):
-        text = text + "_"
-    return text
-
-
-_KWD_RE = re.compile("^(%s)$" % "|".join(keyword.kwlist))
-
-
-def escape_keyword(text, reg=_KWD_RE):
-    return reg.sub(r"\1_", text)
-
-
 def encode(string):
     if not isinstance(string, bytes):
         return string.encode("utf-8")
     return string
 
 
-def unescape_keyword(text):
-    new = text.rstrip("_")
-    if new != escape_keyword(new):
-        return new
-    return text
+_KWD_RE = re.compile("^(%s)$" % "|".join(keyword.kwlist))
 
 
-def escape_name(text, reg=_KWD_RE):
-    """Escape identifiers and keywords by changing them in a defined way
-     - '-' will be replaced by '_'
-     - keywords get '_' appended"""
+def escape_identifier(text, reg=_KWD_RE):
+    """Escape C identifiers so they can be used as attributes/arguments"""
+
     # see http://docs.python.org/reference/lexical_analysis.html#identifiers
     if not text:
         return text
     if text[0].isdigit():
         text = "_" + text
-    text = text.replace("-", "_")
     return reg.sub(r"\1_", text)
 
 
-def unescape_name(text):
+def unescape_identifier(text):
+    # XXX: get rid of this
+
     if len(text) >= 2:
         if text[0] == "_" and text[1].isdigit():
             text = text[1:]
     if text.endswith("_"):
         return text[:-1]
-    return text.replace("_", "-")
+    return text
+
+
+def escape_parameter(text):
+    """Escape a GObejct parameter name so it can be used as python
+    attribute/argument
+    """
+
+    return escape_identifier(text.replace("-", "_"))
+
+
+def unescape_parameter(text):
+    # XXX: get rid of this
+
+    return unescape_identifier(text).replace("_", "-")
 
 
 class cached_property(object):

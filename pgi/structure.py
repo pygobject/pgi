@@ -12,7 +12,7 @@ from .clib.gir import GIUnionInfoPtr, GIFieldInfoFlags, GIStructInfoPtr
 from .clib.glib import g_try_malloc0, free
 from .gtype import PGType
 from .obj import add_method
-from .util import escape_keyword
+from .util import escape_identifier
 
 
 class _DummyInfo(object):
@@ -174,7 +174,7 @@ def StructureAttribute(struct_info):
 
     # Add fields
     for field_info in struct_info.get_fields():
-        field_name = escape_keyword(field_info.name)
+        field_name = escape_identifier(field_info.name)
         attr = FieldAttribute(field_name, field_info)
         setattr(cls, field_name, attr)
 

@@ -6,10 +6,11 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 import ctypes
+import __builtin__
 
 from . import generate_callback
-from .backend import Backend, VariableFactory
-from .utils import CodeBlock, parse_with_objects
+from .backend import Backend
+from .utils import CodeBlock, parse_with_objects, VariableFactory
 
 from pgi.clib import glib
 from pgi.clib.ctypesutil import gicast, find_library
@@ -99,17 +100,6 @@ def typeinfo_to_ctypes(info, return_value=False):
     raise NotImplementedError("Could not convert %r to ctypes type" % info.tag)
 
 
-def fixup_ctypes_kwargs(kwargs):
-    # make ctypes dependencies local
-    new_kwargs = {}
-    for key, value in kwargs.iteritems():
-        if isinstance(value, type) and value.__module__ == "ctypes":
-            new_kwargs[key] = "%s.%s" % (value.__module__, value.__name__)
-        else:
-            new_kwargs[key] = value
-    return new_kwargs
-
-
 class BaseType(object):
     GI_TYPE_TAG = None
     py_type = None
@@ -132,21 +122,19 @@ class BaseType(object):
         return cls
 
     def parse(self, code, **kwargs):
-        block, var = self._gen.parse(code, **fixup_ctypes_kwargs(kwargs))
+        block, var = self._gen.parse(code, **kwargs)
         block.write_into(self.block)
         return var
 
     def get_reference(self, value):
         return self.parse("""
-$ptr = ctypes.byref($value)
+$ptr = $ctypes.byref($value)
 """, value=value)["ptr"]
 
     def free(self, name):
         self.parse("""
-glib.free($ptr)
-""", ptr=name)
-
-        self.block.add_dependency("glib", glib)
+$glib.free($ptr)
+""", ptr=name, glib=glib)
 
     def pack_pointer(self, name):
         """Returns a pointer containing the value.
@@ -155,7 +143,7 @@ glib.free($ptr)
         """
 
         return self.parse("""
-raise TypeError('Can\\'t convert %(type_name)s to pointer: %%r' %% $in_)
+raise $_.TypeError('Can\\'t convert %(type_name)s to pointer: %%r' %% $in_)
 """ % {"type_name": type(self).__name__}, in_=name)["in_"]
 
 
@@ -189,26 +177,26 @@ class Int8(BasicType):
 
     def check(self, name):
         return self.parse("""
-if not isinstance($value, basestring):
-    $int = int($value)
+if not $_.isinstance($value, $_.basestring):
+    $int = $_.int($value)
 else:
     raise TypeError("'$value' not a number")
 
 # overflow check for int8
 if not -2**7 <= $int < 2**7:
-    raise OverflowError("Value %r not in range" % $int)
+    raise $_.OverflowError("Value %r not in range" % $int)
 """, value=name)["int"]
 
     def pack(self, name):
         return self.parse("""
 # to ctypes
-$cvalue = ctypes.c_int8($value)
+$cvalue = $ctypes.c_int8($value)
 """, value=name)["cvalue"]
 
     def new(self):
         return self.parse("""
 # new int8
-$value = ctypes.c_int8()
+$value = $ctypes.c_int8()
 """)["value"]
 
 
@@ -218,32 +206,32 @@ class UInt8(BasicType):
     def check(self, name):
         return self.parse("""
 # uint8 type/value check
-if isinstance($value, basestring):
-    if isinstance($value, str):
+if $_.isinstance($value, $_.basestring):
+    if $_.isinstance($value, $_.str):
         try:
-            $value = ord($value)
-        except TypeError:
-            raise TypeError("'$uint' must be a single character")
+            $value = $_.ord($value)
+        except $_.TypeError:
+            raise $_.TypeError("'$uint' must be a single character")
     else:
-        raise TypeError("Input must be a str character")
+        raise $_.TypeError("Input must be a str character")
 
-$uint = int($value)
+$uint = $_.int($value)
 
 # overflow check for uint8
 if not 0 <= $uint < 2**8:
-    raise OverflowError("Value %r not in range" % $uint)
+    raise $_.OverflowError("Value %r not in range" % $uint)
 """, value=name)["uint"]
 
     def pack(self, name):
         return self.parse("""
 # to ctypes
-$cvalue = ctypes.c_uint8($value)
+$cvalue = $ctypes.c_uint8($value)
 """, value=name)["cvalue"]
 
     def new(self):
         return self.parse("""
 # new uint8
-$value = ctypes.c_uint8()
+$value = $ctypes.c_uint8()
 """)["value"]
 
 
@@ -252,26 +240,26 @@ class Int16(BasicType):
 
     def check(self, name):
         return self.parse("""
-if not isinstance($value, basestring):
-    $int = int($value)
+if not $_.isinstance($value, $_.basestring):
+    $int = $_.int($value)
 else:
-    raise TypeError("'$value' not a number")
+    raise $_.TypeError("'$value' not a number")
 
 # overflow check for int16
 if not -2**15 <= $int < 2**15:
-    raise OverflowError("Value %r not in range" % $int)
+    raise $_.OverflowError("Value %r not in range" % $int)
 """, value=name)["int"]
 
     def pack(self, name):
         return self.parse("""
 # to ctypes
-$cvalue = ctypes.c_int16($value)
+$cvalue = $ctypes.c_int16($value)
 """, value=name)["cvalue"]
 
     def new(self):
         return self.parse("""
 # new int16
-$value = ctypes.c_int16()
+$value = $ctypes.c_int16()
 """)["value"]
 
 
@@ -280,26 +268,26 @@ class UInt16(BasicType):
 
     def check(self, name):
         return self.parse("""
-if not isinstance($value, basestring):
-    $int = int($value)
+if not $_.isinstance($value, $_.basestring):
+    $int = $_.int($value)
 else:
-    raise TypeError("'$value' not a number")
+    raise $_.TypeError("'$value' not a number")
 
 # overflow check for uint16
 if not 0 <= $int < 2**16:
-    raise OverflowError("Value %r not in range" % $int)
+    raise $_.OverflowError("Value %r not in range" % $int)
 """, value=name)["int"]
 
     def pack(self, name):
         return self.parse("""
 # to ctypes
-$cvalue = ctypes.c_uint16($value)
+$cvalue = $ctypes.c_uint16($value)
 """, value=name)["cvalue"]
 
     def new(self):
         return self.parse("""
 # new int16
-$value = ctypes.c_uint16()
+$value = $ctypes.c_uint16()
 """)["value"]
 
 
@@ -309,25 +297,25 @@ class Int32(BasicType):
     def check(self, name):
         return self.parse("""
 # int32 type/value check
-if not isinstance($value, basestring):
-    $int = int($value)
+if not $_.isinstance($value, $_.basestring):
+    $int = $_.int($value)
 else:
-    raise TypeError("'$value' not a number")
+    raise $_.TypeError("'$value' not a number")
 
 if not -2**31 <= $int < 2**31:
-    raise OverflowError("Value %r not in range" % $int)
+    raise $_.OverflowError("Value %r not in range" % $int)
 """, value=name)["int"]
 
     def pack(self, valid):
         return self.parse("""
 # to ctypes
-$c_value = ctypes.c_int32($value)
+$c_value = $ctypes.c_int32($value)
 """, value=valid)["c_value"]
 
     def new(self):
         return self.parse("""
 # new int32
-$value = ctypes.c_int32()
+$value = $ctypes.c_int32()
 """)["value"]
 
     def pack_pointer(self, name):
@@ -342,25 +330,25 @@ class UInt32(BasicType):
     def check(self, name):
         return self.parse("""
 # uint32 type/value check
-if not isinstance($value, basestring):
-    $int = int($value)
+if not $_.isinstance($value, $_.basestring):
+    $int = $_.int($value)
 else:
-    raise TypeError("'$value' not a number")
+    raise $_.TypeError("'$value' not a number")
 
 if not 0 <= $int < 2**32:
-    raise OverflowError("Value %r not in range" % $int)
+    raise $_.OverflowError("Value %r not in range" % $int)
 """, value=name)["int"]
 
     def pack(self, valid):
         return self.parse("""
 # to ctypes
-$c_value = ctypes.c_uint32($value)
+$c_value = $ctypes.c_uint32($value)
 """, value=valid)["c_value"]
 
     def new(self):
         return self.parse("""
 # new uint32
-$value = ctypes.c_uint32()
+$value = $ctypes.c_uint32()
 """)["value"]
 
     def pack_pointer(self, name):
@@ -375,25 +363,25 @@ class Int64(BasicType):
     def check(self, name):
         return self.parse("""
 # int64 type/value check
-if not isinstance($value, basestring):
-    $int = int($value)
+if not $_.isinstance($value, $_.basestring):
+    $int = $_.int($value)
 else:
-    raise TypeError("'$value' not a number")
+    raise $_.TypeError("'$value' not a number")
 
 if not -2**63 <= $int < 2**63:
-    raise OverflowError("Value %r not in range" % $int)
+    raise $_.OverflowError("Value %r not in range" % $int)
 """, value=name)["int"]
 
     def pack(self, valid):
         return self.parse("""
 # to ctypes
-$c_value = ctypes.c_int64($value)
+$c_value = $ctypes.c_int64($value)
 """, value=valid)["c_value"]
 
     def new(self):
         return self.parse("""
 # new int64
-$value = ctypes.c_int64()
+$value = $ctypes.c_int64()
 """)["value"]
 
 
@@ -403,25 +391,25 @@ class UInt64(BasicType):
     def check(self, name):
         return self.parse("""
 # uint64 type/value check
-if not isinstance($value, basestring):
-    $int = int($value)
+if not $_.isinstance($value, $_.basestring):
+    $int = $_.int($value)
 else:
-    raise TypeError("'$value' not a number")
+    raise $_.TypeError("'$value' not a number")
 
 if not 0 <= $int < 2**64:
-    raise OverflowError("Value %r not in range" % $int)
+    raise $_.OverflowError("Value %r not in range" % $int)
 """, value=name)["int"]
 
     def pack(self, valid):
         return self.parse("""
 # to ctypes
-$c_value = ctypes.c_uint64($value)
+$c_value = $ctypes.c_uint64($value)
 """, value=valid)["c_value"]
 
     def new(self):
         return self.parse("""
 # new uint64
-$value = ctypes.c_uint64()
+$value = $ctypes.c_uint64()
 """)["value"]
 
 
@@ -431,14 +419,14 @@ class Float(BasicType):
     def check(self, name):
         return self.parse("""
 # float type/value check
-if isinstance($value, basestring):
-    raise TypeError
-$float = float($value)
-$c_float = ctypes.c_float($float)
+if $_.isinstance($value, $_.basestring):
+    raise $_.TypeError
+$float = $_.float($value)
+$c_float = $ctypes.c_float($float)
 $c_value = $c_float.value
 if $c_value != $float and \\
-        $c_value in (float('inf'), float('-inf'), float('nan')):
-    raise OverflowError("%r out of range" % $float)
+        $c_value in ($_.float('inf'), $_.float('-inf'), $_.float('nan')):
+    raise $_.OverflowError("%r out of range" % $float)
 """, value=name)["c_float"]
 
     def pack(self, name):
@@ -447,7 +435,7 @@ if $c_value != $float and \\
     def new(self):
         return self.parse("""
 # new float
-$value = ctypes.c_float()
+$value = $ctypes.c_float()
 """)["value"]
 
 
@@ -457,14 +445,14 @@ class Double(BasicType):
     def check(self, name):
         return self.parse("""
 # double type/value check
-if isinstance($value, basestring):
-    raise TypeError
-$double = float($value)
-$c_double = ctypes.c_double($double)
+if $_.isinstance($value, $_.basestring):
+    raise $_.TypeError
+$double = $_.float($value)
+$c_double = $ctypes.c_double($double)
 $c_value = $c_double.value
 if $c_value != $double and \\
-        $c_value in (float('inf'), float('-inf'), float('nan')):
-    raise OverflowError("%f out of range" % $double)
+        $c_value in ($_.float('inf'),$_.float('-inf'), $_.float('nan')):
+    raise $_.OverflowError("%f out of range" % $double)
 """, value=name)["c_double"]
 
     def pack(self, name):
@@ -473,7 +461,7 @@ if $c_value != $double and \\
     def new(self):
         return self.parse("""
 # new double
-$value = ctypes.c_double()
+$value = $ctypes.c_double()
 """)["value"]
 
 
@@ -482,12 +470,12 @@ class Boolean(BasicType):
 
     def check(self, name):
         return self.parse("""
-$bool = bool($value)
+$bool = $_.bool($value)
 """, value=name)["bool"]
 
     def pack(self, name):
         return self.parse("""
-$c_bool = ctypes.c_int($value)
+$c_bool = $ctypes.c_int($value)
 """, value=name)["c_bool"]
 
     def pre_unpack(self, name):
@@ -496,12 +484,12 @@ $c_bool = ctypes.c_int($value)
     def unpack(self, name):
         return self.parse("""
 # pypy returns int instead of bool
-$bool = bool($value)
+$bool = $_.bool($value)
 """, value=name)["bool"]
 
     def new(self):
         return self.parse("""
-$value = ctypes.c_int()
+$value = $ctypes.c_int()
 """)["value"]
 
 
@@ -520,26 +508,23 @@ class GType_(BaseType):
         gtype_map = dict((k, PGType.from_name(v)) for (k, v) in items)
 
         var = self.parse("""
-if not isinstance($obj, PGType):
+if not $_.isinstance($obj, $PGType):
     if hasattr($obj, "__gtype__"):
         $obj = $obj.__gtype__
     elif $obj in $gtype_map:
         $obj = $gtype_map[$obj]
 
-if not isinstance($obj, PGType):
+if not $_.isinstance($obj, $PGType):
     raise TypeError("%r not a GType" % $obj)
-""", gtype_map=gtype_map, obj=name)
-
-        self.block.add_dependency("PGType", PGType)
+""", gtype_map=gtype_map, obj=name, PGType=PGType)
 
         return var["obj"]
 
     def pack(self, name):
         var = self.parse("""
-$gtype = GType($obj._type.value)
-""", obj=name)
+$gtype = $GType($obj._type.value)
+""", obj=name, GType=GType)
 
-        self.block.add_dependency("GType", GType)
         return var["gtype"]
 
     pack_in = pack
@@ -549,17 +534,16 @@ $gtype = GType($obj._type.value)
 
     def unpack(self, name):
         var = self.parse("""
-$pgtype = PGType($gtype)
-""", gtype=name)
+$pgtype = $PGType($gtype)
+""", gtype=name, PGType=PGType)
 
-        self.block.add_dependency("PGType", PGType)
         return var["pgtype"]
 
     def new(self):
         var = self.parse("""
-$gtype = GType()
-""")
-        self.block.add_dependency("GType", GType)
+$gtype = $GType()
+""", GType=GType)
+
         return var["gtype"]
 
 
@@ -610,25 +594,25 @@ class Object(BaseInterface):
     def check(self, name):
         if self.may_be_null:
             return self.parse("""
-if $obj is not None and not isinstance($obj, $type_class):
+if $obj is not $_.None and not $_.isinstance($obj, $type_class):
     raise TypeError("argument $obj: Expected %s, got %s" %
                     ($type_class.__name__, $obj.__class__.__name__))
 """, obj=name, type_class=self._import_type())["obj"]
 
         return self.parse("""
-if not isinstance($obj, $type_class):
-    raise TypeError("argument $obj: Expected %s, got %s" %
-                    ($type_class.__name__, $obj.__class__.__name__))
+if not $_.isinstance($obj, $type_class):
+    raise $_.TypeError("argument $obj: Expected %s, got %s" %
+                       ($type_class.__name__, $obj.__class__.__name__))
 """, obj=name, type_class=self._import_type())["obj"]
 
     def pack(self, name):
         if self.may_be_null:
             return self.parse("""
-$ptr = ctypes.c_void_p($obj and $obj._obj)
+$ptr = $ctypes.c_void_p($obj and $obj._obj)
 """, obj=name)["ptr"]
 
         return self.parse("""
-$ptr = ctypes.c_void_p($obj._obj)
+$ptr = $ctypes.c_void_p($obj._obj)
 """, obj=name)["ptr"]
 
     def unpack(self, name):
@@ -644,7 +628,7 @@ $ptr = ctypes.c_void_p($obj._obj)
 # unpack object
 if $value:
     $pyclass = $get_class($value)
-    $obj = object.__new__($pyclass)
+    $obj = $_.object.__new__($pyclass)
     $obj._obj = $value
 else:
     $obj = None
@@ -659,7 +643,7 @@ if $obj:
     def new(self):
         return self.parse("""
 # new object
-$value = ctypes.c_void_p()
+$value = $ctypes.c_void_p()
 """)["value"]
 
 
@@ -731,14 +715,14 @@ class Void(BaseType):
 
         return self.parse("""
 if $ptr is None:
-    raise TypeError("No None allowed")
+    raise $_.TypeError("No None allowed")
 """, ptr=name)["ptr"]
 
     def pack(self, name):
         assert self.type.is_pointer
 
         return self.parse("""
-$c_ptr = ctypes.c_void_p($ptr)
+$c_ptr = $ctypes.c_void_p($ptr)
 """, ptr=name)["c_ptr"]
 
     def unpack(self, name):
@@ -753,7 +737,7 @@ $value = $ptr.value
         assert self.type.is_pointer
 
         return self.parse("""
-$c_ptr = ctypes.c_void_p()
+$c_ptr = $ctypes.c_void_p()
 """)["c_ptr"]
 
 
@@ -763,12 +747,11 @@ class Error(BaseType):
     def unpack(self, name):
         var = self.parse("""
 if $gerror_ptr:
-    $out = PGError($gerror_ptr.contents)
+    $out = $PGError($gerror_ptr.contents)
 else:
-    $out = None
-""", gerror_ptr=name)
+    $out = $_.None
+""", gerror_ptr=name, PGError=PGError)
 
-        self.block.add_dependency("PGError", PGError)
         return var["out"]
 
     def check_raise(self, name):
@@ -796,10 +779,10 @@ class Utf8(BaseType):
         if self.may_be_null:
             return self.parse("""
 if $value is not None:
-    if isinstance($value, unicode):
+    if $_.isinstance($value, $_.unicode):
         $string = $value.encode("utf-8")
-    elif not isinstance($value, str):
-        raise TypeError("%r not a string or None" % $value)
+    elif not $_.isinstance($value, $_.str):
+        raise $_.TypeError("%r not a string or None" % $value)
     else:
         $string = $value
 else:
@@ -807,10 +790,10 @@ else:
 """, value=name)["string"]
 
         return self.parse("""
-if isinstance($value, unicode):
+if $_.isinstance($value, $_.unicode):
     $string = $value.encode("utf-8")
-elif not isinstance($value, str):
-    raise TypeError("%r not a string" % $value)
+elif not isinstance($value, $_.str):
+    raise $_.TypeError("%r not a string" % $value)
 else:
     $string = $value
 """, value=name)["string"]
@@ -820,18 +803,17 @@ else:
 
     def pack(self, name):
         return self.parse("""
-$c_value = ctypes.c_char_p($value)
+$c_value = $ctypes.c_char_p($value)
 """, value=name)["c_value"]
 
     def dup(self, name):
         var = self.parse("""
 if $ptr:
-    $ptr_cpy = ctypes.c_char_p(glib.g_strdup($ptr))
+    $ptr_cpy = $ctypes.c_char_p($glib.g_strdup($ptr))
 else:
-    $ptr_cpy = None
-""", ptr=name)
+    $ptr_cpy = $_.None
+""", ptr=name, glib=glib)
 
-        self.block.add_dependency("glib", glib)
         return var["ptr_cpy"]
 
     def unpack(self, name):
@@ -841,12 +823,12 @@ $value = $ctypes_value.value
 
     def unpack_return(self, name):
         return self.parse("""
-$str_value = ctypes.c_char_p($value).value
+$str_value = $ctypes.c_char_p($value).value
 """, value=name)["str_value"]
 
     def new(self):
         return self.parse("""
-$value = ctypes.c_char_p()
+$value = $ctypes.c_char_p()
 """)["value"]
 
     def pack_pointer(self, name):
@@ -864,32 +846,32 @@ class UniChar(BasicType):
 
     def check(self, name):
         return self.parse("""
-if isinstance($value, str):
+if $_.isinstance($value, $_.str):
     $value = $value.decode("utf-8")
-elif not isinstance($value, unicode):
-    raise TypeError
+elif not isinstance($value, $_.unicode):
+    raise $_.TypeError
 
-$int = ord($value)
+$int = $_.ord($value)
 
 if not 0 <= $int < 2**32:
-    raise OverflowError("Value %r not in range" % $int)
+    raise $_.OverflowError("Value %r not in range" % $int)
 """, value=name)["int"]
 
     def pack(self, valid):
         return self.parse("""
 # to ctypes
-$c_value = ctypes.c_uint32($value)
+$c_value = $ctypes.c_uint32($value)
 """, value=valid)["c_value"]
 
     def unpack_return(self, name):
         return self.parse("""
-$out = unichr($value).encode("utf-8")
+$out = $_.unichr($value).encode("utf-8")
 """, value=name)["out"]
 
     def new(self):
         return self.parse("""
 # new uint32
-$value = ctypes.c_uint32()
+$value = $ctypes.c_uint32()
 """)["value"]
 
     def pack_pointer(self, name):
@@ -903,12 +885,12 @@ class Enum(BaseInterface):
     def check(self, name):
         return self.parse("""
 if $value not in $base_type._allowed:
-    raise TypeError("Invalid enum: %r" % $value)
+    raise $_.TypeError("Invalid enum: %r" % $value)
 """, base_type=self._import_type(), value=name)["value"]
 
     def pack(self, name):
         return self.parse("""
-$c_value = ctypes.c_uint($value)
+$c_value = $ctypes.c_uint($value)
 """, value=name)["c_value"]
 
     def pre_unpack(self, name):
@@ -923,7 +905,7 @@ $enum = $enum_class($value)
 
     def new(self):
         return self.parse("""
-$val = ctypes.c_uint()
+$val = $ctypes.c_uint()
 """)["val"]
 
 
@@ -931,18 +913,18 @@ class Flags(BaseInterface):
 
     def check(self, name):
         return self.parse("""
-if not isinstance($value, basestring) and not int($value):
+if not $_.isinstance($value, basestring) and not $_.int($value):
     $out = 0
-elif isinstance($value, $base_type):
-    $out = int($value)
+elif $_.isinstance($value, $base_type):
+    $out = $_.int($value)
 else:
-    raise TypeError("Expected %r but got %r" %
-                    ($base_type.__name__, type($value).__name__))
+    raise $_.TypeError("Expected %r but got %r" %
+                       ($base_type.__name__, $_.type($value).__name__))
 """, base_type=self._import_type(), value=name)["out"]
 
     def pack(self, name):
         return self.parse("""
-$c_value = ctypes.c_uint($value)
+$c_value = $ctypes.c_uint($value)
 """, value=name)["c_value"]
 
     def pre_unpack(self, name):
@@ -957,7 +939,7 @@ $flags = $flags_class($value)
 
     def new(self):
         return self.parse("""
-$val = ctypes.c_uint()
+$val = $ctypes.c_uint()
 """)["val"]
 
 
@@ -971,13 +953,13 @@ class Struct(BaseInterface):
         if foreign_struct:
             foreign_type = foreign_struct.get_type()
             return self.parse("""
-if not isinstance($obj, $struct_class):
-    raise TypeError("%r is not a %r" % ($obj, $struct_class))
+if not $_.isinstance($obj, $struct_class):
+    raise $_.TypeError("%r is not a %r" % ($obj, $struct_class))
 """, struct_class=foreign_type, obj=name)["obj"]
         else:
             return self.parse("""
-if not isinstance($obj, ($struct_class, $obj_class)):
-    raise TypeError("%r is not a structure object" % $obj)
+if not $_.isinstance($obj, ($struct_class, $obj_class)):
+    raise $_.TypeError("%r is not a structure object" % $obj)
     """, obj_class=base_obj, struct_class=self._import_type(), obj=name)["obj"]
 
     def pack(self, name):
@@ -986,11 +968,11 @@ if not isinstance($obj, ($struct_class, $obj_class)):
 
         if not foreign_struct:
             return self.parse("""
-$out = ctypes.c_void_p($obj._obj)
+$out = $ctypes.c_void_p($obj._obj)
     """, obj=name)["out"]
         else:
             return self.parse("""
-$out = ctypes.c_void_p($foreign_struct.to_pointer($obj))
+$out = $ctypes.c_void_p($foreign_struct.to_pointer($obj))
 """, foreign_struct=foreign_struct, obj=name)["out"]
 
     def pre_unpack(self, name):
@@ -1014,7 +996,7 @@ else:
 
         return self.parse("""
 if $value:
-    $obj = object.__new__($type)
+    $obj = $_.object.__new__($type)
     $obj._obj = $value
 else:
     $obj = None
@@ -1022,7 +1004,7 @@ else:
 
     def new(self):
         return self.parse("""
-$value = ctypes.c_void_p()
+$value = $ctypes.c_void_p()
 """)["value"]
 
     def alloc(self):
@@ -1033,8 +1015,8 @@ $value = ctypes.c_void_p()
         return self.parse("""
 $mem = $malloc($size)
 if not $mem and $size:
-    raise MemoryError
-$value = ctypes.c_void_p($mem)
+    raise $_.MemoryError
+$value = $ctypes.c_void_p($mem)
 """, malloc=malloc, size=size)["value"]
 
     def unpack_gvalue(self, name):
@@ -1071,8 +1053,8 @@ class Callback(BaseInterface):
 
     def check(self, name):
         return self.parse("""
-if not callable($py_cb):
-    raise TypeError("%r must be callable" % $py_cb)
+if not $_.callable($py_cb):
+    raise $_.TypeError("%r must be callable" % $py_cb)
 """, py_cb=name)["py_cb"]
 
     def pack(self, name):
@@ -1103,8 +1085,9 @@ class CArray(BaseArray):
         if self.type.array_fixed_size != -1:
             length = self.type.array_fixed_size
             self.parse("""
-if len($l) != $length:
-    raise ValueError("Expected list of length %d, got $length" % len($l))
+$array_len = $_.len($l)
+if $array_len != $length:
+    raise ValueError("Expected list of length %d, got $length" % $array_len)
 """, l=name, length=length)
         return name
 
@@ -1112,14 +1095,15 @@ if len($l) != $length:
         # length
         if self.type.array_length != -1:
             l = self.get_type(length_type)
-            length = l.parse("$len = len($inp)", inp=name)["len"]
+            length = l.parse("$len = $_.len($inp)", inp=name)["len"]
             packed_length = l.pack(length)
             l.block.write_into(self.block)
         elif self.type.array_fixed_size != -1:
             length = self.type.array_fixed_size
             packed_length = ""
         else:
-            length = self.parse("$len = len($inp)", inp=name)["len"]
+            length = self.parse("$len = $_.len($inp)",
+                                inp=name)["len"]
             packed_length = ""
 
         # param
@@ -1133,21 +1117,21 @@ if len($l) != $length:
         if self.type.is_zero_terminated:
             return self.parse("""
 $array = ($ctypes_type * ($length + 1))()
-for $i, $item_in in enumerate($name):
+for $i, $item_in in $_.enumerate($name):
     $param_pack
     $array[$i] = $item_out
 $array[-1] = $ctypes_type()
-$array_ptr = ctypes.pointer($array)
+$array_ptr = $ctypes.pointer($array)
     """, name=name, item_in=item_in, item_out=item_out, param_pack=p.block,
          ctypes_type=ctypes_type, length=length)["array_ptr"], packed_length
 
         # non zero term
         return self.parse("""
 $array = ($ctypes_type * $length)()
-for $i, $item_in in enumerate($name):
+for $i, $item_in in $_.enumerate($name):
     $param_pack
     $array[$i] = $item_out
-$array_ptr = ctypes.pointer($array)
+$array_ptr = $ctypes.pointer($array)
 """, name=name, item_in=item_in, item_out=item_out, param_pack=p.block,
      ctypes_type=ctypes_type, length=length)["array_ptr"], packed_length
 
@@ -1156,7 +1140,7 @@ $array_ptr = ctypes.pointer($array)
         ctypes_type = typeinfo_to_ctypes(param_type)
 
         data = self.parse("""
-$data = ctypes.cast($value, ctypes.POINTER($type))
+$data = $ctypes.cast($value, $ctypes.POINTER($type))
 """, value=name, type=ctypes_type)["data"]
 
         # fixme: do unpack with param type
@@ -1190,7 +1174,7 @@ while $current:
 
         if self.type.is_zero_terminated or self.type.array_length != -1:
             return self.parse("""
-$array = ctypes.c_void_p()
+$array = $ctypes.c_void_p()
 """)["array"], packed_length
         elif self.type.array_fixed_size != -1:
             param_type = self.type.get_param_type(0)
@@ -1199,7 +1183,7 @@ $array = ctypes.c_void_p()
 
             return self.parse("""
 $data = ($ctypes_type * $length)()
-$array = ctypes.pointer($data)
+$array = $ctypes.pointer($data)
 """, ctypes_type=ctypes_type, length=length)["array"], packed_length
         else:
             raise NotImplementedError
@@ -1210,8 +1194,13 @@ class CTypesCodeGen(object):
         self.var = var
 
     def parse(self, code, **kwargs):
+        assert "_" not in kwargs
+        kwargs["_"] = __builtin__
+
+        assert "ctypes" not in kwargs
+        kwargs["ctypes"] = ctypes
+
         block, var = parse_with_objects(code, self.var, **kwargs)
-        block.add_dependency("ctypes", ctypes)
         return block, var
 
 
@@ -1332,11 +1321,11 @@ $out = $func($type_num, $values)
         return block, var["out"]
 
     def parse(self, code, **kwargs):
-        return self._gen.parse(code, **fixup_ctypes_kwargs(kwargs))
+        return self._gen.parse(code, **kwargs)
 
     def cast_pointer(self, name, type_):
         block, var = self.parse("""
-$value = ctypes.cast($value, ctypes.POINTER($type))
+$value = $ctypes.cast($value, $ctypes.POINTER($type))
 """, value=name, type=typeinfo_to_ctypes(type_))
 
         return block, name

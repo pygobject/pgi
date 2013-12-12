@@ -9,7 +9,7 @@ import traceback
 
 from .backend import list_backends
 from .utils import CodeBlock
-from pgi.util import escape_name, escape_builtin
+from pgi.util import escape_identifier
 from .arguments import get_argument_class, ErrorArgument
 from .returnvalues import get_return_class
 
@@ -97,7 +97,7 @@ def _generate_function(backend, info, arg_infos, arg_types,
     args = []
     for arg_info, arg_type in zip(arg_infos, arg_types):
         cls = get_argument_class(arg_type)
-        name = escape_name(escape_builtin(arg_info.name))
+        name = escape_identifier(arg_info.name)
         args.append(cls(name, args, backend, arg_info, arg_type))
 
     cls = get_return_class(return_type)
@@ -177,7 +177,7 @@ def _generate_function(backend, info, arg_infos, arg_types,
 
     # build final function block
 
-    func_name = escape_name(info.name)
+    func_name = escape_identifier(info.name)
     # handle empty string function names
     if func_name == "":
         func_name = "_"

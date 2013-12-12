@@ -13,7 +13,7 @@ from .clib.gobject import GValue, GValuePtr, G_TYPE_FROM_INSTANCE
 from .clib.gobject import GObjectClassPtr
 from .clib.gir import GIInfoType, GITypeTag
 
-from .util import escape_name, unescape_name, InfoIterWrapper
+from .util import escape_parameter, unescape_parameter, InfoIterWrapper
 from .util import import_attribute, set_gvalue_from_py
 from .gtype import PGType
 
@@ -171,9 +171,10 @@ class _ObjectClassProp(object):
             yield props
 
     def __dir__(self):
-        names = [escape_name(n) for n in self._wrapper.iternames()]
+        names = [escape_parameter(n) for n in self._wrapper.iternames()]
         for props in self.__get_base_props():
-            names.extend([escape_name(n) for n in props._wrapper.iternames()])
+            names.extend(
+                [escape_parameter(n) for n in props._wrapper.iternames()])
 
         base = dir(self.__class__)
         return list(set(base + names))
@@ -186,7 +187,7 @@ class _ObjectClassProp(object):
                 pass
 
         info = self._info
-        gname = unescape_name(name)
+        gname = unescape_parameter(name)
         prop_info = self._wrapper.lookup_name(gname)
         if prop_info:
             gtype = info.g_type

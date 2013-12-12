@@ -7,7 +7,7 @@
 
 from ctypes import byref
 
-from .util import cached_property, escape_name
+from .util import cached_property, escape_parameter
 from .clib.glib import guint
 from .clib.gobject import signal_list_ids, signal_query, GSignalQuery
 from .gtype import PGType
@@ -74,7 +74,7 @@ class _GSignalQuery(object):
 
         for id_ in sig_ids:
             sig = GSignal(id_)
-            setattr(self, escape_name(sig.name), sig)
+            setattr(self, escape_parameter(sig.name), sig)
 
 _GSignalQuery.__name__ = "GSignalQuery"
 

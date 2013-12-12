@@ -12,7 +12,7 @@ from .constant import ConstantAttribute
 from .function import FunctionAttribute
 from .structure import StructureAttribute, UnionAttribute
 from .obj import ObjectAttribute, InterfaceAttribute
-from .util import InfoIterWrapper, escape_keyword, unescape_keyword
+from .util import InfoIterWrapper, escape_identifier, unescape_identifier
 
 
 _attr_list = [None, FunctionAttribute, None, StructureAttribute, None,
@@ -53,7 +53,7 @@ class _Module(types.ModuleType):
         # get all infos and
         names = list(self._wrapper.iternames())
         names.extend(self.__dict__.keys())
-        names = map(escape_keyword, names)
+        names = map(escape_identifier, names)
 
         # filter out not implemented ones
         implemented_names = []
@@ -69,7 +69,7 @@ class _Module(types.ModuleType):
         return implemented_names
 
     def __getattr__(self, name):
-        info = self._wrapper.lookup_name(unescape_keyword(name))
+        info = self._wrapper.lookup_name(unescape_identifier(name))
         if not info:
             raise AttributeError("%r module has not attribute %r" %
                                  (self.__class__.__name__, name))

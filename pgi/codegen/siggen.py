@@ -9,7 +9,7 @@ from .backend import get_backend
 from .utils import CodeBlock
 from .cbargs import get_cbarg_class
 from .cbreturn import get_cbreturn_class
-from pgi.util import escape_name, escape_builtin
+from pgi.util import escape_identifier, escape_parameter
 
 
 def build_docstring(cb_name, args):
@@ -36,7 +36,7 @@ def generate_callback(info):
     cb_args = []
     for arg, type_ in zip(args, arg_types):
         cls = get_cbarg_class(type_)
-        excaped_name = escape_builtin(escape_name(arg.name))
+        excaped_name = escape_identifier(arg.name)
         cb_arg = cls(backend, arg, type_, excaped_name)
         cb_args.append(cb_arg)
 
@@ -56,7 +56,7 @@ def generate_callback(info):
 
     argument_list = ", ".join([a.name for a in cb_args])
     forward_arguments = ", ".join(outs_vars)
-    func_name = escape_name(info.name)
+    func_name = escape_parameter(info.name)
     cb_name = backend.var()
 
     return_var = backend.var()
@@ -93,7 +93,7 @@ def _generate_signal_callback(backend, info, args, arg_types):
 
     for arg, type_ in zip(args, arg_types):
         cls = get_cbarg_class(type_)
-        excaped_name = escape_builtin(escape_name(arg.name))
+        excaped_name = escape_identifier(arg.name)
         sig_arg = cls(backend, arg, type_, excaped_name)
         sig_args.append(sig_arg)
 
@@ -113,7 +113,7 @@ def _generate_signal_callback(backend, info, args, arg_types):
 
     argument_list = ", ".join([a.name for a in sig_args])
     forward_arguments = ", ".join(outs_vars)
-    func_name = escape_name(info.name)
+    func_name = escape_parameter(info.name)
     cb_name = backend.var()
 
     return_var = backend.var()

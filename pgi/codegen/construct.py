@@ -15,7 +15,7 @@ Compared to g_object_newv, this saves us two function calls per parameter.
 from .backend import get_backend
 from .utils import CodeBlock
 from pgi.clib.gir import GITypeTag, GIInfoType
-from pgi.util import escape_builtin, unescape_name
+from pgi.util import unescape_parameter
 
 
 class ConstructorSetter(object):
@@ -152,14 +152,13 @@ def _generate_constructor(gtype, specs, names, backend):
 
         type_ = spec._info.get_type()
         const = get_construct_class(type_)
-        real_name = unescape_name(name)
+        real_name = unescape_parameter(name)
         instance = const(real_name, type_, backend)
         instances.append(instance)
 
-        escaped_name = escape_builtin(name)
-        in_args.append(escaped_name)
+        in_args.append(name)
 
-        block, out = instance.set(escaped_name)
+        block, out = instance.set(name)
         block.write_into(body)
 
     call_block, return_var = backend.get_constructor(gtype, instances)

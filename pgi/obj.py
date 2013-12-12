@@ -16,7 +16,7 @@ from .clib.gobject import GConnectFlags, signal_handler_disconnect
 from .clib.gir import GIInterfaceInfoPtr, GIFunctionInfoFlags, GIObjectInfoPtr
 
 from .clib.ctypesutil import gicast
-from .util import import_attribute, escape_name
+from .util import import_attribute, escape_identifier
 from .gtype import PGType
 from .properties import PropertyAttribute, PROPS_NAME
 from .constant import ConstantAttribute
@@ -272,7 +272,7 @@ class MethodAttribute(object):
 def add_method(info, target_cls):
     """Add a method to the target class"""
 
-    name = escape_name(info.name)
+    name = escape_identifier(info.name)
     attr = MethodAttribute(info, name)
     setattr(target_cls, name, attr)
 

@@ -5,11 +5,13 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
+import __builtin__
+
 from cffi import FFI
 
 from pgi.clib.gir import GIRepositoryPtr, GITypeTag, GIInfoType
-from .backend import Backend, VariableFactory
-from .utils import CodeBlock, parse_with_objects
+from .backend import Backend
+from .utils import CodeBlock, parse_with_objects, VariableFactory
 
 
 _glib_defs = """
@@ -144,7 +146,7 @@ class Boolean(BasicType):
 
     def check(self, name):
         return self.parse("""
-$bool = bool($value)
+$bool = $_.bool($value)
 """, value=name)["bool"]
 
     def pack(self, name):
@@ -152,12 +154,12 @@ $bool = bool($value)
 
     def unpack(self, name):
         return self.parse("""
-$bool = bool($value)
+$bool = $_.bool($value)
 """, value=name)["bool"]
 
     def new(self):
         return self.parse("""
-$value = ffi.cast("gboolean", 0)
+$value = $ffi.cast("gboolean", 0)
 """)["value"]
 
 
@@ -167,19 +169,19 @@ class Int32(BasicType):
     def check(self, name):
         return self.parse("""
 # int32 type/value check
-if not isinstance($value, basestring):
-    $int = int($value)
+if not $_.isinstance($value,$_. basestring):
+    $int = $_.int($value)
 else:
-    raise TypeError("'$value' not a number")
+    raise $_.TypeError("'$value' not a number")
 
 if not -2**31 <= $int < 2**31:
-    raise OverflowError("Value %r not in range" % $int)
+    raise $_.OverflowError("Value %r not in range" % $int)
 """, value=name)["int"]
 
     def pack(self, valid):
         return self.parse("""
 # to cffi
-$c_value = ffi.cast("gint32", $value)
+$c_value = $ffi.cast("gint32", $value)
 """, value=valid)["c_value"]
 
     def unpack(self, name):
@@ -188,7 +190,7 @@ $c_value = ffi.cast("gint32", $value)
     def new(self):
         return self.parse("""
 # new int32
-$value = ffi.cast("gint32", 0)
+$value = $ffi.cast("gint32", 0)
 """)["value"]
 
 
@@ -198,22 +200,22 @@ class Utf8(BasicType):
     def check(self, name):
         if self.may_be_null:
             return self.parse("""
-if $value is not None:
-    if isinstance($value, unicode):
+if $value is not $_.None:
+    if isinstance($value, $_.unicode):
         $string = $value.encode("utf-8")
-    elif not isinstance($value, str):
-        raise TypeError("%r not a string or None" % $value)
+    elif not isinstance($value, $_.str):
+        raise $_.TypeError("%r not a string or None" % $value)
     else:
         $string = $value
 else:
-    $string = None
+    $string = $_.None
 """, value=name)["string"]
 
         return self.parse("""
-if isinstance($value, unicode):
+if $_.isinstance($value, $_.unicode):
     $string = $value.encode("utf-8")
-elif not isinstance($value, str):
-    raise TypeError("%r not a string" % $value)
+elif not $_.isinstance($value, $_.str):
+    raise $_.TypeError("%r not a string" % $value)
 else:
     $string = $value
 """, value=name)["string"]
@@ -223,7 +225,7 @@ else:
 if $value:
     $c_value = $value
 else:
-    $c_value = ffi.cast("char*", 0)
+    $c_value = $ffi.cast("char*", 0)
 """, value=name)["c_value"]
 
     def dup(self, name):
@@ -245,8 +247,13 @@ class CFFICodeGen(object):
         self._ffi = ffi
 
     def parse(self, code, **kwargs):
+        assert "ffi" not in kwargs
+        kwargs["ffi"] = self._ffi
+
+        assert "_" not in kwargs
+        kwargs["_"] = __builtin__
+
         block, var = parse_with_objects(code, self.var, **kwargs)
-        block.add_dependency("ffi", self._ffi)
         return block, var
 
 
@@ -281,7 +288,7 @@ class CFFIBackend(Backend):
             self_block, var = self.parse("""
 $new_self = $sself._obj
 """, sself=self_name)
-            block.add_dependency("ffi", self._ffi)
+
             self_block.write_into(block)
 
         for arg in args:
@@ -312,10 +319,9 @@ $new_self = $sself._obj
 
     def cast_pointer(self, name, type_):
         block, var = self.parse("""
-$value = ffi.cast("$type*", $value)
+$value = $ffi.cast("$type*", $value)
 """, value=name, type=typeinfo_to_cffi(type_))
 
-        block.add_dependency("ffi", self._ffi)
         return block, name
 
     def assign_pointer(self, ptr, value):

@@ -22,7 +22,7 @@ except OSError:
 @unittest.skipUnless(has_pep8, "no pep8")
 class TPEP8(unittest.TestCase):
     # don't care..
-    IGNORE = ["E12", "E261"]
+    IGNORE = ["E12", "E261", "E501"]
     PACKAGES = []
 
     def _run(self, path, ignore=None):
