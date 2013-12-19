@@ -189,5 +189,9 @@ if 2:
             "user_data: object) -> bool")
 
         self.assertEqual(
+            GLib.Source.set_callback.__doc__,
+            "set_callback(func: function, *data: object) -> None")
+
+        self.assertEqual(
             Gtk.FileChooser.get_filenames.__doc__,
             "get_filenames() -> [str]")

@@ -28,10 +28,7 @@ class Argument(object):
     call_var = ""
     out_var = ""
     py_type = None
-
-    # XXXX: a hack to not generate code but still show up in the signature
-    # (for userdata)
-    ignore = False
+    is_userdata = False
 
     def __init__(self, arguments, backend):
         self.args = arguments
@@ -272,7 +269,7 @@ class CallbackArgument(BaseInterfaceArgument):
         self._user_data = None
         if self.info.closure != -1:
             self._user_data = self.args[self.info.closure]
-            self._user_data.ignore = True
+            self._user_data.is_userdata = True
 
         self._destroy = None
         if self.info.destroy != -1:

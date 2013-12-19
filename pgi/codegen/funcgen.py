@@ -116,7 +116,7 @@ def _generate_function(backend, info, arg_infos, arg_types,
 
     # pre call
     for arg in args:
-        if arg.is_aux or arg.ignore:
+        if arg.is_aux or arg.is_userdata:
             continue
         block = arg.pre_call()
         if block:
@@ -162,7 +162,7 @@ def _generate_function(backend, info, arg_infos, arg_types,
 
     # process out args
     for arg in args:
-        if arg.is_aux or arg.ignore:
+        if arg.is_aux or arg.is_userdata:
             continue
         block = arg.post_call()
         if block:
@@ -182,10 +182,17 @@ def _generate_function(backend, info, arg_infos, arg_types,
     if func_name == "":
         func_name = "_"
 
+    in_args = [a for a in args if not a.is_aux and a.in_var]
+
+    # if the last in argument is a user data, make it a positional argument
+    if in_args and in_args[-1].is_userdata:
+        name = in_args[-1].in_var
+        in_args[-1].in_var = "*" + name
+
     docstring = build_docstring(func_name, args,
                                 return_var and return_value, throws)
 
-    names = [a.in_var for a in args if not a.is_aux and a.in_var]
+    names = [a.in_var for a in in_args]
     if method:
         names.insert(0, "self")
     names = ", ".join(names)
