@@ -184,5 +184,10 @@ if 2:
                 "translation_domain: str) raises -> (bool, argv: [str])")
 
         self.assertEqual(
+            GLib.source_remove_by_funcs_user_data.__doc__,
+            "source_remove_by_funcs_user_data(funcs: GLib.SourceFuncs, "
+            "user_data: object) -> bool")
+
+        self.assertEqual(
             Gtk.FileChooser.get_filenames.__doc__,
             "get_filenames() -> [str]")

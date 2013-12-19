@@ -469,7 +469,7 @@ class VoidArgument(GIArgument):
 
     def setup(self):
         if self.type.is_pointer:
-            self.py_type = int
+            self.py_type = object
 
     def pre_call(self):
         var = self.get_type()
