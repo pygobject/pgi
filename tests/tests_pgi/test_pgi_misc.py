@@ -190,7 +190,7 @@ if 2:
 
         self.assertEqual(
             GLib.Source.set_callback.__doc__,
-            "set_callback(func: function, *data: object) -> None")
+            "set_callback(func: GLib.SourceFunc, *data: object) -> None")
 
         self.assertEqual(
             Gtk.FileChooser.get_filenames.__doc__,

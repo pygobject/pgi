@@ -12,10 +12,12 @@ from .constant import ConstantAttribute
 from .function import FunctionAttribute
 from .structure import StructureAttribute, UnionAttribute
 from .obj import ObjectAttribute, InterfaceAttribute
+from .callback import CallbackAttribute
 from .util import InfoIterWrapper, escape_identifier, unescape_identifier
 
 
-_attr_list = [None, FunctionAttribute, None, StructureAttribute, None,
+_attr_list = [None, FunctionAttribute, CallbackAttribute,
+              StructureAttribute, None,
               EnumAttribute, FlagsAttribute, ObjectAttribute,
               InterfaceAttribute, ConstantAttribute, None, UnionAttribute,
               None, None, None, None, None, None, None, None]
