@@ -195,3 +195,16 @@ if 2:
         self.assertEqual(
             Gtk.FileChooser.get_filenames.__doc__,
             "get_filenames() -> [str]")
+
+    def test_callback(self):
+        from gi.repository import GLib, GObject
+
+        self.assertTrue(hasattr(GLib, "SourceFunc"))
+        func = GLib.SourceFunc
+        self.assertEqual(func.__name__, "SourceFunc")
+        self.assertEqual(func.__module__, "GLib")
+
+        self.assertTrue(hasattr(GObject, "Callback"))
+        func = GObject.Callback
+        self.assertEqual(func.__name__, "Callback")
+        self.assertEqual(func.__module__, "GObject")

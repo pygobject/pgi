@@ -7,12 +7,15 @@
 
 from .clib.ctypesutil import gicast
 from .clib.gir import GIFunctionInfoPtr
+from .util import import_attribute
 
 
 def CallbackAttribute(info):
     info = gicast(info, GIFunctionInfoPtr)
 
-    cls = type(info.name, (object,), dict())
-    cls.__module__ = info.namespace
+    func = lambda: None
+    func.__name__ = info.name
+    func.__module__ = info.namespace
+    func._is_callback = True
 
-    return cls
+    return func
