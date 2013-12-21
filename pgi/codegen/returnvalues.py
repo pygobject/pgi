@@ -16,6 +16,10 @@ class ReturnValue(object):
     TAG = None
     py_type = None
 
+    # if the return value can be ignored (None in the single case,
+    # no value in the case out args are present)
+    ignore = False
+
     def __init__(self, info, type_, args, backend):
         super(ReturnValue, self).__init__()
         self.info = info
@@ -84,6 +88,7 @@ class VoidReturnValue(ReturnValue):
         if self.type.is_pointer:
             self.py_type = int
         else:
+            self.ignore = True
             self.py_type = None
 
     def post_call(self, name):

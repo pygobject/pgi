@@ -208,3 +208,21 @@ if 2:
         func = GObject.Callback
         self.assertEqual(func.__name__, "Callback")
         self.assertEqual(func.__module__, "GObject")
+
+    def test_callback_call(self):
+        from gi.repository import GLib
+
+        self.assertRaises(RuntimeError, GLib.DestroyNotify, None)
+        self.assertRaises(TypeError, GLib.DestroyNotify)
+
+    def test_callback_docstring(self):
+        from gi.repository import GLib, Gtk
+
+        string = GLib.DestroyNotify.__doc__
+        self.assertEqual(string, "DestroyNotify(data: object) -> None")
+
+        # out arguments
+        string = Gtk.MenuPositionFunc.__doc__
+        self.assertEqual(string,
+            "MenuPositionFunc(menu: Gtk.Menu, user_data: object) -> "
+            "(x: int, y: int, push_in: bool)")

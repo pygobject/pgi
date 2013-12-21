@@ -8,7 +8,7 @@
 import ctypes
 import __builtin__
 
-from . import generate_callback
+from . import generate_callback_wrapper
 from .backend import Backend
 from .utils import CodeBlock, parse_with_objects, VariableFactory
 
@@ -1059,7 +1059,7 @@ if not $_.callable($py_cb):
 
     def pack(self, name):
         interface = gicast(self.type.get_interface(), GICallableInfoPtr)
-        pack_func, docstring = generate_callback(interface)
+        pack_func, docstring = generate_callback_wrapper(interface)
 
         return self.parse("""
 $ctypes_cb = $pack_func($py_cb)

@@ -44,7 +44,7 @@ def build_docstring(func_name, args, ret, throws):
     """
 
     out_args = []
-    if ret:
+    if ret and not ret.ignore:
         if ret.py_type is None:
             out_args.append("unknown")
         else:
@@ -58,7 +58,7 @@ def build_docstring(func_name, args, ret, throws):
         if arg.is_aux:
             continue
 
-        if arg.in_var:
+        if arg.is_direction_in():
             if arg.py_type is None:
                 in_args.append(arg.in_var)
             else:
@@ -67,7 +67,7 @@ def build_docstring(func_name, args, ret, throws):
                     tname += " or None"
                 in_args.append("%s: %s" % (arg.in_var, tname))
 
-        if arg.out_var:
+        if arg.is_direction_out():
             if arg.py_type is None:
                 out_args.append(arg.name)
             else:
@@ -154,10 +154,11 @@ def _generate_function(backend, info, arg_infos, arg_types,
             block.write_into(body)
 
     # process return value
-    block, return_var = return_value.post_call(ret)
-    if block:
-        block.write_into(body)
-    if return_var:
+    if not return_value.ignore:
+        block, return_var = return_value.post_call(ret)
+        assert return_var
+        if block:
+            block.write_into(body)
         out.append(return_var)
 
     # process out args
@@ -189,8 +190,7 @@ def _generate_function(backend, info, arg_infos, arg_types,
         name = in_args[-1].in_var
         in_args[-1].in_var = "*" + name
 
-    docstring = build_docstring(func_name, args,
-                                return_var and return_value, throws)
+    docstring = build_docstring(func_name, args, return_value, throws)
 
     names = [a.in_var for a in in_args]
     if method:
@@ -225,6 +225,71 @@ def generate_function(info, method=False, throws=False):
         try:
             func = _generate_function(instance, info, arg_infos, arg_types,
                                       return_type, method, throws)
+        except NotImplementedError:
+            messages.append("%s: %s" % (backend.NAME, traceback.format_exc()))
+        else:
+            break
+
+    if func:
+        return func
+
+    raise NotImplementedError("\n".join(messages))
+
+
+def _generate_callback(backend, info, arg_infos, arg_types, return_type):
+    args = []
+    for arg_info, arg_type in zip(arg_infos, arg_types):
+        cls = get_argument_class(arg_type)
+        name = escape_identifier(arg_info.name)
+        args.append(cls(name, args, backend, arg_info, arg_type))
+
+    cls = get_return_class(return_type)
+    return_value = cls(info, return_type, args, backend)
+
+    for arg in args:
+        arg.setup()
+
+    return_value.setup()
+
+    func_name = escape_identifier(info.name)
+    docstring = build_docstring(func_name, args, return_value, False)
+
+    in_args = [a for a in args if not a.is_aux and a.in_var]
+    names = [a.in_var for a in in_args]
+    names = ", ".join(names)
+
+    main, var = backend.parse("""
+def $func_name($func_args):
+    '''$docstring'''
+
+    raise NotImplementedError("This is just a dummy callback function")
+""", func_args=names, docstring=docstring, func_name=func_name)
+
+    func = main.compile()[func_name]
+    func.__doc__ = docstring
+
+    return func
+
+
+def generate_callback(info):
+    """Generates a dummy callback function which just raises
+    but has a correct docstring. They are mainly accessible for
+    documentation, so the API reference can reference a real thing.
+    """
+
+    # FIXME: handle out args and trailing user_data ?
+
+    arg_infos = info.get_args()
+    arg_types = [a.get_type() for a in arg_infos]
+    return_type = info.get_return_type()
+
+    func = None
+    messages = []
+    for backend in list_backends():
+        instance = backend()
+        try:
+            func = _generate_callback(
+                instance, info, arg_infos, arg_types, return_type)
         except NotImplementedError:
             messages.append("%s: %s" % (backend.NAME, traceback.format_exc()))
         else:

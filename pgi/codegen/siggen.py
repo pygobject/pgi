@@ -23,7 +23,7 @@ def build_docstring(cb_name, args):
     return "%s(%s) -> None" % (cb_name, ", ".join(parts))
 
 
-def generate_callback(info):
+def generate_callback_wrapper(info):
     backend = get_backend("ctypes")()
 
     args = info.get_args()

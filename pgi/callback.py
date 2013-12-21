@@ -8,13 +8,13 @@
 from .clib.ctypesutil import gicast
 from .clib.gir import GIFunctionInfoPtr
 from .util import import_attribute
+from .codegen import generate_callback
 
 
 def CallbackAttribute(info):
     info = gicast(info, GIFunctionInfoPtr)
 
-    func = lambda: None
-    func.__name__ = info.name
+    func = generate_callback(info)
     func.__module__ = info.namespace
     func._is_callback = True
 
