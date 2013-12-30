@@ -182,6 +182,25 @@ class ObjectTest(unittest.TestCase):
     def test_field(self):
         self.assertTrue(isinstance(Gtk.Style().xthickness, int))
 
+    def test_method_ownership(self):
+        s1 = Gdk.Window.show
+        s2 = Gtk.Widget.show
+        s3 = Gtk.Window.show
+
+        self.assertFalse(issubclass(Gdk.Window, Gtk.Widget))
+        self.assertTrue(issubclass(Gtk.Window, Gtk.Widget))
+
+        self.assertNotEqual(s1, s2)
+        self.assertNotEqual(s1, s3)
+        self.assertEqual(s2, s3)
+
+        # here we call the subclass first, but we want the method to still
+        # end up at the owner
+        g1 = Gtk.Range.get_has_tooltip
+        g2 = Gtk.Widget.get_has_tooltip
+        self.assertTrue(issubclass(Gtk.Range, Gtk.Widget))
+        self.assertEqual(g1, g2)
+
 
 class GObjectConstructTest(unittest.TestCase):
     def test_props_construct(self):

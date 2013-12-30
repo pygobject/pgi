@@ -244,13 +244,15 @@ class Object(object):
 
 
 class MethodAttribute(object):
-    def __init__(self, info, name):
+    def __init__(self, info, real_owner, name):
         super(MethodAttribute, self).__init__()
         self._info = info
         self._name = name
+        self._real_owner = real_owner
 
     def __get__(self, instance, owner):
         info = self._info
+        real_owner = self._real_owner
         flags = info.flags
         func_flags = flags.value
         name = self._name
@@ -259,12 +261,12 @@ class MethodAttribute(object):
 
         if func_flags & GIFunctionInfoFlags.IS_METHOD:
             func = generate_function(info, method=True, throws=throws)
-            setattr(owner, name, func)
+            setattr(real_owner, name, func)
             return getattr(instance or owner, name)
         elif not func_flags or func_flags & GIFunctionInfoFlags.IS_CONSTRUCTOR:
             func = generate_function(info, method=False, throws=throws)
             func = staticmethod(func)
-            setattr(owner, name, func)
+            setattr(real_owner, name, func)
             return getattr(owner, name)
         else:
             raise NotImplementedError("%r not supported" % flags)
@@ -274,7 +276,7 @@ def add_method(info, target_cls):
     """Add a method to the target class"""
 
     name = escape_identifier(info.name)
-    attr = MethodAttribute(info, name)
+    attr = MethodAttribute(info, target_cls, name)
     setattr(target_cls, name, attr)
 
 
