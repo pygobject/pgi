@@ -196,6 +196,15 @@ if 2:
             Gtk.FileChooser.get_filenames.__doc__,
             "get_filenames() -> [str]")
 
+        self.assertEqual(
+            Gtk.AboutDialog.drag_begin.__doc__,
+            "drag_begin(targets: Gtk.TargetList, actions: Gdk.DragAction, "
+            "button: int, event: Gdk.Event) -> Gdk.DragContext")
+
+        self.assertEqual(
+            Gtk.AboutDialog.set_default_icon_from_file.__doc__,
+            "set_default_icon_from_file(filename: str) raises -> bool")
+
     def test_callback(self):
         from gi.repository import GLib, GObject
 

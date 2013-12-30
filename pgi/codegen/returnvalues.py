@@ -113,7 +113,8 @@ class ArrayReturn(ReturnValue):
         if value == GIArrayType.C:
             return CArrayReturn
 
-        raise NotImplementedError("Unsupported array return type")
+        raise NotImplementedError(
+            "Unsupported array return type %r" % type_.array_type)
 
 
 class CArrayReturn(ArrayReturn):

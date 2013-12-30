@@ -258,6 +258,7 @@ class MethodAttribute(object):
         name = self._name
 
         throws = func_flags & GIFunctionInfoFlags.THROWS
+        func_flags = func_flags & (~GIFunctionInfoFlags.THROWS)
 
         if func_flags & GIFunctionInfoFlags.IS_METHOD:
             func = generate_function(info, method=True, throws=throws)

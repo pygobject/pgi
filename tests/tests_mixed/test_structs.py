@@ -9,7 +9,7 @@ import unittest
 
 import gi
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk, Gdk, Atk
 
 from tests import FIXME, skipUnlessCairo, skipIfGI
 
@@ -70,3 +70,8 @@ class StructTest(unittest.TestCase):
         self.assertTrue(Gdk.Color.pixel.readable)
 
         self.assertEqual(Gdk.EventButton.device.py_type, Gdk.Device)
+
+    def test_utf8_field(self):
+        a = Atk.Object()
+        a.set_name("foo")
+        self.assertEqual(a.name, "foo")

@@ -256,6 +256,8 @@ class BaseInterfaceArgument(GIArgument):
             return StructArgument
         elif iface_type == GIInfoType.CALLBACK:
             return CallbackArgument
+        elif iface_type == GIInfoType.UNION:
+            return UnionArgument
 
         raise NotImplementedError("Unsupported interface type %r" % iface.type)
 
@@ -340,6 +342,17 @@ class StructArgument(BaseInterfaceArgument):
 
         var = self.get_type()
         self.out_var = var.unpack(var.pre_unpack(self._data))
+        return var.block
+
+
+class UnionArgument(BaseInterfaceArgument):
+
+    def pre_call(self):
+        var = self.get_type()
+        return var.block
+
+    def post_call(self):
+        var = self.get_type()
         return var.block
 
 

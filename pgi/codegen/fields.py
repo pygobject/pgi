@@ -126,6 +126,21 @@ class FloatField(BasicField):
     py_type = float
 
 
+class Utf8Field(BasicField):
+    TAG = GITypeTag.UTF8
+    py_type = str
+
+    def get(self, name):
+        var = self.backend.get_type(self.type)
+        out = var.unpack(name)
+        return var.block, out
+
+    def set(self, name, value_name):
+        var = self.backend.get_type(self.type)
+        out = var.pack(value_name)
+        return var.block, out
+
+
 _classes = {}
 
 

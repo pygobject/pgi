@@ -5,7 +5,6 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from warnings import warn
 from ctypes import byref
 
 from .clib.ctypesutil import gicast
@@ -29,8 +28,7 @@ def ConstantAttribute(info):
 
     value_member = _union_access[tag_type]
     if not value_member:
-        warn("Not supported const type", Warning)
-        value = None
+        raise NotImplementedError("Not supported const type: %r", tag_type)
     else:
         value = getattr(arg, value_member)
 
