@@ -75,12 +75,6 @@ class _Structure(BaseStructure):
         name = type(self).__name__
         return form % (name, id(self), self.__gtype__.name, self._obj)
 
-    def copy(self):
-        new = type(self)()
-        memcpy(new._obj, self._obj, self._size)
-        new._needs_free = True
-        return new
-
     __str__ = __repr__
 
     def __del__(self):
