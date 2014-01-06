@@ -126,6 +126,11 @@ class FloatField(BasicField):
     py_type = float
 
 
+class BooleanField(BasicField):
+    TAG = GITypeTag.BOOLEAN
+    py_type = bool
+
+
 class Utf8Field(BasicField):
     TAG = GITypeTag.UTF8
     py_type = str

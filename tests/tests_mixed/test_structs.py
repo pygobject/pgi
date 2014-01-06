@@ -75,3 +75,16 @@ class StructTest(unittest.TestCase):
         a = Atk.Object()
         a.set_name("foo")
         self.assertEqual(a.name, "foo")
+
+    def test_boolean_field(self):
+        a = Gtk.RecentData()
+        self.assertTrue(isinstance(a.is_private, bool))
+
+        for is_true in [True, 42, -1]:
+            a.is_private = is_true
+            self.assertTrue(a.is_private)
+
+        # FIXME: None should also work
+        for is_false in [False, 0]:
+            a.is_private = is_false
+            self.assertFalse(a.is_private)
