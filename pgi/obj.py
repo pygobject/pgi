@@ -288,7 +288,7 @@ InterfaceBase.__module__ = "GObject"
 InterfaceBase.__name__ = "GInterface"
 
 
-class _Interface(InterfaceBase):
+class _Interface(object):
     def __init__(self):
         raise NotImplementedError("Interface can not be constructed")
 
@@ -299,7 +299,7 @@ def InterfaceAttribute(info):
     iface_info = gicast(info, GIInterfaceInfoPtr)
 
     # Create a new class
-    cls = type(info.name, _Interface.__bases__, dict(_Interface.__dict__))
+    cls = type(info.name, (InterfaceBase,), dict(_Interface.__dict__))
     cls.__module__ = iface_info.namespace
 
     # GType
