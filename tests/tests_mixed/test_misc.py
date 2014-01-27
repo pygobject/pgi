@@ -1,4 +1,4 @@
-# Copyright 2012 Christoph Reiter
+# Copyright 2012,2014 Christoph Reiter
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -95,3 +95,11 @@ class MiscTest(unittest.TestCase):
 
     def test_gerror(self):
         self.assertTrue(issubclass(GLib.GError, RuntimeError))
+
+    def test_param_flags_32_64(self):
+        if sys.maxint == 2**31-1:
+            self.assertEqual(int(GObject.ParamFlags.DEPRECATED), -2147483648)
+        else:
+            # FIXME: pygobject gets 2147483648, we get -2147483648
+            #self.assertEqual(int(GObject.ParamFlags.DEPRECATED), 2147483648)
+            pass

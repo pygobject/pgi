@@ -10,6 +10,7 @@ import ctypes
 from .clib.gobject import GEnumClassPtr, GFlagsClassPtr
 from .clib.ctypesutil import gicast
 from .clib.gir import GIEnumInfoPtr
+from .clib.glib import gint
 from .gtype import PGType
 from .util import cached_property, escape_identifier
 from .obj import add_method
@@ -44,7 +45,7 @@ class _EnumClass(EnumBase):
     def __new__(cls, value):
         if not isinstance(value, (long, int)):
             raise TypeError("int expected, got %r instead" % type(value))
-        instance = int.__new__(cls, value)
+        instance = EnumBase.__new__(cls, value)
         if value in cls._allowed:
             return instance
         raise ValueError("invalid enum value: %r", value)
@@ -109,7 +110,7 @@ class _FlagsClass(FlagsBase):
     def __new__(cls, value):
         if not isinstance(value, (long, int)):
             raise TypeError("int expected, got %r instead" % type(value))
-        return int.__new__(cls, value)
+        return FlagsBase.__new__(cls, value)
 
     def __repr__(self):
         names = []
@@ -136,7 +137,7 @@ def _get_values(enum):
     values = []
 
     for value in enum.get_values():
-        num = value.value
+        num = gint(value.value).value
         vname = value.name.upper()
         values.append((num, vname))
 
