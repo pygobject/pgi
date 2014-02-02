@@ -112,9 +112,27 @@ def _generate_function(backend, info, arg_infos, arg_types,
 
     return_value.setup()
 
-    body = CodeBlock()
+    # in args
+    in_args = [a for a in args if not a.is_aux and a.in_var]
+
+    # if the last in argument is a user data, make it a positional argument
+    if in_args and in_args[-1].is_userdata:
+        name = in_args[-1].in_var
+        in_args[-1].in_var = "*" + name
+
+    in_names = [a.in_var for a in in_args]
+    self_name = ""
+    if method:
+        # make sure self doesn't clash with any in args
+        self_name = "self"
+        while self_name in in_names:
+
+            self_name += "_"
+        in_names.insert(0, self_name)
+    in_names = ", ".join(in_names)
 
     # pre call
+    body = CodeBlock()
     for arg in args:
         if arg.is_aux or arg.is_userdata:
             continue
@@ -131,7 +149,7 @@ def _generate_function(backend, info, arg_infos, arg_types,
     symbol = info.symbol
     block, svar, func = backend.get_function(lib, symbol, args,
                                              return_value, method,
-                                             "self", throws)
+                                             self_name, throws)
     if block:
         block.write_into(body)
 
@@ -183,19 +201,7 @@ def _generate_function(backend, info, arg_infos, arg_types,
     if func_name == "":
         func_name = "_"
 
-    in_args = [a for a in args if not a.is_aux and a.in_var]
-
-    # if the last in argument is a user data, make it a positional argument
-    if in_args and in_args[-1].is_userdata:
-        name = in_args[-1].in_var
-        in_args[-1].in_var = "*" + name
-
     docstring = build_docstring(func_name, args, return_value, throws)
-
-    names = [a.in_var for a in in_args]
-    if method:
-        names.insert(0, "self")
-    names = ", ".join(names)
 
     main, var = backend.parse("""
 # backend: $backend_name
@@ -203,7 +209,7 @@ def $func_name($func_args):
     '''$docstring'''
 
     $func_body
-""", backend_name=backend.NAME, func_args=names, docstring=docstring,
+""", backend_name=backend.NAME, func_args=in_names, docstring=docstring,
      func_body=body, func_name=func_name)
 
     func = main.compile()[func_name]
