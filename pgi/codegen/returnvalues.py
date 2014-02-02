@@ -231,6 +231,19 @@ class ErrorReturn(ReturnValue):
         return var.block, out
 
 
+class GHashReturn(ReturnValue):
+    TAG = GITypeTag.GHASH
+    py_type = dict
+
+    def setup(self):
+        self.py_type = {self.get_param_type(0).py_type: self.get_param_type(1).py_type}
+
+    def post_call(self, name):
+        var = self.get_type()
+        # FIXME
+        return var.block, name
+
+
 class GListReturn(ReturnValue):
     TAG = GITypeTag.GLIST
     py_type = list
