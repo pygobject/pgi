@@ -26,6 +26,9 @@ class GParamSpec(object):
     _info = None
 
     def __init__(self, spec, name, info):
+        assert spec  # null ptr check
+
+        spec.ref()
         self._spec = spec
         self._info = info
         self.name = name
@@ -200,6 +203,8 @@ class _ObjectClassProp(object):
                 iface = gtype.default_interface_ref()
                 spec = iface.find_property(gname)
                 gtype.default_interface_unref(iface)
+            if not spec:  # FIXME: why can this be the case?
+                raise AttributeError
             gspec = GParamSpec(spec, gname, prop_info)
             setattr(self, name, gspec)
             return gspec
