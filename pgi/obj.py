@@ -407,7 +407,7 @@ def ObjectAttribute(obj_info):
 
     # Add constants
     for constant in obj_info.get_constants():
-        constant_name = constant.get_name()
+        constant_name = constant.name
         attr = ConstantAttribute(constant)
         setattr(cls, constant_name, attr)
 
