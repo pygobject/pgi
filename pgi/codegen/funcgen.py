@@ -23,6 +23,9 @@ def get_type_name(type_):
     {int: Gtk.Button} -> "{int: Gtk.Button}"
     """
 
+    if type_ is None:
+        raise TypeError
+
     if isinstance(type_, basestring):
         return type_
     elif isinstance(type_, list):
@@ -48,6 +51,8 @@ def build_docstring(func_name, args, ret, throws):
         if ret.py_type is None:
             out_args.append("unknown")
         else:
+            if ret.py_type == [None]:
+                print ret.get_param_type(0)
             tname = get_type_name(ret.py_type)
             if ret.may_return_null:
                 tname += " or None"

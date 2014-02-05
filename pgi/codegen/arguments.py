@@ -476,10 +476,10 @@ class GTypeArgument(BasicTypeArgument):
 
 class VoidArgument(GIArgument):
     TAG = GITypeTag.VOID
+    py_type = object
 
     def setup(self):
-        if self.type.is_pointer:
-            self.py_type = object
+        pass
 
     def pre_call(self):
         var = self.get_type()

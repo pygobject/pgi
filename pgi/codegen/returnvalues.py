@@ -83,13 +83,11 @@ class BooleanReturnValue(ReturnValue):
 
 class VoidReturnValue(ReturnValue):
     TAG = GITypeTag.VOID
+    py_type = object
 
     def setup(self):
-        if self.type.is_pointer:
-            self.py_type = int
-        else:
+        if not self.type.is_pointer:
             self.ignore = True
-            self.py_type = None
 
     def post_call(self, name):
         # FIXME
