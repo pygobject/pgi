@@ -90,10 +90,17 @@ class _GSignalQuery(object):
 
         for id_ in sig_ids:
             sig = GSignal(id_)
-            sig_info = info.find_signal(sig.name)
+            name = sig.name
+
+            try:
+                sig_info = info.find_signal(name)
+            except AttributeError:
+                # older libgirepository
+                sig_info = None
+
             if sig_info:
                 sig._func = generate_callback(sig_info)
-            setattr(self, escape_parameter(sig.name), sig)
+            setattr(self, escape_parameter(name), sig)
 
 _GSignalQuery.__name__ = "GSignalQuery"
 
