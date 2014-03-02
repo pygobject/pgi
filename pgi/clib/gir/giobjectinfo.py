@@ -108,6 +108,7 @@ _methods = [
     ("find_method", GIFunctionInfoPtr, [GIObjectInfoPtr, gchar_p], True),
     ("get_n_signals", gint, [GIObjectInfoPtr]),
     ("get_signal", GISignalInfoPtr, [GIObjectInfoPtr, gint], True),
+    ("find_signal", GISignalInfoPtr, [GIObjectInfoPtr, gchar_p], True),
     ("get_n_vfuncs", gint, [GIObjectInfoPtr]),
     ("get_vfunc", GIVFuncInfoPtr, [GIObjectInfoPtr, gint], True),
     ("get_n_constants", gint, [GIObjectInfoPtr]),

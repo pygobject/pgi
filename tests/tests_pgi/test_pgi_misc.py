@@ -113,6 +113,15 @@ if 2:
         self.assertEqual(sig.flags, 2)
         self.assertEqual(sig.return_type, PGType.from_name("void"))
 
+    def test_signal_dummy_callback_doc(self):
+        from pgi.repository import Gtk
+        sigs = Gtk.Window.signals
+        sig = sigs.set_focus
+
+        self.assertEqual(sig.__doc__, "set_focus(object: Gtk.Widget) -> None")
+        self.assertRaises(TypeError, sig)
+        self.assertRaises(NotImplementedError, sig, None)
+
     def test_signal_property_interface(self):
         from pgi.repository import Gtk
         sigs = Gtk.TreeModel.signals

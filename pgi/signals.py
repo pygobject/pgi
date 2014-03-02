@@ -10,12 +10,28 @@ from ctypes import byref
 from .util import cached_property, escape_parameter
 from .clib.glib import guint
 from .clib.gobject import signal_list_ids, signal_query, GSignalQuery
+from .codegen import generate_callback
 from .gtype import PGType
 
 
 class GSignal(object):
     def __init__(self, signal_id):
         self._id = signal_id
+        self._func = None
+
+    @property
+    def __doc__(self):
+        if self._func:
+            return self._func.__doc__
+        else:
+            # We only expose signals for types in the typelib atm
+            # but when we expose others like in pygobject we might want
+            # to create a docstring here from the signal query info
+            return ""
+
+    def __call__(self, *args, **kwargs):
+        assert self._func
+        return self._func(*args, **kwargs)
 
     @cached_property
     def _query(self):
@@ -50,7 +66,7 @@ class GSignal(object):
 
 
 class _GSignalQuery(object):
-    def __init__(self, pgtype):
+    def __init__(self, info, pgtype):
         # FIXME: DBusGLib.Proxy ?
         if pgtype == PGType.from_name("void"):
             return
@@ -74,15 +90,22 @@ class _GSignalQuery(object):
 
         for id_ in sig_ids:
             sig = GSignal(id_)
+            sig_info = info.find_signal(sig.name)
+            if sig_info:
+                sig._func = generate_callback(sig_info)
             setattr(self, escape_parameter(sig.name), sig)
 
 _GSignalQuery.__name__ = "GSignalQuery"
 
 
 class SignalsDescriptor(object):
+
+    def __init__(self, info):
+        self.info = info
+
     def __get__(self, instance, owner):
-        return _GSignalQuery(owner.__gtype__)
+        return _GSignalQuery(self.info, owner.__gtype__)
 
 
-def SignalsAttribute():
-    return SignalsDescriptor()
+def SignalsAttribute(info):
+    return SignalsDescriptor(info)

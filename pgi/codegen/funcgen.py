@@ -262,7 +262,7 @@ def _generate_callback(backend, info, arg_infos, arg_types, return_type):
 
     return_value.setup()
 
-    func_name = escape_identifier(info.name)
+    func_name = escape_identifier(info.name).replace("-", "_")
     docstring = build_docstring(func_name, args, return_value, False)
 
     in_args = [a for a in args if not a.is_aux and a.in_var]

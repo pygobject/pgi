@@ -63,6 +63,7 @@ _methods = [
     ("find_method", GIFunctionInfoPtr, [GIInterfaceInfoPtr, gchar_p], True),
     ("get_n_signals", gint, [GIInterfaceInfoPtr]),
     ("get_signal", GISignalInfoPtr, [GIInterfaceInfoPtr, gint], True),
+    ("find_signal", GISignalInfoPtr, [GIInterfaceInfoPtr, gchar_p], True),
     ("get_n_vfuncs", gint, [GIInterfaceInfoPtr]),
     ("get_vfunc", GIVFuncInfoPtr, [GIInterfaceInfoPtr, gint], True),
     ("get_n_constants", gint, [GIInterfaceInfoPtr]),

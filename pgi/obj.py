@@ -309,7 +309,7 @@ def InterfaceAttribute(info):
     cls.props = PropertyAttribute(iface_info)
 
     # Signals
-    cls.signals = SignalsAttribute()
+    cls.signals = SignalsAttribute(iface_info)
 
     # Add constants
     for constant in iface_info.get_constants():
@@ -403,7 +403,7 @@ def ObjectAttribute(obj_info):
     setattr(cls, PROPS_NAME, PropertyAttribute(obj_info))
 
     # Signals
-    cls.signals = SignalsAttribute()
+    cls.signals = SignalsAttribute(obj_info)
 
     # Add constants
     for constant in obj_info.get_constants():
