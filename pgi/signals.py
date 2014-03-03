@@ -15,19 +15,30 @@ from .gtype import PGType
 
 
 class GSignal(object):
-    def __init__(self, signal_id):
+    def __init__(self, info, signal_id):
         self._id = signal_id
-        self._func = None
+        self._info = info
+
+    @property
+    def _func(self):
+        try:
+            sig_info = self._info.find_signal(self.name)
+        except AttributeError:
+            # older libgirepository
+            sig_info = None
+
+        if sig_info:
+            return generate_callback(sig_info)
+        else:
+            # FIXME: either too old libgirepository or signal
+            # that is not in the typelib.
+            f = lambda: None
+            f.__doc__ = "%s()" % self.name.replace("-", "_")
+            return f
 
     @property
     def __doc__(self):
-        if self._func:
-            return self._func.__doc__
-        else:
-            # We only expose signals for types in the typelib atm
-            # but when we expose others like in pygobject we might want
-            # to create a docstring here from the signal query info
-            return ""
+        return self._func.__doc__
 
     def __call__(self, *args, **kwargs):
         assert self._func
@@ -89,18 +100,8 @@ class _GSignalQuery(object):
             gtype.class_unref(klass)
 
         for id_ in sig_ids:
-            sig = GSignal(id_)
-            name = sig.name
-
-            try:
-                sig_info = info.find_signal(name)
-            except AttributeError:
-                # older libgirepository
-                sig_info = None
-
-            if sig_info:
-                sig._func = generate_callback(sig_info)
-            setattr(self, escape_parameter(name), sig)
+            sig = GSignal(info, id_)
+            setattr(self, escape_parameter(sig.name), sig)
 
 _GSignalQuery.__name__ = "GSignalQuery"
 
