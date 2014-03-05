@@ -20,6 +20,7 @@ from .util import import_attribute, escape_identifier
 from .gtype import PGType
 from .properties import PropertyAttribute, PROPS_NAME
 from .field import FieldAttribute
+from .vfunc import VFuncAttribute
 from .constant import ConstantAttribute
 from .signals import SignalsAttribute
 from .codegen import generate_function, generate_constructor
@@ -321,6 +322,10 @@ def InterfaceAttribute(info):
     for method_info in iface_info.get_methods():
         add_method(method_info, cls)
 
+    # VFuncs
+    for vfunc_info in iface_info.get_vfuncs():
+        setattr(cls, "do_" + vfunc_info.name, VFuncAttribute(vfunc_info))
+
     cls._sigs = {}
 
     return cls
@@ -422,6 +427,10 @@ def ObjectAttribute(obj_info):
         # Add methods
         for method_info in obj_info.get_methods():
             add_method(method_info, cls)
+
+    # VFuncs
+    for vfunc_info in obj_info.get_vfuncs():
+        setattr(cls, "do_" + vfunc_info.name, VFuncAttribute(vfunc_info))
 
     # Signals
     cls.__sigs__ = {}

@@ -152,6 +152,7 @@ class GITypesTest(unittest.TestCase):
         i.get_signals()
         i.get_constants()
         i.get_prerequisites()
+        i.get_vfuncs()
 
     def test_vfuncinfo(self):
         i = self.gtk[b"Editable"]

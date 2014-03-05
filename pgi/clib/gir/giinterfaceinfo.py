@@ -41,6 +41,9 @@ class GIInterfaceInfoPtr(GIRegisteredTypeInfoPtr):
     def get_constants(self):
         return map(self.get_constant, xrange(self.n_constants))
 
+    def get_vfuncs(self):
+        return map(self.get_vfunc, xrange(self.n_vfuncs))
+
     def get_prerequisites(self):
         return map(self.get_prerequisite, xrange(self.n_prerequisites))
 
