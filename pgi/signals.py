@@ -10,7 +10,7 @@ from ctypes import byref
 from .util import cached_property, escape_parameter
 from .clib.glib import guint
 from .clib.gobject import signal_list_ids, signal_query, GSignalQuery
-from .codegen import generate_callback
+from .codegen import generate_dummy_function
 from .gtype import PGType
 
 
@@ -28,7 +28,8 @@ class GSignal(object):
             sig_info = None
 
         if sig_info:
-            return generate_callback(sig_info)
+            func_name = sig_info.name.replace("-", "_")
+            return generate_dummy_function(sig_info, func_name)
         else:
             # FIXME: either too old libgirepository or signal
             # that is not in the typelib.

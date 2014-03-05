@@ -247,7 +247,8 @@ def generate_function(info, method=False, throws=False):
     raise NotImplementedError("\n".join(messages))
 
 
-def _generate_callback(backend, info, arg_infos, arg_types, return_type):
+def _generate_dummy_function(backend, func_name, info, arg_infos, arg_types,
+                             return_type, method):
     args = []
     for arg_info, arg_type in zip(arg_infos, arg_types):
         cls = get_argument_class(arg_type)
@@ -262,29 +263,39 @@ def _generate_callback(backend, info, arg_infos, arg_types, return_type):
 
     return_value.setup()
 
-    func_name = escape_identifier(info.name).replace("-", "_")
+    func_name = escape_identifier(func_name)
     docstring = build_docstring(func_name, args, return_value, False)
 
     in_args = [a for a in args if not a.is_aux and a.in_var]
-    names = [a.in_var for a in in_args]
-    names = ", ".join(names)
+    in_names = [a.in_var for a in in_args]
+
+    self_name = ""
+    if method:
+        # make sure self doesn't clash with any in args
+        self_name = "self"
+        while self_name in in_names:
+
+            self_name += "_"
+        in_names.insert(0, self_name)
 
     main, var = backend.parse("""
 def $func_name($func_args):
     '''$docstring'''
 
     raise NotImplementedError("This is just a dummy callback function")
-""", func_args=names, docstring=docstring, func_name=func_name)
+""", func_args=", ".join(in_names), docstring=docstring, func_name=func_name)
 
     func = main.compile()[func_name]
+    func._code = main
     func.__doc__ = docstring
+    func.__module__ = info.namespace
 
     return func
 
 
-def generate_callback(info):
-    """Generates a dummy callback function which just raises
-    but has a correct docstring. They are mainly accessible for
+def generate_dummy_function(info, name, method=False):
+    """Takes a GICallableInfo and generates a dummy callback function which
+    just raises but has a correct docstring. They are mainly accessible for
     documentation, so the API reference can reference a real thing.
     """
 
@@ -299,8 +310,9 @@ def generate_callback(info):
     for backend in list_backends():
         instance = backend()
         try:
-            func = _generate_callback(
-                instance, info, arg_infos, arg_types, return_type)
+            func = _generate_dummy_function(
+                instance, name, info, arg_infos, arg_types,
+                return_type, method)
         except NotImplementedError:
             messages.append("%s: %s" % (backend.NAME, traceback.format_exc()))
         else:

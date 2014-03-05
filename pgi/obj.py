@@ -20,11 +20,10 @@ from .util import import_attribute, escape_identifier
 from .gtype import PGType
 from .properties import PropertyAttribute, PROPS_NAME
 from .field import FieldAttribute
-from .vfunc import VFuncAttribute
 from .constant import ConstantAttribute
 from .signals import SignalsAttribute
 from .codegen import generate_function, generate_constructor
-from .codegen import generate_signal_callback
+from .codegen import generate_signal_callback, generate_dummy_function
 
 
 class _Object(object):
@@ -274,11 +273,35 @@ class MethodAttribute(object):
             raise NotImplementedError("%r not supported" % flags)
 
 
-def add_method(info, target_cls):
+class VirtualMethodAttribute(object):
+
+    def __init__(self, info, real_owner, name):
+        super(VirtualMethodAttribute, self).__init__()
+        self._info = info
+        self._name = name
+        self._real_owner = real_owner
+
+    def __get__(self, instance, owner):
+        info = self._info
+        real_owner = self._real_owner
+        name = self._name
+
+        # fixme: generate_callback just gives us a docstring
+        func = generate_dummy_function(info, "do_" + info.name, method=True)
+        func._is_virtual = True
+        setattr(real_owner, name, func)
+        return getattr(instance or owner, name)
+
+
+def add_method(info, target_cls, virtual=False):
     """Add a method to the target class"""
 
     name = escape_identifier(info.name)
-    attr = MethodAttribute(info, target_cls, name)
+    if virtual:
+        name = "do_" + name
+        attr = VirtualMethodAttribute(info, target_cls, name)
+    else:
+        attr = MethodAttribute(info, target_cls, name)
     setattr(target_cls, name, attr)
 
 
@@ -300,7 +323,7 @@ def InterfaceAttribute(info):
     iface_info = gicast(info, GIInterfaceInfoPtr)
 
     # Create a new class
-    cls = type(info.name, (InterfaceBase,), dict(_Interface.__dict__))
+    cls = type(iface_info.name, (InterfaceBase,), dict(_Interface.__dict__))
     cls.__module__ = iface_info.namespace
 
     # GType
@@ -324,7 +347,7 @@ def InterfaceAttribute(info):
 
     # VFuncs
     for vfunc_info in iface_info.get_vfuncs():
-        setattr(cls, "do_" + vfunc_info.name, VFuncAttribute(vfunc_info))
+        add_method(vfunc_info, cls, virtual=True)
 
     cls._sigs = {}
 
@@ -430,7 +453,7 @@ def ObjectAttribute(obj_info):
 
     # VFuncs
     for vfunc_info in obj_info.get_vfuncs():
-        setattr(cls, "do_" + vfunc_info.name, VFuncAttribute(vfunc_info))
+        add_method(vfunc_info, cls, virtual=True)
 
     # Signals
     cls.__sigs__ = {}

@@ -198,9 +198,9 @@ def import_attribute(namespace, name):
     mod = __import__(const.PREFIX[-1] + "." + namespace, fromlist=[name])
     try:
         return getattr(mod, name)
-    except AttributeError:
+    except AttributeError as e:
         # callback types
-        raise NotImplementedError
+        raise NotImplementedError(e)
 
 
 def import_module(namespace):

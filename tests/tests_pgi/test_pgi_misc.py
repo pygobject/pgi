@@ -252,3 +252,9 @@ if 2:
         self.assertEqual(string,
             "load_contents_finish(res: Gio.AsyncResult) "
             "raises -> (bool, contents: str, etag_out: str)")
+
+    def test_virtual_method(self):
+        from gi.repository import Atk
+
+        string = Atk.Object.do_get_object_locale.__doc__
+        self.assertEqual(string, "do_get_object_locale() -> str")
