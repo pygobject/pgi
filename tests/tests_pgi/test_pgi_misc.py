@@ -254,7 +254,7 @@ if 2:
             "raises -> (bool, contents: str, etag_out: str)")
 
     def test_virtual_method(self):
-        from gi.repository import Atk
+        from gi.repository import Gtk
 
-        string = Atk.Object.do_get_object_locale.__doc__
-        self.assertEqual(string, "do_get_object_locale() -> str")
+        string = Gtk.Widget.do_map_event.__doc__
+        self.assertEqual(string, "do_map_event(event: Gdk.EventAny) -> bool")
