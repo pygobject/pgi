@@ -244,3 +244,11 @@ if 2:
         self.assertEqual(string,
             "MenuPositionFunc(menu: Gtk.Menu, user_data: object) -> "
             "(x: int, y: int, push_in: bool)")
+
+    def test_uint8_array_docstring(self):
+        from gi.repository import Gio
+
+        string = Gio.File.load_contents_finish.__doc__
+        self.assertEqual(string,
+            "load_contents_finish(res: Gio.AsyncResult) "
+            "raises -> (bool, contents: str, etag_out: str)")
