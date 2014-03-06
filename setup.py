@@ -31,63 +31,35 @@ class CoverageCommand(Command):
     def run(self):
         set_test_environ()
 
-        for k in sys.modules.keys():
-            if k.startswith("pgi"):
-                del sys.modules[k]
+        # Wipe existing modules, to make sure coverage data is properly
+        # generated for them.
+        for key in list(sys.modules.keys()):
+            if key.startswith('pgi'):
+                del(sys.modules[key])
 
-        import trace
-        tracer = trace.Trace(
-            count=True, trace=False,
-            ignoredirs=[sys.prefix, sys.exec_prefix])
+        try:
+            from coverage import coverage
+        except ImportError:
+            print("Missing 'coverage' module. See "
+                  "https://pypi.python.org/pypi/coverage or try "
+                  "`apt-get install python-coverage`")
+            return
 
-        def run_tests():
-            import tests
-            tests.test(False, "cffi")
+        cov = coverage()
+        cov.start()
 
-        tracer.runfunc(run_tests)
-        results = tracer.results()
-        coverage = os.path.join(os.path.dirname(__file__), "coverage")
-        results.write_results(show_missing=True, coverdir=coverage)
+        import tests
+        tests.test(False, "cffi")
 
-        # remove coverage we don't want
-        for f in os.listdir(coverage):
-            if not f.startswith("pgi."):
-                os.unlink(os.path.join(coverage, f))
-                continue
-            if f.startswith("pgi.overrides") and \
-                    not os.path.basename(f).startswith("_"):
-                os.unlink(os.path.join(coverage, f))
-                continue
+        dest = os.path.join(os.getcwd(), "coverage")
 
-        # compute coverage
-        stats = []
-        for filename in glob.glob(os.path.join(coverage, "*.cover")):
-            lines = file(filename, "rU").readlines()
-            lines = filter(None, map(str.strip, lines))
-            total_lines = len(lines)
-            bad_lines = len([l for l in lines if l.startswith(">>>>>>")])
-            try:
-                percent = 100.0 * (
-                    total_lines - bad_lines) / float(total_lines)
-            except ZeroDivisionError:
-                percent = 100.0
-            stats.append((percent, filename, total_lines, bad_lines))
-        stats.sort(reverse=True)
-        print("#" * 80)
-        print("COVERAGE")
-        print("#" * 80)
-        total_sum = 0
-        bad_sum = 0
-        for s in stats:
-            p, f, t, b = s
-            total_sum += t
-            bad_sum += b
-            print("%6.2f%% %s" % (p, os.path.basename(f)))
-        print("-" * 80)
-        print("Coverage data written to", coverage, "(%d/%d, %0.2f%%)" % (
-            total_sum - bad_sum, total_sum,
-            100.0 * (total_sum - bad_sum) / float(total_sum)))
-        print("#" * 80)
+        cov.stop()
+        cov.html_report(
+            directory=dest,
+            ignore_errors=True,
+            include=["pgi/*"])
+
+        print("Coverage summary: file://%s/index.html" % dest)
 
 
 def set_test_environ():
