@@ -106,3 +106,8 @@ def override(klass):
     _overrides[-1][name] = old_klass
 
     return klass
+
+
+def deprecated(obj, name):
+    # TODO
+    return obj

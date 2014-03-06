@@ -101,6 +101,11 @@ class Int64Argument(CallbackArgument):
     py_type = int
 
 
+class Int32Argument(CallbackArgument):
+    TAG = GITypeTag.INT32
+    py_type = int
+
+
 class UInt64Argument(CallbackArgument):
     TAG = GITypeTag.UINT64
     py_type = int
