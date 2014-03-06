@@ -225,8 +225,8 @@ class GObjectConstructTest(unittest.TestCase):
         self.assertRaises(TypeError,
                           lambda x: Gtk.ScrolledWindow(**x), dict(foo=3))
 
-    @skipIfGI("no gi clutter overrides")
     @unittest.skipUnless(Clutter, "no clutter")
     def test_struct(self):
-        Clutter.Text("Mono Bold 24px", "",
-                     Clutter.Color.from_string("#33FF33"))
+        ok, color = Clutter.Color.from_string("#33FF33")
+        self.assertTrue(ok)
+        Clutter.Text(font_name="Mono Bold 24px", text="", color=color)

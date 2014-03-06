@@ -9,6 +9,8 @@ import math
 
 from gi.repository import Clutter
 
+initialized, sys.argv = Clutter.init(sys.argv)
+
 FRAGMENT_SHADER_VARS = """
 uniform sampler2D tex;
 uniform float x_step, y_step;
@@ -238,7 +240,7 @@ if __name__ == "__main__":
     stage.set_title("Shaders")
     stage.set_color(Clutter.Color.new(0x61, 0x64, 0x8c, 0xff))
     stage.set_size(512, 384)
-    stage.connect("destroy", Clutter.main_quit)
+    stage.connect("destroy", lambda *x: Clutter.main_quit())
 
     # Here we create a texture-based actor from the file on disk.
     # Our actor will toggle through shading on right/left click. Unlike the

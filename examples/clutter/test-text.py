@@ -10,6 +10,8 @@ import sys
 
 from gi.repository import Clutter
 
+initialized, sys.argv = Clutter.init(sys.argv)
+
 RUNES = """
 ᚠᛇᚻ᛫ᛒᛦᚦ᛫ᚠᚱᚩᚠᚢᚱ᛫ᚠᛁᚱᚪ᛫ᚷᛖᚻᚹᛦᛚᚳᚢᛗ
 ᛋᚳᛖᚪᛚ᛫ᚦᛖᚪᚻ᛫ᛗᚪᚾᚾᚪ᛫ᚷᛖᚻᚹᛦᛚᚳ᛫ᛗᛁᚳᛚᚢᚾ᛫ᚻᛦᛏ᛫ᛞᚫᛚᚪᚾ
@@ -19,12 +21,16 @@ RUNES = """
 if __name__ == "__main__":
     stage = Clutter.Stage()
 
-    stage.set_color(Clutter.Color.from_string("#000000"))
+    ok, instance = Clutter.Color.from_string("#000000")
+    assert ok
+    stage.set_color(instance)
     stage.set_size(1024, 768)
     stage.set_title("Text Editing")
-    stage.connect("destroy", Clutter.main_quit)
+    stage.connect("destroy", lambda *x: Clutter.main_quit())
 
-    text = Clutter.Text("Mono Bold 24px", "", Clutter.Color.from_string("#33FF33"))
+    ok, instance = Clutter.Color.from_string("#33FF33")
+    assert ok
+    text = Clutter.Text(font_name="Mono Bold 24px", text="", color=instance)
 
     text.set_position(40, 30)
     text.set_width(1024)
@@ -32,8 +38,12 @@ if __name__ == "__main__":
     text.set_reactive(True)
     text.set_editable(True)
     text.set_selectable(True)
-    text.set_cursor_color(Clutter.Color.from_string("#FF33FF"))
-    text.set_selected_text_color(Clutter.Color.from_string("#0000FF"))
+    ok, instance = Clutter.Color.from_string("#FF33FF")
+    assert ok
+    text.set_cursor_color(instance)
+    ok, instance = Clutter.Color.from_string("#0000FF")
+    assert ok
+    text.set_selected_text_color(instance)
 
     if len(sys.argv) >= 2:
         with open(sys.argv[1], "r") as c:
@@ -44,7 +54,7 @@ if __name__ == "__main__":
     else:
         text.set_text(RUNES)
 
-    stage.add(text)
+    stage.add_actor(text)
     stage.set_key_focus(text)
     stage.show_all()
 
