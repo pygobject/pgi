@@ -151,9 +151,6 @@ class BasicType(BaseType):
 
     @classmethod
     def get_class(cls, type_):
-        # no pointers for now
-        if type_.is_pointer:
-            raise NotImplementedError("basic type pointer")
         return cls
 
     def pack_in(self, name):
