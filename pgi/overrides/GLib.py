@@ -569,7 +569,8 @@ class Source(GLib.Source):
     can_recurse = property(__get_can_recurse, __set_can_recurse)
 
 Source = override(Source)
-__all__.append('Source')
+# FIXME
+#__all__.append('Source')
 
 
 class Idle(Source):
@@ -583,7 +584,7 @@ class Idle(Source):
         if priority != GLib.PRIORITY_DEFAULT:
             self.set_priority(priority)
 
-__all__.append('Idle')
+#__all__.append('Idle')
 
 
 class Timeout(Source):
@@ -596,7 +597,7 @@ class Timeout(Source):
         if priority != GLib.PRIORITY_DEFAULT:
             self.set_priority(priority)
 
-__all__.append('Timeout')
+#__all__.append('Timeout')
 
 
 # backwards compatible API
