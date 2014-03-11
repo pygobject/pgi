@@ -102,7 +102,11 @@ class ArrayReturn(ReturnValue):
     py_type = list
 
     def setup(self):
-        self.py_type = [self.get_param_type(0).py_type]
+        elm_type = self.get_param_type(0)
+        if isinstance(elm_type, UInt8ReturnValue):
+            self.py_type = "bytes"
+        else:
+            self.py_type = [elm_type.py_type]
 
     @classmethod
     def get_class(cls, type_):

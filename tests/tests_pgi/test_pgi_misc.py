@@ -247,7 +247,13 @@ if 2:
         string = Gio.File.load_contents_finish.__doc__
         self.assertEqual(string,
             "load_contents_finish(res: Gio.AsyncResult) "
-            "raises -> (bool, contents: str, etag_out: str)")
+            "raises -> (bool, contents: bytes, etag_out: str)")
+
+    def test_uint8_array_return_docstring(self):
+        from gi.repository import Gtk
+
+        string = Gtk.SelectionData.get_data.__doc__
+        self.assertEqual(string, "get_data() -> bytes")
 
     def test_virtual_method(self):
         from gi.repository import Gtk

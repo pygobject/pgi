@@ -168,7 +168,7 @@ class ArrayArgument(GIArgument):
     def setup(self):
         elm_type = self.get_param_type(0)
         if isinstance(elm_type, UInt8Argument):
-            self.py_type = str
+            self.py_type = "bytes"
         else:
             self.py_type = [elm_type.py_type]
 
