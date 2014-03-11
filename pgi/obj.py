@@ -293,7 +293,7 @@ class VirtualMethodAttribute(object):
         return getattr(instance or owner, name)
 
 
-def add_method(info, target_cls, virtual=False):
+def add_method(info, target_cls, virtual=False, dont_replace=False):
     """Add a method to the target class"""
 
     name = escape_identifier(info.name)
@@ -302,6 +302,10 @@ def add_method(info, target_cls, virtual=False):
         attr = VirtualMethodAttribute(info, target_cls, name)
     else:
         attr = MethodAttribute(info, target_cls, name)
+
+    if dont_replace and hasattr(target_cls, name):
+        return
+
     setattr(target_cls, name, attr)
 
 
@@ -445,11 +449,10 @@ def ObjectAttribute(obj_info):
         attr = FieldAttribute(field_name, field)
         setattr(cls, field_name, attr)
 
-    # we implement the base object ourself
-    if cls is not Object:
-        # Add methods
-        for method_info in obj_info.get_methods():
-            add_method(method_info, cls)
+    # Add methods
+    for method_info in obj_info.get_methods():
+        # we implement most of the base object ourself
+        add_method(method_info, cls, dont_replace=cls is Object)
 
     # VFuncs
     for vfunc_info in obj_info.get_vfuncs():

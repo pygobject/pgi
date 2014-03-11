@@ -260,3 +260,10 @@ if 2:
 
         string = Gtk.Widget.do_map_event.__doc__
         self.assertEqual(string, "do_map_event(event: Gdk.EventAny) -> bool")
+
+    def test_gobject_gir_method(self):
+        from gi.repository import GObject
+
+        # we want Object gir methods to show up we don't implement our self
+        string = GObject.Object.run_dispose.__doc__
+        self.assertEqual(string, "run_dispose() -> None")
