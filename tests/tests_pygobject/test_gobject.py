@@ -6,7 +6,13 @@ import unittest
 import warnings
 
 from gi.repository import GObject, GLib
-from gi import PyGIDeprecationWarning
+
+try:
+    from gi import PyGIDeprecationWarning
+    PyGIDeprecationWarning
+except ImportError:
+    # older pygobject
+    PyGIDeprecationWarning = None
 
 import gi
 
@@ -40,6 +46,7 @@ class TestGObjectAPI(unittest.TestCase):
             obj.force_floating()
 
     @FIXME
+    @unittest.skipUnless(PyGIDeprecationWarning, "too old pygi")
     def test_compat_api(self):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
