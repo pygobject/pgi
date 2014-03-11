@@ -25,7 +25,7 @@ import warnings
 import sys
 
 from pgi.overrides import get_introspection_module, override, deprecated
-from pgi import version_info, PGIDeprecationWarning as PyGIDeprecationWarning
+from pgi import version_info, PyGIDeprecationWarning
 
 GLib = get_introspection_module('GLib')
 

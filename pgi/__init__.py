@@ -59,5 +59,5 @@ def install_as_gi():
     const.PREFIX.append("gi.repository")
 
 
-class PGIDeprecationWarning(RuntimeWarning):
+class PyGIDeprecationWarning(RuntimeWarning):
     pass

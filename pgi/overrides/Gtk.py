@@ -22,7 +22,7 @@
 import sys
 
 from pgi.repository import GObject
-from pgi import PGIDeprecationWarning as PyGIDeprecationWarning
+from pgi import PyGIDeprecationWarning
 from pgi.overrides import override, get_introspection_module
 
 if sys.version_info >= (3, 0):
