@@ -5,7 +5,13 @@ import unittest
 import warnings
 
 import gi.overrides
-from gi import PyGIDeprecationWarning
+
+try:
+    from gi import PyGIDeprecationWarning
+    PyGIDeprecationWarning
+except ImportError:
+    # older pygobject
+    PyGIDeprecationWarning = None
 
 try:
     from gi.repository import Gdk, GdkPixbuf, Gtk
@@ -106,6 +112,7 @@ class TestGdk(unittest.TestCase):
                                  Gdk.EventType.BUTTON_PRESS)
 
     @FIXME
+    @unittest.skipUnless(PyGIDeprecationWarning, "too old pygi")
     def test_cursor(self):
         self.assertEqual(Gdk.Cursor, gi.overrides.Gdk.Cursor)
         c = Gdk.Cursor(Gdk.CursorType.WATCH)
