@@ -16,7 +16,7 @@ except ImportError:
 
 import gi
 
-from tests import FIXME, skipIfPyPy
+from tests import FIXME, skipIfPyPy, skipUnlessGIVersion
 
 
 class TestGObjectAPI(unittest.TestCase):
@@ -275,12 +275,14 @@ class TestGValue(unittest.TestCase):
         self.assertEqual(GObject.TYPE_VALUE, GObject.Value.__gtype__)
         self.assertEqual(GObject.type_name(GObject.TYPE_VALUE), 'GValue')
 
+    @skipUnlessGIVersion(3, 4)
     def test_no_type(self):
         value = GObject.Value()
         self.assertEqual(value.g_type, GObject.TYPE_INVALID)
         self.assertRaises(TypeError, value.set_value, 23)
         self.assertEqual(value.get_value(), None)
 
+    @skipUnlessGIVersion(3, 4)
     def test_int(self):
         value = GObject.Value(GObject.TYPE_UINT)
         self.assertEqual(value.g_type, GObject.TYPE_UINT)
@@ -289,11 +291,13 @@ class TestGValue(unittest.TestCase):
         value.set_value(42.0)
         self.assertEqual(value.get_value(), 42)
 
+    @skipUnlessGIVersion(3, 4)
     def test_string(self):
         value = GObject.Value(str, 'foo_bar')
         self.assertEqual(value.g_type, GObject.TYPE_STRING)
         self.assertEqual(value.get_value(), 'foo_bar')
 
+    @skipUnlessGIVersion(3, 4)
     def test_float(self):
         # python float is G_TYPE_DOUBLE
         value = GObject.Value(float, 23.4)
@@ -328,6 +332,7 @@ class TestGValue(unittest.TestCase):
         value = GObject.Value(GLib.IOFlags, GLib.IOFlags.IS_READABLE)
         self.assertEqual(value.get_value(), GLib.IOFlags.IS_READABLE)
 
+    @skipUnlessGIVersion(3, 4)
     def test_object(self):
         class TestObject(GObject.Object):
             pass
