@@ -5,6 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
+import sys
 import unittest
 
 import gi
@@ -16,6 +17,12 @@ try:
     Clutter
 except ImportError:
     Clutter = None
+else:
+    status, argv = Clutter.init(sys.argv)
+    if status == Clutter.InitError.SUCCESS:
+        sys.argv = argv
+    else:
+        Clutter = None
 
 from tests import skipIfGI
 
