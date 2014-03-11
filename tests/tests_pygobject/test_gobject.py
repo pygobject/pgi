@@ -18,6 +18,10 @@ import gi
 
 from tests import FIXME, skipIfPyPy, skipUnlessGIVersion
 
+testhelper = None
+get_introspection_module = None
+_gobject = None
+
 
 class TestGObjectAPI(unittest.TestCase):
     @FIXME
