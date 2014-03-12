@@ -33,7 +33,7 @@ def get_type_name(type_):
         return "[%s]" % get_type_name(type_[0])
     elif isinstance(type_, dict):
         assert len(type_) == 1
-        key, value = type_.popitem()
+        key, value = type_.items()[0]
         return "{%s: %s}" % (get_type_name(key), get_type_name(value))
     elif type_.__module__ in "__builtin__":
         return type_.__name__

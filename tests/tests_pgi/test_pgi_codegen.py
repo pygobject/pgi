@@ -23,3 +23,8 @@ class TPGICodegen(unittest.TestCase):
         self.assertEqual(get_type_name(Gtk.Window), "Gtk.Window")
         self.assertEqual(get_type_name([Gtk.Window]), "[Gtk.Window]")
         self.assertEqual(get_type_name({int: Gtk.Window}), "{int: Gtk.Window}")
+
+        # don't change the type
+        x = {int: int}
+        self.assertEqual(get_type_name(x), "{int: int}")
+        self.assertEqual(get_type_name(x), "{int: int}")
