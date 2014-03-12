@@ -15,9 +15,29 @@ from pgi import _compat
 def VariableFactory():
     """Returns a callable the produces unique variable names"""
 
-    def var_factory():
-        var_factory.c += 1
-        return "t%d" % var_factory.c
+    # TODO: Pass a blacklist with locals introduced by function arguments
+    # so we can safely skip them here
+
+    None_ = object()
+    cache = {}
+
+    # tXX for normal temporary, eXX for external (closure)
+    def var_factory(obj=None_):
+        # we want to handle the real None
+        if obj is None_:
+            var_factory.c += 1
+            return "t%d" % var_factory.c
+
+        try:
+            # use id so this works for non hashable types
+            return cache[id(obj)][0]
+        except KeyError:
+            var_factory.c += 1
+            res = "e%d" % var_factory.c
+            # keep obj alive, so id() is unique
+            cache[id(obj)] = (res, obj)
+            return res
+
     var_factory.c = 0
 
     return var_factory
@@ -175,7 +195,7 @@ def parse_with_objects(code, var, **kwargs):
             value = str(value)
 
         if not isinstance(value, (basestring, CodeBlock)):
-            new_var = var()
+            new_var = var(value)
             deps[new_var] = value
             kwargs[key] = new_var
 

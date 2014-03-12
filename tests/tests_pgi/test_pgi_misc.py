@@ -79,7 +79,7 @@ if 2:
         some_obj = object()
         some_int = 42
         block, mapping = parse_with_objects(
-            "$foo=$bar", lambda: "X", foo=some_obj, bar=some_int)
+            "$foo=$bar", lambda *x: "X", foo=some_obj, bar=some_int)
 
         self.assertEqual(str(block), "X=42")
         self.assertEqual(block.get_dependencies().items(), [("X", some_obj)])

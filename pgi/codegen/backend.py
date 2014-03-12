@@ -73,17 +73,6 @@ def set_backend(name=None):
     _ACTIVE_BACKENDS[:] = possible
 
 
-def VariableFactory():
-    """Returns a callable the produces unique variable names"""
-
-    def var_factory():
-        var_factory.c += 1
-        return "t%d" % var_factory.c
-    var_factory.c = 0
-
-    return var_factory
-
-
 class Backend(object):
     """The backend interface."""
 
