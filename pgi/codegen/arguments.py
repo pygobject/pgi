@@ -521,6 +521,15 @@ class GSListArgument(GIArgument):
         self.py_type = [self.get_param_type(0).py_type]
 
 
+class GHashArgument(GIArgument):
+    TAG = GITypeTag.GHASH
+    py_type = dict
+
+    def setup(self):
+        self.py_type = {
+            self.get_param_type(0).py_type: self.get_param_type(1).py_type}
+
+
 class Utf8Argument(GIArgument):
     TAG = GITypeTag.UTF8
     py_type = str

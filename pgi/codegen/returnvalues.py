@@ -238,7 +238,8 @@ class GHashReturn(ReturnValue):
     py_type = dict
 
     def setup(self):
-        self.py_type = {self.get_param_type(0).py_type: self.get_param_type(1).py_type}
+        self.py_type = {
+            self.get_param_type(0).py_type: self.get_param_type(1).py_type}
 
     def post_call(self, name):
         var = self.get_type()

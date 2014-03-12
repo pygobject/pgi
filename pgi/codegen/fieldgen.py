@@ -101,14 +101,11 @@ def generate_field_setter(info):
 
 
 def get_field_type(info):
-    """A field python type or None"""
+    """A field python type"""
 
     type_ = info.get_type()
 
-    try:
-        cls = get_field_class(type_)
-    except NotImplementedError:
-        return
+    cls = get_field_class(type_)
 
     field = cls(info, type_, None)
     field.setup()

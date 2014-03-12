@@ -8,6 +8,7 @@
 from .codegen import generate_field_getter, generate_field_setter
 from .codegen import get_field_type
 from .clib.gir import GIFieldInfoFlags
+from .util import cached_property
 
 
 class FieldAttribute(object):
@@ -17,23 +18,27 @@ class FieldAttribute(object):
     def __init__(self, name, info):
         self._info = info
         self.name = name
-        self._readable = info.flags.value & GIFieldInfoFlags.IS_READABLE
-        self._writeable = info.flags.value & GIFieldInfoFlags.IS_WRITABLE
 
-    @property
+    @cached_property
     def writeable(self):
-        return self._writeable
+        return self._info.flags.value & GIFieldInfoFlags.IS_WRITABLE
 
-    @property
+    @cached_property
     def readable(self):
-        return self._readable
+        return self._info.flags.value & GIFieldInfoFlags.IS_READABLE
 
-    @property
+    @cached_property
     def py_type(self):
         return get_field_type(self._info)
 
     def __get__(self, instance, owner):
-        if not self._readable:
+        # make sure we support the type, raises NotImplementedError otherwise
+        self.py_type
+
+        if not instance:
+            return self
+
+        if not self.readable:
             raise AttributeError("Field %r not readable" % self.name)
 
         if not self._getter:
@@ -44,12 +49,10 @@ class FieldAttribute(object):
         return self
 
     def __set__(self, instance, value):
-        if not self._writeable:
+        if not self.writeable:
             raise AttributeError("Field %r not writeable" % self.name)
 
         if not self._setter:
             self._setter = generate_field_setter(self._info)
 
-        if instance:
-            return self._setter(instance, value)
-        return self
+        self._setter(instance, value)

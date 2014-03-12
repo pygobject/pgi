@@ -19,6 +19,10 @@ class Field(object):
         self.info = info
         self.type = type
 
+    @classmethod
+    def get_class(cls, type_):
+        return cls
+
     def setup(self):
         pass
 
@@ -27,6 +31,17 @@ class Field(object):
 
     def set(self, name, value_name):
         raise NotImplementedError("no setter implemented")
+
+    def get_param_type(self, index):
+        """Returns a ReturnValue instance for param type 'index'"""
+
+        assert index in (0, 1)
+
+        type_info = self.type.get_param_type(index)
+        type_cls = get_field_class(type_info)
+        instance = type_cls(self.backend, type_info, None)
+        instance.setup()
+        return instance
 
 
 class InterfaceField(Field):
@@ -40,6 +55,17 @@ class InterfaceField(Field):
         except NotImplementedError:
             # fall back to object
             pass
+
+    @classmethod
+    def get_class(cls, type_):
+        iface = type_.get_interface()
+        iface_type = iface.type.value
+
+        # no idea how to handle that..
+        if iface_type == GIInfoType.CALLBACK:
+            raise NotImplementedError
+
+        return cls
 
     def get(self, name):
         var = self.backend.get_type(self.type)
@@ -111,8 +137,18 @@ class Int64Field(BasicField):
     py_type = int
 
 
+class UInt64Field(BasicField):
+    TAG = GITypeTag.UINT64
+    py_type = int
+
+
 class UInt16Field(BasicField):
     TAG = GITypeTag.UINT16
+    py_type = int
+
+
+class Int8Field(BasicField):
+    TAG = GITypeTag.INT8
     py_type = int
 
 
@@ -131,7 +167,25 @@ class BooleanField(BasicField):
     py_type = bool
 
 
-class Utf8Field(BasicField):
+class ArrayField(Field):
+    TAG = GITypeTag.ARRAY
+    py_type = list
+
+    def setup(self):
+        elm_type = self.get_param_type(0)
+        if isinstance(elm_type, UInt8Field):
+            self.py_type = "bytes"
+        else:
+            self.py_type = [elm_type.py_type]
+
+    def get(self, name):
+        return None, "None"
+
+    def set(self, name, value_name):
+        return None, ""
+
+
+class Utf8Field(Field):
     TAG = GITypeTag.UTF8
     py_type = str
 
@@ -145,6 +199,20 @@ class Utf8Field(BasicField):
         out = var.pack(value_name)
         return var.block, out
 
+
+class VoidField(Field):
+    TAG = GITypeTag.VOID
+    py_type = object
+
+    def get(self, name):
+        var = self.backend.get_type(self.type)
+        out = var.unpack(name)
+        return var.block, out
+
+    def set(self, name, value_name):
+        var = self.backend.get_type(self.type)
+        out = var.pack(value_name)
+        return var.block, out
 
 _classes = {}
 
@@ -161,6 +229,8 @@ def get_field_class(arg_type):
     global _classes
     tag_value = arg_type.tag.value
     try:
-        return _classes[tag_value]
+        cls = _classes[tag_value]
     except KeyError:
         raise NotImplementedError("%r not supported" % arg_type.tag)
+    else:
+        return cls.get_class(arg_type)
