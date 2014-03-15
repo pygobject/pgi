@@ -6,7 +6,6 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 import ctypes
-import __builtin__
 
 from . import generate_callback_wrapper
 from .backend import Backend
@@ -22,6 +21,7 @@ from pgi.clib.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr, GType
 from pgi.gerror import PGError
 from pgi.gtype import PGType
 from pgi import foreign
+from pgi import _compat
 from pgi.util import import_attribute, load_ctypes_library
 
 
@@ -1192,7 +1192,7 @@ class CTypesCodeGen(object):
 
     def parse(self, code, **kwargs):
         assert "_" not in kwargs
-        kwargs["_"] = __builtin__
+        kwargs["_"] = _compat.builtins
 
         assert "ctypes" not in kwargs
         kwargs["ctypes"] = ctypes

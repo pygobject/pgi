@@ -11,6 +11,7 @@ from pgi.clib.gobject import GCallback
 from pgi.gtype import PGType
 from pgi.gerror import PGError
 from pgi.util import import_attribute
+from pgi import _compat
 
 
 class Argument(object):
@@ -570,7 +571,7 @@ class FilenameArgument(Utf8Argument):
 
 class UniCharArgument(BasicTypeArgument):
     TAG = GITypeTag.UNICHAR
-    py_type = unicode
+    py_type = _compat.text_type
 
 
 _classes = {}

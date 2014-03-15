@@ -9,6 +9,7 @@ from pgi.clib.gir import GITypeTag, GIInfoType, GITransfer, GIArrayType
 from pgi.gtype import PGType
 from pgi.gerror import PGError
 from pgi.util import import_attribute
+from pgi import _compat
 
 
 class ReturnValue(object):
@@ -215,7 +216,7 @@ class Utf8ReturnValue(ReturnValue):
 
 class UniCharReturnValue(BasicReturnValue):
     TAG = GITypeTag.UNICHAR
-    py_type = unicode
+    py_type = _compat.text_type
 
     def post_call(self, name):
         var = self.get_type()
