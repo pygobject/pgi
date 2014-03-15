@@ -54,7 +54,10 @@ def generate_callback_wrapper(info):
             block.write_into(body)
         outs_vars.append(out)
 
-    argument_list = ", ".join([a.name for a in cb_args])
+    arg_names = [a.name for a in cb_args]
+    backend.var.add_blacklist(arg_names)
+
+    argument_list = ", ".join(arg_names)
     forward_arguments = ", ".join(outs_vars)
     func_name = escape_parameter(info.name)
     cb_name = backend.var()

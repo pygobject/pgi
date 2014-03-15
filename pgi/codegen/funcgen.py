@@ -124,13 +124,12 @@ def _generate_function(backend, info, arg_infos, arg_types,
         in_args[-1].in_var = "*" + name
 
     in_names = [a.in_var for a in in_args]
+
+    var_fac = backend.var
+    var_fac.add_blacklist([n.strip("*") for n in in_names])
     self_name = ""
     if method:
-        # make sure self doesn't clash with any in args
-        self_name = "self"
-        while self_name in in_names:
-
-            self_name += "_"
+        self_name = var_fac.request_name("self")
         in_names.insert(0, self_name)
     in_names = ", ".join(in_names)
 
@@ -267,13 +266,11 @@ def _generate_dummy_function(backend, func_name, info, arg_infos, arg_types,
     in_args = [a for a in args if not a.is_aux and a.in_var]
     in_names = [a.in_var for a in in_args]
 
+    var_fac = backend.var
+    var_fac.add_blacklist(in_names)
     self_name = ""
     if method:
-        # make sure self doesn't clash with any in args
-        self_name = "self"
-        while self_name in in_names:
-
-            self_name += "_"
+        self_name = var_fac.request_name("self")
         in_names.insert(0, self_name)
 
     main, var = backend.parse("""

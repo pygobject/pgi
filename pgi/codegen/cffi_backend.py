@@ -268,6 +268,10 @@ class CFFIBackend(Backend):
         Backend.__init__(self)
         self._gen = CFFICodeGen(VariableFactory(), self._ffi)
 
+    @property
+    def var(self):
+        return self._gen.var
+
     def get_library(self, namespace):
         if namespace not in self._libs:
             paths = GIRepositoryPtr().get_shared_library(namespace)

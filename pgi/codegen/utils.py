@@ -12,35 +12,52 @@ import collections
 from pgi import _compat
 
 
-def VariableFactory():
-    """Returns a callable the produces unique variable names"""
+class VariableFactory(object):
+    """A callable the produces unique variable names"""
 
-    # TODO: Pass a blacklist with locals introduced by function arguments
-    # so we can safely skip them here
+    def __init__(self, blacklist=None):
+        self._count = 0
+        self._blacklist = set()
+        self._obj_cache = {}
+        if blacklist:
+            self.add_blacklist(blacklist)
 
-    None_ = object()
-    cache = {}
+    def add_blacklist(self, seq):
+        """seq is a sequence of names to reserve"""
 
-    # tXX for normal temporary, eXX for external (closure)
-    def var_factory(obj=None_):
-        # we want to handle the real None
-        if obj is None_:
-            var_factory.c += 1
-            return "t%d" % var_factory.c
+        self._blacklist.update(seq)
 
-        try:
-            # use id so this works for non hashable types
-            return cache[id(obj)][0]
-        except KeyError:
-            var_factory.c += 1
-            res = "e%d" % var_factory.c
-            # keep obj alive, so id() is unique
-            cache[id(obj)] = (res, obj)
-            return res
+    def __call__(self, *args):
+        """Get a random new name, pass an obj to get a cached one"""
 
-    var_factory.c = 0
+        if not args:
+            self._count += 1
+            res = "t%d" % self._count
+        else:
+            obj = args[0]
+            try:
+                # use id so this works for non hashable types
+                return self._obj_cache[id(obj)][0]
+            except KeyError:
+                self._count += 1
+                res = "e%d" % self._count
+                # keep obj alive, so id() is unique
+                self._obj_cache[id(obj)] = (res, obj)
 
-    return var_factory
+        while res in self._blacklist:
+            res += "_"
+        self._blacklist.add(res)
+        return res
+
+    def request_name(self, name):
+        """Request a name, might return the name or a similar one if already
+        used or reserved
+        """
+
+        while name in self._blacklist:
+            name += "_"
+        self._blacklist.add(name)
+        return name
 
 
 class CodeBlock(object):

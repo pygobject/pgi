@@ -13,6 +13,8 @@ from .utils import CodeBlock
 
 
 def _generate_field_setter(info, info_type, backend):
+    backend.var.add_blacklist(["instance", "value", "pointer"])
+
     cls = get_field_class(info_type)
     f = cls(info, info_type, backend)
     f.setup()

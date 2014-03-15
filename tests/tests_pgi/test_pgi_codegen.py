@@ -8,6 +8,7 @@
 import unittest
 
 from pgi.codegen.funcgen import get_type_name
+from pgi.codegen.utils import VariableFactory
 
 
 class TPGICodegen(unittest.TestCase):
@@ -28,3 +29,30 @@ class TPGICodegen(unittest.TestCase):
         x = {int: int}
         self.assertEqual(get_type_name(x), "{int: int}")
         self.assertEqual(get_type_name(x), "{int: int}")
+
+
+class TVariableFactory(unittest.TestCase):
+
+    def test_basic(self):
+        var = VariableFactory()
+        self.assertNotEqual(var(), var())
+
+    def test_blacklist(self):
+        default_first = VariableFactory()()
+        var = VariableFactory([default_first])()
+        self.assertNotEqual(var, default_first)
+
+        var = VariableFactory(["foobar"])
+        self.assertNotEqual(var.request_name("foobar"), "foobar")
+
+    def test_cache(self):
+        obj = object()
+        var = VariableFactory()
+        self.assertEqual(var(obj), var(obj))
+        self.assertNotEqual(var(obj), var())
+
+    def test_request(self):
+        var = VariableFactory()
+        first = var()
+        self.assertNotEqual(var.request_name(first), first)
+        self.assertEqual(var.request_name("foobar"), "foobar")

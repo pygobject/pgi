@@ -142,12 +142,15 @@ def get_construct_class(arg_type):
 def _generate_constructor(gtype, specs, names, backend):
 
     body = CodeBlock()
-
     in_args = []
     instances = []
+
+    backend.var.add_blacklist(names)
+
     for name in names:
-        spec = getattr(specs, name, None)
-        if not spec:
+        try:
+            spec = getattr(specs, name)
+        except AttributeError:
             raise TypeError("Property %r not supported" % name)
 
         type_ = spec._info.get_type()

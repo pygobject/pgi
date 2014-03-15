@@ -1223,8 +1223,9 @@ class CTypesBackend(Backend):
         Backend.__init__(self)
         self._gen = CTypesCodeGen(VariableFactory())
 
+    @property
     def var(self):
-        return self._gen.var()
+        return self._gen.var
 
     def get_type(self, type_, may_be_null=False, may_return_null=False):
         return get_type(type_, self._gen, may_be_null, may_return_null)
