@@ -8,8 +8,6 @@
 import ctypes
 
 from .clib.gobject import GEnumClassPtr, GFlagsClassPtr
-from .clib.ctypesutil import gicast
-from .clib.gir import GIEnumInfoPtr
 from .clib.glib import gint
 from .gtype import PGType
 from .util import cached_property, escape_identifier
@@ -137,7 +135,7 @@ def _get_values(enum):
     values = []
 
     for value in enum.get_values():
-        num = gint(value.value).value
+        num = gint(value.value_).value
         vname = value.name.upper()
         values.append((num, vname))
 
@@ -145,8 +143,6 @@ def _get_values(enum):
 
 
 def FlagsAttribute(info):
-    info = gicast(info, GIEnumInfoPtr)
-
     # add them to the class for init checks
     cls = type(info.name, _FlagsClass.__bases__, dict(_FlagsClass.__dict__))
     cls.__module__ = info.namespace
@@ -167,8 +163,6 @@ def FlagsAttribute(info):
 
 
 def EnumAttribute(info):
-    info = gicast(info, GIEnumInfoPtr)
-
     # add them to the class for init checks
     cls = type(info.name, _EnumClass.__bases__, dict(_EnumClass.__dict__))
     cls.__module__ = info.namespace

@@ -12,12 +12,15 @@ from .backend import Backend
 from .utils import CodeBlock, parse_with_objects, VariableFactory
 
 from pgi.clib import glib
-from pgi.clib.ctypesutil import gicast, find_library
-from pgi.clib.gir import GICallableInfoPtr, GIStructInfoPtr
-from pgi.clib.gir import GIRepositoryPtr, GITypeTag, GIInfoType, GIArrayType
-from pgi.clib.glib import *
-from pgi.clib.gobject import GCallback
-from pgi.clib.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr, GType
+from pgi.clib.ctypesutil import find_library
+from pgi.clib.gir import GIStructInfo
+from pgi.clib.gir import GIRepository, GITypeTag, GIInfoType, GIArrayType
+from pgi.clib.glib import gboolean, gpointer, guint, guint32, GErrorPtr, gint8
+from pgi.clib.glib import GSListPtr, GListPtr, gchar_p, gunichar, gdouble
+from pgi.clib.glib import gfloat, guint64, gint64, gint32, guint16, gint16
+from pgi.clib.glib import guint8
+from pgi.clib.gobject import GCallback, GTypeInstancePtr
+from pgi.clib.gobject import G_TYPE_FROM_INSTANCE, GType
 from pgi.gerror import PGError
 from pgi.gtype import PGType
 from pgi import foreign
@@ -572,10 +575,9 @@ class BaseInterface(BaseType):
     def _import_foreign(self):
         """Gives a ForeignStruct implementation or None"""
 
-        iface = self.type.get_interface()
-        assert iface.type.value == GIInfoType.STRUCT
+        struct_info = self.type.get_interface()
+        assert isinstance(struct_info, GIStructInfo)
 
-        struct_info = gicast(self.type.get_interface(), GIStructInfoPtr)
         if not struct_info.is_foreign:
             return
 
@@ -978,7 +980,7 @@ $value = $cvalue.value
 """, cvalue=name)["value"]
 
     def unpack(self, name):
-        iface = gicast(self.type.get_interface(), GIStructInfoPtr)
+        iface = self.type.get_interface()
         foreign_struct = None
         if iface.is_foreign:
             foreign_struct = foreign.get_foreign(iface.namespace, iface.name)
@@ -1055,7 +1057,7 @@ if not $_.callable($py_cb):
 """, py_cb=name)["py_cb"]
 
     def pack(self, name):
-        interface = gicast(self.type.get_interface(), GICallableInfoPtr)
+        interface = self.type.get_interface()
         pack_func, docstring = generate_callback_wrapper(interface)
 
         return self.parse("""
@@ -1232,7 +1234,7 @@ class CTypesBackend(Backend):
 
     def get_library(self, namespace):
         if namespace not in self._libs:
-            paths = GIRepositoryPtr().get_shared_library(namespace)
+            paths = GIRepository().get_shared_library(namespace)
             if not paths:
                 return
             path = paths.split(",")[0]

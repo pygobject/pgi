@@ -7,48 +7,33 @@
 
 from .._compat import xrange
 from ..glib import gint64, gint
-from .gibaseinfo import GIBaseInfo, GIBaseInfoPtr, GIInfoType
-from .gicallableinfo import GIFunctionInfoPtr
+from .gibaseinfo import GIBaseInfo, GIInfoType
+from .gicallableinfo import GIFunctionInfo
 from .gitypeinfo import GITypeTag
-from .giregisteredtypeinfo import GIRegisteredTypeInfo, GIRegisteredTypeInfoPtr
+from .giregisteredtypeinfo import GIRegisteredTypeInfo
 from ..ctypesutil import find_library, wrap_class
 
 _gir = find_library("girepository-1.0")
 
 
-def gi_is_value_info(base_info, _type=GIInfoType.VALUE):
-    return base_info.type.value == _type
-
-
+@GIBaseInfo._register(GIInfoType.VALUE)
 class GIValueInfo(GIBaseInfo):
-    pass
-
-
-class GIValueInfoPtr(GIBaseInfoPtr):
-    _type_ = GIValueInfo
 
     def _get_repr(self):
-        values = super(GIValueInfoPtr, self)._get_repr()
+        values = super(GIValueInfo, self)._get_repr()
         values["value"] = repr(self.value)
         return values
 
 _methods = [
-    ("get_value", gint64, [GIValueInfoPtr]),
+    ("get_value", gint64, [GIValueInfo]),
 ]
 
-wrap_class(_gir, GIValueInfo, GIValueInfoPtr, "g_value_info_", _methods)
+wrap_class(_gir, GIValueInfo, GIValueInfo, "g_value_info_", _methods)
 
 
-def gi_is_enum_info(base_info):
-    return base_info.type.value in (GIInfoType.ENUM, GIInfoType.FLAGS)
-
-
+@GIBaseInfo._register(GIInfoType.FLAGS)
+@GIBaseInfo._register(GIInfoType.ENUM)
 class GIEnumInfo(GIRegisteredTypeInfo):
-    pass
-
-
-class GIEnumInfoPtr(GIRegisteredTypeInfoPtr):
-    _type_ = GIEnumInfo
 
     def get_values(self):
         return map(self.get_value, xrange(self.n_values))
@@ -57,21 +42,20 @@ class GIEnumInfoPtr(GIRegisteredTypeInfoPtr):
         return map(self.get_method, xrange(self.n_methods))
 
     def _get_repr(self):
-        values = super(GIEnumInfoPtr, self)._get_repr()
+        values = super(GIEnumInfo, self)._get_repr()
         values["n_values"] = repr(self.n_values)
         values["n_methods"] = repr(self.n_methods)
         values["storage_type"] = repr(self.storage_type)
         return values
 
 _methods = [
-    ("get_n_values", gint, [GIEnumInfoPtr]),
-    ("get_value", GIValueInfoPtr, [GIEnumInfoPtr, gint], True),
-    ("get_n_methods", gint, [GIEnumInfoPtr]),
-    ("get_method", GIFunctionInfoPtr, [GIEnumInfoPtr], True),
-    ("get_storage_type", GITypeTag, [GIEnumInfoPtr]),
+    ("get_n_values", gint, [GIEnumInfo]),
+    ("get_value", GIValueInfo, [GIEnumInfo, gint], True),
+    ("get_n_methods", gint, [GIEnumInfo]),
+    ("get_method", GIFunctionInfo, [GIEnumInfo], True),
+    ("get_storage_type", GITypeTag, [GIEnumInfo]),
 ]
 
-wrap_class(_gir, GIEnumInfo, GIEnumInfoPtr, "g_enum_info_", _methods)
+wrap_class(_gir, GIEnumInfo, GIEnumInfo, "g_enum_info_", _methods)
 
-__all__ = ["GIEnumInfo", "GIEnumInfoPtr", "gi_is_enum_info",
-           "GIValueInfo", "GIValueInfoPtr", "gi_is_value_info"]
+__all__ = ["GIEnumInfo", "GIValueInfo"]

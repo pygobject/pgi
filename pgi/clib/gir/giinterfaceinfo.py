@@ -7,27 +7,19 @@
 
 from .._compat import xrange
 from ..glib import gint, gchar_p
-from .gibaseinfo import GIInfoType, GIBaseInfoPtr
-from .gipropertyinfo import GIPropertyInfoPtr
-from .gicallableinfo import GIFunctionInfoPtr, GISignalInfoPtr, GIVFuncInfoPtr
-from .giconstantinfo import GIConstantInfoPtr
-from .gistructinfo import GIStructInfoPtr
-from .giregisteredtypeinfo import GIRegisteredTypeInfo, GIRegisteredTypeInfoPtr
+from .gibaseinfo import GIInfoType, GIBaseInfo
+from .gipropertyinfo import GIPropertyInfo
+from .gicallableinfo import GIFunctionInfo, GISignalInfo, GIVFuncInfo
+from .giconstantinfo import GIConstantInfo
+from .gistructinfo import GIStructInfo
+from .giregisteredtypeinfo import GIRegisteredTypeInfo
 from ..ctypesutil import find_library, wrap_class
 
 _gir = find_library("girepository-1.0")
 
 
-def gi_is_interface_info(base_info, _type=GIInfoType.INTERFACE):
-    return base_info.type.value == _type
-
-
+@GIBaseInfo._register(GIInfoType.INTERFACE)
 class GIInterfaceInfo(GIRegisteredTypeInfo):
-    pass
-
-
-class GIInterfaceInfoPtr(GIRegisteredTypeInfoPtr):
-    _type_ = GIInterfaceInfo
 
     def get_methods(self):
         return map(self.get_method, xrange(self.n_methods))
@@ -48,7 +40,7 @@ class GIInterfaceInfoPtr(GIRegisteredTypeInfoPtr):
         return map(self.get_prerequisite, xrange(self.n_prerequisites))
 
     def _get_repr(self):
-        values = super(GIInterfaceInfoPtr, self)._get_repr()
+        values = super(GIInterfaceInfo, self)._get_repr()
         values["n_constants"] = repr(self.n_constants)
         values["n_signals"] = repr(self.n_signals)
         values["n_methods"] = repr(self.n_methods)
@@ -57,25 +49,25 @@ class GIInterfaceInfoPtr(GIRegisteredTypeInfoPtr):
         return values
 
 _methods = [
-    ("get_n_prerequisites", gint, [GIInterfaceInfoPtr]),
-    ("get_prerequisite", GIBaseInfoPtr, [GIInterfaceInfoPtr, gint], True),
-    ("get_n_properties", gint, [GIInterfaceInfoPtr]),
-    ("get_property", GIPropertyInfoPtr, [GIInterfaceInfoPtr, gint], True),
-    ("get_n_methods", gint, [GIInterfaceInfoPtr]),
-    ("get_method", GIFunctionInfoPtr, [GIInterfaceInfoPtr, gint], True),
-    ("find_method", GIFunctionInfoPtr, [GIInterfaceInfoPtr, gchar_p], True),
-    ("get_n_signals", gint, [GIInterfaceInfoPtr]),
-    ("get_signal", GISignalInfoPtr, [GIInterfaceInfoPtr, gint], True),
-    ("find_signal", GISignalInfoPtr, [GIInterfaceInfoPtr, gchar_p], True),
-    ("get_n_vfuncs", gint, [GIInterfaceInfoPtr]),
-    ("get_vfunc", GIVFuncInfoPtr, [GIInterfaceInfoPtr, gint], True),
-    ("get_n_constants", gint, [GIInterfaceInfoPtr]),
-    ("get_constant", GIConstantInfoPtr, [GIInterfaceInfoPtr, gint], True),
-    ("get_iface_struct", GIStructInfoPtr, [GIInterfaceInfoPtr], True),
-    ("find_vfunc", GIVFuncInfoPtr, [GIInterfaceInfoPtr, gchar_p], True),
+    ("get_n_prerequisites", gint, [GIInterfaceInfo]),
+    ("get_prerequisite", GIBaseInfo, [GIInterfaceInfo, gint], True),
+    ("get_n_properties", gint, [GIInterfaceInfo]),
+    ("get_property", GIPropertyInfo, [GIInterfaceInfo, gint], True),
+    ("get_n_methods", gint, [GIInterfaceInfo]),
+    ("get_method", GIFunctionInfo, [GIInterfaceInfo, gint], True),
+    ("find_method", GIFunctionInfo, [GIInterfaceInfo, gchar_p], True),
+    ("get_n_signals", gint, [GIInterfaceInfo]),
+    ("get_signal", GISignalInfo, [GIInterfaceInfo, gint], True),
+    ("find_signal", GISignalInfo, [GIInterfaceInfo, gchar_p], True),
+    ("get_n_vfuncs", gint, [GIInterfaceInfo]),
+    ("get_vfunc", GIVFuncInfo, [GIInterfaceInfo, gint], True),
+    ("get_n_constants", gint, [GIInterfaceInfo]),
+    ("get_constant", GIConstantInfo, [GIInterfaceInfo, gint], True),
+    ("get_iface_struct", GIStructInfo, [GIInterfaceInfo], True),
+    ("find_vfunc", GIVFuncInfo, [GIInterfaceInfo, gchar_p], True),
 ]
 
-wrap_class(_gir, GIInterfaceInfo, GIInterfaceInfoPtr,
+wrap_class(_gir, GIInterfaceInfo, GIInterfaceInfo,
            "g_interface_info_", _methods)
 
-__all__ = ["GIInterfaceInfo", "GIInterfaceInfoPtr", "gi_is_interface_info"]
+__all__ = ["GIInterfaceInfo"]

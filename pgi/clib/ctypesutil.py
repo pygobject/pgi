@@ -6,7 +6,7 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 import os
-from ctypes import cdll, c_void_p, cast, c_size_t
+from ctypes import cdll, c_void_p, c_size_t
 
 
 if os.name == "nt":
@@ -77,8 +77,8 @@ class _CMethod(object):
     def __init__(self, *args):
         self.args = args
 
-    def __get__(self, instance, owner):
-        lib, name, symbol, ret, args, wrap, unref = self.args
+    def __get__(self, instance, *args):
+        owner, name, lib, symbol, ret, args, wrap, unref = self.args
         func = getattr(lib, symbol)
         func.argtypes = args
         func.restype = ret
@@ -88,6 +88,9 @@ class _CMethod(object):
             instance._unref = True
             return instance
 
+        if instance is None:
+            instance = owner
+
         if wrap:
             if unref:
                 setattr(owner, name, unref_func)
@@ -96,64 +99,51 @@ class _CMethod(object):
             return getattr(instance, name)
         else:
             # FIXME: handle unref
+            assert not unref
             setattr(owner, name, staticmethod(func))
             return getattr(owner, name)
 
 
-def gicast(obj, type_):
-    """cast and transfer ownership to the now object"""
-    new_obj = cast(obj, type_)
-    new_obj._unref = obj._unref
-    obj._unref = False
-    return new_obj
+def wrap_class(lib, base, ptr, prefix, methods):
+    for method in methods:
+        unref = False
+        if len(method) == 3:
+            name, ret, args = method
+        else:
+            name, ret, args, unref = method
 
+        attr_name = name
+        if name[:1] == "_":
+            name = name[1:]
 
-_wraps = []
-
-
-def wrap_class(*args):
-    global _wraps
-
-    _wraps.append(args)
-
-
-def wrap_setup():
-    global _wraps
-
-    wraps = _wraps
-    for lib, base, ptr, prefix, methods in wraps:
-        for method in methods:
-            unref = False
-            if len(method) == 3:
-                name, ret, args = method
+        symbol = prefix + name
+        is_method = args and args[0] == ptr
+        if is_method:
+            # Methods that have no arguments and return no pointer type
+            # can be getters and the values can be cached. hurray!
+            try:
+                is_pointer = hasattr(ret, "contents") or ret is c_void_p or \
+                    issubclass(ret, c_void_p)
+            except TypeError:
+                is_pointer = False
+            is_void = ret is None
+            if len(args) == 1 and not is_void and not is_pointer:
+                if attr_name.startswith("get_"):
+                    attr_name = attr_name[4:]
+                elif attr_name.startswith("to_"):
+                    attr_name = attr_name[3:]
+                # e.g. conflict with ctypes "contents", "value" attribute
+                while hasattr(ptr, attr_name):
+                    attr_name += "_"
+                prop = _CProperty(lib, attr_name, symbol, ret, args)
+                setattr(ptr, attr_name, prop)
             else:
-                name, ret, args, unref = method
-
-            symbol = prefix + name
-            is_method = args and args[0] == ptr
-            if is_method:
-                # Methods that have no arguments and return no pointer type
-                # can be getters and the values can be cached. hurray!
-                is_pointer = hasattr(ret, "contents") or ret is c_void_p
-                is_void = ret is None
-                if len(args) == 1 and not is_void and not is_pointer:
-                    attr_name = name
-                    if attr_name.startswith("get_"):
-                        attr_name = attr_name[4:]
-                    elif attr_name.startswith("to_"):
-                        attr_name = attr_name[3:]
-                    # e.g. conflict with ctypes "contents" attribute
-                    if hasattr(ptr, attr_name):
-                        attr_name += "_"
-                    prop = _CProperty(lib, attr_name, symbol, ret, args)
-                    setattr(ptr, attr_name, prop)
-                else:
-                    method = _CMethod(
-                        lib, name, symbol, ret, args, True, unref)
-                    setattr(ptr, name, method)
-            else:
-                static_method = _CMethod(
-                    lib, name, symbol, ret, args, False, unref)
-                setattr(base, name, static_method)
-
-    _wraps = []
+                method = _CMethod(
+                    ptr, attr_name, lib, symbol, ret, args, True, unref)
+                setattr(ptr, attr_name, method)
+        else:
+            if base is None:
+                base = ptr
+            static_method = _CMethod(
+                base, attr_name, lib, symbol, ret, args, False, unref)
+            setattr(base, attr_name, static_method)

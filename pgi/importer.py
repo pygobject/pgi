@@ -10,7 +10,7 @@
 import sys
 from ctypes import c_char_p, byref
 
-from .clib.gir import GIRepositoryPtr
+from .clib.gir import GIRepository
 from .clib.glib import GErrorPtr
 from . import const, module, util, overrides
 
@@ -25,7 +25,7 @@ def require_version(namespace, version):
 
     global _versions
 
-    repo = GIRepositoryPtr()
+    repo = GIRepository()
 
     namespace = util.encode(namespace)
     version = util.encode(version)
@@ -80,14 +80,14 @@ class Importer(object):
         namespace = extract_namespace(fullname)
         if namespace:
             namespace = util.encode(namespace)
-            if GIRepositoryPtr().enumerate_versions(namespace):
+            if GIRepository().enumerate_versions(namespace):
                 return self
 
     def load_module(self, fullname):
         global _versions
 
         namespace = util.encode(extract_namespace(fullname))
-        repository = GIRepositoryPtr()
+        repository = GIRepository()
 
         if namespace in _versions:
             version = _versions[namespace]

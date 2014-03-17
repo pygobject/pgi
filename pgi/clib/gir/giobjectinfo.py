@@ -10,29 +10,21 @@ from ctypes import c_char_p, CFUNCTYPE, c_void_p
 from .._compat import xrange
 from ..glib import gchar_p, gboolean, gint
 from ..gobject import GValuePtr
-from .gibaseinfo import GIInfoType
-from .giinterfaceinfo import GIInterfaceInfoPtr
-from .gifieldinfo import GIFieldInfoPtr
-from .gipropertyinfo import GIPropertyInfoPtr
-from .gicallableinfo import GIFunctionInfoPtr, GISignalInfoPtr, GIVFuncInfoPtr
-from .giregisteredtypeinfo import GIRegisteredTypeInfo, GIRegisteredTypeInfoPtr
-from .giconstantinfo import GIConstantInfoPtr
-from .gistructinfo import GIStructInfoPtr
+from .gibaseinfo import GIInfoType, GIBaseInfo
+from .giinterfaceinfo import GIInterfaceInfo
+from .gifieldinfo import GIFieldInfo
+from .gipropertyinfo import GIPropertyInfo
+from .gicallableinfo import GIFunctionInfo, GISignalInfo, GIVFuncInfo
+from .giregisteredtypeinfo import GIRegisteredTypeInfo
+from .giconstantinfo import GIConstantInfo
+from .gistructinfo import GIStructInfo
 from ..ctypesutil import find_library, wrap_class
 
 _gir = find_library("girepository-1.0")
 
 
-def gi_is_object_info(base_info, _type=GIInfoType.OBJECT):
-    return base_info.type.value == _type
-
-
+@GIBaseInfo._register(GIInfoType.OBJECT)
 class GIObjectInfo(GIRegisteredTypeInfo):
-    pass
-
-
-class GIObjectInfoPtr(GIRegisteredTypeInfoPtr):
-    _type_ = GIObjectInfo
 
     def get_methods(self):
         return map(self.get_method, xrange(self.n_methods))
@@ -56,7 +48,7 @@ class GIObjectInfoPtr(GIRegisteredTypeInfoPtr):
         return map(self.get_constant, xrange(self.n_constants))
 
     def _get_repr(self):
-        values = super(GIObjectInfoPtr, self)._get_repr()
+        values = super(GIObjectInfo, self)._get_repr()
         values["type_name"] = repr(self.type_name)
         values["type_init"] = repr(self.type_init)
         values["abstract"] = repr(self.abstract)
@@ -92,44 +84,44 @@ GIObjectInfoSetValueFunction = CFUNCTYPE(None, GValuePtr, c_void_p)
 GIObjectInfoUnrefFunction = CFUNCTYPE(None, c_void_p)
 
 _methods = [
-    ("get_type_name", gchar_p, [GIObjectInfoPtr]),
-    ("get_type_init", gchar_p, [GIObjectInfoPtr]),
-    ("get_abstract", gboolean, [GIObjectInfoPtr]),
-    ("get_fundamental", gboolean, [GIObjectInfoPtr]),
-    ("get_parent", GIObjectInfoPtr, [GIObjectInfoPtr], True),
-    ("get_n_interfaces", gint, [GIObjectInfoPtr]),
-    ("get_interface", GIInterfaceInfoPtr, [GIObjectInfoPtr, gint], True),
-    ("get_n_fields", gint, [GIObjectInfoPtr]),
-    ("get_field", GIFieldInfoPtr, [GIObjectInfoPtr, gint], True),
-    ("get_n_properties", gint, [GIObjectInfoPtr]),
-    ("get_property", GIPropertyInfoPtr, [GIObjectInfoPtr, gint], True),
-    ("get_n_methods", gint, [GIObjectInfoPtr]),
-    ("get_method", GIFunctionInfoPtr, [GIObjectInfoPtr, gint], True),
-    ("find_method", GIFunctionInfoPtr, [GIObjectInfoPtr, gchar_p], True),
-    ("get_n_signals", gint, [GIObjectInfoPtr]),
-    ("get_signal", GISignalInfoPtr, [GIObjectInfoPtr, gint], True),
-    ("find_signal", GISignalInfoPtr, [GIObjectInfoPtr, gchar_p], True),
-    ("get_n_vfuncs", gint, [GIObjectInfoPtr]),
-    ("get_vfunc", GIVFuncInfoPtr, [GIObjectInfoPtr, gint], True),
-    ("get_n_constants", gint, [GIObjectInfoPtr]),
-    ("get_constant", GIConstantInfoPtr, [GIObjectInfoPtr, gint], True),
-    ("get_class_struct", GIStructInfoPtr, [GIObjectInfoPtr], True),
-    ("find_vfunc", GIVFuncInfoPtr, [GIObjectInfoPtr, gchar_p], True),
-    ("get_unref_function", c_char_p, [GIObjectInfoPtr]),
+    ("get_type_name", gchar_p, [GIObjectInfo]),
+    ("get_type_init", gchar_p, [GIObjectInfo]),
+    ("get_abstract", gboolean, [GIObjectInfo]),
+    ("get_fundamental", gboolean, [GIObjectInfo]),
+    ("get_parent", GIObjectInfo, [GIObjectInfo], True),
+    ("get_n_interfaces", gint, [GIObjectInfo]),
+    ("get_interface", GIInterfaceInfo, [GIObjectInfo, gint], True),
+    ("get_n_fields", gint, [GIObjectInfo]),
+    ("get_field", GIFieldInfo, [GIObjectInfo, gint], True),
+    ("get_n_properties", gint, [GIObjectInfo]),
+    ("get_property", GIPropertyInfo, [GIObjectInfo, gint], True),
+    ("get_n_methods", gint, [GIObjectInfo]),
+    ("get_method", GIFunctionInfo, [GIObjectInfo, gint], True),
+    ("find_method", GIFunctionInfo, [GIObjectInfo, gchar_p], True),
+    ("get_n_signals", gint, [GIObjectInfo]),
+    ("get_signal", GISignalInfo, [GIObjectInfo, gint], True),
+    ("find_signal", GISignalInfo, [GIObjectInfo, gchar_p], True),
+    ("get_n_vfuncs", gint, [GIObjectInfo]),
+    ("get_vfunc", GIVFuncInfo, [GIObjectInfo, gint], True),
+    ("get_n_constants", gint, [GIObjectInfo]),
+    ("get_constant", GIConstantInfo, [GIObjectInfo, gint], True),
+    ("get_class_struct", GIStructInfo, [GIObjectInfo], True),
+    ("find_vfunc", GIVFuncInfo, [GIObjectInfo, gchar_p], True),
+    ("get_unref_function", c_char_p, [GIObjectInfo]),
     ("get_unref_function_pointer", GIObjectInfoUnrefFunction,
-        [GIObjectInfoPtr]),
-    ("get_ref_function", c_char_p, [GIObjectInfoPtr]),
-    ("get_ref_function_pointer", GIObjectInfoRefFunction, [GIObjectInfoPtr]),
-    ("get_set_value_function", c_char_p, [GIObjectInfoPtr]),
+        [GIObjectInfo]),
+    ("get_ref_function", c_char_p, [GIObjectInfo]),
+    ("get_ref_function_pointer", GIObjectInfoRefFunction, [GIObjectInfo]),
+    ("get_set_value_function", c_char_p, [GIObjectInfo]),
     ("get_set_value_function_pointer", GIObjectInfoSetValueFunction,
-        [GIObjectInfoPtr]),
-    ("get_get_value_function", c_char_p, [GIObjectInfoPtr]),
+        [GIObjectInfo]),
+    ("get_get_value_function", c_char_p, [GIObjectInfo]),
     ("get_get_value_function_pointer", GIObjectInfoGetValueFunction,
-        [GIObjectInfoPtr]),
+        [GIObjectInfo]),
 ]
 
-wrap_class(_gir, GIObjectInfo, GIObjectInfoPtr, "g_object_info_", _methods)
+wrap_class(_gir, GIObjectInfo, GIObjectInfo, "g_object_info_", _methods)
 
-__all__ = ["GIObjectInfo", "GIObjectInfoPtr", "gi_is_object_info",
+__all__ = ["GIObjectInfo",
            "GIObjectInfoGetValueFunction", "GIObjectInfoRefFunction",
            "GIObjectInfoSetValueFunction", "GIObjectInfoUnrefFunction"]

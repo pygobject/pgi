@@ -5,34 +5,35 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from ctypes import *
-from .ctypesutil import wrap_class, wrap_setup, find_library
+import ctypes
+from ctypes import POINTER, Structure
+from .ctypesutil import wrap_class, find_library
 
 _glib = find_library("glib-2.0")
 
-gchar_p = c_char_p
-gchar = c_char
-guchar = c_uint8
-guint = c_uint
-gpointer = c_void_p
-gint32 = c_int32
-guint32 = c_uint32
-gint = c_int
+gchar_p = ctypes.c_char_p
+gchar = ctypes.c_char
+guchar = ctypes.c_uint8
+guint = ctypes.c_uint
+gpointer = ctypes.c_void_p
+gint32 = ctypes.c_int32
+guint32 = ctypes.c_uint32
+gint = ctypes.c_int
 gboolean = gint
-gint8 = c_int8
-guint8 = c_uint8
-gint16 = c_int16
-guint16 = c_uint16
-gint64 = c_int64
-guint64 = c_uint64
-gfloat = c_float
-gdouble = c_double
-gshort = c_short
-gushort = c_ushort
-glong = c_long
-gulong = c_ulong
-gsize = c_size_t
-gconstpointer = c_void_p
+gint8 = ctypes.c_int8
+guint8 = ctypes.c_uint8
+gint16 = ctypes.c_int16
+guint16 = ctypes.c_uint16
+gint64 = ctypes.c_int64
+guint64 = ctypes.c_uint64
+gfloat = ctypes.c_float
+gdouble = ctypes.c_double
+gshort = ctypes.c_short
+gushort = ctypes.c_ushort
+glong = ctypes.c_long
+gulong = ctypes.c_ulong
+gsize = ctypes.c_size_t
+gconstpointer = ctypes.c_void_p
 gunichar = guint32
 
 g_malloc0 = _glib.g_malloc0
@@ -243,8 +244,6 @@ _methods = [
 ]
 
 wrap_class(_glib, GList, GListPtr, "g_list_", _methods)
-
-wrap_setup()
 
 __all__ = ["gchar_p", "guint", "gpointer", "gint32", "guint32", "gint",
            "GQuark", "gboolean", "gint8", "guint8", "gint16", "guint16",

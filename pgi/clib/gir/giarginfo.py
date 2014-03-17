@@ -6,15 +6,11 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from ..glib import Enum, gboolean, gint
-from .gitypeinfo import GITypeInfoPtr
-from .gibaseinfo import GIBaseInfo, GIBaseInfoPtr, GIInfoType
+from .gitypeinfo import GITypeInfo
+from .gibaseinfo import GIBaseInfo, GIInfoType
 from ..ctypesutil import find_library, wrap_class
 
 _gir = find_library("girepository-1.0")
-
-
-def gi_is_arg_info(base_info, _type=GIInfoType.ARG):
-    return base_info.type.value == _type
 
 
 class GITransfer(Enum):
@@ -29,15 +25,11 @@ class GIScopeType(Enum):
     INVALID, CALL, ASYNC, NOTIFIED = range(4)
 
 
+@GIBaseInfo._register(GIInfoType.ARG)
 class GIArgInfo(GIBaseInfo):
-    pass
-
-
-class GIArgInfoPtr(GIBaseInfoPtr):
-    _type_ = GIArgInfo
 
     def _get_repr(self):
-        values = super(GIArgInfoPtr, self)._get_repr()
+        values = super(GIArgInfo, self)._get_repr()
         values["direction"] = repr(self.direction)
         values["is_caller_allocates"] = repr(self.is_caller_allocates)
         values["is_return_value"] = repr(self.is_return_value)
@@ -54,20 +46,19 @@ class GIArgInfoPtr(GIBaseInfoPtr):
         return values
 
 _methods = [
-    ("get_direction", GIDirection, [GIArgInfoPtr]),
-    ("is_caller_allocates", gboolean, [GIArgInfoPtr]),
-    ("is_return_value", gboolean, [GIArgInfoPtr]),
-    ("is_optional", gboolean, [GIArgInfoPtr]),
-    ("may_be_null", gboolean, [GIArgInfoPtr]),
-    ("get_ownership_transfer", GITransfer, [GIArgInfoPtr]),
-    ("get_scope", GIScopeType, [GIArgInfoPtr]),
-    ("get_closure", gint, [GIArgInfoPtr]),
-    ("get_destroy", gint, [GIArgInfoPtr]),
-    ("get_type", GITypeInfoPtr, [GIArgInfoPtr], True),
-    ("load_type", None, [GIArgInfoPtr, GITypeInfoPtr]),
+    ("get_direction", GIDirection, [GIArgInfo]),
+    ("is_caller_allocates", gboolean, [GIArgInfo]),
+    ("is_return_value", gboolean, [GIArgInfo]),
+    ("is_optional", gboolean, [GIArgInfo]),
+    ("may_be_null", gboolean, [GIArgInfo]),
+    ("get_ownership_transfer", GITransfer, [GIArgInfo]),
+    ("get_scope", GIScopeType, [GIArgInfo]),
+    ("get_closure", gint, [GIArgInfo]),
+    ("get_destroy", gint, [GIArgInfo]),
+    ("get_type", GITypeInfo, [GIArgInfo], True),
+    ("load_type", None, [GIArgInfo, GITypeInfo]),
 ]
 
-wrap_class(_gir, GIArgInfo, GIArgInfoPtr, "g_arg_info_", _methods)
+wrap_class(_gir, GIArgInfo, GIArgInfo, "g_arg_info_", _methods)
 
-__all__ = ["GITransfer", "GIDirection", "GIScopeType", "GIArgInfo",
-           "GIArgInfoPtr", "gi_is_arg_info"]
+__all__ = ["GITransfer", "GIDirection", "GIScopeType", "GIArgInfo"]

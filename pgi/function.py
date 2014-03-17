@@ -5,13 +5,11 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from .clib.ctypesutil import gicast
-from .clib.gir import GIFunctionInfoPtr, GIFunctionInfoFlags
+from .clib.gir import GIFunctionInfoFlags
 from .codegen import generate_function
 
 
 def FunctionAttribute(info):
-    info = gicast(info, GIFunctionInfoPtr)
     throws = info.flags.value & GIFunctionInfoFlags.THROWS
     func = generate_function(info, throws=throws)
     return func

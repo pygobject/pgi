@@ -10,7 +10,7 @@ from ctypes import POINTER, Structure, CFUNCTYPE
 from .glib import Flags, gulong, gchar_p, guint, gboolean, gpointer, guint32
 from .glib import guint64, gchar, guchar, gint, glong, gint64, gfloat
 from .glib import gdouble
-from .ctypesutil import find_library, wrap_class, wrap_setup
+from .ctypesutil import find_library, wrap_class
 
 _gobject = find_library("gobject-2.0")
 
@@ -376,7 +376,6 @@ boxed_type_register_static = _gobject.g_boxed_type_register_static
 boxed_type_register_static.argtypes = [gchar_p, GBoxedCopyFunc, GBoxedFreeFunc]
 boxed_type_register_static.restype = GType
 
-wrap_setup()
 g_type_init()
 
 __all__ = ["GType", "g_type_init", "GParamFlags", "GValue", "GValuePtr",

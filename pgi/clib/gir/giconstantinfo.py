@@ -8,36 +8,28 @@
 from ctypes import POINTER
 
 from ..glib import gint
-from .gibaseinfo import GIBaseInfo, GIBaseInfoPtr, GIInfoType
-from .gitypeinfo import GITypeInfoPtr
+from .gibaseinfo import GIBaseInfo, GIInfoType
+from .gitypeinfo import GITypeInfo
 from .giargument import GIArgument
 from ..ctypesutil import find_library, wrap_class
 
 _gir = find_library("girepository-1.0")
 
 
-def gi_is_constant_info(base_info, _type=GIInfoType.CONSTANT):
-    return base_info.type.value == _type
-
-
+@GIBaseInfo._register(GIInfoType.CONSTANT)
 class GIConstantInfo(GIBaseInfo):
-    pass
-
-
-class GIConstantInfoPtr(GIBaseInfoPtr):
-    _type_ = GIConstantInfo
 
     def _get_repr(self):
-        values = super(GIConstantInfoPtr, self)._get_repr()
+        values = super(GIConstantInfo, self)._get_repr()
         values["type"] = repr(self.get_type())
         return values
 
 _methods = [
-    ("get_type", GITypeInfoPtr, [GIConstantInfoPtr], True),
-    ("get_value", gint, [GIConstantInfoPtr, POINTER(GIArgument)]),
+    ("get_type", GITypeInfo, [GIConstantInfo], True),
+    ("get_value", gint, [GIConstantInfo, POINTER(GIArgument)]),
 ]
 
-wrap_class(_gir, GIConstantInfo, GIConstantInfoPtr,
+wrap_class(_gir, GIConstantInfo, GIConstantInfo,
            "g_constant_info_", _methods)
 
-__all__ = ["GIConstantInfo", "GIConstantInfoPtr", "gi_is_constant_info"]
+__all__ = ["GIConstantInfo"]

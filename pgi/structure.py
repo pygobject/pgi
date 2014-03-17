@@ -5,8 +5,6 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from .clib.ctypesutil import gicast, memcpy
-from .clib.gir import GIUnionInfoPtr, GIStructInfoPtr
 from .clib.glib import g_try_malloc0, free
 from .gtype import PGType
 from .obj import add_method
@@ -83,8 +81,6 @@ class _Structure(BaseStructure):
 
 
 def UnionAttribute(union_info):
-    union_info = gicast(union_info, GIUnionInfoPtr)
-
     cls = type(union_info.name, _Union.__bases__, dict(_Union.__dict__))
     cls.__module__ = union_info.namespace
     cls.__gtype__ = PGType(union_info.g_type)
@@ -105,8 +101,6 @@ def UnionAttribute(union_info):
 
 def StructureAttribute(struct_info):
     """Creates a new struct class."""
-
-    struct_info = gicast(struct_info, GIStructInfoPtr)
 
     # Copy the template and add the gtype
     cls_dict = dict(_Structure.__dict__)

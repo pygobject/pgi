@@ -20,7 +20,8 @@ generate_signal_callback = generate_signal_callback
 generate_callback_wrapper = generate_callback_wrapper
 get_field_type = get_field_type
 generate_dummy_function = generate_dummy_function
-
+generate_field_setter = generate_field_setter
+generate_field_getter = generate_field_getter
 
 from .backend import init_backends
 init_backends()

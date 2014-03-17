@@ -13,9 +13,8 @@ from .clib import gobject
 from .clib.gobject import GClosureNotify, signal_connect_data
 from .clib.gobject import signal_handler_unblock, signal_handler_block
 from .clib.gobject import GConnectFlags, signal_handler_disconnect
-from .clib.gir import GIInterfaceInfoPtr, GIFunctionInfoFlags, GIObjectInfoPtr
+from .clib.gir import GIFunctionInfoFlags
 
-from .clib.ctypesutil import gicast
 from .util import import_attribute, escape_identifier
 from .gtype import PGType
 from .properties import PropertyAttribute, PROPS_NAME
@@ -321,10 +320,8 @@ class _Interface(object):
         raise NotImplementedError("Interface can not be constructed")
 
 
-def InterfaceAttribute(info):
+def InterfaceAttribute(iface_info):
     """Creates a GInterface class"""
-
-    iface_info = gicast(info, GIInterfaceInfoPtr)
 
     # Create a new class
     cls = type(iface_info.name, (InterfaceBase,), dict(_Interface.__dict__))
@@ -384,8 +381,6 @@ def ObjectAttribute(obj_info):
 
     It inherits from the base class and all interfaces it implements.
     """
-
-    obj_info = gicast(obj_info, GIObjectInfoPtr)
 
     if obj_info.name == "Object" and obj_info.namespace == "GObject":
         cls = Object

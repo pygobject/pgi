@@ -9,44 +9,32 @@ from ctypes import c_char_p, POINTER, c_int
 
 from ..glib import gint, Enum, gboolean, gchar_p, GError, Flags
 from ..gobject import GSignalFlags
-from .gibaseinfo import GIBaseInfo, GIBaseInfoPtr
-from .gibaseinfo import GIAttributeIterPtr, GIInfoType
-from .gitypeinfo import GITypeInfoPtr
-from .giarginfo import GITransfer, GIArgInfoPtr
-from .gipropertyinfo import GIPropertyInfoPtr
+from .gibaseinfo import GIBaseInfo
+from .gibaseinfo import GIAttributeIter, GIInfoType
+from .gitypeinfo import GITypeInfo
+from .giarginfo import GITransfer, GIArgInfo
+from .gipropertyinfo import GIPropertyInfo
 from .giargument import GIArgument
 from ..ctypesutil import find_library, wrap_class
 
 _gir = find_library("girepository-1.0")
 
 
-def gi_is_callable_info(base_info, _it=GIInfoType):
-    type_ = base_info.type.value
-    return (type_ in (_it.FUNCTION, _it.CALLBACK, _it.SIGNAL, _it.VFUNC))
-
-
+@GIBaseInfo._register(GIInfoType.CALLBACK)
 class GICallableInfo(GIBaseInfo):
-    pass
-
-
-class GICallableInfoPtr(GIBaseInfoPtr):
-    _type_ = GICallableInfo
 
     def get_args(self):
         return map(self.get_arg, xrange(self.n_args))
 
     def _get_repr(self):
-        values = super(GICallableInfoPtr, self)._get_repr()
+        values = super(GICallableInfo, self)._get_repr()
 
-        values["return_type"] = repr(self.get_return_type())
+        # FIXME
+        #values["return_type"] = repr(self.get_return_type())
         values["caller_owns"] = repr(self.caller_owns)
         values["may_return_null"] = repr(self.may_return_null)
         values["n_args"] = repr(self.n_args)
         return values
-
-
-def gi_is_function_info(base_info):
-    return base_info.type.value == GIInfoType.FUNCTION
 
 
 class GIFunctionInfoFlags(Flags):
@@ -62,15 +50,11 @@ class GInvokeError(Enum):
     FAILED, SYMBOL_NOT_FOUND, ARGUMENT_MISMATCH = range(3)
 
 
+@GIBaseInfo._register(GIInfoType.FUNCTION)
 class GIFunctionInfo(GICallableInfo):
-    pass
-
-
-class GIFunctionInfoPtr(GICallableInfoPtr):
-    _type_ = GIFunctionInfo
 
     def _get_repr(self):
-        values = super(GIFunctionInfoPtr, self)._get_repr()
+        values = super(GIFunctionInfo, self)._get_repr()
 
         values["symbol"] = repr(self.symbol)
         values["flags"] = repr(self.flags)
@@ -83,25 +67,17 @@ class GIFunctionInfoPtr(GICallableInfoPtr):
         return values
 
 
-def gi_is_vfunc_info(base_info):
-    return base_info.type.value == GIInfoType.VFUNC
-
-
 class GIVFuncInfoFlags(Enum):
     MUST_CHAIN_UP = 1 << 0
     MUST_OVERRIDE = 1 << 1
     MUST_NOT_OVERRIDE = 1 << 2
 
 
+@GIBaseInfo._register(GIInfoType.VFUNC)
 class GIVFuncInfo(GICallableInfo):
-    pass
-
-
-class GIVFuncInfoPtr(GICallableInfoPtr):
-    _type_ = GIVFuncInfo
 
     def _get_repr(self):
-        values = super(GIVFuncInfoPtr, self)._get_repr()
+        values = super(GIVFuncInfo, self)._get_repr()
         values["flags"] = repr(self.flags)
         values["offset"] = repr(self.offset)
         signal = self.get_signal()
@@ -113,19 +89,11 @@ class GIVFuncInfoPtr(GICallableInfoPtr):
         return values
 
 
-def gi_is_signal_info(base_info):
-    return base_info.type.value == GIInfoType.SIGNAL
-
-
+@GIBaseInfo._register(GIInfoType.SIGNAL)
 class GISignalInfo(GICallableInfo):
-    pass
-
-
-class GISignalInfoPtr(GICallableInfoPtr):
-    _type_ = GISignalInfo
 
     def _get_repr(self):
-        values = super(GISignalInfoPtr, self)._get_repr()
+        values = super(GISignalInfo, self)._get_repr()
         values["flags"] = repr(self.flags)
         closure = self.get_class_closure()
         if closure:
@@ -135,55 +103,53 @@ class GISignalInfoPtr(GICallableInfoPtr):
 
 
 _methods = [
-    ("get_return_type", GITypeInfoPtr, [GICallableInfoPtr], True),
-    ("get_caller_owns", GITransfer, [GICallableInfoPtr]),
-    ("may_return_null", gboolean, [GICallableInfoPtr]),
-    ("get_return_attribute", gchar_p, [GICallableInfoPtr, gchar_p]),
+    ("get_return_type", GITypeInfo, [GICallableInfo], True),
+    ("get_caller_owns", GITransfer, [GICallableInfo]),
+    ("may_return_null", gboolean, [GICallableInfo]),
+    ("get_return_attribute", gchar_p, [GICallableInfo, gchar_p]),
     ("iterate_return_attributes", gint,
-     [GICallableInfoPtr,
-      GIAttributeIterPtr, POINTER(c_char_p), POINTER(c_char_p)]),
-    ("get_n_args", gint, [GICallableInfoPtr]),
-    ("get_arg", GIArgInfoPtr, [GICallableInfoPtr, gint], True),
-    ("load_arg", None, [GICallableInfoPtr, gint, GIArgInfoPtr]),
-    ("load_return_type", None, [GICallableInfoPtr, GITypeInfoPtr]),
+     [GICallableInfo,
+      GIAttributeIter, POINTER(c_char_p), POINTER(c_char_p)]),
+    ("get_n_args", gint, [GICallableInfo]),
+    ("get_arg", GIArgInfo, [GICallableInfo, gint], True),
+    ("load_arg", None, [GICallableInfo, gint, GIArgInfo]),
+    ("load_return_type", None, [GICallableInfo, GITypeInfo]),
 ]
 
-wrap_class(_gir, GICallableInfo, GICallableInfoPtr,
+wrap_class(_gir, GICallableInfo, GICallableInfo,
            "g_callable_info_", _methods)
 
 _methods = [
-    ("get_symbol", gchar_p, [GIFunctionInfoPtr]),
-    ("get_flags", GIFunctionInfoFlags, [GIFunctionInfoPtr]),
-    ("get_property", GIPropertyInfoPtr, [GIFunctionInfoPtr], True),
-    ("get_vfunc", GIVFuncInfoPtr, [GIFunctionInfoPtr], True),
-    ("invoke", gboolean, [GIFunctionInfoPtr, POINTER(GIArgument), c_int,
+    ("get_symbol", gchar_p, [GIFunctionInfo]),
+    ("get_flags", GIFunctionInfoFlags, [GIFunctionInfo]),
+    ("get_property", GIPropertyInfo, [GIFunctionInfo], True),
+    ("get_vfunc", GIVFuncInfo, [GIFunctionInfo], True),
+    ("invoke", gboolean, [GIFunctionInfo, POINTER(GIArgument), c_int,
                           POINTER(GIArgument), c_int, POINTER(GIArgument),
                           POINTER(POINTER(GError))]),
 ]
 
-wrap_class(_gir, GIFunctionInfo, GIFunctionInfoPtr,
+wrap_class(_gir, GIFunctionInfo, GIFunctionInfo,
            "g_function_info_", _methods)
 
 _methods = [
-    ("get_flags", GIVFuncInfoFlags, [GIVFuncInfoPtr]),
-    ("get_offset", gint, [GIVFuncInfoPtr]),
-    ("get_signal", GISignalInfoPtr, [GIVFuncInfoPtr], True),
-    ("get_invoker", GIFunctionInfoPtr, [GIVFuncInfoPtr], True),
+    ("get_flags", GIVFuncInfoFlags, [GIVFuncInfo]),
+    ("get_offset", gint, [GIVFuncInfo]),
+    ("get_signal", GISignalInfo, [GIVFuncInfo], True),
+    ("get_invoker", GIFunctionInfo, [GIVFuncInfo], True),
 ]
 
-wrap_class(_gir, GIVFuncInfo, GIVFuncInfoPtr, "g_vfunc_info_", _methods)
+wrap_class(_gir, GIVFuncInfo, GIVFuncInfo, "g_vfunc_info_", _methods)
 
 _methods = [
-    ("get_flags", GSignalFlags, [GISignalInfoPtr]),
-    ("get_class_closure", GIVFuncInfoPtr, [GISignalInfoPtr], True),
-    ("true_stops_emit", gboolean, [GISignalInfoPtr]),
+    ("get_flags", GSignalFlags, [GISignalInfo]),
+    ("get_class_closure", GIVFuncInfo, [GISignalInfo], True),
+    ("true_stops_emit", gboolean, [GISignalInfo]),
 ]
 
-wrap_class(_gir, GISignalInfo, GISignalInfoPtr, "g_signal_info_", _methods)
+wrap_class(_gir, GISignalInfo, GISignalInfo, "g_signal_info_", _methods)
 
 
-__all__ = ["GICallableInfo", "GICallableInfoPtr", "gi_is_callable_info",
-           "GIFunctionInfoFlags", "GInvokeError", "GIFunctionInfo",
-           "GIFunctionInfoPtr", "GIVFuncInfoFlags", "GIVFuncInfo",
-           "GIVFuncInfoPtr", "GISignalInfo", "GISignalInfoPtr",
-           "gi_is_function_info", "gi_is_signal_info", "gi_is_vfunc_info"]
+__all__ = ["GICallableInfo", "GIFunctionInfoFlags", "GInvokeError",
+           "GIFunctionInfo", "GIVFuncInfoFlags", "GIVFuncInfo",
+           "GISignalInfo"]

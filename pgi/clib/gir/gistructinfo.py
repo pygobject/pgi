@@ -7,28 +7,20 @@
 
 from .._compat import xrange
 from ..glib import gint, gchar_p, gsize, gboolean
-from .gibaseinfo import GIInfoType
-from .gifieldinfo import GIFieldInfoPtr
-from .gicallableinfo import GIFunctionInfoPtr
-from .giregisteredtypeinfo import GIRegisteredTypeInfo, GIRegisteredTypeInfoPtr
+from .gibaseinfo import GIInfoType, GIBaseInfo
+from .gifieldinfo import GIFieldInfo
+from .gicallableinfo import GIFunctionInfo
+from .giregisteredtypeinfo import GIRegisteredTypeInfo
 from ..ctypesutil import find_library, wrap_class
 
 _gir = find_library("girepository-1.0")
 
 
-def gi_is_struct_info(base_info, _type=GIInfoType.STRUCT):
-    return base_info.type.value == _type
-
-
+@GIBaseInfo._register(GIInfoType.STRUCT)
 class GIStructInfo(GIRegisteredTypeInfo):
-    pass
-
-
-class GIStructInfoPtr(GIRegisteredTypeInfoPtr):
-    _type_ = GIStructInfo
 
     def _get_repr(self):
-        values = super(GIStructInfoPtr, self)._get_repr()
+        values = super(GIStructInfo, self)._get_repr()
         values = {}
         values["size"] = repr(self.size)
         values["alignment"] = repr(self.alignment)
@@ -45,17 +37,17 @@ class GIStructInfoPtr(GIRegisteredTypeInfoPtr):
         return map(self.get_method, xrange(self.n_methods))
 
 _methods = [
-    ("get_n_fields", gint, [GIStructInfoPtr]),
-    ("get_field", GIFieldInfoPtr, [GIStructInfoPtr, gint], True),
-    ("get_n_methods", gint, [GIStructInfoPtr]),
-    ("get_method", GIFunctionInfoPtr, [GIStructInfoPtr, gint], True),
-    ("find_method", GIFunctionInfoPtr, [GIStructInfoPtr, gchar_p], True),
-    ("get_size", gsize, [GIStructInfoPtr]),
-    ("get_alignment", gsize, [GIStructInfoPtr]),
-    ("is_gtype_struct", gboolean, [GIStructInfoPtr]),
-    ("is_foreign", gboolean, [GIStructInfoPtr]),
+    ("get_n_fields", gint, [GIStructInfo]),
+    ("get_field", GIFieldInfo, [GIStructInfo, gint], True),
+    ("get_n_methods", gint, [GIStructInfo]),
+    ("get_method", GIFunctionInfo, [GIStructInfo, gint], True),
+    ("find_method", GIFunctionInfo, [GIStructInfo, gchar_p], True),
+    ("get_size", gsize, [GIStructInfo]),
+    ("get_alignment", gsize, [GIStructInfo]),
+    ("is_gtype_struct", gboolean, [GIStructInfo]),
+    ("is_foreign", gboolean, [GIStructInfo]),
 ]
 
-wrap_class(_gir, GIStructInfo, GIStructInfoPtr, "g_struct_info_", _methods)
+wrap_class(_gir, GIStructInfo, GIStructInfo, "g_struct_info_", _methods)
 
-__all__ = ["GIStructInfo", "GIStructInfoPtr", "gi_is_struct_info"]
+__all__ = ["GIStructInfo"]

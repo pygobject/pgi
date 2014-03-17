@@ -7,8 +7,7 @@
 
 from ctypes import byref
 
-from .clib.ctypesutil import gicast
-from .clib.gir import GIConstantInfoPtr, GIArgument
+from .clib.gir import GIArgument
 
 
 _union_access = [None, "v_boolean", "v_int8", "v_uint8", "v_int16",
@@ -18,8 +17,6 @@ _union_access = [None, "v_boolean", "v_int8", "v_uint8", "v_int16",
 
 
 def ConstantAttribute(info):
-    info = gicast(info, GIConstantInfoPtr)
-
     arg = GIArgument()
     info.get_value(byref(arg))
 

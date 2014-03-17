@@ -7,27 +7,19 @@
 
 from .._compat import xrange
 from ..glib import gint, gboolean, gchar_p, gsize
-from .gibaseinfo import GIInfoType
-from .gifieldinfo import GIFieldInfoPtr
-from .gicallableinfo import GIFunctionInfoPtr
-from .gitypeinfo import GITypeInfoPtr
-from .giconstantinfo import GIConstantInfoPtr
-from .giregisteredtypeinfo import GIRegisteredTypeInfo, GIRegisteredTypeInfoPtr
+from .gibaseinfo import GIInfoType, GIBaseInfo
+from .gifieldinfo import GIFieldInfo
+from .gicallableinfo import GIFunctionInfo
+from .gitypeinfo import GITypeInfo
+from .giconstantinfo import GIConstantInfo
+from .giregisteredtypeinfo import GIRegisteredTypeInfo
 from ..ctypesutil import find_library, wrap_class
 
 _gir = find_library("girepository-1.0")
 
 
-def gi_is_union_info(base_info):
-    return base_info.type.value == GIInfoType.UNION
-
-
+@GIBaseInfo._register(GIInfoType.UNION)
 class GIUnionInfo(GIRegisteredTypeInfo):
-    pass
-
-
-class GIUnionInfoPtr(GIRegisteredTypeInfoPtr):
-    _type_ = GIUnionInfo
 
     def get_methods(self):
         return map(self.get_method, xrange(self.n_methods))
@@ -36,7 +28,7 @@ class GIUnionInfoPtr(GIRegisteredTypeInfoPtr):
         return map(self.get_field, xrange(self.n_fields))
 
     def _get_repr(self):
-        values = super(GIUnionInfoPtr, self)._get_repr()
+        values = super(GIUnionInfo, self)._get_repr()
         values = {}
         values["n_fields"] = repr(self.n_fields)
         values["is_discriminated"] = repr(self.is_discriminated)
@@ -49,19 +41,19 @@ class GIUnionInfoPtr(GIRegisteredTypeInfoPtr):
         return values
 
 _methods = [
-    ("get_n_fields", gint, [GIUnionInfoPtr]),
-    ("get_field", GIFieldInfoPtr, [GIUnionInfoPtr, gint], True),
-    ("get_n_methods", gint, [GIUnionInfoPtr]),
-    ("get_method", GIFunctionInfoPtr, [GIUnionInfoPtr, gint], True),
-    ("is_discriminated", gboolean, [GIUnionInfoPtr]),
-    ("get_discriminator_offset", gint, [GIUnionInfoPtr]),
-    ("get_discriminator_type", GITypeInfoPtr, [GIUnionInfoPtr], True),
-    ("get_discriminator", GIConstantInfoPtr, [GIUnionInfoPtr, gint], True),
-    ("find_method", GIFunctionInfoPtr, [GIUnionInfoPtr, gchar_p], True),
-    ("get_size", gsize, [GIUnionInfoPtr]),
-    ("get_alignment", gsize, [GIUnionInfoPtr]),
+    ("get_n_fields", gint, [GIUnionInfo]),
+    ("get_field", GIFieldInfo, [GIUnionInfo, gint], True),
+    ("get_n_methods", gint, [GIUnionInfo]),
+    ("get_method", GIFunctionInfo, [GIUnionInfo, gint], True),
+    ("is_discriminated", gboolean, [GIUnionInfo]),
+    ("get_discriminator_offset", gint, [GIUnionInfo]),
+    ("get_discriminator_type", GITypeInfo, [GIUnionInfo], True),
+    ("get_discriminator", GIConstantInfo, [GIUnionInfo, gint], True),
+    ("find_method", GIFunctionInfo, [GIUnionInfo, gchar_p], True),
+    ("get_size", gsize, [GIUnionInfo]),
+    ("get_alignment", gsize, [GIUnionInfo]),
 ]
 
-wrap_class(_gir, GIUnionInfo, GIUnionInfoPtr, "g_union_info_", _methods)
+wrap_class(_gir, GIUnionInfo, GIUnionInfo, "g_union_info_", _methods)
 
-__all__ = ["GIUnionInfo", "GIUnionInfoPtr", "gi_is_union_info"]
+__all__ = ["GIUnionInfo"]

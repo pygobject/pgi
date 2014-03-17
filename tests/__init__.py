@@ -188,6 +188,7 @@ def test(load_gi, backend=None, strict=False, filter_=None):
             GLib.LogLevelFlags.LEVEL_WARNING)
 
     current_dir = os.path.join(os.path.dirname(__file__))
+    tests = []
     tests = discover(current_dir, "tests_pygobject")
     tests += discover(current_dir, "tests_mixed")
     if not load_gi:

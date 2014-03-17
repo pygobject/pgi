@@ -9,7 +9,7 @@ import __builtin__
 
 from cffi import FFI
 
-from pgi.clib.gir import GIRepositoryPtr, GITypeTag, GIInfoType
+from pgi.clib.gir import GIRepository, GITypeTag, GIInfoType
 from .backend import Backend
 from .utils import CodeBlock, parse_with_objects, VariableFactory
 
@@ -274,7 +274,7 @@ class CFFIBackend(Backend):
 
     def get_library(self, namespace):
         if namespace not in self._libs:
-            paths = GIRepositoryPtr().get_shared_library(namespace)
+            paths = GIRepository().get_shared_library(namespace)
             if not paths:
                 raise NotImplementedError("No shared library")
             path = paths.split(",")[0]
