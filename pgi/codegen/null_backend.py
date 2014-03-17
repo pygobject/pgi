@@ -71,6 +71,10 @@ class BaseType(object):
 class NullBackend(Backend):
     NAME = "null"
 
+    @property
+    def var(self):
+        return VariableFactory()
+
     def get_library(self, namespace):
         return namespace
 
