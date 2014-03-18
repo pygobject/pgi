@@ -5,7 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from pgi.lib import _fixup_cdef_enums
+from .. import _fixup_cdef_enums
 
 
 GI_TYPES_CDEF = """
@@ -463,6 +463,35 @@ GIObjectInfoGetValueFunction g_object_info_get_get_value_function_pointer
 """
 
 
+GI_INTERFACE_CDEF = """
+gint             g_interface_info_get_n_prerequisites (GIInterfaceInfo *info);
+GIBaseInfo *     g_interface_info_get_prerequisite    (GIInterfaceInfo *info,
+                                                       gint             n);
+gint             g_interface_info_get_n_properties    (GIInterfaceInfo *info);
+GIPropertyInfo * g_interface_info_get_property        (GIInterfaceInfo *info,
+                                                       gint             n);
+gint             g_interface_info_get_n_methods       (GIInterfaceInfo *info);
+GIFunctionInfo * g_interface_info_get_method          (GIInterfaceInfo *info,
+                                                       gint             n);
+GIFunctionInfo * g_interface_info_find_method         (GIInterfaceInfo *info,
+                                                       const gchar     *name);
+gint             g_interface_info_get_n_signals       (GIInterfaceInfo *info);
+GISignalInfo *   g_interface_info_get_signal          (GIInterfaceInfo *info,
+                                                       gint             n);
+GISignalInfo *   g_interface_info_find_signal         (GIInterfaceInfo *info,
+                                                       const gchar  *name);
+gint             g_interface_info_get_n_vfuncs        (GIInterfaceInfo *info);
+GIVFuncInfo *    g_interface_info_get_vfunc           (GIInterfaceInfo *info,
+                                                       gint             n);
+GIVFuncInfo *    g_interface_info_find_vfunc          (GIInterfaceInfo *info,
+                                                       const gchar     *name);
+gint             g_interface_info_get_n_constants     (GIInterfaceInfo *info);
+GIConstantInfo * g_interface_info_get_constant        (GIInterfaceInfo *info,
+                                                       gint             n);
+GIStructInfo *   g_interface_info_get_iface_struct    (GIInterfaceInfo *info);
+"""
+
+
 GI_STRUCT_CDEF = """
 gint                g_struct_info_get_n_fields          (GIStructInfo *info);
 GIFieldInfo *       g_struct_info_get_field             (GIStructInfo *info,
@@ -493,5 +522,6 @@ GIR_CDEF = "".join([
     GI_FUNC_CDEF,
     GI_UNION_CDEF,
     GI_OBJECT_CDEF,
+    GI_INTERFACE_CDEF,
     GI_STRUCT_CDEF,
 ])

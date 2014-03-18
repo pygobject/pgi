@@ -31,10 +31,12 @@ class GIStructInfo(GIRegisteredTypeInfo):
         return values
 
     def get_fields(self):
-        return map(self.get_field, xrange(self.n_fields))
+        for i in xrange(self.n_fields):
+            yield self.get_field(i)
 
     def get_methods(self):
-        return map(self.get_method, xrange(self.n_methods))
+        for i in xrange(self.n_methods):
+            yield self.get_method(i)
 
 _methods = [
     ("get_n_fields", gint, [GIStructInfo]),

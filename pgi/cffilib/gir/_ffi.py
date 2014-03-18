@@ -8,7 +8,7 @@
 import sys
 import cffi
 
-from pgi.lib import gobject
+from .. import gobject
 from ._cdef import GIR_CDEF
 
 

@@ -6,10 +6,11 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from ._ffi import ffi, lib
-from .gibaseinfo import GIBaseInfo
+from .gibaseinfo import GIBaseInfo, GIInfoType
 from .gitypeinfo import GITypeInfo
 
 
+@GIBaseInfo._register(GIInfoType.CONSTANT)
 class GIConstantInfo(GIBaseInfo):
 
     def get_type(self):

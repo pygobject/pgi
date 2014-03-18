@@ -10,6 +10,7 @@ from .. import _create_enum_class, _unpack_zeroterm_char_array
 
 from ._ffi import ffi, lib
 from .gibaseinfo import GITypelib, GIBaseInfo
+from .error import GIError
 
 
 GIRepositoryLoadFlags = _create_enum_class(ffi, "GIRepositoryLoadFlags",
@@ -50,7 +51,7 @@ class GIRepository(object):
     def require(self, namespace, version, flags):
         if version is None:
             version = ffi.cast("gchar*", ffi.NULL)
-        with glib.gerror() as error:
+        with glib.gerror(GIError) as error:
             res = lib.g_irepository_require(self._ptr, namespace, version,
                                             flags, error)
         return GITypelib(res)
@@ -71,7 +72,7 @@ class GIRepository(object):
     def get_loaded_namespaces(self):
         res = lib.g_irepository_get_loaded_namespaces(self._ptr)
         res = _unpack_zeroterm_char_array(ffi, res)
-        return [r.decode("utf-8") for r in res]
+        return res
 
     def find_by_gtype(self, gtype):
         res = lib.g_irepository_find_by_gtype(self._ptr, gtype)
@@ -106,11 +107,11 @@ class GIRepository(object):
             return ffi.string(res)
 
     def dump(self, arg):
-        with glib.gerror() as error:
+        with glib.gerror(GIError) as error:
             res = lib.g_irepository_dump(arg, error)
         return bool(res)
 
     def enumerate_versions(self, namespace):
         res = lib.g_irepository_enumerate_versions(self._ptr, namespace)
         l = glib.GList(res)
-        return [ffi.string(e).decode("utf-8") for e in l._unpack("gchar*")]
+        return [ffi.string(e) for e in l._unpack("gchar*")]

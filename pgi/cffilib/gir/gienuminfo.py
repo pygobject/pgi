@@ -16,7 +16,7 @@ from .gifunctioninfo import GIFunctionInfo
 class GIValueInfo(GIBaseInfo):
 
     @property
-    def value(self):
+    def value_(self):
         return lib.g_value_info_get_value(self._ptr)
 
 

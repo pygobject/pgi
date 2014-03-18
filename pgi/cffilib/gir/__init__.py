@@ -19,8 +19,11 @@ from .gifunctioninfo import GIFunctionInfo, GIFunctionInfoFlags, GInvokeError
 from .giobjectinfo import GIObjectInfo
 from .giunioninfo import GIUnionInfo
 from .gistructinfo import GIStructInfo
+from .giinterfaceinfo import GIInterfaceInfo
+from .error import GIError
 
 
+# pyflakes
 GIArgInfo = GIArgInfo
 GIArrayType = GIArrayType
 GIBaseInfo = GIBaseInfo
@@ -47,3 +50,4 @@ GITypelib = GITypelib
 GITypeTag = GITypeTag
 GIUnionInfo = GIUnionInfo
 GIValueInfo = GIValueInfo
+GIError = GIError

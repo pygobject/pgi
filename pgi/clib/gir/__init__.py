@@ -25,6 +25,7 @@ from .gitypelib import GITypelib
 from .giunioninfo import GIUnionInfo
 from .giarginfo import GITransfer, GIDirection, GIScopeType, GIArgInfo
 from .gipropertyinfo import GIPropertyInfo
+from .error import GIError
 
 
 # pyflakes
@@ -65,3 +66,4 @@ GIDirection
 GIScopeType
 GIArgInfo
 GIPropertyInfo
+GIError

@@ -26,7 +26,7 @@ def build_docstring(cb_name, args):
 def generate_callback_wrapper(info):
     backend = get_backend("ctypes")()
 
-    args = info.get_args()
+    args = list(info.get_args())
     arg_types = [a.get_type() for a in args]
 
     ret_type = info.get_return_type()
@@ -141,7 +141,7 @@ def $cb_wrapper($dummy, $args):
 
 
 def generate_signal_callback(info):
-    args = info.get_args()
+    args = list(info.get_args())
     arg_types = [a.get_type() for a in args]
     backend = get_backend("ctypes")()
 

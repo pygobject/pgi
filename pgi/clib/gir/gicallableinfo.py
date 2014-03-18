@@ -24,7 +24,8 @@ _gir = find_library("girepository-1.0")
 class GICallableInfo(GIBaseInfo):
 
     def get_args(self):
-        return map(self.get_arg, xrange(self.n_args))
+        for i in xrange(self.n_args):
+            yield self.get_arg(i)
 
     def _get_repr(self):
         values = super(GICallableInfo, self)._get_repr()

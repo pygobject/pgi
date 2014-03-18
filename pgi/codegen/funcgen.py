@@ -222,7 +222,7 @@ def $func_name($func_args):
 
 
 def generate_function(info, method=False, throws=False):
-    arg_infos = info.get_args()
+    arg_infos = list(info.get_args())
     arg_types = [a.get_type() for a in arg_infos]
     return_type = info.get_return_type()
 
@@ -296,7 +296,7 @@ def generate_dummy_function(info, name, method=False):
 
     # FIXME: handle out args and trailing user_data ?
 
-    arg_infos = info.get_args()
+    arg_infos = list(info.get_args())
     arg_types = [a.get_type() for a in arg_infos]
     return_type = info.get_return_type()
 

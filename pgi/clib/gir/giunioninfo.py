@@ -25,7 +25,8 @@ class GIUnionInfo(GIRegisteredTypeInfo):
         return map(self.get_method, xrange(self.n_methods))
 
     def get_fields(self):
-        return map(self.get_field, xrange(self.n_fields))
+        for i in xrange(self.n_fields):
+            yield self.get_field(i)
 
     def _get_repr(self):
         values = super(GIUnionInfo, self)._get_repr()

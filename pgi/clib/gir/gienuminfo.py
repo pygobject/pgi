@@ -36,10 +36,12 @@ wrap_class(_gir, GIValueInfo, GIValueInfo, "g_value_info_", _methods)
 class GIEnumInfo(GIRegisteredTypeInfo):
 
     def get_values(self):
-        return map(self.get_value, xrange(self.n_values))
+        for i in xrange(self.n_values):
+            yield self.get_value(i)
 
     def get_methods(self):
-        return map(self.get_method, xrange(self.n_methods))
+        for i in xrange(self.n_methods):
+            yield self.get_method(i)
 
     def _get_repr(self):
         values = super(GIEnumInfo, self)._get_repr()

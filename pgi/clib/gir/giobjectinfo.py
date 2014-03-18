@@ -27,25 +27,32 @@ _gir = find_library("girepository-1.0")
 class GIObjectInfo(GIRegisteredTypeInfo):
 
     def get_methods(self):
-        return map(self.get_method, xrange(self.n_methods))
+        for i in xrange(self.n_methods):
+            yield self.get_method(i)
 
     def get_interfaces(self):
-        return map(self.get_interface, xrange(self.n_interfaces))
+        for i in xrange(self.n_interfaces):
+            yield self.get_interface(i)
 
     def get_properties(self):
-        return map(self.get_property, xrange(self.n_properties))
+        for i in xrange(self.n_properties):
+            yield self.get_property(i)
 
     def get_signals(self):
-        return map(self.get_signal, xrange(self.n_signals))
+        for i in xrange(self.n_signals):
+            yield self.get_signal(i)
 
     def get_vfuncs(self):
-        return map(self.get_vfunc, xrange(self.n_vfuncs))
+        for i in xrange(self.n_vfuncs):
+            yield self.get_vfunc(i)
 
     def get_fields(self):
-        return map(self.get_field, xrange(self.n_fields))
+        for i in xrange(self.n_fields):
+            yield self.get_field(i)
 
     def get_constants(self):
-        return map(self.get_constant, xrange(self.n_constants))
+        for i in xrange(self.n_constants):
+            yield self.get_constant(i)
 
     def _get_repr(self):
         values = super(GIObjectInfo, self)._get_repr()

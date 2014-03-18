@@ -5,13 +5,14 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from ctypes import POINTER, c_char_p, c_void_p
+from ctypes import POINTER, c_char_p, c_void_p, byref
 
-from ..glib import guint, gchar_p, GErrorPtr, gboolean, gint
-from ..glib import GSListPtr, GOptionGroupPtr, GListPtr
+from ..glib import guint, gchar_p, GErrorPtr, gboolean, gint, unpack_glist
+from ..glib import GSListPtr, GOptionGroupPtr, GListPtr, gerror
 from ..gobject import GType
 from .gibaseinfo import GIBaseInfo
 from .gitypelib import GITypelib
+from .error import GIError
 from ..ctypesutil import find_library, wrap_class
 
 _gir = find_library("girepository-1.0")
@@ -31,8 +32,8 @@ class GIRepositoryLoadFlags(guint):
 class GIRepository(c_void_p):
 
     def get_infos(self, namespace):
-        n_infos = self.get_n_infos(namespace)
-        return [self.get_info(namespace, i) for i in xrange(n_infos)]
+        for i in xrange(self.n_infos):
+            yield self.get_info(i)
 
     def get_info(self, *args):
         res = self._get_info(*args)
@@ -50,9 +51,18 @@ class GIRepository(c_void_p):
             return None
         return GIBaseInfo._cast(res)
 
+    def require(self, namespace, version, flags):
+        with gerror(GIError) as error:
+            return self._require(namespace, version, flags, error)
+
+    def enumerate_versions(self, namespace):
+        glist = self._enumerate_versions(namespace)
+        return unpack_glist(glist, c_char_p)
+
+
 _methods = [
     ("get_default", GIRepository, []),
-    ("require", GITypelib, [GIRepository, gchar_p, gchar_p,
+    ("_require", GITypelib, [GIRepository, gchar_p, gchar_p,
                             GIRepositoryLoadFlags,
                             POINTER(GErrorPtr)]),
     ("_find_by_name", GIBaseInfo,
@@ -78,7 +88,7 @@ _methods = [
     ("get_option_group", GOptionGroupPtr, [], True),
     ("get_c_prefix", gchar_p, [GIRepository, gchar_p]),
     ("dump", gboolean, [c_char_p, POINTER(GErrorPtr)]),
-    ("enumerate_versions", GListPtr, [GIRepository, gchar_p]),
+    ("_enumerate_versions", GListPtr, [GIRepository, gchar_p]),
 ]
 
 wrap_class(_gir, None, GIRepository, "g_irepository_", _methods)

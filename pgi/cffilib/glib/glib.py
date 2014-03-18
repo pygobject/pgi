@@ -42,22 +42,22 @@ class GQuark(object):
         return self._ptr
 
 
-@contextmanager
-def gerror():
-    error = ffi.new("GError**")
-    yield error
-    gerror = GError(error[0])
-    if gerror:
-        exc = GErrorError(gerror)
-        gerror.free()
-        raise exc
-
-
 class GErrorError(Exception):
     def __init__(self, gerror):
         super(GErrorError, self).__init__(gerror.message)
         self.domain = gerror.domain
         self.code = gerror.code
+
+
+@contextmanager
+def gerror(type_=GErrorError):
+    error = ffi.new("GError**")
+    yield error
+    gerror = GError(error[0])
+    if gerror:
+        exc = type_(gerror)
+        gerror.free()
+        raise exc
 
 
 @_compat.implements_bool

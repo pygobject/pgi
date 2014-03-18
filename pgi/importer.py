@@ -8,10 +8,8 @@
 """Provides a custom PEP-302 import hook to load GI libraries"""
 
 import sys
-from ctypes import c_char_p, byref
 
-from .clib.gir import GIRepository
-from .clib.glib import GErrorPtr
+from .clib.gir import GIRepository, GIError
 from . import const, module, util, overrides
 
 _versions = {}
@@ -41,8 +39,7 @@ def require_version(namespace, version):
         raise ValueError('Namespace %s already requires version %s' %
                          (namespace, _versions[namespace]))
 
-    version_glist = repo.enumerate_versions(namespace)
-    available_versions = util.glist_to_list(version_glist, c_char_p)
+    available_versions = repo.enumerate_versions(namespace)
     if not available_versions:
         raise ValueError('Namespace %s not available' % namespace)
 
@@ -98,13 +95,10 @@ class Importer(object):
         if fullname in sys.modules:
             return sys.modules[fullname]
 
-        error = GErrorPtr()
-        repository.require(namespace, version, 0, byref(error))
-        if error:
-            try:
-                raise ImportError(error.contents.message)
-            finally:
-                error.free()
+        try:
+            repository.require(namespace, version, 0)
+        except GIError as e:
+            raise ImportError(e.message)
 
         # No strictly needed here, but most things will fail during use
         library = repository.get_shared_library(namespace)

@@ -6,7 +6,9 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 import ctypes
-from ctypes import POINTER, Structure
+from ctypes import POINTER, Structure, cast
+from contextlib import contextmanager
+
 from .ctypesutil import wrap_class, find_library
 
 _glib = find_library("glib-2.0")
@@ -245,6 +247,42 @@ _methods = [
 
 wrap_class(_glib, GList, GListPtr, "g_list_", _methods)
 
+
+class GErrorError(Exception):
+
+    def __init__(self, gerror):
+        super(GErrorError, self).__init__(gerror.message)
+        self.domain = gerror.domain
+        self.code = gerror.code
+
+
+@contextmanager
+def gerror(type_=GErrorError):
+    error = GErrorPtr()
+    yield ctypes.byref(error)
+    if error:
+        exc = type_(error.contents)
+        error.free()
+        raise exc
+
+
+def unpack_glist(g, type_):
+    """Takes a glist, copies the values casted to type_ in to a list
+    and frees all items and the list.
+    """
+
+    values = []
+    item = g
+    while item:
+        ptr = item.contents.data
+        value = cast(ptr, type_).value
+        values.append(value)
+        free(ptr)
+        item = item.next()
+    g.free()
+    return values
+
+
 __all__ = ["gchar_p", "guint", "gpointer", "gint32", "guint32", "gint",
            "GQuark", "gboolean", "gint8", "guint8", "gint16", "guint16",
            "gint64", "guint64", "gfloat", "gdouble", "gshort", "gushort",
@@ -252,5 +290,5 @@ __all__ = ["gchar_p", "guint", "gpointer", "gint32", "guint32", "gint",
            "GError", "GErrorPtr", "free", "g_try_malloc0", "g_strdup",
            "GMappedFile", "GMappedFilePtr", "gconstpointer", "g_malloc0",
            "GOptionGroup", "GOptionGroupPtr", "gunichar",
-           "GSList", "GSListPtr",
+           "GSList", "GSListPtr", "GErrorError", "gerror", "unpack_glist",
            "GList", "GListPtr"]

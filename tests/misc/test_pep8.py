@@ -69,6 +69,18 @@ class TPEP8(unittest.TestCase):
         import gi.clib.gir
         self._run_package(gi.clib.gir)
 
-    def test_clib_gir(self):
-        import gi.clib.gir
-        self._run_package(gi.clib.gir)
+    def test_cffilib(self):
+        import gi.cffilib
+        self._run_package(gi.cffilib)
+
+    def test_cffilib_gir(self):
+        import gi.cffilib.gir
+        self._run_package(gi.cffilib.gir)
+
+    def test_cffilib_glib(self):
+        import gi.cffilib.glib
+        self._run_package(gi.cffilib.glib)
+
+    def test_cffilib_gobject(self):
+        import gi.cffilib.gobject
+        self._run_package(gi.cffilib.gobject)

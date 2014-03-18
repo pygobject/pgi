@@ -40,6 +40,7 @@ class GITypeTag(Enum):
     ERROR = 20
     UNICHAR = 21
 
+    @property
     def is_basic(self):
         return (self.value < self.ARRAY or self.value == self.UNICHAR)
 

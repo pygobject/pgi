@@ -28,6 +28,10 @@ def _create_enum_class(ffi, type_name, prefix):
     class _template(int):
         _map = {}
 
+        @property
+        def value(self):
+            return int(self)
+
         def __repr__(self):
             return "%s.%s" % (type(self).__name__,
                               self._map.get(self, "__UNKNOWN__"))

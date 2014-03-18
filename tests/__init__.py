@@ -94,8 +94,14 @@ def discover(base, dir_):
             loaded = __import__(mod)
 
         var = vars(loaded)
+
+        if "__all__" in var:
+            var = var["__all__"]
+
         for key in var:
             value = getattr(loaded, key)
+            if key.startswith("_"):
+                continue
             if not inspect.isclass(value):
                 continue
             if issubclass(value, unittest.TestCase):

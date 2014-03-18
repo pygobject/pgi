@@ -179,21 +179,6 @@ def array_to_list(array):
     return l
 
 
-def glist_to_list(g, type_):
-    """Takes a glist, copies the values casted to type_ in to a list
-    and frees all items and the list"""
-    values = []
-    item = g
-    while item:
-        ptr = item.contents.data
-        value = cast(ptr, type_).value
-        values.append(value)
-        free(ptr)
-        item = item.next()
-    g.free()
-    return values
-
-
 def import_attribute(namespace, name):
     mod = __import__(const.PREFIX[-1] + "." + namespace, fromlist=[name])
     try:
