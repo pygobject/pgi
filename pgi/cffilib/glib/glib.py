@@ -230,7 +230,7 @@ def unpack_glist(glist_ptr, cffi_type):
 
 
 def unpack_zeroterm_array(ptr):
-    """Converts a zero terminated array to a list and frees each element 
+    """Converts a zero terminated array to a list and frees each element
     and the list itself.
 
     If an item is returned all yielded before are invalid.
