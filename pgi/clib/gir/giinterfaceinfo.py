@@ -13,7 +13,7 @@ from .gicallableinfo import GIFunctionInfo, GISignalInfo, GIVFuncInfo
 from .giconstantinfo import GIConstantInfo
 from .gistructinfo import GIStructInfo
 from .giregisteredtypeinfo import GIRegisteredTypeInfo
-from ..ctypesutil import find_library, wrap_class
+from .._utils import find_library, wrap_class
 
 _gir = find_library("girepository-1.0")
 

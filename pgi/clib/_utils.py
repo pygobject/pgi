@@ -6,7 +6,7 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 import os
-from ctypes import cdll, c_void_p, c_size_t
+from ctypes import cdll, c_void_p, c_size_t, cast, POINTER
 
 
 if os.name == "nt":

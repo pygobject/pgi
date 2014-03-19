@@ -11,7 +11,7 @@ from ..glib import gint
 from .gibaseinfo import GIBaseInfo, GIInfoType
 from .gitypeinfo import GITypeInfo
 from .giargument import GIArgument
-from ..ctypesutil import find_library, wrap_class
+from .._utils import find_library, wrap_class
 
 _gir = find_library("girepository-1.0")
 

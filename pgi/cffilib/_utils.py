@@ -9,19 +9,6 @@
 import re
 
 
-def _unpack_zeroterm_char_array(ffi, ptr):
-    assert ptr
-
-    index = 0
-    current = ptr[index]
-    array = []
-    while current:
-        array.append(ffi.string(current))
-        index += 1
-        current = ptr[index]
-    return array
-
-
 def _create_enum_class(ffi, type_name, prefix):
     """Returns a new shiny class for the given enum type"""
 

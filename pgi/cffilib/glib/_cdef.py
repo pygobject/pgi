@@ -96,4 +96,6 @@ typedef struct _GList {
   struct _GList *next;
   struct _GList *prev;
 } GList;
+
+void g_list_free(GList *list);
 """

@@ -10,7 +10,7 @@ from ctypes import POINTER, Structure, CFUNCTYPE
 from .glib import Flags, gulong, gchar_p, guint, gboolean, gpointer, guint32
 from .glib import guint64, gchar, guchar, gint, glong, gint64, gfloat
 from .glib import gdouble
-from .ctypesutil import find_library, wrap_class
+from ._utils import find_library, wrap_class
 
 _gobject = find_library("gobject-2.0")
 

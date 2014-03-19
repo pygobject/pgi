@@ -27,7 +27,7 @@ def require_version(namespace, version):
 
     namespace = util.encode(namespace)
     version = util.encode(version)
-    namespaces = util.array_to_list(repo.get_loaded_namespaces())
+    namespaces = repo.get_loaded_namespaces()
 
     if namespace in namespaces:
         loaded_version = repo.get_version(namespace)

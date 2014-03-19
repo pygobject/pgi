@@ -6,7 +6,8 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from .. import glib
-from .. import _create_enum_class, _unpack_zeroterm_char_array
+from ..glib import unpack_zeroterm_array, unpack_glist
+from .. import _create_enum_class
 
 from ._ffi import ffi, lib
 from .gibaseinfo import GITypelib, GIBaseInfo
@@ -67,12 +68,11 @@ class GIRepository(object):
 
     def get_dependencies(self, namespace):
         res = lib.g_irepository_get_dependencies(self._ptr, namespace)
-        return _unpack_zeroterm_char_array(ffi, res)
+        return [ffi.string(p) for p in unpack_zeroterm_array(res)]
 
     def get_loaded_namespaces(self):
         res = lib.g_irepository_get_loaded_namespaces(self._ptr)
-        res = _unpack_zeroterm_char_array(ffi, res)
-        return res
+        return [ffi.string(p) for p in unpack_zeroterm_array(res)]
 
     def find_by_gtype(self, gtype):
         res = lib.g_irepository_find_by_gtype(self._ptr, gtype)
@@ -113,5 +113,4 @@ class GIRepository(object):
 
     def enumerate_versions(self, namespace):
         res = lib.g_irepository_enumerate_versions(self._ptr, namespace)
-        l = glib.GList(res)
-        return [ffi.string(e) for e in l._unpack("gchar*")]
+        return [ffi.string(p) for p in unpack_glist(res, "gchar*")]

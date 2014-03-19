@@ -8,7 +8,7 @@
 from ..glib import gchar_p
 from ..gobject import GType
 from .gibaseinfo import GIBaseInfo
-from ..ctypesutil import find_library, wrap_class
+from .._utils import find_library, wrap_class
 
 _gir = find_library("girepository-1.0")
 

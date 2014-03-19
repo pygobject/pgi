@@ -170,35 +170,32 @@ class GSList(object):
 
 class GList(object):
     def __init__(self, l):
-        self._ptr = l
+        self.ptr = l
 
     @property
     def data(self):
-        return self._ptr.data
+        return self.ptr.data
 
     @property
     def next(self):
-        n = self._ptr.next
+        n = self.ptr.next
         if n:
             return GList(n)
         return
 
     @property
     def prev(self):
-        n = self._ptr.prev
+        n = self.ptr.prev
         if n:
             return GList(n)
         return
 
+    def free(self):
+        lib.g_slist_free(self.ptr)
+
     def __repr__(self):
         return "<%s data=%r, next=%r>" % (
             type(self).__name__, self.data, self.next)
-
-    def _unpack(self, cffi_type):
-        current = self._ptr
-        while current:
-            yield ffi.cast(cffi_type, current.data)
-            current = current.next
 
 
 def malloc0(n_bytes):
@@ -215,3 +212,37 @@ def try_malloc0(n_bytes):
 
 def strdup(string):
     return lib.g_strdup(string)
+
+
+def unpack_glist(glist_ptr, cffi_type):
+    """Takes a glist ptr, copies the values casted to type_ in to a list
+    and frees all items and the list.
+
+    If an item is returned all yielded before are invalid.
+    """
+
+    current = glist_ptr
+    while current:
+        yield ffi.cast(cffi_type, current.data)
+        free(current.data)
+        current = current.next
+    lib.g_list_free(glist_ptr)
+
+
+def unpack_zeroterm_array(ptr):
+    """Converts a zero terminated array to a list and frees each element 
+    and the list itself.
+
+    If an item is returned all yielded before are invalid.
+    """
+
+    assert ptr
+
+    index = 0
+    current = ptr[index]
+    while current:
+        yield current
+        free(ffi.cast("gpointer", current))
+        index += 1
+        current = ptr[index]
+    free(ffi.cast("gpointer", ptr))

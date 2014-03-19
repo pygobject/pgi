@@ -7,12 +7,11 @@
 
 import keyword
 import re
-from ctypes import cast, POINTER, c_void_p, cdll
+from ctypes import cdll
 from ctypes.util import find_library
 
 from . import const
 from .clib.gir import GITypeTag, GIInfoType
-from .clib.glib import free
 
 
 def load_ctypes_library(name):
@@ -161,22 +160,6 @@ def set_gvalue_from_py(ptr, is_interface, tag, value):
             return False
 
     return True
-
-
-def array_to_list(array):
-    """Takes a null terminated array, copies the values into a list
-    and frees each value and the list"""
-    addrs = cast(array, POINTER(c_void_p))
-    l = []
-    i = 0
-    value = array[i]
-    while value:
-        l.append(value)
-        free(addrs[i])
-        i += 1
-        value = array[i]
-    free(addrs)
-    return l
 
 
 def import_attribute(namespace, name):

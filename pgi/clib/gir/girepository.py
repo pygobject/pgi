@@ -9,11 +9,12 @@ from ctypes import POINTER, c_char_p, c_void_p, byref
 
 from ..glib import guint, gchar_p, GErrorPtr, gboolean, gint, unpack_glist
 from ..glib import GSListPtr, GOptionGroupPtr, GListPtr, gerror
+from ..glib import unpack_nullterm_array
 from ..gobject import GType
 from .gibaseinfo import GIBaseInfo
 from .gitypelib import GITypelib
 from .error import GIError
-from ..ctypesutil import find_library, wrap_class
+from .._utils import find_library, wrap_class
 
 _gir = find_library("girepository-1.0")
 
@@ -59,6 +60,14 @@ class GIRepository(c_void_p):
         glist = self._enumerate_versions(namespace)
         return unpack_glist(glist, c_char_p)
 
+    def get_loaded_namespaces(self):
+        res = self._get_loaded_namespaces()
+        return unpack_nullterm_array(res)
+
+    def get_dependencies(self, namespace):
+        res = self._get_dependencies(namespace)
+        return unpack_nullterm_array(res)
+
 
 _methods = [
     ("get_default", GIRepository, []),
@@ -77,8 +86,8 @@ _methods = [
     ("require_private",
         GITypelib, [GIRepository, gchar_p, gchar_p, gchar_p,
                     GIRepositoryLoadFlags, POINTER(GErrorPtr)]),
-    ("get_dependencies", POINTER(gchar_p), [GIRepository, gchar_p]),
-    ("get_loaded_namespaces", POINTER(gchar_p), [GIRepository]),
+    ("_get_dependencies", POINTER(gchar_p), [GIRepository, gchar_p]),
+    ("_get_loaded_namespaces", POINTER(gchar_p), [GIRepository]),
     ("_find_by_gtype", GIBaseInfo, [GIRepository, GType], True),
     ("get_n_infos", gint, [GIRepository, gchar_p]),
     ("_get_info", GIBaseInfo, [GIRepository, gchar_p, gint], True),

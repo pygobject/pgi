@@ -8,7 +8,7 @@
 from ..glib import Enum, gboolean, gint
 from .gitypeinfo import GITypeInfo
 from .gibaseinfo import GIBaseInfo, GIInfoType
-from ..ctypesutil import find_library, wrap_class
+from .._utils import find_library, wrap_class
 
 _gir = find_library("girepository-1.0")
 

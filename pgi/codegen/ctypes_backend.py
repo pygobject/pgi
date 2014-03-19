@@ -12,7 +12,7 @@ from .backend import Backend
 from .utils import CodeBlock, parse_with_objects, VariableFactory
 
 from pgi.clib import glib
-from pgi.clib.ctypesutil import find_library
+from pgi.clib import find_library
 from pgi.clib.gir import GIStructInfo
 from pgi.clib.gir import GIRepository, GITypeTag, GIInfoType, GIArrayType
 from pgi.clib.glib import gboolean, gpointer, guint, guint32, GErrorPtr, gint8

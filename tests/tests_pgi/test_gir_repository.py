@@ -26,6 +26,18 @@ class _GIRepoTest(unittest.TestCase):
         self.assertEqual(repo.enumerate_versions("Foobar999"), [])
         self.assertTrue("2.0" in repo.enumerate_versions("GObject"))
 
+    def test_get_loaded_namespaces(self):
+        repo = self.GIRepository.get_default()
+        repo.require("GObject", "2.0", 0)
+        res = repo.get_loaded_namespaces()
+        self.assertTrue(isinstance(res, list))
+        self.assertTrue("GObject" in res)
+
+    def test_get_dependencies(self):
+        repo = self.GIRepository.get_default()
+        repo.require("GObject", "2.0", 0)
+        self.assertEqual(repo.get_dependencies("GObject"), ["GLib-2.0"])
+
 
 class GIRepoTestCTypes(_GIRepoTest):
     from pgi.clib.gir import GIRepository

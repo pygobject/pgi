@@ -9,7 +9,7 @@ from ..gobject import GParamFlags
 from .gibaseinfo import GIBaseInfo
 from .gitypeinfo import GITypeInfo, GIInfoType
 from .giarginfo import GITransfer
-from ..ctypesutil import find_library, wrap_class
+from .._utils import find_library, wrap_class
 
 _gir = find_library("girepository-1.0")
 

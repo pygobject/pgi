@@ -8,7 +8,7 @@
 from ctypes import POINTER, c_char_p, cast, c_void_p
 
 from ..glib import gchar_p, Enum, gboolean
-from ..ctypesutil import wrap_class, find_library
+from .._utils import wrap_class, find_library
 from .gitypelib import GITypelib
 
 _gir = find_library("girepository-1.0")
