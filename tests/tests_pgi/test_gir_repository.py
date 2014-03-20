@@ -58,7 +58,11 @@ class _GIRepoTest(unittest.TestCase):
 
     def test_prepend_library_path(self):
         repo = self.GIRepository.get_default()
-        repo.prepend_library_path("/nope")
+        try:
+            repo.prepend_library_path("/nope")
+        except AttributeError:
+            # too old libgirepository
+            pass
 
     def test_find_by_name(self):
         repo = self.GIRepository.get_default()
