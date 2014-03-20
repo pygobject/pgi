@@ -9,7 +9,7 @@ from ctypes import byref
 import sys
 sys.path.insert(0, '..')
 
-from pgi.clib.gir import GIRepository, GIRepositoryLoadFlags, GIFunctionInfoPtr
+from pgi.clib.gir import GIRepository, GIRepositoryLoadFlags
 from pgi.clib.gir import GIArgument
 from pgi.clib.glib import GErrorPtr
 from pgi.clib.gobject import g_type_init
@@ -17,11 +17,7 @@ from pgi.clib.gobject import g_type_init
 g_type_init()
 
 repo = GIRepository.get_default()
-
-error = GErrorPtr()
-repo.require("GLib", "2.0", GIRepositoryLoadFlags.LAZY, byref(error))
-if error:
-    raise Exception(error.contents.message)
+repo.require("GLib", "2.0", GIRepositoryLoadFlags.LAZY)
 
 function_info = repo.find_by_name("GLib", "warn_message")
 if not function_info:
