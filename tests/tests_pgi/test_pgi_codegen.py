@@ -7,8 +7,12 @@
 
 import unittest
 
+from pgi._compat import StringIO
 from pgi.codegen.funcgen import get_type_name
 from pgi.codegen.utils import VariableFactory
+from pgi.codegen.utils import CodeBlock, parse_code, parse_with_objects
+
+from pgi.repository import Gtk
 
 
 class TPGICodegen(unittest.TestCase):
@@ -19,8 +23,6 @@ class TPGICodegen(unittest.TestCase):
         self.assertEqual(get_type_name(list), "list")
         self.assertEqual(get_type_name("foo"), "foo")
 
-        from pgi.repository import Gtk
-
         self.assertEqual(get_type_name(Gtk.Window), "Gtk.Window")
         self.assertEqual(get_type_name([Gtk.Window]), "[Gtk.Window]")
         self.assertEqual(get_type_name({int: Gtk.Window}), "{int: Gtk.Window}")
@@ -29,6 +31,46 @@ class TPGICodegen(unittest.TestCase):
         x = {int: int}
         self.assertEqual(get_type_name(x), "{int: int}")
         self.assertEqual(get_type_name(x), "{int: int}")
+
+    def test_parse_with_objects(self):
+        some_obj = object()
+        some_int = 42
+        block, mapping = parse_with_objects(
+            "$foo=$bar", lambda *x: "X", foo=some_obj, bar=some_int)
+
+        self.assertEqual(str(block), "X=42")
+        self.assertEqual(block.get_dependencies().items(), [("X", some_obj)])
+
+    def test_codeblock(self):
+        a = CodeBlock("foo")
+        self.assertEqual(str(a), "foo")
+        a.write_lines(["1", "2"], 0)
+        self.assertEqual(str(a), "foo\n1\n2")
+
+    def test_codeblock_deps(self):
+        a = CodeBlock()
+        a.add_dependency("a", object())
+        self.assertRaises(ValueError, a.add_dependency, "a", object())
+
+    def test_codeblock_print(self):
+        f = StringIO()
+        a = CodeBlock()
+        a.write_line("abc")
+        a.pprint(f)
+        self.assertEqual(f.getvalue(), "abc")
+
+    def test_parse_codeblock(self):
+        b = CodeBlock()
+        b.add_dependency("test", "blah")
+        b.write_line("if 1:")
+        b.write_line("do()", 1)
+        n, v = parse_code("""
+if 2:
+    $doit
+""", None, doit=b)
+
+        self.assertEqual(str(n), "if 2:\n    if 1:\n        do()")
+        self.assertTrue("test" in n.get_dependencies())
 
 
 class TVariableFactory(unittest.TestCase):

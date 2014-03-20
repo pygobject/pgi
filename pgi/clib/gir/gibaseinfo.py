@@ -23,7 +23,7 @@ _methods = [
     ("to_string", gchar_p, [GIInfoType]),
 ]
 
-wrap_class(_gir, GIInfoType, None, "g_info_type_", _methods)
+wrap_class(_gir, GIInfoType, GIInfoType, "g_info_type_", _methods)
 
 
 class GIAttributeIter(c_void_p):
@@ -69,6 +69,12 @@ class GIBaseInfo(c_void_p):
     def __del__(self):
         if self and self._unref:
             self.unref()
+
+    def __eq__(self, other):
+        return self.equal(other)
+
+    def __neq__(self, other):
+        return not self.equal(other)
 
     def __repr__(self):
         l = ", ".join(("%s=%s" % v for v in sorted(self._get_repr().items())))

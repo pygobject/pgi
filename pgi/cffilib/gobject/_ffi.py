@@ -18,9 +18,9 @@ ffi.include(glib.ffi)
 ffi.cdef(GOBJECT_CDEF)
 
 if sys.platform == 'win32':
-    lib = ffi.dlopen("libglib-2.0-0.dll")
+    lib = ffi.dlopen("libgobject-2.0-0.dll")
 else:
-    lib = ffi.dlopen("libglib-2.0.so.0")
+    lib = ffi.dlopen("libgobject-2.0.so.0")
 
 
 __all__ = ["ffi", "lib"]

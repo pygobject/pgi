@@ -54,13 +54,13 @@ class _GIInfoTest(unittest.TestCase):
         self.failUnlessEqual(e.type_name, b"GtkExpander")
         self.failUnlessEqual(e.type_init, b"gtk_expander_get_type")
 
-        e.get_methods()
-        e.get_fields()
-        e.get_interfaces()
-        e.get_properties()
-        e.get_signals()
-        e.get_vfuncs()
-        e.get_constants()
+        list(e.get_methods())
+        list(e.get_fields())
+        list(e.get_interfaces())
+        list(e.get_properties())
+        list(e.get_signals())
+        list(e.get_vfuncs())
+        list(e.get_constants())
 
     def test_enuminfo(self):
         t = self._get_gtk(b"WindowType")
@@ -128,12 +128,12 @@ class _GIInfoTest(unittest.TestCase):
         self.assertTrue(isinstance(i, self.gir.GIInterfaceInfo))
         repr(i)
 
-        i.get_methods()
-        i.get_properties()
-        i.get_signals()
-        i.get_constants()
-        i.get_prerequisites()
-        i.get_vfuncs()
+        list(i.get_methods())
+        list(i.get_properties())
+        list(i.get_signals())
+        list(i.get_constants())
+        list(i.get_prerequisites())
+        list(i.get_vfuncs())
 
     def test_propertyinfo(self):
         e = self._get_gtk(b"Expander")
@@ -163,9 +163,22 @@ class _GIInfoTest(unittest.TestCase):
         self.failUnless(self.gir.GITypeTag(21).is_basic)
         self.failUnless(self.gir.GITypeTag(10).is_basic)
 
+    def test_infotype(self):
+        c = self._get_gtk(b"Expander")
+        self.assertTrue(isinstance(c.type, self.gir.GIInfoType))
+        self.assertEqual(c.type.string, "object")
+
+    def test_equal_info(self):
+        a = self._get_gtk(b"Expander")
+        b = self._get_gtk(b"Expander")
+        self.assertEqual(a, b)
+        c = self._get_gtk(b"Editable")
+        self.assertNotEqual(a, c)
+
 
 class GIInfoCTypesTest(_GIInfoTest):
     from pgi.clib import gir
+    gir
 
     def test_vfuncinfo(self):
         i = self._get_gtk(b"Editable")
@@ -184,3 +197,4 @@ class GIInfoCTypesTest(_GIInfoTest):
 
 class GIInfoCFFITest(_GIInfoTest):
     from pgi.cffilib import gir
+    gir

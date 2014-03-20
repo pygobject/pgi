@@ -16,8 +16,10 @@ if PY2:
         del cls.__bool__
         return cls
     integer_types = (int, long)
+    long = long
     xrange = xrange
 elif PY3:
     implements_bool = lambda x: x
     integer_types = (int,)
+    long = int
     xrange = lambda *x: iter(range(*x))

@@ -214,7 +214,7 @@ def strdup(string):
     return lib.g_strdup(string)
 
 
-def unpack_glist(glist_ptr, cffi_type):
+def unpack_glist(glist_ptr, cffi_type, transfer_full=True):
     """Takes a glist ptr, copies the values casted to type_ in to a list
     and frees all items and the list.
 
@@ -224,9 +224,11 @@ def unpack_glist(glist_ptr, cffi_type):
     current = glist_ptr
     while current:
         yield ffi.cast(cffi_type, current.data)
-        free(current.data)
+        if transfer_full:
+            free(current.data)
         current = current.next
-    lib.g_list_free(glist_ptr)
+    if transfer_full:
+        lib.g_list_free(glist_ptr)
 
 
 def unpack_zeroterm_array(ptr):

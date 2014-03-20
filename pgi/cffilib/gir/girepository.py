@@ -36,7 +36,9 @@ class GIRepository(object):
 
     @classmethod
     def get_search_path(cls):
-        return glib.GSList(lib.g_irepository_get_search_path())
+        res = lib.g_irepository_get_search_path()
+        return [ffi.string(p) for p in unpack_glist(res, "gchar*",
+                                                    transfer_full=False)]
 
     def is_registered(self, namespace, version):
         return bool(lib.g_irepository_is_registered(self._ptr,
@@ -105,11 +107,6 @@ class GIRepository(object):
         res = lib.g_irepository_get_c_prefix(self._ptr, namespace)
         if res:
             return ffi.string(res)
-
-    def dump(self, arg):
-        with glib.gerror(GIError) as error:
-            res = lib.g_irepository_dump(arg, error)
-        return bool(res)
 
     def enumerate_versions(self, namespace):
         res = lib.g_irepository_enumerate_versions(self._ptr, namespace)

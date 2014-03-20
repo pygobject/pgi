@@ -6,7 +6,8 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from ._ffi import ffi
-from .gobject import GParamFlags
+from .gobject import GParamFlags, GType
 
 GParamFlags = GParamFlags
 ffi = ffi
+GType

@@ -18,14 +18,15 @@ def _g_info_type_to_string(self):
     res = lib.g_info_type_to_string(self)
     return ffi.string(res)
 
-GIInfoType.to_string = _g_info_type_to_string
+GIInfoType.string = property(_g_info_type_to_string)
 
 
 class GIBaseInfo(object):
     __types = {}
 
-    def __init__(self, ptr):
+    def __init__(self, ptr, unref=True):
         self._ptr = ptr
+        self._unref = unref
 
     @classmethod
     def _register(cls, info_type):
@@ -67,7 +68,7 @@ class GIBaseInfo(object):
     def is_deprecated(self):
         return bool(lib.g_base_info_is_deprecated(self._ptr))
 
-    def get_attribue(self, name):
+    def get_attribute(self, name):
         res = lib.g_base_info_get_attribute(self._ptr, name)
         if res:
             return ffi.string(res)
@@ -100,3 +101,7 @@ class GIBaseInfo(object):
     def __repr__(self):
         return "<%s namespace=%r name=%r>" % (
             type(self).__name__, self.namespace, self.name)
+
+    def __del__(self):
+        if self._ptr and self._unref:
+            self.unref()

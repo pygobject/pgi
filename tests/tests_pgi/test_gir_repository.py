@@ -5,6 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
+import os
 import unittest
 
 
@@ -12,6 +13,8 @@ class _GIRepoTest(unittest.TestCase):
 
     GIRepository = None
     GIError = None
+    gir = None
+    gobject = None
 
     def test_repository(self):
         repo = self.GIRepository.get_default()
@@ -20,6 +23,16 @@ class _GIRepoTest(unittest.TestCase):
     def test_require_invalid(self):
         repo = self.GIRepository.get_default()
         self.assertRaises(self.GIError, repo.require, b"Gtk", b"999.0", 0)
+
+    def test_require_latest(self):
+        repo = self.GIRepository.get_default()
+        repo.require("GObject", None, 0)
+
+    def test_require_private_latest(self):
+        repo = self.GIRepository.get_default()
+        # require first, so require_private doesn't do anything
+        repo.require("GObject", "2.0", 0)
+        repo.require_private("/nope", "GObject", None, 0)
 
     def test_enumerate_versions(self):
         repo = self.GIRepository.get_default()
@@ -38,12 +51,85 @@ class _GIRepoTest(unittest.TestCase):
         repo.require("GObject", "2.0", 0)
         self.assertEqual(repo.get_dependencies("GObject"), ["GLib-2.0"])
 
+    def test_search_path(self):
+        repo = self.GIRepository.get_default()
+        repo.prepend_search_path("/nope")
+        self.assertEqual(repo.get_search_path()[0], "/nope")
+
+    def test_prepend_library_path(self):
+        repo = self.GIRepository.get_default()
+        repo.prepend_library_path("/nope")
+
+    def test_find_by_name(self):
+        repo = self.GIRepository.get_default()
+        repo.require("GObject", "2.0", 0)
+        res = repo.find_by_name("GObject", "Object")
+        self.assertTrue(isinstance(res, self.gir.GIObjectInfo))
+
+        res = repo.find_by_name("GObject", "Foobar")
+        self.assertTrue(res is None)
+
+    def test_find_by_gtype(self):
+        repo = self.GIRepository.get_default()
+        repo.require("GObject", "2.0", 0)
+        gtype = self.gobject.GType.from_name("GObject")
+        self.assertTrue(gtype)
+        res = repo.find_by_gtype(gtype)
+        self.assertTrue(isinstance(res, self.gir.GIObjectInfo))
+
+    def test_is_registered(self):
+        repo = self.GIRepository.get_default()
+        repo.require("GObject", "2.0", 0)
+        res = repo.is_registered("GObject", "2.0")
+        self.assertTrue(res)
+        res = repo.is_registered("Foobar", "2.0")
+        self.assertFalse(res)
+
+    def test_get_n_infos(self):
+        repo = self.GIRepository.get_default()
+        repo.require("GObject", "2.0", 0)
+        self.assertTrue(repo.get_n_infos("GObject") > 10)
+
+    def test_get_info(self):
+        repo = self.GIRepository.get_default()
+        repo.require("GObject", "2.0", 0)
+        res = repo.get_info("GObject", 0)
+        self.assertTrue(isinstance(res, self.gir.GIBaseInfo))
+
+    def test_get_typelib_path(self):
+        repo = self.GIRepository.get_default()
+        repo.require("GObject", "2.0", 0)
+        self.assertTrue(os.path.exists(repo.get_typelib_path("GObject")))
+
+        self.assertTrue(repo.get_typelib_path("NopeNope") is None)
+
+    def test_get_shared_library(self):
+        repo = self.GIRepository.get_default()
+        repo.require("GObject", "2.0", 0)
+        self.assertTrue("gobject" in repo.get_shared_library("GObject"))
+
+    def test_get_version(self):
+        repo = self.GIRepository.get_default()
+        repo.require("GObject", "2.0", 0)
+        self.assertEqual(repo.get_version("GObject"), "2.0")
+
+    def test_get_c_prefix(self):
+        repo = self.GIRepository.get_default()
+        repo.require("GObject", "2.0", 0)
+        self.assertEqual(repo.get_c_prefix("GObject"), "G")
+
 
 class GIRepoTestCTypes(_GIRepoTest):
+    from pgi.clib import gir, gobject
     from pgi.clib.gir import GIRepository
     from pgi.clib.gir import GIError
 
+    GIRepository, GIError, gir, gobject
+
 
 class GIRepoTestCFFI(_GIRepoTest):
+    from pgi.cffilib import gir, gobject
     from pgi.cffilib.gir import GIRepository
     from pgi.cffilib.gir import GIError
+
+    GIRepository, GIError, gir, gobject

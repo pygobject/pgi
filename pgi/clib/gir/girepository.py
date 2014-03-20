@@ -56,6 +56,11 @@ class GIRepository(c_void_p):
         with gerror(GIError) as error:
             return self._require(namespace, version, flags, error)
 
+    def require_private(self, typelib_dir, namespace, version, flags):
+        with gerror(GIError) as error:
+            return self._require_private(
+                typelib_dir, namespace, version, flags, error)
+
     def enumerate_versions(self, namespace):
         glist = self._enumerate_versions(namespace)
         return unpack_glist(glist, c_char_p)
@@ -68,6 +73,10 @@ class GIRepository(c_void_p):
         res = self._get_dependencies(namespace)
         return unpack_nullterm_array(res)
 
+    def get_search_path(self):
+        res = self._get_search_path()
+        return unpack_glist(res, c_char_p, transfer_full=False)
+
 
 _methods = [
     ("get_default", GIRepository, []),
@@ -78,12 +87,13 @@ _methods = [
      [GIRepository, gchar_p, gchar_p], True),
     ("get_version", gchar_p, [GIRepository, gchar_p]),
     ("prepend_search_path", None, [c_char_p]),
-    ("get_search_path", GSListPtr, []),
+    ("prepend_library_path", None, [c_char_p]),
+    ("_get_search_path", GSListPtr, []),
     ("load_typelib", c_char_p,
         [GIRepository, GITypelib, GIRepositoryLoadFlags,
          POINTER(GErrorPtr)]),
     ("is_registered", gboolean, [GIRepository, gchar_p, gchar_p]),
-    ("require_private",
+    ("_require_private",
         GITypelib, [GIRepository, gchar_p, gchar_p, gchar_p,
                     GIRepositoryLoadFlags, POINTER(GErrorPtr)]),
     ("_get_dependencies", POINTER(gchar_p), [GIRepository, gchar_p]),
@@ -96,7 +106,6 @@ _methods = [
     ("get_version", gchar_p, [GIRepository, gchar_p]),
     ("get_option_group", GOptionGroupPtr, [], True),
     ("get_c_prefix", gchar_p, [GIRepository, gchar_p]),
-    ("dump", gboolean, [c_char_p, POINTER(GErrorPtr)]),
     ("_enumerate_versions", GListPtr, [GIRepository, gchar_p]),
 ]
 
