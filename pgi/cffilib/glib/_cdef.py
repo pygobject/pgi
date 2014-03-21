@@ -28,7 +28,6 @@ typedef unsigned int guint;
 typedef unsigned long gulong;
 typedef unsigned short gushort;
 typedef intptr_t gpointer;
-typedef gulong GType;
 typedef signed long gssize;
 
 // utility functions
