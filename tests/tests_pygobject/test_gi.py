@@ -27,7 +27,7 @@ except ImportError:
 import gi
 from gi.repository import GObject, GLib, Gio
 
-from compathelper import _bytes, _unicode
+from .compathelper import _bytes, _unicode
 
 if sys.version_info < (3, 0):
     CONSTANT_UTF8 = "const \xe2\x99\xa5 utf8"

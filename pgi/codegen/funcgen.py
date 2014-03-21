@@ -12,6 +12,7 @@ from .utils import CodeBlock
 from pgi.util import escape_identifier
 from .arguments import get_argument_class, ErrorArgument
 from .returnvalues import get_return_class
+from pgi._compat import string_types
 
 
 def get_type_name(type_):
@@ -26,7 +27,7 @@ def get_type_name(type_):
     if type_ is None:
         raise TypeError
 
-    if isinstance(type_, basestring):
+    if isinstance(type_, string_types):
         return type_
     elif isinstance(type_, list):
         assert len(type_) == 1
@@ -35,7 +36,7 @@ def get_type_name(type_):
         assert len(type_) == 1
         key, value = type_.items()[0]
         return "{%s: %s}" % (get_type_name(key), get_type_name(value))
-    elif type_.__module__ in "__builtin__":
+    elif type_.__module__ in ("__builtin__", "builtins"):
         return type_.__name__
     else:
         return "%s.%s" % (type_.__module__, type_.__name__)

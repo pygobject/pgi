@@ -112,6 +112,9 @@ def wrap_class(lib, base, ptr, prefix, methods):
         else:
             name, ret, args, unref = method
 
+        # _get_name -> _name
+        # _get_version(*args) -> _get_version(*args)
+
         attr_name = name
         if name[:1] == "_":
             name = name[1:]
@@ -128,10 +131,13 @@ def wrap_class(lib, base, ptr, prefix, methods):
                 is_pointer = False
             is_void = ret is None
             if len(args) == 1 and not is_void and not is_pointer:
-                if attr_name.startswith("get_"):
-                    attr_name = attr_name[4:]
-                elif attr_name.startswith("to_"):
-                    attr_name = attr_name[3:]
+                is_override = attr_name.startswith("_")
+                if name.startswith("get_"):
+                    attr_name = name.split("_", 1)[-1]
+                elif name.startswith("to_"):
+                    attr_name = name.split("_", 1)[-1]
+                if is_override:
+                    attr_name = "_" + attr_name
                 # e.g. conflict with ctypes "contents", "value" attribute
                 while hasattr(ptr, attr_name):
                     attr_name += "_"

@@ -16,6 +16,7 @@ from .giarginfo import GITransfer, GIArgInfo
 from .gipropertyinfo import GIPropertyInfo
 from .giargument import GIArgument
 from .._utils import find_library, wrap_class
+from .._compat import xrange, PY3
 
 _gir = find_library("girepository-1.0")
 
@@ -26,6 +27,12 @@ class GICallableInfo(GIBaseInfo):
     def get_args(self):
         for i in xrange(self.n_args):
             yield self.get_arg(i)
+
+    @property
+    def symbol(self):
+        if PY3:
+            return self._symbol.decode("ascii")
+        return self._symbol
 
     def _get_repr(self):
         values = super(GICallableInfo, self)._get_repr()
@@ -121,7 +128,7 @@ wrap_class(_gir, GICallableInfo, GICallableInfo,
            "g_callable_info_", _methods)
 
 _methods = [
-    ("get_symbol", gchar_p, [GIFunctionInfo]),
+    ("_get_symbol", gchar_p, [GIFunctionInfo]),
     ("get_flags", GIFunctionInfoFlags, [GIFunctionInfo]),
     ("get_property", GIPropertyInfo, [GIFunctionInfo], True),
     ("get_vfunc", GIVFuncInfo, [GIFunctionInfo], True),

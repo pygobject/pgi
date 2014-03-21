@@ -12,6 +12,7 @@ from .clib.glib import gint
 from .gtype import PGType
 from .util import cached_property, escape_identifier
 from .obj import add_method
+from ._compat import integer_types
 
 
 class EnumBase(int):
@@ -41,7 +42,7 @@ class _EnumClass(EnumBase):
         return enum_value.value_name
 
     def __new__(cls, value):
-        if not isinstance(value, (long, int)):
+        if not isinstance(value, integer_types):
             raise TypeError("int expected, got %r instead" % type(value))
         instance = EnumBase.__new__(cls, value)
         if value in cls._allowed:
@@ -106,7 +107,7 @@ class _FlagsClass(FlagsBase):
         return (self.value_names and self.value_names[0]) or None
 
     def __new__(cls, value):
-        if not isinstance(value, (long, int)):
+        if not isinstance(value, integer_types):
             raise TypeError("int expected, got %r instead" % type(value))
         return FlagsBase.__new__(cls, value)
 

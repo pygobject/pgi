@@ -22,7 +22,7 @@ class _GIRepoTest(unittest.TestCase):
 
     def test_require_invalid(self):
         repo = self.GIRepository.get_default()
-        self.assertRaises(self.GIError, repo.require, b"Gtk", b"999.0", 0)
+        self.assertRaises(self.GIError, repo.require, "Gtk", "999.0", 0)
 
     def test_require_latest(self):
         repo = self.GIRepository.get_default()

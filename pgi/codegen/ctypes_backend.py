@@ -1,4 +1,4 @@
-# Copyright 2012,2013 Christoph Reiter
+# Copyright 2012-2014 Christoph Reiter
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -119,6 +119,13 @@ class BaseType(object):
 
     def var(self):
         return self._gen.var()
+
+    def __getattr__(self, attr):
+        if attr.endswith(("_py2", "_py3")):
+            raise AttributeError(attr)
+        if _compat.PY3:
+            return getattr(self, attr + "_py3")
+        return getattr(self, attr + "_py2")
 
     @classmethod
     def get_class(cls, type_):
@@ -593,10 +600,10 @@ class Object(BaseInterface):
     def check(self, name):
         if self.may_be_null:
             return self.parse("""
-if $obj is not $_.None and not $_.isinstance($obj, $type_class):
+if $obj is not $none and not $_.isinstance($obj, $type_class):
     raise TypeError("argument $obj: Expected %s, got %s" %
                     ($type_class.__name__, $obj.__class__.__name__))
-""", obj=name, type_class=self._import_type())["obj"]
+""", obj=name, type_class=self._import_type(), none=None)["obj"]
 
         return self.parse("""
 if not $_.isinstance($obj, $type_class):
@@ -748,8 +755,8 @@ class Error(BaseType):
 if $gerror_ptr:
     $out = $PGError($gerror_ptr.contents)
 else:
-    $out = $_.None
-""", gerror_ptr=name, PGError=PGError)
+    $out = $none
+""", gerror_ptr=name, PGError=PGError, none=None)
 
         return var["out"]
 
@@ -774,7 +781,26 @@ if $ptr:
 class Utf8(BaseType):
     GI_TYPE_TAG = GITypeTag.UTF8
 
-    def check(self, name):
+    def check_py3(self, name):
+        if self.may_be_null:
+            return self.parse("""
+if $value is not None:
+    if not $_.isinstance($value, $_.str):
+        raise $_.TypeError("%r not a string or None" % $value)
+    else:
+        $string = $value
+else:
+    $string = None
+""", value=name)["string"]
+
+        return self.parse("""
+if not isinstance($value, $_.str):
+    raise $_.TypeError("%r not a string" % $value)
+else:
+    $string = $value
+""", value=name)["string"]
+
+    def check_py2(self, name):
         if self.may_be_null:
             return self.parse("""
 if $value is not None:
@@ -797,11 +823,22 @@ else:
     $string = $value
 """, value=name)["string"]
 
-    def pack_in(self, name):
+    def pack_in_py2(self, name):
         return name
 
-    def pack(self, name):
+    def pack_in_py3(self, name):
         return self.parse("""
+$encoded = $value.encode("utf-8")
+""", value=name)["encoded"]
+
+    def pack_py2(self, name):
+        return self.parse("""
+$c_value = $ctypes.c_char_p($value)
+""", value=name)["c_value"]
+
+    def pack_py3(self, name):
+        return self.parse("""
+$value = $value.encode("utf-8")
 $c_value = $ctypes.c_char_p($value)
 """, value=name)["c_value"]
 
@@ -810,19 +847,34 @@ $c_value = $ctypes.c_char_p($value)
 if $ptr:
     $ptr_cpy = $ctypes.c_char_p($glib.g_strdup($ptr))
 else:
-    $ptr_cpy = $_.None
-""", ptr=name, glib=glib)
+    $ptr_cpy = $none
+""", ptr=name, glib=glib, none=None)
 
         return var["ptr_cpy"]
 
-    def unpack(self, name):
+    def pre_unpack(self, c_value):
         return self.parse("""
 $value = $ctypes_value.value
+""", ctypes_value=c_value)["value"]
+
+    def unpack_py2(self, name):
+        return self.parse("""
+$value = $ctypes_value
 """, ctypes_value=name)["value"]
 
-    def unpack_return(self, name):
+    def unpack_py3(self, name):
+        return self.parse("""
+$value = $ctypes_value.decode("utf-8")
+""", ctypes_value=name, none=None)["value"]
+
+    def unpack_return_py2(self, name):
         return self.parse("""
 $str_value = $ctypes.c_char_p($value).value
+""", value=name)["str_value"]
+
+    def unpack_return_py3(self, name):
+        return self.parse("""
+$str_value = $ctypes.c_char_p($value).value.decode("utf-8")
 """, value=name)["str_value"]
 
     def new(self):

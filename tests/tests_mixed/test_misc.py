@@ -96,6 +96,7 @@ class MiscTest(unittest.TestCase):
     def test_gerror(self):
         self.assertTrue(issubclass(GLib.GError, RuntimeError))
 
+    @unittest.skipIf(_compat.PY3, "py3")
     def test_param_flags_32_64(self):
         if sys.maxint == 2**31-1:
             self.assertEqual(int(GObject.ParamFlags.DEPRECATED), -2147483648)

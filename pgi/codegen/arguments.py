@@ -559,7 +559,7 @@ class Utf8Argument(GIArgument):
             return
 
         var = self.get_type()
-        self.out_var = var.unpack(self._data)
+        self.out_var = var.unpack(var.pre_unpack(self._data))
         if self.transfer_everything():
             var.free(self._data)
         return var.block

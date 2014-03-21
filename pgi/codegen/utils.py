@@ -145,7 +145,6 @@ class CodeBlock(object):
 
     def __str__(self):
         lines = []
-
         for line, level in self._lines:
             lines.append(" " * self.INDENTATION * level + line)
         return "\n".join(lines)
@@ -181,7 +180,7 @@ def parse_code(code, var_factory, **kwargs):
                 indent = spaces
                 level = 1
             else:
-                level = spaces / indent
+                level = spaces // indent
         else:
             level = 0
 
@@ -208,16 +207,21 @@ def parse_with_objects(code, var, **kwargs):
 
     deps = {}
     for key, value in kwargs.items():
-        if isinstance(value, (int, long)):
+        if isinstance(value, _compat.integer_types):
             value = str(value)
 
-        if not isinstance(value, (basestring, CodeBlock)):
+        if _compat.PY3:
+            if value is None:
+                value = str(value)
+
+        if not isinstance(value, _compat.string_types) and \
+                not isinstance(value, CodeBlock):
             new_var = var(value)
             deps[new_var] = value
             kwargs[key] = new_var
 
     block, var = parse_code(code, var, **kwargs)
-    for key, dep in deps.iteritems():
+    for key, dep in _compat.iteritems(deps):
         block.add_dependency(key, dep)
 
     return block, var

@@ -61,7 +61,7 @@ def load(namespace, module):
         # FIXME!!! we need a real non-override module somewhere
 
         proxy = get_introspection_module(namespace)
-        for name, klass in _overrides[-1].iteritems():
+        for name, klass in _compat.iteritems(_overrides[-1]):
             setattr(proxy, name, klass)
 
         # add all objects referenced in __all__ to the original module

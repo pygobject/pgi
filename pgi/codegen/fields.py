@@ -191,7 +191,7 @@ class Utf8Field(Field):
 
     def get(self, name):
         var = self.backend.get_type(self.type)
-        out = var.unpack(name)
+        out = var.unpack(var.pre_unpack(name))
         return var.block, out
 
     def set(self, name, value_name):
