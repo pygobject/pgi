@@ -281,19 +281,12 @@ class CFFIBackend(Backend):
             self._libs[namespace] = self._ffi.dlopen(path)
         return self._libs[namespace]
 
-    def get_function(self, lib, symbol, args, ret,
-                     method=False, self_name="", throws=False):
-
+    def get_function(self, lib, symbol, args, ret, method=False, throws=False):
         block = CodeBlock()
         cdef_types = []
 
         if method:
             cdef_types.append("gpointer")
-            self_block, var = self.parse("""
-$new_self = $sself._obj
-""", sself=self_name)
-
-            self_block.write_into(block)
 
         for arg in args:
             cdef_types.append(typeinfo_to_cffi(arg.type))
@@ -313,7 +306,7 @@ $new_self = $sself._obj
             raise NotImplementedError(
                 "Library doesn't provide symbol: %s" % symbol)
 
-        return block, method and var["new_self"], func
+        return block, func
 
     def get_type(self, type_, may_be_null=False, may_return_null=False):
         return get_type(type_, self._gen, may_be_null, may_return_null)

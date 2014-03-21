@@ -150,16 +150,16 @@ def _generate_function(backend, info, arg_infos, arg_types,
     # generate call
     lib = backend.get_library(info.namespace)
     symbol = info.symbol
-    block, svar, func = backend.get_function(lib, symbol, args,
+    block, func = backend.get_function(lib, symbol, args,
                                              return_value, method,
-                                             self_name, throws)
+                                             throws)
     if block:
         block.write_into(body)
 
     # do the call
     call_vars = [a.call_var for a in args if a.call_var]
     if method:
-        call_vars.insert(0, svar)
+        call_vars.insert(0, "%s._obj" % self_name)
     call_block, var = backend.parse("$ret = $func($args)",
                                     func=func, args=", ".join(call_vars))
     call_block.write_into(body)

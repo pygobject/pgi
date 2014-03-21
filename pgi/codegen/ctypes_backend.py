@@ -1294,23 +1294,15 @@ class CTypesBackend(Backend):
             self._libs[namespace] = lib
         return self._libs[namespace]
 
-    def get_function(self, lib, symbol, args, ret,
-                     method=False, self_name="", throws=False):
-        try:
-            h = getattr(lib, symbol)
-        except AttributeError:
-            raise NotImplementedError(
-                "Library doesn't provide symbol: %s" % symbol)
-
+    def _get_signature(self, args, ret, method, throws):
         if ret:
-            h.restype = typeinfo_to_ctypes(ret.type, return_value=True)
+            restype = typeinfo_to_ctypes(ret.type, return_value=True)
         else:
-            h.restype = None
+            restype = None
 
-        arg_types = []
-
+        argtypes = []
         if method:
-            arg_types.append(ctypes.c_void_p)
+            argtypes.append(ctypes.c_void_p)
 
         if throws:
             args = args[:-1]
@@ -1319,19 +1311,28 @@ class CTypesBackend(Backend):
             type_ = typeinfo_to_ctypes(arg.type)
             if arg.is_direction_out() and type_ != ctypes.c_void_p:
                 type_ = ctypes.POINTER(type_)
-            arg_types.append(type_)
+            argtypes.append(type_)
 
         if throws:
-            arg_types.append(ctypes.c_void_p)
+            argtypes.append(ctypes.c_void_p)
 
-        h.argtypes = arg_types
+        return restype, argtypes
+
+    def get_function(self, lib, symbol, args, ret, method=False, throws=False):
+        try:
+            h = getattr(lib, symbol)
+        except AttributeError:
+            raise NotImplementedError(
+                "Library doesn't provide symbol: %s" % symbol)
+
+        h.restype, h.argtypes = self._get_signature(args, ret, method, throws)
 
         block, var = self.parse("""
 # args: $args
 # ret: $ret
 """, args=repr([n.__name__ for n in h.argtypes]), ret=repr(h.restype))
 
-        return block, method and "%s._obj" % self_name, h
+        return block, h
 
     def get_callback(self, func, args, ret, is_signal=False):
         arg_types = [typeinfo_to_ctypes(a.type) for a in args]
