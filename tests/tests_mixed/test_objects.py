@@ -24,8 +24,6 @@ else:
     else:
         Clutter = None
 
-from tests import skipIfGI
-
 
 class ObjectTest(unittest.TestCase):
 

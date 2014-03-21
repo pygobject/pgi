@@ -7,12 +7,13 @@
 
 import traceback
 
-from .backend import list_backends
+from .backend import list_backends, get_backend
 from .utils import CodeBlock
 from pgi.util import escape_identifier
 from .arguments import get_argument_class, ErrorArgument
 from .returnvalues import get_return_class
 from pgi._compat import string_types
+from pgi.clib.gir import GICallableInfo, GIFunctionInfo, GIFunctionInfoFlags
 
 
 def get_type_name(type_):
@@ -96,7 +97,7 @@ def build_docstring(func_name, args, ret, throws):
 
 
 def _generate_function(backend, info, arg_infos, arg_types,
-                       return_type, method, throws):
+                       return_type, method):
 
     args = []
     for arg_info, arg_type in zip(arg_infos, arg_types):
@@ -106,6 +107,7 @@ def _generate_function(backend, info, arg_infos, arg_types,
 
     cls = get_return_class(return_type)
     return_value = cls(info, return_type, args, backend)
+    throws = info.flags.value & GIFunctionInfoFlags.THROWS
 
     if throws:
         args.append(ErrorArgument(args, backend))
@@ -151,8 +153,8 @@ def _generate_function(backend, info, arg_infos, arg_types,
     lib = backend.get_library(info.namespace)
     symbol = info.symbol
     block, func = backend.get_function(lib, symbol, args,
-                                             return_value, method,
-                                             throws)
+                                       return_value, method,
+                                       throws)
     if block:
         block.write_into(body)
 
@@ -222,7 +224,11 @@ def $func_name($func_args):
     return func
 
 
-def generate_function(info, method=False, throws=False):
+def generate_function(info, method=False):
+    """Creates a Python callable for a GIFunctionInfo instance"""
+
+    assert isinstance(info, GIFunctionInfo)
+
     arg_infos = list(info.get_args())
     arg_types = [a.get_type() for a in arg_infos]
     return_type = info.get_return_type()
@@ -233,7 +239,7 @@ def generate_function(info, method=False, throws=False):
         instance = backend()
         try:
             func = _generate_function(instance, info, arg_infos, arg_types,
-                                      return_type, method, throws)
+                                      return_type, method)
         except NotImplementedError:
             messages.append("%s: %s" % (backend.NAME, traceback.format_exc()))
         else:
@@ -245,8 +251,26 @@ def generate_function(info, method=False, throws=False):
     raise NotImplementedError("\n".join(messages))
 
 
-def _generate_dummy_function(backend, func_name, info, arg_infos, arg_types,
-                             return_type, method):
+def generate_dummy_callable(info, func_name, method=False):
+    """Takes a GICallableInfo and generates a dummy callback function which
+    just raises but has a correct docstring. They are mainly accessible for
+    documentation, so the API reference can reference a real thing.
+
+    func_name can be different than info.name because vfuncs, for example,
+    get prefixed with 'do_' when exposed in Python.
+    """
+
+    assert isinstance(info, GICallableInfo)
+
+    # FIXME: handle out args and trailing user_data ?
+
+    arg_infos = list(info.get_args())
+    arg_types = [a.get_type() for a in arg_infos]
+    return_type = info.get_return_type()
+
+    # the null backend is good enough here
+    backend = get_backend("null")()
+
     args = []
     for arg_info, arg_type in zip(arg_infos, arg_types):
         cls = get_argument_class(arg_type)
@@ -287,34 +311,3 @@ def $func_name($func_args):
     func.__module__ = info.namespace
 
     return func
-
-
-def generate_dummy_function(info, name, method=False):
-    """Takes a GICallableInfo and generates a dummy callback function which
-    just raises but has a correct docstring. They are mainly accessible for
-    documentation, so the API reference can reference a real thing.
-    """
-
-    # FIXME: handle out args and trailing user_data ?
-
-    arg_infos = list(info.get_args())
-    arg_types = [a.get_type() for a in arg_infos]
-    return_type = info.get_return_type()
-
-    func = None
-    messages = []
-    for backend in list_backends():
-        instance = backend()
-        try:
-            func = _generate_dummy_function(
-                instance, name, info, arg_infos, arg_types,
-                return_type, method)
-        except NotImplementedError:
-            messages.append("%s: %s" % (backend.NAME, traceback.format_exc()))
-        else:
-            break
-
-    if func:
-        return func
-
-    raise NotImplementedError("\n".join(messages))

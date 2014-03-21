@@ -24,30 +24,31 @@ from .error import GIError
 
 
 # pyflakes
-GIArgInfo = GIArgInfo
-GIArrayType = GIArrayType
-GIBaseInfo = GIBaseInfo
-GICallableInfo = GICallableInfo
-GIConstantInfo = GIConstantInfo
-GIDirection = GIDirection
-GIEnumInfo = GIEnumInfo
-GIFieldInfoFlags = GIFieldInfoFlags
-GIFieldInfo = GIFieldInfo
-GIFunctionInfoFlags = GIFunctionInfoFlags
-GIFunctionInfo = GIFunctionInfo
-GIInfoType = GIInfoType
-GInvokeError = GInvokeError
-GIObjectInfo = GIObjectInfo
-GIPropertyInfo = GIPropertyInfo
-GIRegisteredTypeInfo = GIRegisteredTypeInfo
-GIRepository = GIRepository
-GIRepositoryLoadFlags = GIRepositoryLoadFlags
-GIScopeType = GIScopeType
-GIStructInfo = GIStructInfo
-GITransfer = GITransfer
-GITypeInfo = GITypeInfo
-GITypelib = GITypelib
-GITypeTag = GITypeTag
-GIUnionInfo = GIUnionInfo
-GIValueInfo = GIValueInfo
-GIError = GIError
+GIArgInfo
+GIArrayType
+GIBaseInfo
+GICallableInfo
+GIConstantInfo
+GIDirection
+GIEnumInfo
+GIFieldInfoFlags
+GIFieldInfo
+GIFunctionInfoFlags
+GIFunctionInfo
+GIInfoType
+GInvokeError
+GIObjectInfo
+GIPropertyInfo
+GIRegisteredTypeInfo
+GIRepository
+GIRepositoryLoadFlags
+GIScopeType
+GIStructInfo
+GITransfer
+GITypeInfo
+GITypelib
+GITypeTag
+GIUnionInfo
+GIValueInfo
+GIError
+GIInterfaceInfo

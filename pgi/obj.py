@@ -22,7 +22,7 @@ from .field import FieldAttribute
 from .constant import ConstantAttribute
 from .signals import SignalsAttribute
 from .codegen import generate_function, generate_constructor
-from .codegen import generate_signal_callback, generate_dummy_function
+from .codegen import generate_signal_callback, generate_dummy_callable
 
 
 class _Object(object):
@@ -256,15 +256,14 @@ class MethodAttribute(object):
         func_flags = flags.value
         name = self._name
 
-        throws = func_flags & GIFunctionInfoFlags.THROWS
         func_flags = func_flags & (~GIFunctionInfoFlags.THROWS)
 
         if func_flags & GIFunctionInfoFlags.IS_METHOD:
-            func = generate_function(info, method=True, throws=throws)
+            func = generate_function(info, method=True)
             setattr(real_owner, name, func)
             return getattr(instance or owner, name)
         elif not func_flags or func_flags & GIFunctionInfoFlags.IS_CONSTRUCTOR:
-            func = generate_function(info, method=False, throws=throws)
+            func = generate_function(info, method=False)
             func = staticmethod(func)
             setattr(real_owner, name, func)
             return getattr(owner, name)
@@ -286,7 +285,7 @@ class VirtualMethodAttribute(object):
         name = self._name
 
         # fixme: generate_callback just gives us a docstring
-        func = generate_dummy_function(info, "do_" + info.name, method=True)
+        func = generate_dummy_callable(info, "do_" + info.name, method=True)
         func._is_virtual = True
         setattr(real_owner, name, func)
         return getattr(instance or owner, name)

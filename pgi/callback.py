@@ -5,11 +5,11 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from .codegen import generate_dummy_function
+from .codegen import generate_dummy_callable
 
 
 def CallbackAttribute(info):
-    func = generate_dummy_function(info, info.name)
+    func = generate_dummy_callable(info, info.name)
     func._is_callback = True
 
     return func

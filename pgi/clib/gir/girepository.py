@@ -5,7 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from ctypes import POINTER, c_char_p, c_void_p, byref
+from ctypes import POINTER, c_char_p, c_void_p
 
 from ..glib import guint, gchar_p, GErrorPtr, gboolean, gint, unpack_glist
 from ..glib import GSListPtr, GOptionGroupPtr, GListPtr, gerror

@@ -289,4 +289,5 @@ def new(gtype_or_similar):
 __all__.append('new')
 
 
+list_properties
 __all__.append("list_properties")

@@ -22,9 +22,12 @@ def init_backends():
         _BACKENDS.append(CFFIBackend)
 
     from .ctypes_backend import CTypesBackend
+    from .null_backend import NullBackend
 
     _BACKENDS.append(CTypesBackend)
     _ACTIVE_BACKENDS = _BACKENDS[:]
+    # null isn't active by default
+    _BACKENDS.append(NullBackend)
 
 
 def list_backends():
@@ -36,7 +39,7 @@ def list_backends():
 def get_backend(name):
     """Returns the backend by name or raises KeyError"""
 
-    for backend in _ACTIVE_BACKENDS:
+    for backend in _BACKENDS:
         if backend.NAME == name:
             return backend
     raise KeyError("Backend %r not available" % name)
@@ -56,11 +59,6 @@ def set_backend(name=None):
     else:
         names = name.split(",")
 
-    # if explicitly asked, enable the null backend
-    if "null" in names:
-        from .null_backend import NullBackend
-        possible.append(NullBackend)
-
     for name in reversed(names):
         for backend in list(possible):
             if backend.NAME == name:
@@ -79,8 +77,7 @@ class Backend(object):
     def get_library(self, namespace):
         raise NotImplementedError
 
-    def get_function(self, lib, symbol, args, ret,
-                     method=False, self_name="", throws=False):
+    def get_function(self, lib, symbol, args, ret, method=False, throws=False):
         raise NotImplementedError
 
     def get_constructor(self, gtype, args):

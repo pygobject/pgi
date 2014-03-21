@@ -17,18 +17,24 @@ except ImportError:
     pyflakes = None
 
 
-class FakeStream(object):
-    # skip these, can be false positives
-    BL = ["imported but unused",
-          #"redefinition of unused",
-          "unable to detect undefined names",
-          "redefinition of function"]
+class Error(object):
+    IMPORT_UNUSED = "imported but unused"
+    REDEF_FUNCTION = "redefinition of function"
+    UNABLE_DETECT_UNDEF = "unable to detect undefined names"
 
-    def __init__(self):
+
+class FakeStream(object):
+    # skip these by default
+    BL = [Error.UNABLE_DETECT_UNDEF]
+
+    def __init__(self, blacklist=None):
         self.lines = []
+        if blacklist is None:
+            blacklist = []
+        self.bl = self.BL[:] + blacklist
 
     def write(self, text):
-        for p in self.BL:
+        for p in self.bl:
             if p in text:
                 return
         text = text.strip()
@@ -44,9 +50,9 @@ class FakeStream(object):
 @unittest.skipUnless(pyflakes, "no pyflakes found")
 class TPyFlakes(unittest.TestCase):
 
-    def _run(self, path):
+    def _run(self, path, **kwargs):
         old_stdout = sys.stdout
-        stream = FakeStream()
+        stream = FakeStream(**kwargs)
         try:
             sys.stdout = stream
             for dirpath, dirnames, filenames in os.walk(path):
@@ -57,9 +63,9 @@ class TPyFlakes(unittest.TestCase):
             sys.stdout = old_stdout
         stream.check()
 
-    def _run_package(self, mod):
+    def _run_package(self, mod, *args, **kwargs):
         path = mod.__path__[0]
-        self._run(path)
+        self._run(path, *args, **kwargs)
 
     def test_main(self):
         import pgi
@@ -75,4 +81,5 @@ class TPyFlakes(unittest.TestCase):
 
     def test_tests_pygobject(self):
         import tests.tests_pygobject
-        self._run_package(tests.tests_pygobject)
+        self._run_package(tests.tests_pygobject,
+                          blacklist=[Error.IMPORT_UNUSED])

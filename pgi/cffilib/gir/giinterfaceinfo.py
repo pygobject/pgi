@@ -6,7 +6,7 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from .._compat import xrange
-from ._ffi import ffi, lib
+from ._ffi import lib
 from .giregisteredtypeinfo import GIRegisteredTypeInfo
 from .gibaseinfo import GIBaseInfo, GIInfoType
 from .gifunctioninfo import GIFunctionInfo

@@ -79,7 +79,7 @@ class NullBackend(Backend):
         return namespace
 
     def get_function(self, *args, **kwargs):
-        return CodeBlock(), "foo", lambda *x: None
+        return CodeBlock(), lambda *x: None
 
     def get_type(self, type_, *args, **kwargs):
         return BaseType(type_)

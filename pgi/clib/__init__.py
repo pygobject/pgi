@@ -6,3 +6,6 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from ._utils import find_library
+
+
+find_library
