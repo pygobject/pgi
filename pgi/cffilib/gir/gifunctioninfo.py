@@ -6,6 +6,7 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from .. import _create_enum_class, glib
+from .._compat import PY3
 from ._ffi import ffi, lib
 from .gibaseinfo import GIBaseInfo, GIInfoType
 from .gicallableinfo import GICallableInfo
@@ -26,7 +27,10 @@ class GIFunctionInfo(GICallableInfo):
     @property
     def symbol(self):
         res = lib.g_function_info_get_symbol(self._ptr)
-        return ffi.string(res)
+        res = ffi.string(res)
+        if PY3:
+            res = res.decode("ascii")
+        return res
 
     @property
     def flags(self):

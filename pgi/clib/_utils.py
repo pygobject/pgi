@@ -6,7 +6,9 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 import os
-from ctypes import cdll, c_void_p, c_size_t
+from ctypes import cdll, c_void_p, c_size_t, c_char_p
+
+from ._compat import PY3
 
 
 if os.name == "nt":
@@ -64,11 +66,16 @@ class _CProperty(object):
             return self
 
         lib, name, symbol, ret, args = self.args
+        assert len(args) == 1
         func = getattr(lib, symbol)
         func.argtypes = args
         func.restype = ret
 
         value = func(instance)
+
+        if PY3 and issubclass(ret, c_char_p) and value is not None:
+            value = value.decode("ascii")
+
         setattr(instance, name, value)
         return value
 

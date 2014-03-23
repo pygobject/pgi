@@ -6,6 +6,7 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from ._ffi import ffi, lib
+from .._compat import PY3
 
 
 class GITypelib(object):
@@ -17,7 +18,12 @@ class GITypelib(object):
 
     @property
     def namespace(self):
-        return ffi.string(lib.g_typelib_get_namespace(self._ptr))
+        res = lib.g_typelib_get_namespace(self._ptr)
+        if res:
+            res = ffi.string(res)
+            if PY3:
+                res = res.decode("ascii")
+        return res
 
     def __repr__(self):
         return "<%s namespace=%r>" % (type(self).__name__, self.namespace)

@@ -12,6 +12,7 @@ from cffi import FFI
 from pgi.clib.gir import GIRepository, GITypeTag, GIInfoType
 from .backend import Backend
 from .utils import CodeBlock, parse_with_objects, VariableFactory
+from .. import _compat
 
 
 _glib_defs = """
@@ -169,14 +170,14 @@ class Int32(BasicType):
     def check(self, name):
         return self.parse("""
 # int32 type/value check
-if not $_.isinstance($value,$_. basestring):
+if not $_.isinstance($value, $basestring):
     $int = $_.int($value)
 else:
     raise $_.TypeError("'$value' not a number")
 
 if not -2**31 <= $int < 2**31:
     raise $_.OverflowError("Value %r not in range" % $int)
-""", value=name)["int"]
+""", value=name, basestring=_compat.string_types)["int"]
 
     def pack(self, valid):
         return self.parse("""

@@ -39,7 +39,8 @@ class TPGICodegen(unittest.TestCase):
             "$foo=$bar", lambda *x: "X", foo=some_obj, bar=some_int)
 
         self.assertEqual(str(block), "X=42")
-        self.assertEqual(block.get_dependencies().items(), [("X", some_obj)])
+        self.assertEqual(list(block.get_dependencies().items()),
+                         [("X", some_obj)])
 
     def test_codeblock(self):
         a = CodeBlock("foo")

@@ -12,6 +12,7 @@ from ctypes.util import find_library
 
 from . import const
 from .clib.gir import GITypeTag, GIInfoType
+from ._compat import xrange
 
 
 def load_ctypes_library(name):

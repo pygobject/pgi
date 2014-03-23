@@ -9,7 +9,6 @@ from ctypes import POINTER, c_char_p, cast, c_void_p
 
 from ..glib import gchar_p, Enum, gboolean
 from .._utils import wrap_class, find_library
-from .._compat import PY3
 from .gitypelib import GITypelib
 
 _gir = find_library("girepository-1.0")
@@ -53,18 +52,6 @@ class GIBaseInfo(c_void_p):
         except KeyError:
             return base_info
 
-    @property
-    def name(self):
-        if PY3:
-            return self._name.decode("ascii")
-        return self._name
-
-    @property
-    def namespace(self):
-        if PY3:
-            return self._namespace.decode("ascii")
-        return self._namespace
-
     def _get_repr(self):
         values = {}
         values["info_type"] = repr(self.type)
@@ -97,8 +84,8 @@ _methods = [
     ("ref", GIBaseInfo, [GIBaseInfo], False),
     ("unref", None, [GIBaseInfo]),
     ("get_type", GIInfoType, [GIBaseInfo]),
-    ("_get_name", gchar_p, [GIBaseInfo]),
-    ("_get_namespace", gchar_p, [GIBaseInfo]),
+    ("get_name", gchar_p, [GIBaseInfo]),
+    ("get_namespace", gchar_p, [GIBaseInfo]),
     ("is_deprecated", gboolean, [GIBaseInfo]),
     ("get_attribute", gchar_p, [GIBaseInfo, gchar_p]),
     ("iterate_attributes", gboolean, [GIBaseInfo, GIAttributeIter,

@@ -5,7 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from .._compat import xrange
+from .._compat import xrange, PY3
 from ._ffi import ffi, lib
 from .giregisteredtypeinfo import GIRegisteredTypeInfo
 from .gibaseinfo import GIBaseInfo, GIInfoType
@@ -97,8 +97,14 @@ class GIObjectInfo(GIRegisteredTypeInfo):
 
     @property
     def type_name(self):
-        return ffi.string(lib.g_object_info_get_type_name(self._ptr))
+        res = ffi.string(lib.g_object_info_get_type_name(self._ptr))
+        if PY3:
+            res = res.decode("ascii")
+        return res
 
     @property
     def type_init(self):
-        return ffi.string(lib.g_object_info_get_type_init(self._ptr))
+        res = ffi.string(lib.g_object_info_get_type_init(self._ptr))
+        if PY3:
+            res = res.decode("ascii")
+        return res

@@ -32,7 +32,7 @@ class _GIRepoTest(unittest.TestCase):
         repo = self.GIRepository.get_default()
         # require first, so require_private doesn't do anything
         repo.require("GObject", "2.0", 0)
-        repo.require_private("/nope", "GObject", None, 0)
+        repo.require_private(b"/nope", "GObject", None, 0)
 
     def test_enumerate_versions(self):
         repo = self.GIRepository.get_default()
@@ -53,13 +53,13 @@ class _GIRepoTest(unittest.TestCase):
 
     def test_search_path(self):
         repo = self.GIRepository.get_default()
-        repo.prepend_search_path("/nope")
-        self.assertEqual(repo.get_search_path()[0], "/nope")
+        repo.prepend_search_path(b"/nope")
+        self.assertEqual(repo.get_search_path()[0], b"/nope")
 
     def test_prepend_library_path(self):
         repo = self.GIRepository.get_default()
         try:
-            repo.prepend_library_path("/nope")
+            repo.prepend_library_path(b"/nope")
         except AttributeError:
             # too old libgirepository
             pass
@@ -76,7 +76,7 @@ class _GIRepoTest(unittest.TestCase):
     def test_find_by_gtype(self):
         repo = self.GIRepository.get_default()
         repo.require("GObject", "2.0", 0)
-        gtype = self.gobject.GType.from_name("GObject")
+        gtype = self.gobject.GType.from_name(b"GObject")
         self.assertTrue(gtype)
         res = repo.find_by_gtype(gtype)
         self.assertTrue(isinstance(res, self.gir.GIObjectInfo))
@@ -85,6 +85,8 @@ class _GIRepoTest(unittest.TestCase):
         repo = self.GIRepository.get_default()
         repo.require("GObject", "2.0", 0)
         res = repo.is_registered("GObject", "2.0")
+        self.assertTrue(res)
+        res = repo.is_registered("GObject", None)
         self.assertTrue(res)
         res = repo.is_registered("Foobar", "2.0")
         self.assertFalse(res)

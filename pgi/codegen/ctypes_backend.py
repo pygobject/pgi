@@ -184,7 +184,7 @@ class Int8(BasicType):
 
     def check(self, name):
         return self.parse("""
-if not $_.isinstance($value, $_.basestring):
+if not $_.isinstance($value, $basestring):
     $int = $_.int($value)
 else:
     raise TypeError("'$value' not a number")
@@ -192,7 +192,7 @@ else:
 # overflow check for int8
 if not -2**7 <= $int < 2**7:
     raise $_.OverflowError("Value %r not in range" % $int)
-""", value=name)["int"]
+""", value=name, basestring=_compat.string_types)["int"]
 
     def pack(self, name):
         return self.parse("""
@@ -213,7 +213,7 @@ class UInt8(BasicType):
     def check(self, name):
         return self.parse("""
 # uint8 type/value check
-if $_.isinstance($value, $_.basestring):
+if $_.isinstance($value, $basestring):
     if $_.isinstance($value, $_.str):
         try:
             $value = $_.ord($value)
@@ -227,7 +227,7 @@ $uint = $_.int($value)
 # overflow check for uint8
 if not 0 <= $uint < 2**8:
     raise $_.OverflowError("Value %r not in range" % $uint)
-""", value=name)["uint"]
+""", value=name, basestring=_compat.string_types)["uint"]
 
     def pack(self, name):
         return self.parse("""
@@ -247,7 +247,7 @@ class Int16(BasicType):
 
     def check(self, name):
         return self.parse("""
-if not $_.isinstance($value, $_.basestring):
+if not $_.isinstance($value, $basestring):
     $int = $_.int($value)
 else:
     raise $_.TypeError("'$value' not a number")
@@ -255,7 +255,7 @@ else:
 # overflow check for int16
 if not -2**15 <= $int < 2**15:
     raise $_.OverflowError("Value %r not in range" % $int)
-""", value=name)["int"]
+""", value=name, basestring=_compat.string_types)["int"]
 
     def pack(self, name):
         return self.parse("""
@@ -275,7 +275,7 @@ class UInt16(BasicType):
 
     def check(self, name):
         return self.parse("""
-if not $_.isinstance($value, $_.basestring):
+if not $_.isinstance($value, $basestring):
     $int = $_.int($value)
 else:
     raise $_.TypeError("'$value' not a number")
@@ -283,7 +283,7 @@ else:
 # overflow check for uint16
 if not 0 <= $int < 2**16:
     raise $_.OverflowError("Value %r not in range" % $int)
-""", value=name)["int"]
+""", value=name, basestring=_compat.string_types)["int"]
 
     def pack(self, name):
         return self.parse("""
@@ -304,14 +304,14 @@ class Int32(BasicType):
     def check(self, name):
         return self.parse("""
 # int32 type/value check
-if not $_.isinstance($value, $_.basestring):
+if not $_.isinstance($value, $basestring):
     $int = $_.int($value)
 else:
     raise $_.TypeError("'$value' not a number")
 
 if not -2**31 <= $int < 2**31:
     raise $_.OverflowError("Value %r not in range" % $int)
-""", value=name)["int"]
+""", value=name, basestring=_compat.string_types)["int"]
 
     def pack(self, valid):
         return self.parse("""
@@ -337,14 +337,14 @@ class UInt32(BasicType):
     def check(self, name):
         return self.parse("""
 # uint32 type/value check
-if not $_.isinstance($value, $_.basestring):
+if not $_.isinstance($value, $basestring):
     $int = $_.int($value)
 else:
     raise $_.TypeError("'$value' not a number")
 
 if not 0 <= $int < 2**32:
     raise $_.OverflowError("Value %r not in range" % $int)
-""", value=name)["int"]
+""", value=name, basestring=_compat.string_types)["int"]
 
     def pack(self, valid):
         return self.parse("""
@@ -370,14 +370,14 @@ class Int64(BasicType):
     def check(self, name):
         return self.parse("""
 # int64 type/value check
-if not $_.isinstance($value, $_.basestring):
+if not $_.isinstance($value, $basestring):
     $int = $_.int($value)
 else:
     raise $_.TypeError("'$value' not a number")
 
 if not -2**63 <= $int < 2**63:
     raise $_.OverflowError("Value %r not in range" % $int)
-""", value=name)["int"]
+""", value=name, basestring=_compat.string_types)["int"]
 
     def pack(self, valid):
         return self.parse("""
@@ -398,14 +398,14 @@ class UInt64(BasicType):
     def check(self, name):
         return self.parse("""
 # uint64 type/value check
-if not $_.isinstance($value, $_.basestring):
+if not $_.isinstance($value, $basestring):
     $int = $_.int($value)
 else:
     raise $_.TypeError("'$value' not a number")
 
 if not 0 <= $int < 2**64:
     raise $_.OverflowError("Value %r not in range" % $int)
-""", value=name)["int"]
+""", value=name, basestring=_compat.string_types)["int"]
 
     def pack(self, valid):
         return self.parse("""
@@ -426,7 +426,7 @@ class Float(BasicType):
     def check(self, name):
         return self.parse("""
 # float type/value check
-if $_.isinstance($value, $_.basestring):
+if $_.isinstance($value, $basestring):
     raise $_.TypeError
 $float = $_.float($value)
 $c_float = $ctypes.c_float($float)
@@ -434,7 +434,7 @@ $c_value = $c_float.value
 if $c_value != $float and \\
         $c_value in ($_.float('inf'), $_.float('-inf'), $_.float('nan')):
     raise $_.OverflowError("%r out of range" % $float)
-""", value=name)["c_float"]
+""", value=name, basestring=_compat.string_types)["c_float"]
 
     def pack(self, name):
         return name
@@ -452,7 +452,7 @@ class Double(BasicType):
     def check(self, name):
         return self.parse("""
 # double type/value check
-if $_.isinstance($value, $_.basestring):
+if $_.isinstance($value, $basestring):
     raise $_.TypeError
 $double = $_.float($value)
 $c_double = $ctypes.c_double($double)
@@ -460,7 +460,7 @@ $c_value = $c_double.value
 if $c_value != $double and \\
         $c_value in ($_.float('inf'),$_.float('-inf'), $_.float('nan')):
     raise $_.OverflowError("%f out of range" % $double)
-""", value=name)["c_double"]
+""", value=name, basestring=_compat.string_types)["c_double"]
 
     def pack(self, name):
         return name
@@ -964,14 +964,15 @@ class Flags(BaseInterface):
 
     def check(self, name):
         return self.parse("""
-if not $_.isinstance($value, basestring) and not $_.int($value):
+if not $_.isinstance($value, $basestring) and not $_.int($value):
     $out = 0
 elif $_.isinstance($value, $base_type):
     $out = $_.int($value)
 else:
     raise $_.TypeError("Expected %r but got %r" %
                        ($base_type.__name__, $_.type($value).__name__))
-""", base_type=self._import_type(), value=name)["out"]
+""", base_type=self._import_type(), value=name,
+basestring=_compat.string_types)["out"]
 
     def pack(self, name):
         return self.parse("""

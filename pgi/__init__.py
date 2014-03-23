@@ -6,7 +6,7 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from . import const
-from ._compat import iterkeys
+from ._compat import iterkeys, string_types
 from .importer import require_version, get_required_version
 from .codegen import set_backend
 from .foreign import check_foreign
@@ -28,7 +28,7 @@ def check_version(version):
     Keep in mind that the pgi version is different from the pygobject one.
     """
 
-    if isinstance(version, basestring):
+    if isinstance(version, string_types):
         version = tuple(map(int, version.split(".")))
 
     if version > version_info:

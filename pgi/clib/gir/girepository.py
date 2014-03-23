@@ -34,15 +34,24 @@ class GIRepositoryLoadFlags(guint):
 class GIRepository(c_void_p):
 
     def get_infos(self, namespace):
+        if PY3:
+            namespace = namespace.encode("ascii")
         for i in xrange(self.n_infos):
             yield self.get_info(i)
 
-    def get_info(self, *args):
-        res = self._get_info(*args)
+    def get_info(self, namespace, index):
+        if PY3:
+            namespace = namespace.encode("ascii")
+        res = self._get_info(namespace, index)
         return GIBaseInfo._cast(res)
 
-    def find_by_gtype(self, *args):
-        res = self._find_by_gtype(*args)
+    def get_n_infos(self, namespace):
+        if PY3:
+            namespace = namespace.encode("ascii")
+        return self._get_n_infos(namespace)
+
+    def find_by_gtype(self, gtype):
+        res = self._find_by_gtype(gtype)
         if not res:
             return None
         return GIBaseInfo._cast(res)
@@ -59,11 +68,16 @@ class GIRepository(c_void_p):
     def require(self, namespace, version, flags):
         if PY3:
             namespace = namespace.encode("ascii")
-            version = version if version is None else version.encode("ascii")
+            if version is not None:
+                version = version.encode("ascii")
         with gerror(GIError) as error:
             return self._require(namespace, version, flags, error)
 
     def require_private(self, typelib_dir, namespace, version, flags):
+        if PY3:
+            namespace = namespace.encode("ascii")
+            if version is not None:
+                version = version.encode("ascii")
         with gerror(GIError) as error:
             return self._require_private(
                 typelib_dir, namespace, version, flags, error)
@@ -79,11 +93,19 @@ class GIRepository(c_void_p):
 
     def get_loaded_namespaces(self):
         res = self._get_loaded_namespaces()
-        return unpack_nullterm_array(res)
+        res = unpack_nullterm_array(res)
+        if PY3:
+            res = [b.decode("ascii") for b in res]
+        return res
 
     def get_dependencies(self, namespace):
+        if PY3:
+            namespace = namespace.encode("ascii")
         res = self._get_dependencies(namespace)
-        return unpack_nullterm_array(res)
+        res = unpack_nullterm_array(res)
+        if PY3:
+            res = [p.decode("ascii") for p in res]
+        return res
 
     def get_search_path(self):
         res = self._get_search_path()
@@ -106,6 +128,21 @@ class GIRepository(c_void_p):
             return self._get_version(namespace).decode("ascii")
         return self._get_version(namespace)
 
+    def is_registered(self, namespace, version):
+        if PY3:
+            namespace = namespace.encode("ascii")
+            if version is not None:
+                version = version.encode("ascii")
+        return self._is_registered(namespace, version)
+
+    def get_c_prefix(self, namespace):
+        if PY3:
+            namespace = namespace.encode("ascii")
+        res = self._get_c_prefix(namespace)
+        if PY3:
+            res = res.decode("ascii")
+        return res
+
 
 _methods = [
     ("get_default", GIRepository, []),
@@ -120,20 +157,20 @@ _methods = [
     ("load_typelib", c_char_p,
         [GIRepository, GITypelib, GIRepositoryLoadFlags,
          POINTER(GErrorPtr)]),
-    ("is_registered", gboolean, [GIRepository, gchar_p, gchar_p]),
+    ("_is_registered", gboolean, [GIRepository, gchar_p, gchar_p]),
     ("_require_private",
         GITypelib, [GIRepository, gchar_p, gchar_p, gchar_p,
                     GIRepositoryLoadFlags, POINTER(GErrorPtr)]),
     ("_get_dependencies", POINTER(gchar_p), [GIRepository, gchar_p]),
     ("_get_loaded_namespaces", POINTER(gchar_p), [GIRepository]),
     ("_find_by_gtype", GIBaseInfo, [GIRepository, GType], True),
-    ("get_n_infos", gint, [GIRepository, gchar_p]),
+    ("_get_n_infos", gint, [GIRepository, gchar_p]),
     ("_get_info", GIBaseInfo, [GIRepository, gchar_p, gint], True),
     ("_get_typelib_path", gchar_p, [GIRepository, gchar_p]),
     ("_get_shared_library", gchar_p, [GIRepository, gchar_p]),
     ("_get_version", gchar_p, [GIRepository, gchar_p]),
     ("get_option_group", GOptionGroupPtr, [], True),
-    ("get_c_prefix", gchar_p, [GIRepository, gchar_p]),
+    ("_get_c_prefix", gchar_p, [GIRepository, gchar_p]),
     ("_enumerate_versions", GListPtr, [GIRepository, gchar_p]),
 ]
 
