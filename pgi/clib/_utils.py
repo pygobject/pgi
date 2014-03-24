@@ -6,9 +6,24 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 import os
+import sys
 from ctypes import cdll, c_void_p, c_size_t, c_char_p
 
 from ._compat import PY3
+
+
+# decode a path from glib
+if os.name == "nt":
+    def fsdecode(path):
+        return path.decode("utf-8")
+elif PY3:
+    _FSENC = sys.getfilesystemencoding()
+
+    def fsdecode(path):
+        return path.decode(_FSENC, "surrogateescape")
+else:
+    def fsdecode(path):
+        return path
 
 
 if os.name == "nt":
@@ -74,7 +89,7 @@ class _CProperty(object):
         value = func(instance)
 
         if PY3 and issubclass(ret, c_char_p) and value is not None:
-            value = value.decode("ascii")
+            value = value.decode("utf-8")
 
         setattr(instance, name, value)
         return value

@@ -194,6 +194,13 @@ class GIInfoCTypesTest(_GIInfoTest):
             self.assertTrue(isinstance(v, self.gir.GISignalInfo))
             repr(v)
 
+    def test_giargument(self):
+        arg = self.gir.GIArgument()
+        self.assertTrue(arg.v_string is None)
+        arg.v_string = "foo"
+        self.assertEqual(arg.v_string, "foo")
+        self.assertEqual(arg.v_string, "foo")
+
 
 class GIInfoCFFITest(_GIInfoTest):
     from pgi.cffilib import gir

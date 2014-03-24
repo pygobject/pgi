@@ -14,7 +14,7 @@ from ..gobject import GType
 from .gibaseinfo import GIBaseInfo
 from .gitypelib import GITypelib
 from .error import GIError
-from .._utils import find_library, wrap_class
+from .._utils import find_library, wrap_class, fsdecode
 from .._compat import PY3
 
 _gir = find_library("girepository-1.0")
@@ -109,7 +109,8 @@ class GIRepository(c_void_p):
 
     def get_search_path(self):
         res = self._get_search_path()
-        return unpack_glist(res, c_char_p, transfer_full=False)
+        paths = unpack_glist(res, c_char_p, transfer_full=False)
+        return [fsdecode(p) for p in paths]
 
     def get_shared_library(self, namespace):
         if PY3:
@@ -120,7 +121,9 @@ class GIRepository(c_void_p):
     def get_typelib_path(self, namespace):
         if PY3:
             namespace = namespace.encode("ascii")
-        return self._get_typelib_path(namespace)
+        path = self._get_typelib_path(namespace)
+        if path is not None:
+            return fsdecode(path)
 
     def get_version(self, namespace):
         if PY3:

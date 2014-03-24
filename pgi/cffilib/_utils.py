@@ -6,6 +6,24 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 import re
+import os
+import sys
+
+from ._compat import PY3
+
+
+# decode a path from glib
+if os.name == "nt":
+    def fsdecode(path):
+        return path.decode("utf-8")
+elif PY3:
+    _FSENC = sys.getfilesystemencoding()
+
+    def fsdecode(path):
+        return path.decode(_FSENC, "surrogateescape")
+else:
+    def fsdecode(path):
+        return path
 
 
 def _create_enum_class(ffi, type_name, prefix):

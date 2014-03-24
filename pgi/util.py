@@ -15,6 +15,19 @@ from .clib.gir import GITypeTag, GIInfoType
 from ._compat import xrange, text_type
 
 
+def decode_return(codec="ascii"):
+    """Decodes the return value of it isn't None"""
+
+    def outer(f):
+        def wrap(*args, **kwargs):
+            res = f(*args, **kwargs)
+            if res is not None:
+                return res.decode(codec)
+            return res
+        return wrap
+    return outer
+
+
 def load_ctypes_library(name):
     """Takes a library name and calls find_library in case loading fails,
     since some girs don't include the real .so name.

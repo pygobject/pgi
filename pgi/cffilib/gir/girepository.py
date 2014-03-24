@@ -8,6 +8,7 @@
 from .. import glib
 from ..glib import unpack_zeroterm_array, unpack_glist
 from .. import _create_enum_class
+from .._utils import fsdecode
 from .._compat import PY3
 
 from ._ffi import ffi, lib
@@ -38,8 +39,9 @@ class GIRepository(object):
     @classmethod
     def get_search_path(cls):
         res = lib.g_irepository_get_search_path()
-        return [ffi.string(p) for p in unpack_glist(res, "gchar*",
-                                                    transfer_full=False)]
+        paths = [ffi.string(p) for p in unpack_glist(res, "gchar*",
+                                                     transfer_full=False)]
+        return [fsdecode(p) for p in paths]
 
     def is_registered(self, namespace, version):
         if version is None:
@@ -125,7 +127,10 @@ class GIRepository(object):
             namespace = namespace.encode("ascii")
         res = lib.g_irepository_get_typelib_path(self._ptr, namespace)
         if res:
-            return ffi.string(res)
+            res = ffi.string(res)
+            if PY3:
+                res = fsdecode(res)
+            return res
 
     def get_shared_library(self, namespace):
         if PY3:
@@ -134,7 +139,7 @@ class GIRepository(object):
         if res:
             res = ffi.string(res)
             if PY3:
-                res = res.decode("ascii")
+                res = fsdecode(res)
             return res
 
     def get_version(self, namespace):

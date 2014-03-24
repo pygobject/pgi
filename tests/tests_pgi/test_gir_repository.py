@@ -8,6 +8,8 @@
 import os
 import unittest
 
+from pgi._compat import PY3
+
 
 class _GIRepoTest(unittest.TestCase):
 
@@ -54,7 +56,7 @@ class _GIRepoTest(unittest.TestCase):
     def test_search_path(self):
         repo = self.GIRepository.get_default()
         repo.prepend_search_path(b"/nope")
-        self.assertEqual(repo.get_search_path()[0], b"/nope")
+        self.assertEqual(repo.get_search_path()[0], "/nope")
 
     def test_prepend_library_path(self):
         repo = self.GIRepository.get_default()
@@ -106,6 +108,14 @@ class _GIRepoTest(unittest.TestCase):
         repo = self.GIRepository.get_default()
         repo.require("GObject", "2.0", 0)
         self.assertTrue(os.path.exists(repo.get_typelib_path("GObject")))
+
+        path = repo.get_typelib_path("GObject")
+        if PY3:
+            self.assertTrue(isinstance(path, str))
+        elif os.name == "nt":
+            self.assertTrue(isinstance(path, unicode))
+        else:
+            self.assertTrue(isinstance(path, bytes))
 
         self.assertTrue(repo.get_typelib_path("NopeNope") is None)
 

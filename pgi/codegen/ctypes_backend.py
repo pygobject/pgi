@@ -1096,11 +1096,15 @@ $value = $ctypes.c_void_p($mem)
             "GObject": lambda v: v.get_object(),
             "gpointer": lambda v: v.get_pointer(),
             "gchararray": lambda v: v.get_string(),
-            "guchar": lambda v: chr(v.get_uchar()),
             "guint64": lambda v: v.get_uint64(),
             "guint": lambda v: v.get_uint(),
             "gulong": lambda v: v.get_ulong(),
         }
+
+        if _compat.PY3:
+            getter_map["guchar"] = lambda v: bytes([v.get_uchar()])
+        else:
+            getter_map["guchar"] = lambda v: chr(v.get_uchar())
 
         items = getter_map.items()
         getter_map = dict((PGType.from_name(k), v) for (k, v) in items)

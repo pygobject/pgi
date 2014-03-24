@@ -104,3 +104,6 @@ class MiscTest(unittest.TestCase):
             # FIXME: pygobject gets 2147483648, we get -2147483648
             #self.assertEqual(int(GObject.ParamFlags.DEPRECATED), 2147483648)
             pass
+
+    def test_module_special_methods(self):
+        self.assertTrue(isinstance(Gtk.__path__, str))

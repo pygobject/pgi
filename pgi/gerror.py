@@ -5,6 +5,8 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
+from ._compat import PY3
+
 
 class PGError(RuntimeError):
 
@@ -12,6 +14,9 @@ class PGError(RuntimeError):
         self.domain = error.domain.string
         self.code = error.code
         self.message = error.message
+
+        if PY3 and self.message is not None:
+            self.message = self.message.decode("utf-8")
 
 PGError.__module__ = "GLib"
 PGError.__name__ = "GError"

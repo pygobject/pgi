@@ -9,6 +9,7 @@ from ctypes import Union
 from ..glib import gboolean, gint8, guint8, gint16, guint16, gint32, guint32
 from ..glib import gint64, guint64, gfloat, gdouble, gshort, gushort, gint
 from ..glib import guint, glong, gulong, gsize, gchar_p, gpointer
+from .._compat import PY3
 
 
 class GIArgument(Union):
@@ -34,5 +35,24 @@ class GIArgument(Union):
         ("v_string", gchar_p),
         ("v_pointer", gpointer),
     ]
+
+    if PY3:
+        assert _fields_[-2][0] == "v_string"
+        _fields_[-2] = ("_v_string", gchar_p)
+
+        @property
+        def v_string(self):
+            res = self._v_string
+            if res is not None:
+                res = res.decode("utf-8")
+            return res
+
+        @v_string.setter
+        def v_string(self, value):
+            if value is None:
+                self._v_string = None
+            else:
+                self._v_string = value.encode("utf-8")
+
 
 __all__ = ["GIArgument"]

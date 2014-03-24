@@ -7,7 +7,7 @@
 
 from ctypes import byref
 
-from .util import cached_property, escape_parameter
+from .util import cached_property, escape_parameter, decode_return
 from .clib.glib import guint
 from .clib.gobject import signal_list_ids, signal_query, GSignalQuery
 from .codegen import generate_dummy_callable
@@ -22,7 +22,7 @@ class GSignal(object):
     @property
     def _func(self):
         try:
-            sig_info = self._info.find_signal(self.name)
+            sig_info = self._info.find_signal(self._query.signal_name)
         except AttributeError:
             # older libgirepository
             sig_info = None
@@ -56,6 +56,7 @@ class GSignal(object):
         return self._query.signal_id
 
     @property
+    @decode_return()
     def name(self):
         return self._query.signal_name
 
