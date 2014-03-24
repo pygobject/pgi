@@ -14,7 +14,7 @@ from .clib.gobject import GObjectClassPtr
 from .clib.gir import GIInfoType, GITypeTag
 
 from .util import escape_parameter, unescape_parameter, InfoIterWrapper
-from .util import import_attribute, set_gvalue_from_py
+from .util import import_attribute, set_gvalue_from_py, decode_return
 from .gtype import PGType
 from ._compat import PY3
 
@@ -32,7 +32,12 @@ class GParamSpec(object):
         spec.ref()
         self._spec = spec
         self._info = info
-        self.name = name
+        self._name = name
+
+    @property
+    @decode_return()
+    def name(self):
+        return self._name
 
     @property
     def __gtype__(self):
@@ -47,6 +52,7 @@ class GParamSpec(object):
         return self._spec.nick
 
     @property
+    @decode_return()
     def blurb(self):
         return self._spec.blurb
 
@@ -118,7 +124,11 @@ class Property(object):
             ptr.unset()
             raise TypeError("Object not initialized")
 
-        gobject.get_property(instance._object, self.__spec.name, ptr)
+        name = self.__spec.name
+        if PY3:
+            name = name.encode("ascii")
+
+        gobject.get_property(instance._object, name, ptr)
         return func()
 
     def __set__(self, instance, value):
@@ -133,7 +143,11 @@ class Property(object):
             warn("Property %r unhandled. Type not supported" % name, Warning)
             return
 
-        gobject.set_property(instance._object, self.__spec.name, ptr)
+        name = self.__spec.name
+        if PY3:
+            name = name.encode("ascii")
+
+        gobject.set_property(instance._object, name, ptr)
 
 
 class _GProps(object):

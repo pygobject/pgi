@@ -10,7 +10,8 @@ import ctypes
 from .clib.gobject import GEnumClassPtr, GFlagsClassPtr
 from .clib.glib import gint
 from .gtype import PGType
-from .util import cached_property, escape_identifier, decode_return
+from .util import cached_property, escape_identifier, decode_return, \
+    decode_return_list
 from .obj import add_method
 from ._compat import integer_types
 
@@ -38,6 +39,7 @@ class _EnumClass(EnumBase):
         return enum_value.value_nick
 
     @cached_property
+    @decode_return()
     def value_name(self):
         enum_value = self.__get_enum_value()
         return enum_value.value_name
@@ -92,6 +94,7 @@ class _FlagsClass(FlagsBase):
         return values
 
     @cached_property
+    @decode_return_list()
     def value_nicks(self):
         return [v.value_nick for v in self.__get_flag_values()]
 
@@ -100,6 +103,7 @@ class _FlagsClass(FlagsBase):
         return (self.value_nicks and self.value_nicks[0]) or None
 
     @cached_property
+    @decode_return_list()
     def value_names(self):
         return [v.value_name for v in self.__get_flag_values()]
 

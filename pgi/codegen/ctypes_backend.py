@@ -873,8 +873,9 @@ $value = $ctypes_value
 
     def unpack_py3(self, name):
         return self.parse("""
-$value = $ctypes_value.decode("utf-8")
-""", ctypes_value=name, none=None)["value"]
+if $value is not None:
+    $value = $value.decode("utf-8")
+""", value=name, none=None)["value"]
 
     def unpack_return_py2(self, name):
         return self.parse("""
@@ -906,7 +907,7 @@ class Filename(Utf8):
 class UniChar(BasicType):
     GI_TYPE_TAG = GITypeTag.UNICHAR
 
-    def check(self, name):
+    def check_py2(self, name):
         return self.parse("""
 if $_.isinstance($value, $_.str):
     $value = $value.decode("utf-8")
@@ -919,15 +920,28 @@ if not 0 <= $int < 2**32:
     raise $_.OverflowError("Value %r not in range" % $int)
 """, value=name)["int"]
 
+    def check_py3(self, name):
+        return self.parse("""
+$int = $_.ord($value)
+
+if not 0 <= $int < 2**32:
+    raise $_.OverflowError("Value %r not in range" % $int)
+""", value=name)["int"]
+
     def pack(self, valid):
         return self.parse("""
 # to ctypes
 $c_value = $ctypes.c_uint32($value)
 """, value=valid)["c_value"]
 
-    def unpack_return(self, name):
+    def unpack_return_py2(self, name):
         return self.parse("""
 $out = $_.unichr($value).encode("utf-8")
+""", value=name)["out"]
+
+    def unpack_return_py3(self, name):
+        return self.parse("""
+$out = $_.chr($value)
 """, value=name)["out"]
 
     def new(self):

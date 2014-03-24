@@ -12,7 +12,7 @@ from .utils import CodeBlock
 from pgi.util import escape_identifier
 from .arguments import get_argument_class, ErrorArgument
 from .returnvalues import get_return_class
-from pgi._compat import string_types
+from pgi._compat import string_types, PY3
 from pgi.clib.gir import GICallableInfo, GIFunctionInfo, GIFunctionInfoFlags
 
 
@@ -161,7 +161,23 @@ def _generate_function(backend, info, arg_infos, arg_types,
     # do the call
     call_vars = [a.call_var for a in args if a.call_var]
     if method:
-        call_vars.insert(0, "%s._obj" % self_name)
+        # there are not unbound method in Python 3 and also no
+        # type checking for the "self" object, but at least raise
+        # TypeError if getting the pointer value fails which
+        # should cover most cases
+
+        if PY3:
+            block, var = backend.parse("""
+try:
+    $ptr = %s._obj
+except AttributeError:
+    raise TypeError
+""" % self_name)
+        else:
+            block, var = backend.parse("$ptr = %s._obj" % self_name)
+        block.write_into(body)
+
+        call_vars.insert(0, var["ptr"])
     call_block, var = backend.parse("$ret = $func($args)",
                                     func=func, args=", ".join(call_vars))
     call_block.write_into(body)

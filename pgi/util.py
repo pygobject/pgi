@@ -28,6 +28,16 @@ def decode_return(codec="ascii"):
     return outer
 
 
+def decode_return_list(codec="ascii"):
+    """Decodes a list return value"""
+
+    def outer(f):
+        def wrap(*args, **kwargs):
+            return [res.decode(codec) for res in f(*args, **kwargs)]
+        return wrap
+    return outer
+
+
 def load_ctypes_library(name):
     """Takes a library name and calls find_library in case loading fails,
     since some girs don't include the real .so name.

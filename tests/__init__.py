@@ -36,6 +36,10 @@ def skipUnlessGIVersion(*version):
     return unittest.skipIf(_is_gi and _gi_version < version, "gi too old")
 
 
+def skipIfPy3(func):
+    return unittest.skipIf(sys.version_info[0] == 3, "skipped on python 3")
+
+
 def skipIfGI(func):
     if callable(func):
         return unittest.skipIf(_is_gi, "not supported by gi")(func)

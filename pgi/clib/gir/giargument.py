@@ -48,7 +48,7 @@ class GIArgument(Union):
             return res
 
         @v_string.setter
-        def v_string_setter(self, value):
+        def v_string(self, value):
             if value is None:
                 self._v_string = None
             else:
