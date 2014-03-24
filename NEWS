@@ -1,3 +1,14 @@
+0.0.7 (2014-03-24)
+~~~~~~~~~~~~~~~~~~
+
+* Python 3 support
+* Clutter overrides removed to match PyGObject
+* Implement GObject.list_properties
+* Multiple docstring fixes for pgi-docgen
+* Expose callback types as dummy functions with docstrings
+* Sync GLib overrides with PyGObject trunk
+
+
 0.0.6.3 (2013-11-29)
 ~~~~~~~~~~~~~~~~~~~~
 
