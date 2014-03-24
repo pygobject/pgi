@@ -16,6 +16,7 @@ from .clib.gir import GIInfoType, GITypeTag
 from .util import escape_parameter, unescape_parameter, InfoIterWrapper
 from .util import import_attribute, set_gvalue_from_py
 from .gtype import PGType
+from ._compat import PY3
 
 
 PROPS_NAME = "props"
@@ -192,6 +193,8 @@ class _ObjectClassProp(object):
         info = self._info
         gname = unescape_parameter(name)
         prop_info = self._wrapper.lookup_name(gname)
+        if PY3:
+            gname = gname.encode("ascii")
         if prop_info:
             gtype = info.g_type
             if info.type.value == GIInfoType.OBJECT:

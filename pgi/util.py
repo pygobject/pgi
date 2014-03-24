@@ -12,7 +12,7 @@ from ctypes.util import find_library
 
 from . import const
 from .clib.gir import GITypeTag, GIInfoType
-from ._compat import xrange
+from ._compat import xrange, text_type
 
 
 def load_ctypes_library(name):
@@ -154,7 +154,7 @@ def set_gvalue_from_py(ptr, is_interface, tag, value):
         elif tag == GITypeTag.FLOAT:
             ptr.set_float(value)
         elif tag == GITypeTag.UTF8:
-            if isinstance(value, unicode):
+            if isinstance(value, text_type):
                 value = value.encode("utf-8")
             ptr.set_string(value)
         else:

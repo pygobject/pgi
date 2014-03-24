@@ -211,10 +211,16 @@ class UInt8(BasicType):
     GI_TYPE_TAG = GITypeTag.UINT8
 
     def check(self, name):
+
+        if _compat.PY3:
+            int_text_types = (str, bytes)
+        else:
+            int_text_types = (unicode, str)
+
         return self.parse("""
 # uint8 type/value check
-if $_.isinstance($value, $basestring):
-    if $_.isinstance($value, $_.str):
+if $_.isinstance($value, $text_types):
+    if $_.isinstance($value, $_.bytes):
         try:
             $value = $_.ord($value)
         except $_.TypeError:
@@ -227,7 +233,7 @@ $uint = $_.int($value)
 # overflow check for uint8
 if not 0 <= $uint < 2**8:
     raise $_.OverflowError("Value %r not in range" % $uint)
-""", value=name, basestring=_compat.string_types)["uint"]
+""", value=name, text_types=int_text_types)["uint"]
 
     def pack(self, name):
         return self.parse("""
@@ -828,7 +834,9 @@ else:
 
     def pack_in_py3(self, name):
         return self.parse("""
-$encoded = $value.encode("utf-8")
+$encoded = $value
+if $value is not None:
+    $encoded = $value.encode("utf-8")
 """, value=name)["encoded"]
 
     def pack_py2(self, name):
@@ -838,7 +846,8 @@ $c_value = $ctypes.c_char_p($value)
 
     def pack_py3(self, name):
         return self.parse("""
-$value = $value.encode("utf-8")
+if $value is not None:
+    $value = $value.encode("utf-8")
 $c_value = $ctypes.c_char_p($value)
 """, value=name)["c_value"]
 
@@ -874,7 +883,9 @@ $str_value = $ctypes.c_char_p($value).value
 
     def unpack_return_py3(self, name):
         return self.parse("""
-$str_value = $ctypes.c_char_p($value).value.decode("utf-8")
+$str_value = $ctypes.c_char_p($value).value
+if $str_value is not None:
+    $str_value = $str_value.decode("utf-8")
 """, value=name)["str_value"]
 
     def new(self):
@@ -1072,6 +1083,7 @@ $value = $ctypes.c_void_p($mem)
 """, malloc=malloc, size=size)["value"]
 
     def unpack_gvalue(self, name):
+
         getter_map = {
             "gboolean": lambda v: v.get_boolean(),
             "gchar": lambda v: chr(v.get_schar()),
@@ -1360,7 +1372,7 @@ class CTypesBackend(Backend):
 
         values = []
         for arg in args:
-            values.append("'%s'" % arg.name)
+            values.append("b'%s'" % arg.name)
             values.append(arg.out_var)
         values.append("None")
         type_ = gtype._type

@@ -23,6 +23,7 @@ from .constant import ConstantAttribute
 from .signals import SignalsAttribute
 from .codegen import generate_function, generate_constructor
 from .codegen import generate_signal_callback, generate_dummy_callable
+from ._compat import PY3
 
 
 class _Object(object):
@@ -108,6 +109,8 @@ class Object(object):
         cb = generate_signal_callback(info)(_add_self)
 
         destroy = GClosureNotify()
+        if PY3:
+            name = name.encode("ascii")
         id_ = signal_connect_data(self._obj, name, cb, None, destroy, flags)
         self.__signal_cb_ref[id_] = (cb, destroy)
         return id_
