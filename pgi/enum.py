@@ -5,6 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
+import sys
 import ctypes
 
 from .clib.gobject import GEnumClassPtr, GFlagsClassPtr
@@ -47,6 +48,8 @@ class _EnumClass(EnumBase):
     def __new__(cls, value):
         if not isinstance(value, integer_types):
             raise TypeError("int expected, got %r instead" % type(value))
+        if value > sys.maxsize:
+            raise OverflowError
         instance = EnumBase.__new__(cls, value)
         if value in cls._allowed:
             return instance
@@ -114,6 +117,8 @@ class _FlagsClass(FlagsBase):
     def __new__(cls, value):
         if not isinstance(value, integer_types):
             raise TypeError("int expected, got %r instead" % type(value))
+        if value > sys.maxsize:
+            raise OverflowError
         return FlagsBase.__new__(cls, value)
 
     def __repr__(self):

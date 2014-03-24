@@ -699,14 +699,21 @@ param_check_pack=param_type.block, item_out=param_out)["new"]
         param_type = self.type.get_param_type(0)
         ctypes_type = typeinfo_to_ctypes(param_type)
 
+        p = self.get_type(param_type)
+        item_in = self.var()
+        item_out = p.unpack(item_in)
+
         return self.parse("""
 $out = []
 $elm = $in_
 while $elm:
     $entry = $elm.contents
-    $out.append($ctypes_type($entry.data or 0).value)
+    $item_in = $ctypes_type($entry.data or 0).value
+    $item_unpack
+    $out.append($item_out)
     $elm = $entry.next
-""", in_=name, ctypes_type=ctypes_type)["out"]
+""", in_=name, ctypes_type=ctypes_type, item_in=item_in,
+item_out=item_out, item_unpack=p.block)["out"]
 
     def free(self, name):
         return self.parse("""
@@ -1227,24 +1234,41 @@ $data = $ctypes.cast($value, $ctypes.POINTER($type))
 
         # fixme: do unpack with param type
 
+        p = self.get_type(param_type)
+        item_in = self.var()
+        item_out = p.unpack(item_in)
+
         if self.type.array_length != -1:
             return self.parse("""
-$out = $array[:$length.value]
-""", array=data, length=length)["out"]
+$out = []
+for $item_in in $array[:$length.value]:
+    $unpack_item
+    $out.append($item_out)
+#$out = $array[:$length.value]
+""", array=data, length=length, unpack_item=p.block,
+item_in=item_in, item_out=item_out)["out"]
+
         elif self.type.array_fixed_size != -1:
             return self.parse("""
-$out = $array[:$length]
-""", array=data, length=self.type.array_fixed_size)["out"]
+$out = []
+for $item_in in $array[:$length]:
+    $unpack_item
+    $out.append($item_out)
+""", array=data, length=self.type.array_fixed_size, unpack_item=p.block,
+item_in=item_in, item_out=item_out)["out"]
         else:
             return self.parse("""
 $list = []
 $i = 0
 $current = $array and $array[$i]
 while $current:
-    $list.append($current)
+    $item_in = $current
+    $unpack_item
+    $list.append($item_out)
     $i += 1
     $current = $array[$i]
-""", array=data)["list"]
+""", array=data, unpack_item=p.block,
+item_in=item_in, item_out=item_out)["list"]
 
     def new(self, length_type):
         if self.type.array_length != -1:

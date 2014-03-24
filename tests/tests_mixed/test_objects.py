@@ -18,10 +18,6 @@ try:
 except ImportError:
     Clutter = None
 else:
-    # FIXME: marshalling of string arrays is missing the decoding in PY3
-    # and the previous Gtk.init call changed sys.argv to bytes
-    if sys.version_info[0] == 3:
-        sys.argv = []
     status, argv = Clutter.init(sys.argv)
     if status == Clutter.InitError.SUCCESS:
         sys.argv = argv

@@ -10,7 +10,7 @@ and cffi_ (optional). API compatible with PyGObject_.
 
 **Requirements:**
 
-- CPython_ 2.7 or PyPy_ 1.9
+- CPython_ 2.7 or Python 3.3 or PyPy_ 1.9
 - libgirepository_ 1.0
 - cffi_ 0.6+ (optional)
 - cairocffi_ 0.4+ (optional, for cairo support)

@@ -5,8 +5,6 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-import __builtin__
-
 from cffi import FFI
 
 from pgi.clib.gir import GIRepository, GITypeTag, GIInfoType
@@ -135,14 +133,15 @@ class BaseType(object):
     def free(self, name):
         raise NotImplementedError
 
+    def __getattr__(self, attr):
+        if attr.endswith(("_py2", "_py3")):
+            raise AttributeError(attr)
+        if _compat.PY3:
+            return getattr(self, attr + "_py3")
+        return getattr(self, attr + "_py2")
 
-class BasicType(BaseType):
 
-    def pack_in(self, name):
-        return name
-
-
-class Boolean(BasicType):
+class Boolean(BaseType):
     GI_TYPE_TAG = GITypeTag.BOOLEAN
 
     def check(self, name):
@@ -151,6 +150,9 @@ $bool = $_.bool($value)
 """, value=name)["bool"]
 
     def pack(self, name):
+        return name
+
+    def pack_in(self, name):
         return name
 
     def unpack(self, name):
@@ -164,7 +166,7 @@ $value = $ffi.cast("gboolean", 0)
 """)["value"]
 
 
-class Int32(BasicType):
+class Int32(BaseType):
     GI_TYPE_TAG = GITypeTag.INT32
 
     def check(self, name):
@@ -185,6 +187,9 @@ if not -2**31 <= $int < 2**31:
 $c_value = $ffi.cast("gint32", $value)
 """, value=valid)["c_value"]
 
+    def pack_in(self, name):
+        return name
+
     def unpack(self, name):
         raise NotImplementedError
 
@@ -195,13 +200,34 @@ $value = $ffi.cast("gint32", 0)
 """)["value"]
 
 
-class Utf8(BasicType):
+class Utf8(BaseType):
     GI_TYPE_TAG = GITypeTag.UTF8
 
-    def check(self, name):
+    def check_py3(self, name):
         if self.may_be_null:
             return self.parse("""
-if $value is not $_.None:
+if $value is not None:
+    if isinstance($value, $_.str):
+        $string = $value.encode("utf-8")
+    else:
+        $string = $value
+else:
+    $string = None
+""", value=name)["string"]
+
+        return self.parse("""
+if isinstance($value, $_.str):
+    $string = $value.encode("utf-8")
+elif not isinstance($value, $_.bytes):
+    raise TypeError
+else:
+    $string = $value
+""", value=name)["string"]
+
+    def check_py2(self, name):
+        if self.may_be_null:
+            return self.parse("""
+if $value is not $none:
     if isinstance($value, $_.unicode):
         $string = $value.encode("utf-8")
     elif not isinstance($value, $_.str):
@@ -209,8 +235,8 @@ if $value is not $_.None:
     else:
         $string = $value
 else:
-    $string = $_.None
-""", value=name)["string"]
+    $string = $none
+""", value=name, none=None)["string"]
 
         return self.parse("""
 if $_.isinstance($value, $_.unicode):
@@ -221,9 +247,17 @@ else:
     $string = $value
 """, value=name)["string"]
 
-    def pack(self, name):
+    def pack_py2(self, name):
         return self.parse("""
 if $value:
+    $c_value = $value
+else:
+    $c_value = $ffi.cast("char*", 0)
+""", value=name)["c_value"]
+
+    def pack_py3(self, name):
+        return self.parse("""
+if $value is not None:
     $c_value = $value
 else:
     $c_value = $ffi.cast("char*", 0)
@@ -252,7 +286,7 @@ class CFFICodeGen(object):
         kwargs["ffi"] = self._ffi
 
         assert "_" not in kwargs
-        kwargs["_"] = __builtin__
+        kwargs["_"] = _compat.builtins
 
         block, var = parse_with_objects(code, self.var, **kwargs)
         return block, var

@@ -32,6 +32,11 @@ class FuncsTest(unittest.TestCase):
         self.assertEqual(GLib.basename("/omg/foo/test"), "test")
         self.assertEqual(GLib.basename(u"/omg/foo/test"), "test")
 
+    def test_basic_utf8_arg(self):
+        b = Gtk.Button()
+        b.set_name("foobar")
+        self.assertEqual(b.get_name(), "foobar")
+
     def test_return_guint(self):
         self.assertTrue(isinstance(Gtk.get_binary_age(),
                         _compat.integer_types))
