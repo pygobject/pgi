@@ -1181,6 +1181,12 @@ if $array_len != $length:
         return name
 
     def pack(self, name, length_type):
+        return self._pack(name, length_type, True)
+
+    def pack_in(self, name, length_type):
+        return self._pack(name, length_type, False)
+
+    def _pack(self, name, length_type, out=True):
         # length
         if self.type.array_length != -1:
             l = self.get_type(length_type)
@@ -1202,6 +1208,11 @@ if $array_len != $length:
         item_out = p.pack(p.check(item_in))
         ctypes_type = typeinfo_to_ctypes(param_type)
 
+        if out:
+            getref = ctypes.pointer
+        else:
+            getref = ctypes.byref
+
         # array zero term
         if self.type.is_zero_terminated:
             return self.parse("""
@@ -1210,19 +1221,31 @@ for $i, $item_in in $_.enumerate($name):
     $param_pack
     $array[$i] = $item_out
 $array[-1] = $ctypes_type()
-$array_ptr = $ctypes.pointer($array)
+$array_ptr = $getref($array)
     """, name=name, item_in=item_in, item_out=item_out, param_pack=p.block,
-         ctypes_type=ctypes_type, length=length)["array_ptr"], packed_length
+         ctypes_type=ctypes_type, length=length, getref=getref)["array_ptr"], packed_length
 
-        # non zero term
-        return self.parse("""
-$array = ($ctypes_type * $length)()
+        if self.type.array_fixed_size != -1:
+            array_type = ctypes_type * length
+            return self.parse("""
+$array = $array_type()
 for $i, $item_in in $_.enumerate($name):
     $param_pack
     $array[$i] = $item_out
-$array_ptr = $ctypes.pointer($array)
+$array_ptr = $getref($array)
 """, name=name, item_in=item_in, item_out=item_out, param_pack=p.block,
-     ctypes_type=ctypes_type, length=length)["array_ptr"], packed_length
+     array_type=array_type, getref=getref)["array_ptr"], packed_length
+
+        # non zero term
+        return self.parse("""
+$array_type = ($ctypes_type * $length)
+$array = $array_type()
+for $i, $item_in in $_.enumerate($name):
+    $param_pack
+    $array[$i] = $item_out
+$array_ptr = $getref($array)
+""", name=name, item_in=item_in, item_out=item_out, param_pack=p.block,
+     ctypes_type=ctypes_type, length=length, getref=getref)["array_ptr"], packed_length
 
     def unpack(self, name, length):
         param_type = self.type.get_param_type(0)

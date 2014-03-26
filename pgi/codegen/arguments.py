@@ -208,10 +208,10 @@ class CArrayArgument(ArrayArgument):
         elif self.is_direction_in():
             checked = var.check(self.name)
             if self.type.array_length != -1:
-                self.call_var, length = var.pack(checked, self._aux.type)
+                self.call_var, length = var.pack_in(checked, self._aux.type)
                 self._aux.call_var = length
             else:
-                self.call_var, dummy = var.pack(checked, None)
+                self.call_var, dummy = var.pack_in(checked, None)
             return var.block
         else:
             if self.type.array_length != -1:

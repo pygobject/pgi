@@ -52,7 +52,9 @@ class BaseType(object):
     def pre_unpack(self, name):
         return name
 
-    def pack_in(self, name):
+    def pack_in(self, name, *args):
+        if args:
+            return (name, None)
         return name
 
     def unpack_return(self, name):
