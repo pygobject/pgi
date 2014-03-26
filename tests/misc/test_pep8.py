@@ -61,6 +61,10 @@ class TPEP8(unittest.TestCase):
         import gi.codegen
         self._run_package(gi.codegen)
 
+    def test_codegen_ctypes_backend(self):
+        import gi.codegen.ctypes_backend
+        self._run_package(gi.codegen.ctypes_backend)
+
     def test_clib(self):
         import gi.clib
         self._run_package(gi.clib)

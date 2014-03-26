@@ -224,7 +224,8 @@ setup(name='pgi',
          'pgi.clib.gir',
          'pgi.overrides',
          'pgi.repository',
-         'pgi.codegen'
+         'pgi.codegen',
+         'pgi.codegen.ctypes_backend',
       ],
       license='LGPL-2.1+',
       classifiers=[
