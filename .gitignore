@@ -10,3 +10,5 @@
 docs/_html
 MANIFEST
 coverage/
+build/
+dist/
