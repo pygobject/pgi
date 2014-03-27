@@ -56,35 +56,29 @@ class BaseInterfaceSetter(ConstructorSetter):
 
         raise NotImplementedError(iface.type)
 
-
-class ObjectSetter(BaseInterfaceSetter):
     def set(self, name):
         var = self.get_type()
-        out = var.pack(var.check(name))
+        out = var.pack_in(name)
         self.out_var = out
         return var.block, out
+
+
+class ObjectSetter(BaseInterfaceSetter):
+    pass
 
 
 class StructSetter(BaseInterfaceSetter):
-    def set(self, name):
-        var = self.get_type()
-        out = var.pack(var.check(name))
-        self.out_var = out
-        return var.block, out
+    pass
 
 
 class EnumFlagsSetter(BaseInterfaceSetter):
-    def set(self, name):
-        var = self.get_type()
-        out = var.pack(var.check(name))
-        self.out_var = out
-        return var.block, out
+    pass
 
 
 class BasicSetter(ConstructorSetter):
     def set(self, name):
         var = self.get_type()
-        out = var.pack(var.check(name))
+        out = var.pack_in(name)
         self.out_var = out
         return var.block, out
 
@@ -105,14 +99,9 @@ class DoubleSetter(BasicSetter):
     TAG = GITypeTag.DOUBLE
 
 
-class UTF8Argument(ConstructorSetter):
+class UTF8Argument(BasicSetter):
     TAG = GITypeTag.UTF8
 
-    def set(self, name):
-        var = self.get_type()
-        out = var.pack(var.check(name))
-        self.out_var = out
-        return var.block, out
 
 _classes = {}
 

@@ -57,6 +57,14 @@ class BaseType(object):
             return (name, None)
         return name
 
+    def pack_out(self, name, *args):
+        if args:
+            return (name, None)
+        return name
+
+    def unpack_out(self, name):
+        return name
+
     def unpack_return(self, name):
         return name
 

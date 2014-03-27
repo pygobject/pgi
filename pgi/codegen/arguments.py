@@ -303,10 +303,10 @@ class EnumFlagsArgument(BaseInterfaceArgument):
         var = self.get_type()
 
         if self.is_direction_inout():
-            self._data = var.pack(var.check(self.name))
+            self._data = var.pack_out(self.name)
             self.call_var = var.get_reference(self._data)
         elif self.is_direction_in():
-            self.call_var = var.pack(var.check(self.name))
+            self.call_var = var.pack_in(self.name)
         else:
             self._data = var.new()
             self.call_var = var.get_reference(self._data)
@@ -318,7 +318,7 @@ class EnumFlagsArgument(BaseInterfaceArgument):
             return
 
         var = self.get_type()
-        self.out_var = var.unpack(var.pre_unpack(self._data))
+        self.out_var = var.unpack_out(self._data)
         return var.block
 
 
@@ -328,10 +328,10 @@ class StructArgument(BaseInterfaceArgument):
         var = self.get_type()
 
         if self.is_direction_inout():
-            self._data = var.pack(var.check(self.name))
+            self._data = var.pack_out(self.name)
             self.call_var = var.get_reference(self._data)
         elif self.is_direction_in():
-            self.call_var = var.pack(var.check(self.name))
+            self.call_var = var.pack_in(self.name)
         else:
             if self.is_caller_allocates():
                 self.call_var = self._data = var.alloc()
@@ -346,7 +346,7 @@ class StructArgument(BaseInterfaceArgument):
             return
 
         var = self.get_type()
-        self.out_var = var.unpack(var.pre_unpack(self._data))
+        self.out_var = var.unpack_out(self._data)
         return var.block
 
 
@@ -367,7 +367,7 @@ class ObjectArgument(BaseInterfaceArgument):
         var = self.get_type()
 
         if self.is_direction_in():
-            self._data = var.pack(var.check(self.name))
+            self._data = var.pack_in(self.name)
 
             if self.transfer_everything():
                 var.ref(self.name)
@@ -387,7 +387,7 @@ class ObjectArgument(BaseInterfaceArgument):
     def post_call(self):
         if self.is_direction_out():
             var = self.get_type()
-            out = var.unpack(self._data)
+            out = var.unpack_out(self._data)
             if self.transfer_nothing():
                 var.ref(out)
             self.out_var = out
@@ -401,11 +401,11 @@ class BasicTypeArgument(GIArgument):
         var = self.get_type()
 
         if self.is_direction_inout():
-            self._data = var.pack(var.check(self.name))
+            self._data = var.pack_out(self.name)
             self.call_var = var.get_reference(self._data)
             return var.block
         elif self.is_direction_in():
-            self.call_var = var.pack_in(var.check(self.name))
+            self.call_var = var.pack_in(self.name)
             return var.block
         else:
             self._data = var.new()
@@ -415,7 +415,7 @@ class BasicTypeArgument(GIArgument):
     def post_call(self):
         if self.is_direction_out():
             var = self.get_type()
-            self.out_var = var.unpack(var.pre_unpack(self._data))
+            self.out_var = var.unpack_out(self._data)
             return var.block
 
 
@@ -488,7 +488,7 @@ class VoidArgument(GIArgument):
 
     def pre_call(self):
         var = self.get_type()
-        self.call_var = var.pack(var.check(self.name))
+        self.call_var = var.pack_out(self.name)
         return var.block
 
 
@@ -539,7 +539,7 @@ class Utf8Argument(GIArgument):
         var = self.get_type()
 
         if self.is_direction_inout():
-            data = var.pack(var.check(self.name))
+            data = var.pack_out(self.name)
 
             if self.transfer_everything():
                 data = var.dup(data)
@@ -547,7 +547,7 @@ class Utf8Argument(GIArgument):
             self.call_var = var.get_reference(data)
             self._data = data
         elif self.is_direction_in():
-            self.call_var = var.pack(var.check(self.name))
+            self.call_var = var.pack_in(self.name)
         else:
             self._data = var.new()
             self.call_var = var.get_reference(self._data)
@@ -559,7 +559,7 @@ class Utf8Argument(GIArgument):
             return
 
         var = self.get_type()
-        self.out_var = var.unpack(var.pre_unpack(self._data))
+        self.out_var = var.unpack_out(self._data)
         if self.transfer_everything():
             var.free(self._data)
         return var.block

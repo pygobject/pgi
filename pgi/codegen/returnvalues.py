@@ -72,16 +72,6 @@ class ReturnValue(object):
         return self.info.caller_owns.value == GITransfer.EVERYTHING
 
 
-class BooleanReturnValue(ReturnValue):
-    TAG = GITypeTag.BOOLEAN
-    py_type = bool
-
-    def post_call(self, name):
-        var = self.get_type()
-        out = var.unpack(name)
-        return var.block, out
-
-
 class VoidReturnValue(ReturnValue):
     TAG = GITypeTag.VOID
     py_type = object
@@ -149,7 +139,14 @@ class CArrayReturn(ArrayReturn):
 class BasicReturnValue(ReturnValue):
 
     def post_call(self, name):
-        return None, name
+        var = self.get_type()
+        out = var.unpack_return(name)
+        return var.block, out
+
+
+class BooleanReturnValue(BasicReturnValue):
+    TAG = GITypeTag.BOOLEAN
+    py_type = bool
 
 
 class UInt8ReturnValue(BasicReturnValue):
@@ -323,7 +320,7 @@ class EnumReturn(BaseInterfaceReturn):
 
     def post_call(self, name):
         var = self.get_type()
-        out = var.unpack(name)
+        out = var.unpack_return(name)
         return var.block, out
 
 
@@ -331,7 +328,7 @@ class InterfaceReturn(BaseInterfaceReturn):
 
     def post_call(self, name):
         var = self.get_type()
-        out = var.unpack(name)
+        out = var.unpack_return(name)
         if self.transfer_nothing():
             var.ref(out)
         return var.block, out
@@ -341,7 +338,7 @@ class ObjectReturn(BaseInterfaceReturn):
 
     def post_call(self, name):
         var = self.get_type()
-        out = var.unpack(name)
+        out = var.unpack_return(name)
         if self.transfer_nothing():
             var.ref(out)
         return var.block, out
@@ -355,7 +352,7 @@ class StructReturn(BaseInterfaceReturn):
         iface_name = iface.name
 
         var = self.get_type()
-        out = var.unpack(name)
+        out = var.unpack_return(name)
         if iface_namespace == "GObject" and iface_name == "Value":
             out = var.unpack_gvalue(out)
         return var.block, out
@@ -365,7 +362,7 @@ class UnionReturn(BaseInterfaceReturn):
 
     def post_call(self, name):
         var = self.get_type()
-        out = var.unpack(name)
+        out = var.unpack_return(name)
         return var.block, out
 
 
@@ -373,7 +370,7 @@ class FlagsReturn(BaseInterfaceReturn):
 
     def post_call(self, name):
         var = self.get_type()
-        out = var.unpack(name)
+        out = var.unpack_return(name)
         return var.block, out
 
 
@@ -383,7 +380,7 @@ class GTypeReturnValue(ReturnValue):
 
     def post_call(self, name):
         var = self.get_type()
-        out = var.unpack(name)
+        out = var.unpack_return(name)
         return var.block, out
 
 

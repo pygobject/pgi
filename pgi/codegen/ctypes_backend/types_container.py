@@ -48,7 +48,7 @@ if $array_len != $length:
         if self.type.array_length != -1:
             l = self.get_type(length_type)
             length = l.parse("$len = $_.len($inp)", inp=name)["len"]
-            packed_length = l.pack(length)
+            packed_length = l.pack_out(length)
             l.block.write_into(self.block)
         elif self.type.array_fixed_size != -1:
             length = self.type.array_fixed_size
@@ -62,7 +62,7 @@ if $array_len != $length:
         param_type = self.type.get_param_type(0)
         p = self.get_type(param_type)
         item_in = self.var()
-        item_out = p.pack(p.check(item_in))
+        item_out = p.pack_in(item_in)
         ctypes_type = typeinfo_to_ctypes(param_type)
 
         if out:
@@ -112,11 +112,9 @@ $array_ptr = $getref($array)
 $data = $ctypes.cast($value, $ctypes.POINTER($type))
 """, value=name, type=ctypes_type)["data"]
 
-        # fixme: do unpack with param type
-
         p = self.get_type(param_type)
         item_in = self.var()
-        item_out = p.unpack(item_in)
+        item_out = p.unpack_return(item_in)
 
         if self.type.array_length != -1:
             return self.parse("""
@@ -186,7 +184,7 @@ class GList(BaseType):
         param_type = self.get_type(param_type_info)
 
         param_in = self.var()
-        param_out = param_type.pack_pointer(param_type.check(param_in))
+        param_out = param_type.pack_pointer(param_type.pack_in(param_in))
 
         return self.parse("""
 $new = $GListPtr()
@@ -203,7 +201,7 @@ param_check_pack=param_type.block, item_out=param_out)["new"]
 
         p = self.get_type(param_type)
         item_in = self.var()
-        item_out = p.unpack(item_in)
+        item_out = p.unpack_return(item_in)
 
         return self.parse("""
 $out = []

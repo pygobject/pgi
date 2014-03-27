@@ -25,7 +25,7 @@ class CallbackReturn(object):
 
     def process(self, name):
         var = self.get_type()
-        out = var.check(name)
+        out = var.unpack_return(name)
         return var.block, out
 
 

@@ -71,7 +71,7 @@ class BaseInterfaceArgument(CallbackArgument):
 
     def process(self):
         var = self.backend.get_type(self.type)
-        out = var.unpack(self.name)
+        out = var.unpack_return(self.name)
         return var.block, out
 
 

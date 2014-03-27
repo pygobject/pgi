@@ -1,4 +1,4 @@
-# Copyright 2013 Christoph Reiter
+# Copyright 2013,2014 Christoph Reiter
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -67,6 +67,10 @@ def set_backend(name=None):
                 break
         else:
             raise LookupError("Unkown backend: %r" % name)
+
+    # only add null as fallback it explicitly specified
+    if "null" not in names:
+        possible = [b for b in possible if b.NAME != "null"]
 
     _ACTIVE_BACKENDS[:] = possible
 

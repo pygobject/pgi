@@ -17,7 +17,7 @@ from .utils import BaseType, register_type
 @register_type(GITypeTag.GTYPE)
 class GType_(BaseType):
 
-    def check(self, name):
+    def _check(self, name):
         gtype_map = {
             str: "gchararray",
             int: "gint",
@@ -41,24 +41,24 @@ if not $_.isinstance($obj, $PGType):
 
         return var["obj"]
 
-    def pack(self, name):
+    def pack_in(self, name):
+        checked = self._check(name)
         var = self.parse("""
 $gtype = $GType($obj._type.value)
-""", obj=name, GType=GType)
+""", obj=checked, GType=GType)
 
         return var["gtype"]
 
-    pack_in = pack
+    pack_out = pack_in
 
-    def pre_unpack(self, name):
-        return name
-
-    def unpack(self, name):
+    def unpack_out(self, name):
         var = self.parse("""
 $pgtype = $PGType($gtype)
 """, gtype=name, PGType=PGType)
 
         return var["pgtype"]
+
+    unpack_return = unpack_out
 
     def new(self):
         var = self.parse("""

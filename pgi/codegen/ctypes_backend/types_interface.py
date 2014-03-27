@@ -62,7 +62,7 @@ class BaseInterface(BaseType):
 
 class Object(BaseInterface):
 
-    def check(self, name):
+    def _check(self, name):
         if self.may_be_null:
             return self.parse("""
 if $obj is not $none and not $_.isinstance($obj, $type_class):
@@ -76,17 +76,20 @@ if not $_.isinstance($obj, $type_class):
                        ($type_class.__name__, $obj.__class__.__name__))
 """, obj=name, type_class=self._import_type())["obj"]
 
-    def pack(self, name):
+    def pack_out(self, name):
+        checked = self._check(name)
         if self.may_be_null:
             return self.parse("""
 $ptr = $ctypes.c_void_p($obj and $obj._obj)
-""", obj=name)["ptr"]
+""", obj=checked)["ptr"]
 
         return self.parse("""
 $ptr = $ctypes.c_void_p($obj._obj)
-""", obj=name)["ptr"]
+""", obj=checked)["ptr"]
 
-    def unpack(self, name):
+    pack_in = pack_out
+
+    def unpack_return(self, name):
         def get_class_func(pointer):
             instance = ctypes.cast(pointer, GTypeInstancePtr)
             gtype = PGType(G_TYPE_FROM_INSTANCE(instance.contents))
@@ -104,6 +107,8 @@ if $value:
 else:
     $obj = None
 """, value=name, get_class=get_class_func)["obj"]
+
+    unpack_out = unpack_return
 
     def ref(self, name):
             self.parse("""
@@ -124,7 +129,7 @@ class Interface(Object):
 
 class Union(BaseInterface):
 
-    def unpack(self, name):
+    def unpack_return(self, name):
         return self.parse("""
 # unpack union
 $union = object.__new__($union_class)
@@ -134,7 +139,7 @@ $union._obj = $value
 
 class Flags(BaseInterface):
 
-    def check(self, name):
+    def _check(self, name):
         return self.parse("""
 if not $_.isinstance($value, $basestring) and not $_.int($value):
     $out = 0
@@ -146,17 +151,21 @@ else:
 """, base_type=self._import_type(), value=name,
 basestring=_compat.string_types)["out"]
 
-    def pack(self, name):
+    def pack_in(self, name):
+        return self._check(name)
+
+    def pack_out(self, name):
+        checked = self._check(name)
         return self.parse("""
 $c_value = $ctypes.c_uint($value)
-""", value=name)["c_value"]
+""", value=checked)["c_value"]
 
-    def pre_unpack(self, name):
+    def unpack_out(self, name):
         return self.parse("""
-$value = $cvalue.value
-""", cvalue=name)["value"]
+$flags = $flags_class($value.value)
+""", flags_class=self._import_type(), value=name)["flags"]
 
-    def unpack(self, name):
+    def unpack_return(self, name):
         return self.parse("""
 $flags = $flags_class($value)
 """, flags_class=self._import_type(), value=name)["flags"]
@@ -169,7 +178,7 @@ $val = $ctypes.c_uint()
 
 class Struct(BaseInterface):
 
-    def check(self, name):
+    def _check(self, name):
         base_obj = import_attribute("GObject", "Object")
 
         foreign_struct = self._import_foreign()
@@ -186,7 +195,8 @@ if not $_.isinstance($obj, ($struct_class, $obj_class)):
     raise $_.TypeError("%r is not a structure object" % $obj)
     """, obj_class=base_obj, struct_class=self._import_type(), obj=name)["obj"]
 
-    def pack(self, name):
+    def pack_out(self, name):
+        name = self._check(name)
 
         foreign_struct = self._import_foreign()
 
@@ -199,12 +209,9 @@ $out = $ctypes.c_void_p($obj._obj)
 $out = $ctypes.c_void_p($foreign_struct.to_pointer($obj))
 """, foreign_struct=foreign_struct, obj=name)["out"]
 
-    def pre_unpack(self, name):
-        return self.parse("""
-$value = $cvalue.value
-""", cvalue=name)["value"]
+    pack_in = pack_out
 
-    def unpack(self, name):
+    def _unpack(self, name):
         iface = self.type.get_interface()
         foreign_struct = None
         if iface.is_foreign:
@@ -225,6 +232,15 @@ if $value:
 else:
     $obj = None
 """, value=name, type=self._import_type())["obj"]
+
+    def unpack_out(self, name):
+        pre = self.parse("""
+$value = $cvalue.value
+""", cvalue=name)["value"]
+        return self._unpack(pre)
+
+    def unpack_return(self, value):
+        return self._unpack(value)
 
     def new(self):
         return self.parse("""
@@ -297,23 +313,27 @@ $ctypes_cb = $pack_func($py_cb)
 
 class Enum(BaseInterface):
 
-    def check(self, name):
+    def _check(self, name):
         return self.parse("""
 if $value not in $base_type._allowed:
     raise $_.TypeError("Invalid enum: %r" % $value)
 """, base_type=self._import_type(), value=name)["value"]
 
-    def pack(self, name):
+    def pack_in(self, name):
+        return self._check(name)
+
+    def pack_out(self, name):
+        checked = self._check(name)
         return self.parse("""
 $c_value = $ctypes.c_uint($value)
-""", value=name)["c_value"]
+""", value=checked)["c_value"]
 
-    def pre_unpack(self, name):
+    def unpack_out(self, name):
         return self.parse("""
-$value = $cvalue.value
-""", cvalue=name)["value"]
+$enum = $enum_class($value.value)
+""", enum_class=self._import_type(), value=name)["enum"]
 
-    def unpack(self, name):
+    def unpack_return(self, name):
         return self.parse("""
 $enum = $enum_class($value)
 """, enum_class=self._import_type(), value=name)["enum"]

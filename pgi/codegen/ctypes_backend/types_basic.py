@@ -14,58 +14,64 @@ from .utils import BaseType, register_type
 
 class BasicType(BaseType):
 
-    @classmethod
-    def get_class(cls, type_):
-        return cls
+    def pack_in(self, value):
+        raise NotImplementedError
 
-    def pack_in(self, name):
-        return name
+    def pack_out(self, value):
+        raise NotImplementedError
 
-    def pre_unpack(self, c_value):
-        # ctypes does auto unpacking of return values
-        # to keep the unpack methods for out arguments and return values
-        # the same, do the unpacking explicitly in the out arg case
-        return self.parse("""
-# unpack basic ctypes value
-$value = $ctypes_value.value
-""", ctypes_value=c_value)["value"]
+    def unpack_out(self, value):
+        raise NotImplementedError
 
-    def unpack(self, name):
-        return name
+    def unpack_return(self, value):
+        raise NotImplementedError
+
+    def new(self):
+        raise NotImplementedError
+
+    def pack_pointer(self, value):
+        raise NotImplementedError
 
 
 @register_type(GITypeTag.BOOLEAN)
 class Boolean(BasicType):
 
-    def check(self, name):
+    def pack_in(self, value):
         return self.parse("""
 $bool = $_.bool($value)
-""", value=name)["bool"]
+""", value=value)["bool"]
 
-    def pack(self, name):
+    def pack_out(self, value):
         return self.parse("""
 $c_bool = $ctypes.c_int($value)
-""", value=name)["c_bool"]
+""", value=value)["c_bool"]
 
-    def pre_unpack(self, name):
-        return name
-
-    def unpack(self, name):
+    def unpack_out(self, value):
         return self.parse("""
-# pypy returns int instead of bool
+$value = $ctypes_value.value
 $bool = $_.bool($value)
-""", value=name)["bool"]
+""", ctypes_value=value)["bool"]
+
+    def unpack_return(self, value):
+        return self.parse("""
+$bool = $_.bool($value)
+""", value=value)["bool"]
 
     def new(self):
         return self.parse("""
 $value = $ctypes.c_int()
 """)["value"]
 
+    def pack_pointer(self, value):
+        return self.parse("""
+$ptr = $_.bool($value)
+""", value=value)["ptr"]
+
 
 @register_type(GITypeTag.INT8)
 class Int8(BasicType):
 
-    def check(self, name):
+    def _check(self, name):
         return self.parse("""
 if not $_.isinstance($value, $basestring):
     $int = $_.int($value)
@@ -77,23 +83,35 @@ if not -2**7 <= $int < 2**7:
     raise $_.OverflowError("Value %r not in range" % $int)
 """, value=name, basestring=_compat.string_types)["int"]
 
-    def pack(self, name):
+    def pack_in(self, value):
+        return self._check(value)
+
+    def pack_out(self, value):
+        checked = self._check(value)
         return self.parse("""
-# to ctypes
 $cvalue = $ctypes.c_int8($value)
-""", value=name)["cvalue"]
+""", value=checked)["cvalue"]
+
+    def unpack_out(self, value):
+        return self.parse("""
+$value = $ctypes_value.value
+""", ctypes_value=value)["value"]
+
+    def unpack_return(self, value):
+        return value
 
     def new(self):
         return self.parse("""
-# new int8
 $value = $ctypes.c_int8()
 """)["value"]
+
+    pack_pointer = pack_in
 
 
 @register_type(GITypeTag.UINT8)
 class UInt8(BasicType):
 
-    def check(self, name):
+    def _check(self, name):
 
         if _compat.PY3:
             int_text_types = (str, bytes)
@@ -118,23 +136,35 @@ if not 0 <= $uint < 2**8:
     raise $_.OverflowError("Value %r not in range" % $uint)
 """, value=name, text_types=int_text_types)["uint"]
 
-    def pack(self, name):
+    def pack_in(self, value):
+        return self._check(value)
+
+    def pack_out(self, value):
+        checked = self._check(value)
         return self.parse("""
-# to ctypes
 $cvalue = $ctypes.c_uint8($value)
-""", value=name)["cvalue"]
+""", value=checked)["cvalue"]
+
+    def unpack_out(self, value):
+        return self.parse("""
+$value = $ctypes_value.value
+""", ctypes_value=value)["value"]
+
+    def unpack_return(self, value):
+        return value
 
     def new(self):
         return self.parse("""
-# new uint8
 $value = $ctypes.c_uint8()
 """)["value"]
+
+    pack_pointer = pack_in
 
 
 @register_type(GITypeTag.INT16)
 class Int16(BasicType):
 
-    def check(self, name):
+    def _check(self, name):
         return self.parse("""
 if not $_.isinstance($value, $basestring):
     $int = $_.int($value)
@@ -146,23 +176,35 @@ if not -2**15 <= $int < 2**15:
     raise $_.OverflowError("Value %r not in range" % $int)
 """, value=name, basestring=_compat.string_types)["int"]
 
-    def pack(self, name):
+    def pack_in(self, value):
+        return self._check(value)
+
+    def pack_out(self, value):
+        checked = self._check(value)
         return self.parse("""
-# to ctypes
 $cvalue = $ctypes.c_int16($value)
-""", value=name)["cvalue"]
+""", value=checked)["cvalue"]
+
+    def unpack_out(self, value):
+        return self.parse("""
+$value = $ctypes_value.value
+""", ctypes_value=value)["value"]
+
+    def unpack_return(self, value):
+        return value
 
     def new(self):
         return self.parse("""
-# new int16
 $value = $ctypes.c_int16()
 """)["value"]
+
+    pack_pointer = pack_in
 
 
 @register_type(GITypeTag.UINT16)
 class UInt16(BasicType):
 
-    def check(self, name):
+    def _check(self, name):
         return self.parse("""
 if not $_.isinstance($value, $basestring):
     $int = $_.int($value)
@@ -174,23 +216,35 @@ if not 0 <= $int < 2**16:
     raise $_.OverflowError("Value %r not in range" % $int)
 """, value=name, basestring=_compat.string_types)["int"]
 
-    def pack(self, name):
+    def pack_in(self, value):
+        return self._check(value)
+
+    def pack_out(self, value):
+        checked = self._check(value)
         return self.parse("""
-# to ctypes
 $cvalue = $ctypes.c_uint16($value)
-""", value=name)["cvalue"]
+""", value=checked)["cvalue"]
+
+    def unpack_out(self, value):
+        return self.parse("""
+$value = $ctypes_value.value
+""", ctypes_value=value)["value"]
+
+    def unpack_return(self, value):
+        return value
 
     def new(self):
         return self.parse("""
-# new int16
 $value = $ctypes.c_uint16()
 """)["value"]
+
+    pack_pointer = pack_in
 
 
 @register_type(GITypeTag.INT32)
 class Int32(BasicType):
 
-    def check(self, name):
+    def _check(self, name):
         return self.parse("""
 # int32 type/value check
 if not $_.isinstance($value, $basestring):
@@ -202,28 +256,35 @@ if not -2**31 <= $int < 2**31:
     raise $_.OverflowError("Value %r not in range" % $int)
 """, value=name, basestring=_compat.string_types)["int"]
 
-    def pack(self, valid):
+    def pack_in(self, value):
+        return self._check(value)
+
+    def pack_out(self, value):
+        checked = self._check(value)
         return self.parse("""
-# to ctypes
 $c_value = $ctypes.c_int32($value)
-""", value=valid)["c_value"]
+""", value=checked)["c_value"]
+
+    def unpack_out(self, value):
+        return self.parse("""
+$value = $ctypes_value.value
+""", ctypes_value=value)["value"]
+
+    def unpack_return(self, value):
+        return value
 
     def new(self):
         return self.parse("""
-# new int32
 $value = $ctypes.c_int32()
 """)["value"]
 
-    def pack_pointer(self, name):
-        return self.parse("""
-$ptr = $in_
-""", in_=name)["ptr"]
+    pack_pointer = pack_in
 
 
 @register_type(GITypeTag.UINT32)
 class UInt32(BasicType):
 
-    def check(self, name):
+    def _check(self, name):
         return self.parse("""
 # uint32 type/value check
 if not $_.isinstance($value, $basestring):
@@ -235,28 +296,35 @@ if not 0 <= $int < 2**32:
     raise $_.OverflowError("Value %r not in range" % $int)
 """, value=name, basestring=_compat.string_types)["int"]
 
-    def pack(self, valid):
+    def pack_in(self, value):
+        return self._check(value)
+
+    def pack_out(self, value):
+        checked = self._check(value)
         return self.parse("""
-# to ctypes
 $c_value = $ctypes.c_uint32($value)
-""", value=valid)["c_value"]
+""", value=checked)["c_value"]
+
+    def unpack_out(self, value):
+        return self.parse("""
+$value = $ctypes_value.value
+""", ctypes_value=value)["value"]
+
+    def unpack_return(self, value):
+        return value
 
     def new(self):
         return self.parse("""
-# new uint32
 $value = $ctypes.c_uint32()
 """)["value"]
 
-    def pack_pointer(self, name):
-        return self.parse("""
-$ptr = $in_
-""", in_=name)["ptr"]
+    pack_pointer = pack_in
 
 
 @register_type(GITypeTag.INT64)
 class Int64(BasicType):
 
-    def check(self, name):
+    def _check(self, name):
         return self.parse("""
 # int64 type/value check
 if not $_.isinstance($value, $basestring):
@@ -268,11 +336,22 @@ if not -2**63 <= $int < 2**63:
     raise $_.OverflowError("Value %r not in range" % $int)
 """, value=name, basestring=_compat.string_types)["int"]
 
-    def pack(self, valid):
+    def pack_in(self, value):
+        return self._check(value)
+
+    def pack_out(self, value):
+        checked = self._check(value)
         return self.parse("""
-# to ctypes
 $c_value = $ctypes.c_int64($value)
-""", value=valid)["c_value"]
+""", value=checked)["c_value"]
+
+    def unpack_out(self, value):
+        return self.parse("""
+$value = $ctypes_value.value
+""", ctypes_value=value)["value"]
+
+    def unpack_return(self, value):
+        return value
 
     def new(self):
         return self.parse("""
@@ -280,11 +359,13 @@ $c_value = $ctypes.c_int64($value)
 $value = $ctypes.c_int64()
 """)["value"]
 
+    pack_pointer = pack_in
+
 
 @register_type(GITypeTag.UINT64)
 class UInt64(BasicType):
 
-    def check(self, name):
+    def _check(self, name):
         return self.parse("""
 # uint64 type/value check
 if not $_.isinstance($value, $basestring):
@@ -296,11 +377,22 @@ if not 0 <= $int < 2**64:
     raise $_.OverflowError("Value %r not in range" % $int)
 """, value=name, basestring=_compat.string_types)["int"]
 
-    def pack(self, valid):
+    def pack_in(self, value):
+        return self._check(value)
+
+    def pack_out(self, value):
+        checked = self._check(value)
         return self.parse("""
-# to ctypes
 $c_value = $ctypes.c_uint64($value)
-""", value=valid)["c_value"]
+""", value=checked)["c_value"]
+
+    def unpack_out(self, value):
+        return self.parse("""
+$value = $ctypes_value.value
+""", ctypes_value=value)["value"]
+
+    def unpack_return(self, value):
+        return value
 
     def new(self):
         return self.parse("""
@@ -308,11 +400,13 @@ $c_value = $ctypes.c_uint64($value)
 $value = $ctypes.c_uint64()
 """)["value"]
 
+    pack_pointer = pack_in
+
 
 @register_type(GITypeTag.FLOAT)
 class Float(BasicType):
 
-    def check(self, name):
+    def _check(self, name):
         return self.parse("""
 # float type/value check
 if $_.isinstance($value, $basestring):
@@ -325,8 +419,18 @@ if $c_value != $float and \\
     raise $_.OverflowError("%r out of range" % $float)
 """, value=name, basestring=_compat.string_types)["c_float"]
 
-    def pack(self, name):
-        return name
+    def pack_in(self, value):
+        return self._check(value)
+
+    pack_out = pack_in
+
+    def unpack_out(self, value):
+        return self.parse("""
+$value = $ctypes_value.value
+""", ctypes_value=value)["value"]
+
+    def unpack_return(self, value):
+        return value
 
     def new(self):
         return self.parse("""
@@ -334,11 +438,13 @@ if $c_value != $float and \\
 $value = $ctypes.c_float()
 """)["value"]
 
+    pack_pointer = pack_in
+
 
 @register_type(GITypeTag.DOUBLE)
 class Double(BasicType):
 
-    def check(self, name):
+    def _check(self, name):
         return self.parse("""
 # double type/value check
 if $_.isinstance($value, $basestring):
@@ -351,20 +457,32 @@ if $c_value != $double and \\
     raise $_.OverflowError("%f out of range" % $double)
 """, value=name, basestring=_compat.string_types)["c_double"]
 
-    def pack(self, name):
-        return name
+    def pack_in(self, value):
+        return self._check(value)
+
+    pack_out = pack_in
+
+    def unpack_out(self, value):
+        return self.parse("""
+$value = $ctypes_value.value
+""", ctypes_value=value)["value"]
+
+    def unpack_return(self, value):
+        return value
 
     def new(self):
         return self.parse("""
-# new double
+# new float
 $value = $ctypes.c_double()
 """)["value"]
+
+    pack_pointer = pack_in
 
 
 @register_type(GITypeTag.UNICHAR)
 class UniChar(BasicType):
 
-    def check_py2(self, name):
+    def _check_py2(self, name):
         return self.parse("""
 if $_.isinstance($value, $_.str):
     $value = $value.decode("utf-8")
@@ -377,7 +495,7 @@ if not 0 <= $int < 2**32:
     raise $_.OverflowError("Value %r not in range" % $int)
 """, value=name)["int"]
 
-    def check_py3(self, name):
+    def _check_py3(self, name):
         return self.parse("""
 $int = $_.ord($value)
 
@@ -385,11 +503,24 @@ if not 0 <= $int < 2**32:
     raise $_.OverflowError("Value %r not in range" % $int)
 """, value=name)["int"]
 
-    def pack(self, valid):
+    def pack_in(self, value):
+        return self._check(value)
+
+    def pack_out(self, value):
+        checked = self._check(self, value)
         return self.parse("""
-# to ctypes
 $c_value = $ctypes.c_uint32($value)
-""", value=valid)["c_value"]
+""", value=checked)["c_value"]
+
+    def unpack_out_py2(self, name):
+        return self.parse("""
+$out = $_.unichr($value.value).encode("utf-8")
+""", value=name)["out"]
+
+    def unpack_out_py3(self, name):
+        return self.parse("""
+$out = $_.chr($value.value)
+""", value=name)["out"]
 
     def unpack_return_py2(self, name):
         return self.parse("""
@@ -403,20 +534,16 @@ $out = $_.chr($value)
 
     def new(self):
         return self.parse("""
-# new uint32
 $value = $ctypes.c_uint32()
 """)["value"]
 
-    def pack_pointer(self, name):
-        return self.parse("""
-$ptr = $in_
-""", in_=name)["ptr"]
+    pack_pointer = pack_in
 
 
 @register_type(GITypeTag.VOID)
 class Void(BaseType):
 
-    def check(self, name):
+    def _check(self, name):
         if self.may_be_null:
             return name
 
@@ -425,20 +552,25 @@ if $ptr is None:
     raise $_.TypeError("No None allowed")
 """, ptr=name)["ptr"]
 
-    def pack(self, name):
+    def pack_in(self, value):
         assert self.type.is_pointer
 
+        checked = self._check(value)
         return self.parse("""
 $c_ptr = $ctypes.c_void_p($ptr)
-""", ptr=name)["c_ptr"]
+""", ptr=checked)["c_ptr"]
 
-    def unpack(self, name):
+    pack_out = pack_in
+
+    def unpack_out(self, name):
         if self.type.is_pointer:
-            return ""
+            return "None"
 
         return self.parse("""
 $value = $ptr.value
 """, ptr=name)["value"]
+
+    unpack_return = unpack_out
 
     def new(self):
         assert self.type.is_pointer
@@ -447,11 +579,13 @@ $value = $ptr.value
 $c_ptr = $ctypes.c_void_p()
 """)["c_ptr"]
 
+    pack_pointer = pack_in
+
 
 @register_type(GITypeTag.UTF8)
 class Utf8(BaseType):
 
-    def check_py3(self, name):
+    def _check_py3(self, name):
         if self.may_be_null:
             return self.parse("""
 if $value is not None:
@@ -470,7 +604,7 @@ else:
     $string = $value
 """, value=name)["string"]
 
-    def check_py2(self, name):
+    def _check_py2(self, name):
         if self.may_be_null:
             return self.parse("""
 if $value is not None:
@@ -494,26 +628,29 @@ else:
 """, value=name)["string"]
 
     def pack_in_py2(self, name):
-        return name
+        return self._check(name)
 
     def pack_in_py3(self, name):
+        checked = self._check(name)
         return self.parse("""
 $encoded = $value
 if $value is not None:
     $encoded = $value.encode("utf-8")
-""", value=name)["encoded"]
+""", value=checked)["encoded"]
 
-    def pack_py2(self, name):
+    def pack_out_py2(self, name):
+        checked = self._check(name)
         return self.parse("""
 $c_value = $ctypes.c_char_p($value)
-""", value=name)["c_value"]
+""", value=checked)["c_value"]
 
-    def pack_py3(self, name):
+    def pack_out_py3(self, name):
+        checked = self._check(name)
         return self.parse("""
 if $value is not None:
     $value = $value.encode("utf-8")
 $c_value = $ctypes.c_char_p($value)
-""", value=name)["c_value"]
+""", value=checked)["c_value"]
 
     def dup(self, name):
         var = self.parse("""
@@ -525,21 +662,17 @@ else:
 
         return var["ptr_cpy"]
 
-    def pre_unpack(self, c_value):
+    def unpack_out_py2(self, c_value):
         return self.parse("""
 $value = $ctypes_value.value
 """, ctypes_value=c_value)["value"]
 
-    def unpack_py2(self, name):
+    def unpack_out_py3(self, name):
         return self.parse("""
-$value = $ctypes_value
-""", ctypes_value=name)["value"]
-
-    def unpack_py3(self, name):
-        return self.parse("""
+$value = $ctypes_value.value
 if $value is not None:
     $value = $value.decode("utf-8")
-""", value=name, none=None)["value"]
+""", ctypes_value=name)["value"]
 
     def unpack_return_py2(self, name):
         return self.parse("""
@@ -558,10 +691,11 @@ if $str_value is not None:
 $value = $ctypes.c_char_p()
 """)["value"]
 
-    def pack_pointer(self, name):
+    def pack_pointer(self, value):
+        checked = self._check(value)
         return self.parse("""
-$ptr = ord($in_)
-""", in_=name)["ptr"]
+$ptr = ord($value)
+""", value=checked)["ptr"]
 
 
 @register_type(GITypeTag.FILENAME)

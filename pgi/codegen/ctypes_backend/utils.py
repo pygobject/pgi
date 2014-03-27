@@ -37,12 +37,14 @@ class BaseType(object):
     def var(self):
         return self._gen.var()
 
-    def __getattr__(self, attr):
-        if attr.endswith(("_py2", "_py3")):
-            raise AttributeError(attr)
-        if _compat.PY3:
-            return getattr(self, attr + "_py3")
-        return getattr(self, attr + "_py2")
+    def __getattribute__(self, name):
+        try:
+            if _compat.PY3:
+                return object.__getattribute__(self, name + "_py3")
+            else:
+                return object.__getattribute__(self, name + "_py2")
+        except AttributeError:
+            return object.__getattribute__(self, name)
 
     @classmethod
     def get_class(cls, type_):

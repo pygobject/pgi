@@ -73,16 +73,16 @@ class InterfaceField(Field):
         iface_type = iface.type.value
 
         if iface_type == GIInfoType.ENUM:
-            out = var.unpack(var.pre_unpack(name))
+            out = var.unpack_out(name)
             return var.block, out
         elif iface_type == GIInfoType.STRUCT:
-            out = var.unpack(var.pre_unpack(name))
+            out = var.unpack_out(name)
             return var.block, out
         elif iface_type == GIInfoType.OBJECT:
-            out = var.unpack(name)
+            out = var.unpack_out(name)
             return var.block, out
         elif iface_type == GIInfoType.FLAGS:
-            out = var.unpack(var.pre_unpack(name))
+            out = var.unpack_out(name)
             return var.block, out
 
         raise NotImplementedError(
@@ -95,7 +95,7 @@ class TypeField(Field):
 
     def get(self, name):
         var = self.backend.get_type(self.type)
-        out = var.unpack(var.pre_unpack(name))
+        out = var.unpack_out(name)
         return var.block, out
 
 
@@ -103,12 +103,12 @@ class BasicField(Field):
 
     def get(self, name):
         var = self.backend.get_type(self.type)
-        out = var.unpack(var.pre_unpack(name))
+        out = var.unpack_out(name)
         return var.block, out
 
     def set(self, name, value_name):
         var = self.backend.get_type(self.type)
-        out = var.pack(value_name)
+        out = var.pack_out(value_name)
         return var.block, out
 
 
@@ -185,34 +185,15 @@ class ArrayField(Field):
         return None, ""
 
 
-class Utf8Field(Field):
+class Utf8Field(BasicField):
     TAG = GITypeTag.UTF8
     py_type = str
 
-    def get(self, name):
-        var = self.backend.get_type(self.type)
-        out = var.unpack(var.pre_unpack(name))
-        return var.block, out
 
-    def set(self, name, value_name):
-        var = self.backend.get_type(self.type)
-        out = var.pack(value_name)
-        return var.block, out
-
-
-class VoidField(Field):
+class VoidField(BasicField):
     TAG = GITypeTag.VOID
     py_type = object
 
-    def get(self, name):
-        var = self.backend.get_type(self.type)
-        out = var.unpack(name)
-        return var.block, out
-
-    def set(self, name, value_name):
-        var = self.backend.get_type(self.type)
-        out = var.pack(value_name)
-        return var.block, out
 
 _classes = {}
 

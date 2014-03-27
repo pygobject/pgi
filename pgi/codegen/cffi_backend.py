@@ -124,41 +124,57 @@ class BaseType(object):
         block.write_into(self.block)
         return var
 
-    def pre_unpack(self, name):
-        return name
-
     def get_reference(self, value):
         raise NotImplementedError
 
     def free(self, name):
         raise NotImplementedError
 
-    def __getattr__(self, attr):
-        if attr.endswith(("_py2", "_py3")):
-            raise AttributeError(attr)
-        if _compat.PY3:
-            return getattr(self, attr + "_py3")
-        return getattr(self, attr + "_py2")
+    def __getattribute__(self, name):
+        try:
+            if _compat.PY3:
+                return object.__getattribute__(self, name + "_py3")
+            else:
+                return object.__getattribute__(self, name + "_py2")
+        except AttributeError:
+            return object.__getattribute__(self, name)
 
 
-class Boolean(BaseType):
+class BasicType(BaseType):
+
+    def pack_in(self, value):
+        raise NotImplementedError
+
+    def pack_out(self, value):
+        raise NotImplementedError
+
+    def unpack_out(self, value):
+        raise NotImplementedError
+
+    def unpack_return(self, value):
+        raise NotImplementedError
+
+    def new(self):
+        raise NotImplementedError
+
+
+class Boolean(BasicType):
     GI_TYPE_TAG = GITypeTag.BOOLEAN
 
-    def check(self, name):
+    def _check(self, name):
         return self.parse("""
 $bool = $_.bool($value)
 """, value=name)["bool"]
 
-    def pack(self, name):
-        return name
+    pack_out = _check
+    pack_in = _check
 
-    def pack_in(self, name):
-        return name
-
-    def unpack(self, name):
+    def unpack_return(self, name):
         return self.parse("""
 $bool = $_.bool($value)
 """, value=name)["bool"]
+
+    unpack_out = unpack_return
 
     def new(self):
         return self.parse("""
@@ -166,10 +182,10 @@ $value = $ffi.cast("gboolean", 0)
 """)["value"]
 
 
-class Int32(BaseType):
+class Int32(BasicType):
     GI_TYPE_TAG = GITypeTag.INT32
 
-    def check(self, name):
+    def _check(self, name):
         return self.parse("""
 # int32 type/value check
 if not $_.isinstance($value, $basestring):
@@ -181,17 +197,14 @@ if not -2**31 <= $int < 2**31:
     raise $_.OverflowError("Value %r not in range" % $int)
 """, value=name, basestring=_compat.string_types)["int"]
 
-    def pack(self, valid):
+    def pack_out(self, value):
+        value = self._check(value)
         return self.parse("""
-# to cffi
 $c_value = $ffi.cast("gint32", $value)
-""", value=valid)["c_value"]
+""", value=value)["c_value"]
 
-    def pack_in(self, name):
-        return name
-
-    def unpack(self, name):
-        raise NotImplementedError
+    def pack_in(self, value):
+        return self._check(value)
 
     def new(self):
         return self.parse("""
@@ -200,10 +213,10 @@ $value = $ffi.cast("gint32", 0)
 """)["value"]
 
 
-class Utf8(BaseType):
+class Utf8(BasicType):
     GI_TYPE_TAG = GITypeTag.UTF8
 
-    def check_py3(self, name):
+    def _check_py3(self, name):
         if self.may_be_null:
             return self.parse("""
 if $value is not None:
@@ -224,7 +237,7 @@ else:
     $string = $value
 """, value=name)["string"]
 
-    def check_py2(self, name):
+    def _check_py2(self, name):
         if self.may_be_null:
             return self.parse("""
 if $value is not $none:
@@ -247,26 +260,28 @@ else:
     $string = $value
 """, value=name)["string"]
 
-    def pack_py2(self, name):
+    def pack_in_py2(self, value):
+        value = self._check(value)
         return self.parse("""
 if $value:
     $c_value = $value
 else:
     $c_value = $ffi.cast("char*", 0)
-""", value=name)["c_value"]
+""", value=value)["c_value"]
 
-    def pack_py3(self, name):
+    def pack_in_py3(self, value):
+        value = self._check(value)
         return self.parse("""
 if $value is not None:
     $c_value = $value
 else:
     $c_value = $ffi.cast("char*", 0)
-""", value=name)["c_value"]
+""", value=value)["c_value"]
 
     def dup(self, name):
         raise NotImplementedError
 
-    def unpack(self, name):
+    def unpack_out(self, name):
         raise NotImplementedError
 
     def unpack_return(self, name):
