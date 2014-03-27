@@ -130,7 +130,7 @@ def test_pep8():
     return len(run.failures) + len(run.errors)
 
 
-def test(load_gi, backend=None, strict=False, filter_=None):
+def test(load_gi, backend=None, strict=False, filter_=None, failfast=False):
     """Run the test suite.
 
     load_gi -- run all tests in the pygobject suite with PyGObject
@@ -220,6 +220,7 @@ def test(load_gi, backend=None, strict=False, filter_=None):
             else:
                 print()
 
-    run = unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite(tests))
+    run = unittest.TextTestRunner(
+        verbosity=2, failfast=failfast).run(unittest.TestSuite(tests))
 
     return len(run.failures) + len(run.errors)

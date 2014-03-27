@@ -90,6 +90,7 @@ class TestCommand(Command):
         ("backend=", None, "backend"),
         ("strict", None, "make glib warnings/errors fatal"),
         ("filter=", None, "regexp for filter classes"),
+        ("exitfirst", "x", "exit instantly on first error or failed test"),
     ]
 
     def initialize_options(self):
@@ -98,6 +99,7 @@ class TestCommand(Command):
         self.backend = ""
         self.filter = ""
         self.strict = False
+        self.exitfirst = False
 
     def finalize_options(self):
         self.pgi_only = bool(self.pgi_only)
@@ -105,6 +107,7 @@ class TestCommand(Command):
         self.backend = str(self.backend)
         self.strict = bool(self.strict)
         self.filter = str(self.filter)
+        self.exitfirst = bool(self.exitfirst)
 
     def run(self):
         import tests
@@ -149,7 +152,8 @@ class TestCommand(Command):
         # don't fork with one run
         if len(filtered_runs) == 1:
             run_gi, backend = filtered_runs[0]
-            exit(tests.test(run_gi, backend, self.strict, filter_tests))
+            exit(tests.test(
+                run_gi, backend, self.strict, filter_tests, self.exitfirst))
 
         for is_gi, backend in filtered_runs:
             pid = os.fork()
@@ -158,7 +162,8 @@ class TestCommand(Command):
                 if status:
                     exit(status)
             else:
-                exit(tests.test(is_gi, backend, self.strict, filter_tests))
+                exit(tests.test(
+                    is_gi, backend, self.strict, filter_tests, self.exitfirst))
 
 
 class QualityCommand(Command):
