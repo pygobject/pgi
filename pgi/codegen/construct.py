@@ -22,6 +22,7 @@ class ConstructorSetter(object):
     TAG = None
 
     out_var = ""
+    desc = ""
 
     @classmethod
     def get_class(cls, type_):
@@ -33,7 +34,7 @@ class ConstructorSetter(object):
         self.name = prop_name
 
     def get_type(self):
-        return self.backend.get_type(self.type, may_be_null=True)
+        return self.backend.get_type(self.type, self.desc, may_be_null=True)
 
     def set(self, name):
         return None, name
@@ -128,7 +129,10 @@ def get_construct_class(arg_type):
         return cls.get_class(arg_type)
 
 
-def _generate_constructor(gtype, specs, names, backend):
+def _generate_constructor(cls, names, backend):
+
+    gtype = cls.__gtype__
+    specs = cls.props
 
     body = CodeBlock()
     in_args = []
@@ -146,6 +150,8 @@ def _generate_constructor(gtype, specs, names, backend):
         const = get_construct_class(type_)
         real_name = unescape_parameter(name)
         instance = const(real_name, type_, backend)
+        instance.desc = "%s.%s property '%s'" % (
+            cls.__module__, cls.__name__, real_name)
         instances.append(instance)
 
         in_args.append(name)
@@ -180,7 +186,7 @@ def generate_constructor(cls, names):
         cache.clear()
 
     backend = get_backend("ctypes")()
-    func = _generate_constructor(cls.__gtype__, cls.props, names, backend)
+    func = _generate_constructor(cls, names, backend)
 
     cache[names] = func
     return func

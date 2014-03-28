@@ -121,6 +121,9 @@ class BaseType(object):
         return cls
 
     def parse(self, code, **kwargs):
+        assert "DESC" not in kwargs
+        kwargs["DESC"] = self.desc
+
         block, var = self._gen.parse(code, **kwargs)
         block.write_into(self.block)
         return var
@@ -192,10 +195,10 @@ class Int32(BasicType):
 if not $_.isinstance($value, $basestring):
     $int = $_.int($value)
 else:
-    raise $_.TypeError("'$value' not a number")
+    raise $_.TypeError("$DESC: not a number")
 
 if not -2**31 <= $int < 2**31:
-    raise $_.OverflowError("Value %r not in range" % $int)
+    raise $_.OverflowError("$DESC: %r not in range" % $int)
 """, value=name, basestring=_compat.string_types)["int"]
 
     def pack_out(self, value):
@@ -245,7 +248,7 @@ if $value is not $none:
     if isinstance($value, $_.unicode):
         $string = $value.encode("utf-8")
     elif not isinstance($value, $_.str):
-        raise $_.TypeError("%r not a string or None" % $value)
+        raise $_.TypeError("$DESC: %r not a string or None" % $value)
     else:
         $string = $value
 else:
@@ -256,7 +259,7 @@ else:
 if $_.isinstance($value, $_.unicode):
     $string = $value.encode("utf-8")
 elif not $_.isinstance($value, $_.str):
-    raise $_.TypeError("%r not a string" % $value)
+    raise $_.TypeError("$DESC: %r not a string" % $value)
 else:
     $string = $value
 """, value=name)["string"]

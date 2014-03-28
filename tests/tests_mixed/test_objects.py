@@ -12,6 +12,8 @@ import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GObject, Gdk, Gio
 
+from tests import skipIfGI
+
 try:
     from gi.repository import Clutter
     Clutter
@@ -235,3 +237,11 @@ class GObjectConstructTest(unittest.TestCase):
         ok, color = Clutter.Color.from_string("#33FF33")
         self.assertTrue(ok)
         Clutter.Text(font_name="Mono Bold 24px", text="", color=color)
+
+    @skipIfGI
+    def test_construct_error_message(self):
+        try:
+            Gtk.Label(label=object())
+        except TypeError as e:
+            self.assertTrue("Gtk.Label" in str(e))
+            self.assertTrue("label" in str(e))

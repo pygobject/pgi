@@ -76,12 +76,12 @@ class Int8(BasicType):
 if not $_.isinstance($value, $basestring):
     $int = $_.int($value)
 else:
-    raise TypeError("$desc: %r not a number" % $value)
+    raise TypeError("$DESC: %r not a number" % $value)
 
 # overflow check for int8
 if not -2**7 <= $int < 2**7:
-    raise $_.OverflowError("$desc: Value %r not in range" % $int)
-""", value=name, basestring=_compat.string_types, desc=self.desc)["int"]
+    raise $_.OverflowError("$DESC: Value %r not in range" % $int)
+""", value=name, basestring=_compat.string_types)["int"]
 
     def pack_in(self, value):
         return self._check(value)
@@ -125,15 +125,15 @@ if $_.isinstance($value, $text_types):
         try:
             $value = $_.ord($value)
         except $_.TypeError:
-            raise $_.TypeError("'$uint' must be a single character")
+            raise $_.TypeError("$DESC: must be a single character")
     else:
-        raise $_.TypeError("Input must be a str character")
+        raise $_.TypeError("$DESC: must be a str character")
 
 $uint = $_.int($value)
 
 # overflow check for uint8
 if not 0 <= $uint < 2**8:
-    raise $_.OverflowError("Value %r not in range" % $uint)
+    raise $_.OverflowError("$DESC: %r not in range" % $uint)
 """, value=name, text_types=int_text_types)["uint"]
 
     def pack_in(self, value):
@@ -169,11 +169,11 @@ class Int16(BasicType):
 if not $_.isinstance($value, $basestring):
     $int = $_.int($value)
 else:
-    raise $_.TypeError("'$value' not a number")
+    raise $_.TypeError("$DESC: not a number")
 
 # overflow check for int16
 if not -2**15 <= $int < 2**15:
-    raise $_.OverflowError("Value %r not in range" % $int)
+    raise $_.OverflowError("$DESC: %r not in range" % $int)
 """, value=name, basestring=_compat.string_types)["int"]
 
     def pack_in(self, value):
@@ -209,11 +209,11 @@ class UInt16(BasicType):
 if not $_.isinstance($value, $basestring):
     $int = $_.int($value)
 else:
-    raise $_.TypeError("'$value' not a number")
+    raise $_.TypeError("$DESC: not a number")
 
 # overflow check for uint16
 if not 0 <= $int < 2**16:
-    raise $_.OverflowError("Value %r not in range" % $int)
+    raise $_.OverflowError("$DESC: %r not in range" % $int)
 """, value=name, basestring=_compat.string_types)["int"]
 
     def pack_in(self, value):
@@ -250,10 +250,10 @@ class Int32(BasicType):
 if not $_.isinstance($value, $basestring):
     $int = $_.int($value)
 else:
-    raise $_.TypeError("'$value' not a number")
+    raise $_.TypeError("$DESC: not a number")
 
 if not -2**31 <= $int < 2**31:
-    raise $_.OverflowError("Value %r not in range" % $int)
+    raise $_.OverflowError("$DESC: %r not in range" % $int)
 """, value=name, basestring=_compat.string_types)["int"]
 
     def pack_in(self, value):
@@ -290,10 +290,10 @@ class UInt32(BasicType):
 if not $_.isinstance($value, $basestring):
     $int = $_.int($value)
 else:
-    raise $_.TypeError("'$value' not a number")
+    raise $_.TypeError("$DESC: not a number")
 
 if not 0 <= $int < 2**32:
-    raise $_.OverflowError("Value %r not in range" % $int)
+    raise $_.OverflowError("$DESC: %r not in range" % $int)
 """, value=name, basestring=_compat.string_types)["int"]
 
     def pack_in(self, value):
@@ -330,10 +330,10 @@ class Int64(BasicType):
 if not $_.isinstance($value, $basestring):
     $int = $_.int($value)
 else:
-    raise $_.TypeError("'$value' not a number")
+    raise $_.TypeError("$DESC: not a number")
 
 if not -2**63 <= $int < 2**63:
-    raise $_.OverflowError("Value %r not in range" % $int)
+    raise $_.OverflowError("$DESC: %r not in range" % $int)
 """, value=name, basestring=_compat.string_types)["int"]
 
     def pack_in(self, value):
@@ -371,10 +371,10 @@ class UInt64(BasicType):
 if not $_.isinstance($value, $basestring):
     $int = $_.int($value)
 else:
-    raise $_.TypeError("'$value' not a number")
+    raise $_.TypeError("$DESC: not a number")
 
 if not 0 <= $int < 2**64:
-    raise $_.OverflowError("Value %r not in range" % $int)
+    raise $_.OverflowError("$DESC: %r not in range" % $int)
 """, value=name, basestring=_compat.string_types)["int"]
 
     def pack_in(self, value):
@@ -410,13 +410,13 @@ class Float(BasicType):
         return self.parse("""
 # float type/value check
 if $_.isinstance($value, $basestring):
-    raise $_.TypeError
+    raise $_.TypeError("$DESC: not a number")
 $float = $_.float($value)
 $c_float = $ctypes.c_float($float)
 $c_value = $c_float.value
 if $c_value != $float and \\
         $c_value in ($_.float('inf'), $_.float('-inf'), $_.float('nan')):
-    raise $_.OverflowError("%r out of range" % $float)
+    raise $_.OverflowError("$DESC: %r out of range" % $float)
 """, value=name, basestring=_compat.string_types)["c_float"]
 
     def pack_in(self, value):
@@ -448,13 +448,13 @@ class Double(BasicType):
         return self.parse("""
 # double type/value check
 if $_.isinstance($value, $basestring):
-    raise $_.TypeError
+    raise $_.TypeError("$DESC: not a number")
 $double = $_.float($value)
 $c_double = $ctypes.c_double($double)
 $c_value = $c_double.value
 if $c_value != $double and \\
         $c_value in ($_.float('inf'),$_.float('-inf'), $_.float('nan')):
-    raise $_.OverflowError("%f out of range" % $double)
+    raise $_.OverflowError("$DESC: %f out of range" % $double)
 """, value=name, basestring=_compat.string_types)["c_double"]
 
     def pack_in(self, value):
@@ -487,12 +487,12 @@ class UniChar(BasicType):
 if $_.isinstance($value, $_.str):
     $value = $value.decode("utf-8")
 elif not isinstance($value, $_.unicode):
-    raise $_.TypeError
+    raise $_.TypeError("$DESC")
 
 $int = $_.ord($value)
 
 if not 0 <= $int < 2**32:
-    raise $_.OverflowError("Value %r not in range" % $int)
+    raise $_.OverflowError("$DESC: %r not in range" % $int)
 """, value=name)["int"]
 
     def _check_py3(self, name):
@@ -500,7 +500,7 @@ if not 0 <= $int < 2**32:
 $int = $_.ord($value)
 
 if not 0 <= $int < 2**32:
-    raise $_.OverflowError("Value %r not in range" % $int)
+    raise $_.OverflowError("$DESC: %r not in range" % $int)
 """, value=name)["int"]
 
     def pack_in(self, value):
@@ -549,7 +549,7 @@ class Void(BaseType):
 
         return self.parse("""
 if $ptr is None:
-    raise $_.TypeError("No None allowed")
+    raise $_.TypeError("$DESC: No None allowed")
 """, ptr=name)["ptr"]
 
     def pack_in(self, value):
@@ -590,7 +590,7 @@ class Utf8(BaseType):
             return self.parse("""
 if $value is not None:
     if not $_.isinstance($value, $_.str):
-        raise $_.TypeError("%r not a string or None" % $value)
+        raise $_.TypeError("$DESC: %r not a string or None" % $value)
     else:
         $string = $value
 else:
@@ -599,7 +599,7 @@ else:
 
         return self.parse("""
 if not isinstance($value, $_.str):
-    raise $_.TypeError("%r not a string" % $value)
+    raise $_.TypeError("$DESC: %r not a string" % $value)
 else:
     $string = $value
 """, value=name)["string"]
@@ -611,7 +611,7 @@ if $value is not None:
     if $_.isinstance($value, $_.unicode):
         $string = $value.encode("utf-8")
     elif not $_.isinstance($value, $_.str):
-        raise $_.TypeError("%r not a string or None" % $value)
+        raise $_.TypeError("$DESC: %r not a string or None" % $value)
     else:
         $string = $value
 else:
@@ -622,7 +622,7 @@ else:
 if $_.isinstance($value, $_.unicode):
     $string = $value.encode("utf-8")
 elif not isinstance($value, $_.str):
-    raise $_.TypeError("%r not a string" % $value)
+    raise $_.TypeError("$DESC: %r not a string" % $value)
 else:
     $string = $value
 """, value=name)["string"]

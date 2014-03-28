@@ -33,7 +33,7 @@ class CArray(BaseArray):
             self.parse("""
 $array_len = $_.len($l)
 if $array_len != $length:
-    raise ValueError("Expected list of length %d, got $length" % $array_len)
+    raise ValueError("$DESC: Expected list of length %d, got $length" % $array_len)
 """, l=name, length=length)
         return name
 

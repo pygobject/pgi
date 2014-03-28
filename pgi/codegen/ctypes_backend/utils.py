@@ -54,6 +54,9 @@ class BaseType(object):
         return cls
 
     def parse(self, code, **kwargs):
+        assert "DESC" not in kwargs
+        kwargs["DESC"] = self.desc
+
         block, var = self._gen.parse(code, **kwargs)
         block.write_into(self.block)
         return var

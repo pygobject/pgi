@@ -66,13 +66,13 @@ class Object(BaseInterface):
         if self.may_be_null:
             return self.parse("""
 if $obj is not $none and not $_.isinstance($obj, $type_class):
-    raise TypeError("argument $obj: Expected %s, got %s" %
+    raise TypeError("$DESC: Expected %s, got %s" %
                     ($type_class.__name__, $obj.__class__.__name__))
 """, obj=name, type_class=self._import_type(), none=None)["obj"]
 
         return self.parse("""
 if not $_.isinstance($obj, $type_class):
-    raise $_.TypeError("argument $obj: Expected %s, got %s" %
+    raise $_.TypeError("$DESC: Expected %s, got %s" %
                        ($type_class.__name__, $obj.__class__.__name__))
 """, obj=name, type_class=self._import_type())["obj"]
 
@@ -146,7 +146,7 @@ if not $_.isinstance($value, $basestring) and not $_.int($value):
 elif $_.isinstance($value, $base_type):
     $out = $_.int($value)
 else:
-    raise $_.TypeError("Expected %r but got %r" %
+    raise $_.TypeError("$DESC: Expected %r but got %r" %
                        ($base_type.__name__, $_.type($value).__name__))
 """, base_type=self._import_type(), value=name,
 basestring=_compat.string_types)["out"]
@@ -187,12 +187,12 @@ class Struct(BaseInterface):
             foreign_type = foreign_struct.get_type()
             return self.parse("""
 if not $_.isinstance($obj, $struct_class):
-    raise $_.TypeError("%r is not a %r" % ($obj, $struct_class))
+    raise $_.TypeError("$DESC: %r is not a %r" % ($obj, $struct_class))
 """, struct_class=foreign_type, obj=name)["obj"]
         else:
             return self.parse("""
 if not $_.isinstance($obj, ($struct_class, $obj_class)):
-    raise $_.TypeError("%r is not a structure object" % $obj)
+    raise $_.TypeError("$DESC: %r is not a structure object" % $obj)
     """, obj_class=base_obj, struct_class=self._import_type(), obj=name)["obj"]
 
     def pack_out(self, name):
@@ -255,7 +255,7 @@ $value = $ctypes.c_void_p()
         return self.parse("""
 $mem = $malloc($size)
 if not $mem and $size:
-    raise $_.MemoryError
+    raise $_.MemoryError("$DESC")
 $value = $ctypes.c_void_p($mem)
 """, malloc=malloc, size=size)["value"]
 
@@ -299,7 +299,7 @@ class Callback(BaseInterface):
     def check(self, name):
         return self.parse("""
 if not $_.callable($py_cb):
-    raise $_.TypeError("%r must be callable" % $py_cb)
+    raise $_.TypeError("$DESC: %r must be callable" % $py_cb)
 """, py_cb=name)["py_cb"]
 
     def pack(self, name):
@@ -316,7 +316,7 @@ class Enum(BaseInterface):
     def _check(self, name):
         return self.parse("""
 if $value not in $base_type._allowed:
-    raise $_.TypeError("Invalid enum: %r" % $value)
+    raise $_.TypeError("$DESC: Invalid enum: %r" % $value)
 """, base_type=self._import_type(), value=name)["value"]
 
     def pack_in(self, name):
