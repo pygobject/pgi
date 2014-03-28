@@ -143,6 +143,10 @@ class CodeBlock(object):
                 return
         file_.write(code)
 
+    def clear(self):
+        del self._lines[:]
+        self._deps.clear()
+
     def __str__(self):
         lines = []
         for line, level in self._lines:
