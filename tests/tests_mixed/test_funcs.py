@@ -14,6 +14,17 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GLib, GObject, Pango
 from pgi import _compat
 
+try:
+    from gi.repository import GIMarshallingTests
+    GIMarshallingTests
+except ImportError:
+    GIMarshallingTests = None
+
+
+def skipUnlessGIMarshallingTests(func):
+    return unittest.skipUnless(GIMarshallingTests,
+                               "GIMarshallingTests missing")(func)
+
 
 class FuncsTest(unittest.TestCase):
 
@@ -371,3 +382,23 @@ class FuncsTest(unittest.TestCase):
         icon = Gtk.IconSource.new()
         icon.set_filename("/tmp/foobar")
         self.assertEqual(icon.get_filename(), "/tmp/foobar")
+
+
+@skipIfGI
+@skipUnlessGIMarshallingTests
+class TArgExceptions(unittest.TestCase):
+
+    def test_arg_exceptions(self):
+        try:
+            GIMarshallingTests.int8_in_max("fdsaf")
+        except TypeError as e:
+            self.assertTrue("1" in str(e))
+            self.assertTrue("'v'" in str(e))
+            self.assertTrue("int8_in_max" in str(e))
+
+        try:
+            GIMarshallingTests.int8_in_max(10000)
+        except OverflowError as e:
+            self.assertTrue("1" in str(e))
+            self.assertTrue("'v'" in str(e))
+            self.assertTrue("int8_in_max" in str(e))

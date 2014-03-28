@@ -121,6 +121,10 @@ def _generate_function(backend, info, arg_infos, arg_types,
     # in args
     in_args = [a for a in args if not a.is_aux and a.in_var]
 
+    # set description used for exceptions
+    for i, arg in enumerate(in_args):
+        arg.desc = "%s() argument '%s'(%d)" % (info.name, arg.in_var, i + 1)
+
     # if the last in argument is a user data, make it a positional argument
     if in_args and in_args[-1].is_userdata:
         name = in_args[-1].in_var

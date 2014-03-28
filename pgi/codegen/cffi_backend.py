@@ -83,7 +83,7 @@ def typeinfo_to_cffi(info):
     raise NotImplementedError("Couldn't convert %r to cffi type" % info.tag)
 
 
-def get_type(type_, gen, may_be_null, may_return_null):
+def get_type(type_, gen, desc, may_be_null, may_return_null):
     tag_value = type_.tag.value
     for obj in globals().values():
         if isinstance(obj, type) and issubclass(obj, BaseType):
@@ -94,7 +94,7 @@ def get_type(type_, gen, may_be_null, may_return_null):
         raise NotImplementedError("type: %r" % type_.tag)
 
     cls = cls.get_class(type_)
-    return cls(gen, type_, may_be_null, may_return_null)
+    return cls(gen, type_, desc, may_be_null, may_return_null)
 
 
 class BaseType(object):
@@ -102,12 +102,13 @@ class BaseType(object):
     type = None
     py_type = None
 
-    def __init__(self, gen, type_, may_be_null, may_return_null):
+    def __init__(self, gen, type_, desc, may_be_null, may_return_null):
         self._gen = gen
         self.block = CodeBlock()
         self.type = type_
         self.may_be_null = may_be_null
         self.may_return_null = may_return_null
+        self.desc = desc
 
     def get_type(self, type_, may_be_null=False, may_return_null=False):
         return get_type(type_, self._gen, may_be_null, may_return_null)
@@ -358,8 +359,9 @@ class CFFIBackend(Backend):
 
         return block, func
 
-    def get_type(self, type_, may_be_null=False, may_return_null=False):
-        return get_type(type_, self._gen, may_be_null, may_return_null)
+    def get_type(self, type_, desc="", may_be_null=False,
+                 may_return_null=False):
+        return get_type(type_, self._gen, desc, may_be_null, may_return_null)
 
     def parse(self, code, **kwargs):
         return self._gen.parse(code, **kwargs)

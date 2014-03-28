@@ -30,6 +30,7 @@ class Argument(object):
     out_var = ""
     py_type = None
     is_userdata = False
+    desc = ""
 
     def __init__(self, arguments, backend):
         self.args = arguments
@@ -57,14 +58,14 @@ class ErrorArgument(Argument):
         tag = Y()
 
     def pre_call(self):
-        var = self.backend.get_type(ErrorArgument.FakeType(), True)
+        var = self.backend.get_type(ErrorArgument.FakeType(), may_be_null=True)
 
         self._error = var.new()
         self.call_var = var.get_reference(self._error)
         return var.block
 
     def post_call(self):
-        var = self.backend.get_type(ErrorArgument.FakeType(), True)
+        var = self.backend.get_type(ErrorArgument.FakeType(), may_be_null=True)
 
         out = var.unpack(self._error)
         var.free(self._error)
@@ -99,7 +100,8 @@ class GIArgument(Argument):
         return self.info.may_be_null
 
     def get_type(self):
-        return self.backend.get_type(self.type, self.may_be_null)
+        return self.backend.get_type(
+            self.type, desc=self.desc, may_be_null=self.may_be_null)
 
     def get_param_type(self, index):
         """Returns a ReturnValue instance for param type 'index'"""

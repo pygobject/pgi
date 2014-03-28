@@ -76,12 +76,12 @@ class Int8(BasicType):
 if not $_.isinstance($value, $basestring):
     $int = $_.int($value)
 else:
-    raise TypeError("'$value' not a number")
+    raise TypeError("$desc: %r not a number" % $value)
 
 # overflow check for int8
 if not -2**7 <= $int < 2**7:
-    raise $_.OverflowError("Value %r not in range" % $int)
-""", value=name, basestring=_compat.string_types)["int"]
+    raise $_.OverflowError("$desc: Value %r not in range" % $int)
+""", value=name, basestring=_compat.string_types, desc=self.desc)["int"]
 
     def pack_in(self, value):
         return self._check(value)

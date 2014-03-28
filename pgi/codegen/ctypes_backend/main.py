@@ -54,8 +54,10 @@ class CTypesBackend(Backend):
     def var(self):
         return self._gen.var
 
-    def get_type(self, type_, may_be_null=False, may_return_null=False):
-        return get_type(type_)(self._gen, type_, may_be_null, may_return_null)
+    def get_type(self, type_, desc="", may_be_null=False,
+                 may_return_null=False):
+        return get_type(type_)(
+            self._gen, type_, desc, may_be_null, may_return_null)
 
     def get_library(self, namespace):
         if namespace not in self._libs:

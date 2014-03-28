@@ -24,15 +24,18 @@ class BaseType(object):
     GI_TYPE_TAG = None
     py_type = None
 
-    def __init__(self, gen, type_, may_be_null, may_return_null):
+    def __init__(self, gen, type_, desc, may_be_null, may_return_null):
         self._gen = gen
         self.block = CodeBlock()
         self.type = type_
         self.may_be_null = may_be_null
         self.return_null = may_return_null
+        self.desc = desc
 
-    def get_type(self, type_, may_be_null=False, may_return_null=False):
-        return get_type(type_)(self._gen, type_, may_be_null, may_return_null)
+    def get_type(self, type_, desc="", may_be_null=False,
+                 may_return_null=False):
+        return get_type(type_)(
+            self._gen, type_, desc, may_be_null, may_return_null)
 
     def var(self):
         return self._gen.var()
