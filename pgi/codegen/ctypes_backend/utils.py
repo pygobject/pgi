@@ -17,7 +17,7 @@ from pgi.clib.gobject import GType
 from pgi.clib.gir import GITypeTag, GIInfoType
 from pgi.clib.gobject import GCallback
 
-from ..utils import CodeBlock
+from ..utils import CodeBlock, TypeTagRegistry
 
 
 class BaseType(object):
@@ -34,8 +34,12 @@ class BaseType(object):
 
     def get_type(self, type_, desc="", may_be_null=False,
                  may_return_null=False):
-        return get_type(type_)(
-            self._gen, type_, desc, may_be_null, may_return_null)
+        try:
+            cls = registry.get_type(type_)
+        except LookupError as e:
+            raise NotImplementedError(e)
+        else:
+            return cls(self._gen, type_, desc, may_be_null, may_return_null)
 
     def var(self):
         return self._gen.var()
@@ -82,22 +86,11 @@ raise $_.TypeError('Can\\'t convert %(type_name)s to pointer: %%r' %% $in_)
 """ % {"type_name": type(self).__name__}, in_=name)["in_"]
 
 
-_type_registry = {}
+registry = TypeTagRegistry()
 
 
 def register_type(type_tag):
-    def wrap(cls):
-        assert type_tag not in _type_registry
-        _type_registry[type_tag] = cls
-        return cls
-    return wrap
-
-
-def get_type(type_):
-    tag_value = type_.tag.value
-    if tag_value in _type_registry:
-        return _type_registry[tag_value].get_class(type_)
-    raise NotImplementedError("type: %r", type_.tag)
+    return registry.register(type_tag)
 
 
 def typeinfo_to_ctypes(info, return_value=False):

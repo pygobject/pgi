@@ -17,7 +17,7 @@ from ..backend import Backend
 from ..utils import parse_with_objects, VariableFactory
 
 from . import types_basic, types_container, types_interface, types_other
-from .utils import get_type, typeinfo_to_ctypes
+from .utils import registry, typeinfo_to_ctypes
 
 
 # pyflakes
@@ -56,8 +56,12 @@ class CTypesBackend(Backend):
 
     def get_type(self, type_, desc="", may_be_null=False,
                  may_return_null=False):
-        return get_type(type_)(
-            self._gen, type_, desc, may_be_null, may_return_null)
+        try:
+            cls = registry.get_type(type_)
+        except LookupError as e:
+            raise NotImplementedError(e)
+        else:
+            return cls(self._gen, type_, desc, may_be_null, may_return_null)
 
     def get_library(self, namespace):
         if namespace not in self._libs:

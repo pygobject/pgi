@@ -10,6 +10,7 @@ from cffi import FFI
 from pgi.clib.gir import GIRepository, GITypeTag, GIInfoType
 from .backend import Backend
 from .utils import CodeBlock, parse_with_objects, VariableFactory
+from .utils import TypeTagRegistry
 from .. import _compat
 
 
@@ -83,17 +84,15 @@ def typeinfo_to_cffi(info):
     raise NotImplementedError("Couldn't convert %r to cffi type" % info.tag)
 
 
-def get_type(type_, gen, desc, may_be_null, may_return_null):
-    tag_value = type_.tag.value
-    for obj in globals().values():
-        if isinstance(obj, type) and issubclass(obj, BaseType):
-            if obj.GI_TYPE_TAG == tag_value:
-                cls = obj
-                break
-    else:
-        raise NotImplementedError("type: %r" % type_.tag)
+registry = TypeTagRegistry()
 
-    cls = cls.get_class(type_)
+
+def get_type(type_, gen, desc, may_be_null, may_return_null):
+    try:
+        cls = registry.get_type(type_)
+    except LookupError as e:
+        raise NotImplementedError(e)
+
     return cls(gen, type_, desc, may_be_null, may_return_null)
 
 
@@ -162,8 +161,8 @@ class BasicType(BaseType):
         raise NotImplementedError
 
 
+@registry.register(GITypeTag.BOOLEAN)
 class Boolean(BasicType):
-    GI_TYPE_TAG = GITypeTag.BOOLEAN
 
     def _check(self, name):
         return self.parse("""
@@ -186,39 +185,62 @@ $value = $ffi.cast("gboolean", 0)
 """)["value"]
 
 
-class Int32(BasicType):
-    GI_TYPE_TAG = GITypeTag.INT32
+class BaseInt(BasicType):
 
-    def _check(self, name):
-        return self.parse("""
-# int32 type/value check
+    CTYPE = None
+
+    def _check(self, value):
+        int_ = self.parse("""
 if not $_.isinstance($value, $basestring):
     $int = $_.int($value)
 else:
     raise $_.TypeError("$DESC: not a number")
+""", value=value, basestring=_compat.string_types)["int"]
 
-if not -2**31 <= $int < 2**31:
+        if self.CTYPE.startswith("u"):
+            bits = int(self.CTYPE[4:])
+            return self.parse("""
+if not 0 <= $int < 2**$bits:
     raise $_.OverflowError("$DESC: %r not in range" % $int)
-""", value=name, basestring=_compat.string_types)["int"]
-
-    def pack_out(self, value):
-        value = self._check(value)
-        return self.parse("""
-$c_value = $ffi.cast("gint32", $value)
-""", value=value)["c_value"]
+""", int=int_, bits=bits)["int"]
+        else:
+            bits = int(self.CTYPE[3:])
+            return self.parse("""
+if not -2**$bits <= $int < 2**$bits:
+    raise $_.OverflowError("$DESC: %r not in range" % $int)
+""", int=int_, bits=bits - 1)["int"]
 
     def pack_in(self, value):
         return self._check(value)
 
+    def pack_out(self, value):
+        checked = self._check(value)
+        return self.parse("""
+$value = $ffi.cast("g$ctype", $value)
+""", ctype=self.CTYPE, value=checked)["value"]
+
+    def unpack_return(self, value):
+        return value
+
+    def unpack_out(self, value):
+        return self.parse("""
+$value = int($value)
+""", value=value)["value"]
+
     def new(self):
         return self.parse("""
-# new int32
-$value = $ffi.cast("gint32", 0)
-""")["value"]
+$value = $ffi.cast("g$ctype", 0)
+""", ctype=self.CTYPE)["value"]
 
 
+for name in ["Int16", "UInt16", "Int32", "UInt32", "Int64", "UInt64"]:
+    cls = type(name, (BaseInt,), {"CTYPE": name.lower()})
+    type_tag = getattr(GITypeTag, name.upper())
+    registry.register(type_tag)(cls)
+
+
+@registry.register(GITypeTag.UTF8)
 class Utf8(BasicType):
-    GI_TYPE_TAG = GITypeTag.UTF8
 
     def _check_py3(self, name):
         if self.may_be_null:
@@ -288,8 +310,13 @@ else:
     def unpack_out(self, name):
         raise NotImplementedError
 
-    def unpack_return(self, name):
-        raise NotImplementedError
+    def unpack_return(self, value):
+        return self.parse("""
+if $value == $ffi.NULL:
+    $value = None
+else:
+    $value = $ffi.string($value)
+""", value=value)["value"]
 
     def new(self):
         raise NotImplementedError

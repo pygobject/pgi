@@ -80,6 +80,15 @@ class _TBackend(unittest.TestCase):
         lib = self.backend.get_library("GObject")
         self.assertTrue(lib)
 
+    def test_basic_int(self):
+        for type_tag in [GITypeTag.INT16, GITypeTag.UINT16, GITypeTag.INT32,
+                         GITypeTag.UINT32, GITypeTag.INT64, GITypeTag.UINT64]:
+            with executor(self.backend, type_tag) as var:
+                self.assertEqual(var.pack_in(42), 42)
+                self.assertEqual(var.unpack_return(42), 42)
+                self.assertEqual(var.unpack_out(var.new()), 0)
+                self.assertEqual(var.unpack_out(var.pack_out(42)), 42)
+
 
 class TBackendCFFI(_TBackend):
     Backend = CFFIBackend
@@ -87,9 +96,3 @@ class TBackendCFFI(_TBackend):
 
 class TBackendCTypes(_TBackend):
     Backend = CTypesBackend
-
-    def test_int32(self):
-
-        with executor(self.backend, GITypeTag.INT32) as var:
-            self.assertEqual(var.pack_in(4), 4)
-            self.assertEqual(var.unpack_out(var.pack_out(42)), 42)

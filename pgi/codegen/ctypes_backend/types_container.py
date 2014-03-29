@@ -9,10 +9,10 @@ import ctypes
 
 from pgi.clib.gir import GITypeTag, GIArrayType
 from pgi.clib import glib
-from .utils import BaseType, register_type, typeinfo_to_ctypes
+from .utils import BaseType, registry, typeinfo_to_ctypes
 
 
-@register_type(GITypeTag.ARRAY)
+@registry.register(GITypeTag.ARRAY)
 class BaseArray(BaseType):
 
     @classmethod
@@ -173,7 +173,7 @@ $array = $ctypes.pointer($data)
             raise NotImplementedError
 
 
-@register_type(GITypeTag.GLIST)
+@registry.register(GITypeTag.GLIST)
 class GList(BaseType):
 
     def check(self, name):
@@ -221,6 +221,6 @@ $list_.free()
 """, list_=name)
 
 
-@register_type(GITypeTag.GSLIST)
+@registry.register(GITypeTag.GSLIST)
 class GSList(BaseType):
     pass

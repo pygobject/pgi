@@ -11,10 +11,10 @@ from pgi.clib.gobject import GType
 from pgi.gerror import PGError
 from pgi.gtype import PGType
 
-from .utils import BaseType, register_type
+from .utils import BaseType, registry
 
 
-@register_type(GITypeTag.GTYPE)
+@registry.register(GITypeTag.GTYPE)
 class GType_(BaseType):
 
     def _check(self, name):
@@ -68,7 +68,7 @@ $gtype = $GType()
         return var["gtype"]
 
 
-@register_type(GITypeTag.ERROR)
+@registry.register(GITypeTag.ERROR)
 class Error(BaseType):
 
     def unpack(self, name):

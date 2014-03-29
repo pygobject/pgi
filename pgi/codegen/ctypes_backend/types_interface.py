@@ -16,10 +16,10 @@ from pgi.util import import_attribute
 
 from .. import generate_callback_wrapper
 
-from .utils import BaseType, register_type
+from .utils import BaseType, registry
 
 
-@register_type(GITypeTag.INTERFACE)
+@registry.register(GITypeTag.INTERFACE)
 class BaseInterface(BaseType):
 
     @classmethod

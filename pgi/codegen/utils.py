@@ -12,6 +12,22 @@ import collections
 from pgi import _compat
 
 
+class TypeTagRegistry(dict):
+
+    def register(self, type_tag):
+        def wrap(cls):
+            assert type_tag not in self
+            self[type_tag] = cls
+            return cls
+        return wrap
+
+    def get_type(self, type_):
+        tag_value = type_.tag.value
+        if tag_value in self:
+            return self[tag_value].get_class(type_)
+        raise LookupError("type: %r", type_.tag)
+
+
 class VariableFactory(object):
     """A callable the produces unique variable names"""
 
