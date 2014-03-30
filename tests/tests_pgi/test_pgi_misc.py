@@ -38,6 +38,9 @@ class PGIMisc(unittest.TestCase):
     def test_escape_identifier(self):
         self.assertEqual(escape_identifier("class"), "class_")
         self.assertEqual(escape_identifier("2BUTTON_PRESS"), "_2BUTTON_PRESS")
+        # most things from the gir are partial identifiers, so an empty
+        # string can occur
+        self.assertEqual(escape_identifier(""), "_")
 
     def test_unescape_identifier(self):
         self.assertEqual(unescape_identifier("foo_"), "foo")
