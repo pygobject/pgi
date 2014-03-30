@@ -74,7 +74,7 @@ class Error(BaseType):
     def unpack(self, name):
         var = self.parse("""
 if $gerror_ptr:
-    $out = $PGError($gerror_ptr.contents)
+    $out = $PGError._from_gerror($gerror_ptr.contents)
 else:
     $out = $none
 """, gerror_ptr=name, PGError=PGError, none=None)

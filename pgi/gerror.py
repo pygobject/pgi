@@ -10,13 +10,19 @@ from ._compat import PY3
 
 class PGError(RuntimeError):
 
-    def __init__(self, error):
+    @classmethod
+    def _from_gerror(cls, error):
+        message = error.message
+        if PY3 and message is not None:
+            message = message.decode("utf-8")
+
+        self = cls(message)
+        if PY3:
+            self.message = message
         self.domain = error.domain.string
         self.code = error.code
-        self.message = error.message
+        return self
 
-        if PY3 and self.message is not None:
-            self.message = self.message.decode("utf-8")
 
 PGError.__module__ = "GLib"
 PGError.__name__ = "GError"

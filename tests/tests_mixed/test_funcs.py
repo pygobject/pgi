@@ -383,6 +383,18 @@ class FuncsTest(unittest.TestCase):
         icon.set_filename("/tmp/foobar")
         self.assertEqual(icon.get_filename(), "/tmp/foobar")
 
+    def test_error_message(self):
+        try:
+            GIMarshallingTests.gerror()
+        except GLib.GError as e:
+            self.assertTrue("gi-marshalling-tests-gerror-message" in str(e))
+
+    def test_error_init(self):
+        error = GLib.GError("foo")
+        self.assertEqual(str(error), "foo")
+        error = GLib.GError(1, 2, 3, 4)
+        self.assertEqual(str(error), "(1, 2, 3, 4)")
+
 
 @skipIfGI
 @skipUnlessGIMarshallingTests
