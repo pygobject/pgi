@@ -10,7 +10,7 @@ from operator import itemgetter
 
 from .backend import list_backends, get_backend
 from .utils import CodeBlock
-from pgi.util import escape_identifier, KWD_RE
+from pgi.util import escape_identifier
 from .arguments import get_argument_class, ErrorArgument
 from .returnvalues import get_return_class
 from pgi._compat import string_types, PY3
@@ -51,7 +51,7 @@ def create_return_tuple(args):
         _fields = tuple(args)
         for i, a in enumerate(args):
             if a is not None:
-                vars()[a]  = property(itemgetter(i))
+                vars()[a] = property(itemgetter(i))
         del i, a
 
     return ReturnValue
