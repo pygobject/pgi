@@ -6,10 +6,11 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 import traceback
+import collections
 
 from .backend import list_backends, get_backend
 from .utils import CodeBlock
-from pgi.util import escape_identifier
+from pgi.util import escape_identifier, KWD_RE
 from .arguments import get_argument_class, ErrorArgument
 from .returnvalues import get_return_class
 from pgi._compat import string_types, PY3
@@ -41,6 +42,25 @@ def get_type_name(type_):
         return type_.__name__
     else:
         return "%s.%s" % (type_.__module__, type_.__name__)
+
+
+def escape_for_namedtuple(names, reg=KWD_RE):
+    """Takes a list of C identifiers and returns value suitable for
+    using as names in a namedtuple. The first element can be None
+    to represent a return value without a name
+    """
+
+    used = set()
+    for name in reversed(names):
+        if name is None:
+            name = "return_"
+        elif name[0] == "_":
+            name = "value" + name
+        name = reg.sub(r"\1_", name)
+        while name in used:
+            name += "_"
+        used.add(name)
+        yield name
 
 
 def build_docstring(func_name, args, ret, throws):
@@ -202,7 +222,7 @@ except AttributeError:
         assert return_var
         if block:
             block.write_into(body)
-        out.append(return_var)
+        out.append((return_var, None))
 
     # process out args
     for arg in args:
@@ -212,12 +232,19 @@ except AttributeError:
         if block:
             block.write_into(body)
         if arg.out_var:
-            out.append(arg.out_var)
+            out.append((arg.out_var, arg.name))
 
     if len(out) == 1:
-        body.write_line("return %s" % out[0])
+        body.write_line("return %s" % out[0][0])
     elif len(out) > 1:
-        body.write_line("return (%s)" % ", ".join(out))
+        # for more than one value use a named tuple.
+        out_vars, out_names = zip(*out)
+        out_names = escape_for_namedtuple(out_names)
+        ntuple = collections.namedtuple("ReturnValue", out_names)
+        block, var = backend.parse("""
+return $ntuple(%s)
+""" % ", ".join(out_vars), ntuple=ntuple)
+        block.write_into(body)
 
     # build final function block
 

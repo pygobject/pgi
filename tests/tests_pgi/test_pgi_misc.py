@@ -115,3 +115,11 @@ class PGIMisc(unittest.TestCase):
 
         self.assertRaises(RuntimeError, GLib.DestroyNotify, None)
         self.assertRaises(TypeError, GLib.DestroyNotify)
+
+    def test_named_tuple_return(self):
+        from gi.repository import Gtk
+        b = Gtk.Button()
+        align = b.get_alignment()
+        self.assertEqual(len(align), 2)
+        self.assertEqual(align[0], align.yalign)
+        self.assertEqual(align[1], align.xalign)

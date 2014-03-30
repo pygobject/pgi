@@ -206,10 +206,10 @@ def encode(string):
     return string
 
 
-_KWD_RE = re.compile("^(%s)$" % "|".join(keyword.kwlist))
+KWD_RE = re.compile("^(%s)$" % "|".join(keyword.kwlist))
 
 
-def escape_identifier(text, reg=_KWD_RE):
+def escape_identifier(text, reg=KWD_RE):
     """Escape C identifiers so they can be used as attributes/arguments"""
 
     # see http://docs.python.org/reference/lexical_analysis.html#identifiers
