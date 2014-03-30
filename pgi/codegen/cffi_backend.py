@@ -310,12 +310,20 @@ else:
     def unpack_out(self, name):
         raise NotImplementedError
 
-    def unpack_return(self, value):
+    def unpack_return_py2(self, value):
         return self.parse("""
 if $value == $ffi.NULL:
     $value = None
 else:
     $value = $ffi.string($value)
+""", value=value)["value"]
+
+    def unpack_return_py3(self, value):
+        return self.parse("""
+if $value == $ffi.NULL:
+    $value = None
+else:
+    $value = $ffi.string($value).decode("utf-8")
 """, value=value)["value"]
 
     def new(self):
