@@ -89,6 +89,9 @@ class _Module(types.ModuleType):
 
         return attr
 
+    def __repr__(self):
+        return "<module '%s' from '%s'>" % (self.__name__, self.__path__)
+
 
 def Module(repo, namespace):
     cls = type(namespace, _Module.__bases__, dict(_Module.__dict__))
