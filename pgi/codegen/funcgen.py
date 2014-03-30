@@ -6,7 +6,7 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 import traceback
-import collections
+from operator import itemgetter
 
 from .backend import list_backends, get_backend
 from .utils import CodeBlock
@@ -15,6 +15,46 @@ from .arguments import get_argument_class, ErrorArgument
 from .returnvalues import get_return_class
 from pgi._compat import string_types, PY3
 from pgi.clib.gir import GICallableInfo, GIFunctionInfo, GIFunctionInfoFlags
+
+
+class _ReturnValue(tuple):
+    __slots__ = ()
+    _fields = ()
+
+    def __new__(cls, *args):
+        return tuple.__new__(cls, args)
+
+    def __repr__(self):
+        ff = ["%r" if f is None else "%s=%%r" % f for f in self._fields]
+        field_list = (", ".join(ff)) % self
+        return "%s(%s)" % (type(self).__name__, field_list)
+
+    def __getnewargs__(self):
+        return tuple(self)
+
+    def __getstate__(self):
+        pass
+
+
+def create_return_tuple(args):
+    """Creates a new class similar to namedtuple.
+
+    Pass a list of field names or None for no field name.
+
+    >>> x = new_named_tuple([None, "bar"])
+    >>> x(1, 3)
+    ReturnValue(1, bar=3)
+    """
+
+    class ReturnValue(_ReturnValue):
+        __slots__ = ()
+        _fields = tuple(args)
+        for i, a in enumerate(args):
+            if a is not None:
+                vars()[a]  = property(itemgetter(i))
+        del i, a
+
+    return ReturnValue
 
 
 def get_type_name(type_):
@@ -42,25 +82,6 @@ def get_type_name(type_):
         return type_.__name__
     else:
         return "%s.%s" % (type_.__module__, type_.__name__)
-
-
-def escape_for_namedtuple(names, reg=KWD_RE):
-    """Takes a list of C identifiers and returns value suitable for
-    using as names in a namedtuple. The first element can be None
-    to represent a return value without a name
-    """
-
-    used = set()
-    for name in reversed(names):
-        if name is None:
-            name = "return_"
-        elif name[0] == "_":
-            name = "value" + name
-        name = reg.sub(r"\1_", name)
-        while name in used:
-            name += "_"
-        used.add(name)
-        yield name
 
 
 def build_docstring(func_name, args, ret, throws):
@@ -239,8 +260,7 @@ except AttributeError:
     elif len(out) > 1:
         # for more than one value use a named tuple.
         out_vars, out_names = zip(*out)
-        out_names = escape_for_namedtuple(out_names)
-        ntuple = collections.namedtuple("ReturnValue", out_names)
+        ntuple = create_return_tuple(out_names)
         block, var = backend.parse("""
 return $ntuple(%s)
 """ % ", ".join(out_vars), ntuple=ntuple)
