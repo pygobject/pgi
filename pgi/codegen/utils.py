@@ -97,7 +97,8 @@ class CodeBlock(object):
         if name in self._deps:
             if self._deps[name] is obj:
                 return
-            raise ValueError("There exists a different dep with the same name")
+            raise ValueError(
+                "There exists a different dep with the same name : %r" % name)
         self._deps[name] = obj
 
     def write_into(self, block, level=0):

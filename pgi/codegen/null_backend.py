@@ -81,9 +81,9 @@ class BaseType(object):
 class NullBackend(Backend):
     NAME = "null"
 
-    @property
-    def var(self):
-        return VariableFactory()
+    def __init__(self):
+        Backend.__init__(self)
+        self.var = VariableFactory()
 
     def get_library(self, namespace):
         return namespace
@@ -95,7 +95,7 @@ class NullBackend(Backend):
         return BaseType(type_)
 
     def parse(self, code, **kwargs):
-        return parse_with_objects(code, VariableFactory(), **kwargs)
+        return parse_with_objects(code, self.var, **kwargs)
 
     def cast_pointer(self, name, *args):
         return CodeBlock(), name

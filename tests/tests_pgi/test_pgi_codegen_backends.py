@@ -11,6 +11,7 @@ import contextlib
 
 from pgi.codegen.cffi_backend import CFFIBackend
 from pgi.codegen.ctypes_backend import CTypesBackend
+from pgi.codegen.null_backend import NullBackend
 from pgi.clib.gir import GITypeTag
 
 
@@ -96,3 +97,13 @@ class TBackendCFFI(_TBackend):
 
 class TBackendCTypes(_TBackend):
     Backend = CTypesBackend
+
+
+class TNullBackend(unittest.TestCase):
+
+    def test_same_varfac(self):
+        # make sure everything uses the same variable factory
+        backend = NullBackend()
+        b1, v = backend.parse("$foo", foo=object())
+        b2, v = backend.parse("$foo", foo=object())
+        b2.write_into(b1)
