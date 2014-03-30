@@ -51,7 +51,7 @@ class TPEP8(unittest.TestCase):
     def test_overrides(self):
         import gi.overrides
         self._run_package(
-            gi.overrides, ignore=["E501", "E303", "E502", "E302"])
+            gi.overrides, ignore=["E501", "E303", "E502", "E302", "E714"])
 
     def test_repository(self):
         import gi.repository
