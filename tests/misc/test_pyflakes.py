@@ -5,10 +5,13 @@
 # published by the Free Software Foundation
 
 import os
+import re
 import glob
 import sys
 import subprocess
 import unittest
+
+from pgi import _compat
 
 os.environ["PYFLAKES_NODOCTEST"] = "1"
 try:
@@ -21,11 +24,15 @@ class Error(object):
     IMPORT_UNUSED = "imported but unused"
     REDEF_FUNCTION = "redefinition of function"
     UNABLE_DETECT_UNDEF = "unable to detect undefined names"
+    UNDEFINED_PY2_NAME = \
+        "undefined name '(unicode|long|basestring|xrange|cmp)'"
 
 
 class FakeStream(object):
     # skip these by default
     BL = [Error.UNABLE_DETECT_UNDEF]
+    if _compat.PY3:
+        BL.append(Error.UNDEFINED_PY2_NAME)
 
     def __init__(self, blacklist=None):
         self.lines = []
@@ -35,7 +42,7 @@ class FakeStream(object):
 
     def write(self, text):
         for p in self.bl:
-            if p in text:
+            if re.search(p, text):
                 return
         text = text.strip()
         if not text:
