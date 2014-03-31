@@ -22,7 +22,7 @@ class _ReturnValue(tuple):
     _fformat = ()
 
     def __repr__(self):
-        return type(self).__name__ + self._fformat % self
+        return self._fformat % self
 
     def __reduce__(self):
         return (tuple, (tuple(self),))

@@ -132,7 +132,7 @@ class PGIMisc(unittest.TestCase):
         self.assertEqual(align[1], align.yalign)
 
         # repr
-        self.assertEqual(repr(align), "ReturnValue(xalign=0.0, yalign=1.0)")
+        self.assertEqual(repr(align), "(xalign=0.0, yalign=1.0)")
 
         # pickle as tuple
         obj = pickle.dumps(align)
