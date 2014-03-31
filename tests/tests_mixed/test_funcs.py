@@ -383,6 +383,7 @@ class FuncsTest(unittest.TestCase):
         icon.set_filename("/tmp/foobar")
         self.assertEqual(icon.get_filename(), "/tmp/foobar")
 
+    @skipUnlessGIMarshallingTests
     def test_error_message(self):
         try:
             GIMarshallingTests.gerror()

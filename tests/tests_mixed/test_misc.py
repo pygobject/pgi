@@ -7,6 +7,7 @@
 
 import unittest
 import sys
+import os
 
 from tests import skipIfGI
 
@@ -106,4 +107,7 @@ class MiscTest(unittest.TestCase):
             pass
 
     def test_module_special_methods(self):
-        self.assertTrue(isinstance(Gtk.__path__, str))
+        if os.name == "nt":
+            self.assertTrue(isinstance(Gtk.__path__, type(u"")))
+        else:
+            self.assertTrue(isinstance(Gtk.__path__, str))

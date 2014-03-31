@@ -199,6 +199,9 @@ class BenchmarkCommand(Command):
         import os
         import platform
 
+        if os.name == "nt":
+            exit(benchmarks.run(False, "ctypes"))
+
         set_test_environ()
 
         is_cpython = platform.python_implementation() == "CPython"

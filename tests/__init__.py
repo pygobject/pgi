@@ -149,7 +149,7 @@ def test(load_gi, backend=None, strict=False, filter_=None, failfast=False):
         try:
             import cairocffi
             cairocffi.install_as_pycairo()
-        except ImportError:
+        except (ImportError, OSError):
             _has_cairo = False
         import pgi
         pgi.install_as_gi()

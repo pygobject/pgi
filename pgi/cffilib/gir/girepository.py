@@ -128,9 +128,7 @@ class GIRepository(object):
         res = lib.g_irepository_get_typelib_path(self._ptr, namespace)
         if res:
             res = ffi.string(res)
-            if PY3:
-                res = fsdecode(res)
-            return res
+            return fsdecode(res)
 
     def get_shared_library(self, namespace):
         if PY3:
@@ -138,9 +136,7 @@ class GIRepository(object):
         res = lib.g_irepository_get_shared_library(self._ptr, namespace)
         if res:
             res = ffi.string(res)
-            if PY3:
-                res = fsdecode(res)
-            return res
+            return fsdecode(res)
 
     def get_version(self, namespace):
         if PY3:
