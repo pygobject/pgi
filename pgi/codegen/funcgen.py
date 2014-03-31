@@ -34,7 +34,7 @@ def create_return_tuple(args):
     Pass a list of field names or None for no field name.
 
     >>> x = new_named_tuple([None, "bar"])
-    >>> x(1, 3)
+    >>> x((1, 3))
     ReturnValue(1, bar=3)
     """
 
