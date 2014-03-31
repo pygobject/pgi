@@ -7,6 +7,7 @@
 
 import re
 import unittest
+import pickle
 
 from tests import skipUnlessCairo
 
@@ -122,7 +123,17 @@ class PGIMisc(unittest.TestCase):
     def test_named_tuple_return(self):
         from gi.repository import Gtk
         b = Gtk.Button()
+        b.set_alignment(0.0, 1.0)
         align = b.get_alignment()
+
+        # access by name
         self.assertEqual(len(align), 2)
-        self.assertEqual(align[0], align.yalign)
-        self.assertEqual(align[1], align.xalign)
+        self.assertEqual(align[0], align.xalign)
+        self.assertEqual(align[1], align.yalign)
+
+        # repr
+        self.assertEqual(repr(align), "ReturnValue(xalign=0.0, yalign=1.0)")
+
+        # pickle as tuple
+        obj = pickle.dumps(align)
+        self.assertEqual(pickle.loads(obj), (0.0, 1.0))

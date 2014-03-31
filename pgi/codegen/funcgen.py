@@ -19,21 +19,13 @@ from pgi.clib.gir import GICallableInfo, GIFunctionInfo, GIFunctionInfoFlags
 
 class _ReturnValue(tuple):
     __slots__ = ()
-    _fields = ()
-
-    def __new__(cls, *args):
-        return tuple.__new__(cls, args)
+    _fformat = ()
 
     def __repr__(self):
-        ff = ["%r" if f is None else "%s=%%r" % f for f in self._fields]
-        field_list = (", ".join(ff)) % self
-        return "%s(%s)" % (type(self).__name__, field_list)
+        return type(self).__name__ + self._fformat % self
 
-    def __getnewargs__(self):
-        return tuple(self)
-
-    def __getstate__(self):
-        pass
+    def __reduce__(self):
+        return (tuple, (tuple(self),))
 
 
 def create_return_tuple(args):
@@ -46,9 +38,12 @@ def create_return_tuple(args):
     ReturnValue(1, bar=3)
     """
 
+    fformat = ["%r" if f is None else "%s=%%r" % f for f in args]
+    fformat = "(%s)" % ", ".join(fformat)
+
     class ReturnValue(_ReturnValue):
         __slots__ = ()
-        _fields = tuple(args)
+        _fformat = fformat
         for i, a in enumerate(args):
             if a is not None:
                 vars()[a] = property(itemgetter(i))
@@ -262,7 +257,7 @@ except AttributeError:
         out_vars, out_names = zip(*out)
         ntuple = create_return_tuple(out_names)
         block, var = backend.parse("""
-return $ntuple(%s)
+return $ntuple((%s))
 """ % ", ".join(out_vars), ntuple=ntuple)
         block.write_into(body)
 
