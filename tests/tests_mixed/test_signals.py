@@ -12,23 +12,26 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 from pgi import _compat
 
-from tests import FIXME
+from tests import FIXME, skipIfGIVersion
 
 
 class SignalTest(unittest.TestCase):
 
+    @skipIfGIVersion(3, 8)
     def test_connect(self):
         w = Gtk.Window()
         id_ = w.connect("map", lambda *x: None)
         self.assertTrue(isinstance(id_, _compat.integer_types))
         w.disconnect(id_)
 
+    @skipIfGIVersion(3, 8)
     def test_connect_after(self):
         w = Gtk.Window()
         id_ = w.connect_after("map", lambda *x: None)
         self.assertTrue(isinstance(id_, _compat.integer_types))
         w.disconnect(id_)
 
+    @skipIfGIVersion(3, 8)
     def test_handler_block(self):
         w = Gtk.Window()
         id_ = w.connect_after("map", lambda *x: None)
@@ -42,11 +45,13 @@ class SignalTest(unittest.TestCase):
         self.assertRaises(TypeError, w.connect, "foobar", lambda *x: None)
         self.assertRaises(TypeError, w.connect_after, "foobar", lambda: None)
 
+    @skipIfGIVersion(3, 8)
     def test_connect_user_data(self):
         w = Gtk.Window()
         id_ = w.connect("map", lambda *x: None, 1, 2, 3, 4)
         w.disconnect(id_)
 
+    @skipIfGIVersion(3, 8)
     def test_subclass_connect(self):
         class A(Gtk.Window):
             def __init__(self):

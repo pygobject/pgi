@@ -23,7 +23,7 @@ else:
     faulthandler.enable()
 
 
-_gi_version = (-1)
+_gi_version = (-1,)
 _is_gi = False
 _is_pypy = False
 _has_cairo = False
@@ -32,8 +32,13 @@ _fixme = {}
 GIOverflowError = None
 
 
-def skipUnlessGIVersion(*version):
+def skipUnlessGIVersionAtLeast(*version):
     return unittest.skipIf(_is_gi and _gi_version < version, "gi too old")
+
+
+def skipIfGIVersion(*version):
+    sub = _gi_version[:len(version)]
+    return unittest.skipIf(_is_gi and sub == version, "gi version broken")
 
 
 def skipIfPy3(func):

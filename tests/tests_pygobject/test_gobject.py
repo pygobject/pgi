@@ -16,7 +16,8 @@ except ImportError:
 
 import gi
 
-from tests import FIXME, skipIfPyPy, skipUnlessGIVersion
+from tests import FIXME, skipIfPyPy, skipUnlessGIVersionAtLeast, \
+    GIOverflowError
 
 testhelper = None
 get_introspection_module = None
@@ -279,14 +280,14 @@ class TestGValue(unittest.TestCase):
         self.assertEqual(GObject.TYPE_VALUE, GObject.Value.__gtype__)
         self.assertEqual(GObject.type_name(GObject.TYPE_VALUE), 'GValue')
 
-    @skipUnlessGIVersion(3, 4)
+    @skipUnlessGIVersionAtLeast(3, 8)
     def test_no_type(self):
         value = GObject.Value()
         self.assertEqual(value.g_type, GObject.TYPE_INVALID)
         self.assertRaises(TypeError, value.set_value, 23)
         self.assertEqual(value.get_value(), None)
 
-    @skipUnlessGIVersion(3, 4)
+    @skipUnlessGIVersionAtLeast(3, 8)
     def test_int(self):
         value = GObject.Value(GObject.TYPE_UINT)
         self.assertEqual(value.g_type, GObject.TYPE_UINT)
@@ -295,13 +296,13 @@ class TestGValue(unittest.TestCase):
         value.set_value(42.0)
         self.assertEqual(value.get_value(), 42)
 
-    @skipUnlessGIVersion(3, 4)
+    @skipUnlessGIVersionAtLeast(3, 8)
     def test_string(self):
         value = GObject.Value(str, 'foo_bar')
         self.assertEqual(value.g_type, GObject.TYPE_STRING)
         self.assertEqual(value.get_value(), 'foo_bar')
 
-    @skipUnlessGIVersion(3, 4)
+    @skipUnlessGIVersionAtLeast(3, 8)
     def test_float(self):
         # python float is G_TYPE_DOUBLE
         value = GObject.Value(float, 23.4)
@@ -312,7 +313,7 @@ class TestGValue(unittest.TestCase):
         value = GObject.Value(GObject.TYPE_FLOAT, 23.4)
         self.assertEqual(value.g_type, GObject.TYPE_FLOAT)
         self.assertRaises(TypeError, value.set_value, 'string')
-        self.assertRaises(OverflowError, value.set_value, 1e50)
+        self.assertRaises(GIOverflowError, value.set_value, 1e50)
 
     @FIXME  # on pypy only
     def test_float_inf_nan(self):
@@ -336,7 +337,7 @@ class TestGValue(unittest.TestCase):
         value = GObject.Value(GLib.IOFlags, GLib.IOFlags.IS_READABLE)
         self.assertEqual(value.get_value(), GLib.IOFlags.IS_READABLE)
 
-    @skipUnlessGIVersion(3, 4)
+    @skipUnlessGIVersionAtLeast(3, 8)
     def test_object(self):
         class TestObject(GObject.Object):
             pass

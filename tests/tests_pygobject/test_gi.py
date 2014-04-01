@@ -16,8 +16,8 @@ import sys
 from io import StringIO, BytesIO
 
 import tests
-from tests import _is_gi, skipUnlessGIVersion, skipIfGI, FIXME, skipIfPyPy, \
-    skipIfPy3
+from tests import _is_gi, skipUnlessGIVersionAtLeast, skipIfGI, FIXME, \
+    skipIfPyPy, skipIfPy3
 
 try:
     from gi.repository import GIMarshallingTests
@@ -929,7 +929,7 @@ class TestArray(unittest.TestCase):
     def test_array_in_len_before(self):
         GIMarshallingTests.array_in_len_before(Sequence([-1, 0, 1, 2]))
 
-    @skipUnlessGIVersion(3, 4)
+    @skipUnlessGIVersionAtLeast(3, 4)
     def test_array_in_len_zero_terminated(self):
         GIMarshallingTests.array_in_len_zero_terminated(Sequence([-1, 0, 1, 2]))
 
@@ -1079,16 +1079,16 @@ class TestPGI(unittest.TestCase):
 
 
 class TestProjectVersion(unittest.TestCase):
-    @skipUnlessGIVersion(3, 4)
+    @skipUnlessGIVersionAtLeast(3, 4)
     def test_version_str(self):
         self.assertGreaterEqual(gi.__version__, "0.0.2")
 
-    @skipUnlessGIVersion(3, 4)
+    @skipUnlessGIVersionAtLeast(3, 4)
     def test_version_info(self):
         self.assertTrue(len(gi.version_info) >= 3)
         self.assertGreaterEqual(gi.version_info, (0, 0, 2))
 
-    @skipUnlessGIVersion(3, 4)
+    @skipUnlessGIVersionAtLeast(3, 4)
     def test_check_version(self):
         self.assertRaises(ValueError, gi.check_version, (99, 0, 0))
         self.assertRaises(ValueError, gi.check_version, "99.0.0")
@@ -1600,12 +1600,12 @@ class TestKeywords(unittest.TestCase):
         v = GLib.Variant('i', 1)
         self.assertEqual(v.print_(False), '1')
 
-    @skipUnlessGIVersion(3, 4)
+    @skipUnlessGIVersionAtLeast(3, 4)
     def test_function(self):
         # g_thread_yield()
         self.assertEqual(GLib.Thread.yield_(), None)
 
-    @skipUnlessGIVersion(3, 4)
+    @skipUnlessGIVersionAtLeast(3, 4)
     def test_struct_method(self):
         # g_timer_continue()
         # we cannot currently instantiate GLib.Timer objects, so just ensure
@@ -1626,7 +1626,7 @@ class TestModule(unittest.TestCase):
         self.assertTrue("'GIMarshallingTests' from '" in str(GIMarshallingTests),
                         str(GIMarshallingTests))
 
-    @skipUnlessGIVersion(3, 4)
+    @skipUnlessGIVersionAtLeast(3, 4)
     def test_dir(self):
         _dir = dir(GIMarshallingTests)
         self.assertGreater(len(_dir), 10)
@@ -1641,7 +1641,7 @@ class TestModule(unittest.TestCase):
             item = getattr(GIMarshallingTests, item_name)
             self.assertTrue(hasattr(item, '__class__'))
 
-    @skipUnlessGIVersion(3, 4)
+    @skipUnlessGIVersionAtLeast(3, 4)
     @skipIfPyPy("pypy gets confused by some __path__")
     def test_help(self):
         orig_stdout = sys.stdout

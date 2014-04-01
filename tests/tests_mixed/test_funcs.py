@@ -8,7 +8,7 @@
 import unittest
 
 import tests
-from tests import skipUnlessGIVersion, skipIfGI
+from tests import skipUnlessGIVersionAtLeast, skipIfGI
 import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GLib, GObject, Pango
@@ -242,7 +242,7 @@ class FuncsTest(unittest.TestCase):
         self.assertRaises(tests.GIOverflowError, v.set_float, 10**39)
         self.assertRaises(tests.GIOverflowError, v.set_float, -10**39)
 
-    @skipUnlessGIVersion(3, 6)
+    @skipUnlessGIVersionAtLeast(3, 6)
     def test_value_float_inf(self):
         v = GObject.Value()
         v.init(GObject.TYPE_FLOAT)
@@ -351,7 +351,7 @@ class FuncsTest(unittest.TestCase):
         self.assertEqual(f(GObject.TYPE_UINT), 0)
         self.assertEqual(f(GObject.TYPE_ULONG), 0)
 
-    @skipUnlessGIVersion(3, 4)
+    @skipUnlessGIVersionAtLeast(3, 4)
     def gvalue_return_gtype(self):
         f = lambda t: GObject.Value().init(t)
 

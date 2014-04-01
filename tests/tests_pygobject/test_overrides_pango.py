@@ -12,7 +12,7 @@ except ImportError:
     Pango = None
     PangoCairo = None
 
-from tests import FIXME, skipUnlessGIVersion
+from tests import FIXME, skipUnlessGIVersionAtLeast
 
 
 @unittest.skipUnless(Pango, 'Pango not available')
@@ -39,7 +39,7 @@ class TestPango(unittest.TestCase):
         layout.set_markup("Foobar")
         self.assertEqual(layout.get_text(), "Foobar")
 
-    @skipUnlessGIVersion(3, 4)
+    @skipUnlessGIVersionAtLeast(3, 8)
     def test_break_keyword_escape(self):
         # https://bugzilla.gnome.org/show_bug.cgi?id=697363
         self.assertTrue(hasattr(Pango, 'break_'))
