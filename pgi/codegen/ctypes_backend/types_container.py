@@ -46,7 +46,8 @@ if $array_len != $length:
     def _pack(self, name, length_type, out=True):
         # length
         if self.type.array_length != -1:
-            l = self.get_type(length_type)
+            l = self.get_type(
+                length_type, desc="Return value of __len__() of %s" % self.desc)
             length = l.parse("$len = $_.len($inp)", inp=name)["len"]
             packed_length = l.pack_out(length)
             l.block.write_into(self.block)
@@ -60,7 +61,7 @@ if $array_len != $length:
 
         # param
         param_type = self.type.get_param_type(0)
-        p = self.get_type(param_type)
+        p = self.get_type(param_type, desc="Element of %s" % self.desc)
         item_in = self.var()
         item_out = p.pack_in(item_in)
         ctypes_type = typeinfo_to_ctypes(param_type)

@@ -415,3 +415,20 @@ class TArgExceptions(unittest.TestCase):
             self.assertTrue("1" in str(e))
             self.assertTrue("'v'" in str(e))
             self.assertTrue("int8_in_max" in str(e))
+
+    def test_container_sub_exceptions(self):
+        class Foo(list):
+            def __len__(self):
+                return 2**33
+
+        try:
+            GIMarshallingTests.array_in(Foo([1,2,3,4]))
+        except OverflowError as e:
+            self.assertTrue("not in range" in str(e))
+            self.assertTrue("array_in" in str(e))
+
+        try:
+            GIMarshallingTests.array_in(["foo"])
+        except TypeError as e:
+            self.assertTrue("not a number" in str(e))
+            self.assertTrue("array_in" in str(e))
