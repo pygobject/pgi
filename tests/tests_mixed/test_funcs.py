@@ -40,8 +40,8 @@ class FuncsTest(unittest.TestCase):
         self.assertEqual(Gtk.get_current_event_time(), 0)
 
     def test_basic_argument(self):
-        self.assertEqual(GLib.basename("/omg/foo/test"), "test")
-        self.assertEqual(GLib.basename(u"/omg/foo/test"), "test")
+        self.assertEqual(GLib.path_get_basename("/omg/foo/test"), "test")
+        self.assertEqual(GLib.path_get_basename(u"/omg/foo/test"), "test")
 
     def test_basic_utf8_arg(self):
         b = Gtk.Button()
