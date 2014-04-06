@@ -8,7 +8,7 @@
 import unittest
 
 import tests
-from tests import skipUnlessGIVersionAtLeast, skipIfGI
+from tests import skipUnlessGIVersionAtLeast, skipIfGI, skipIfGIVersion
 import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GLib, GObject, Pango
@@ -117,6 +117,7 @@ class FuncsTest(unittest.TestCase):
         b = Gtk.Action("foo3", "bar", "blah", Gtk.STOCK_NEW)
         ag.add_action_with_accel(b, "<ctrl>a")
 
+    @skipIfGIVersion(3, 12, 0)
     def test_pass_object(self):
         action = Gtk.RadioAction("", "", None, None, 0)
         self.assertRaises(TypeError, action.join_group, 1)
