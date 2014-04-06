@@ -67,8 +67,7 @@ class ErrorArgument(Argument):
     def post_call(self):
         var = self.backend.get_type(ErrorArgument.FakeType(), may_be_null=True)
 
-        out = var.unpack(self._error)
-        var.free(self._error)
+        out = var.unpack(self._error, own=True)
         var.check_raise(out)
         return var.block
 
@@ -157,9 +156,8 @@ class GIErrorArgument(GIArgument):
             return
 
         var = self.get_type()
-        self.out_var = var.unpack(self._error)
-        if self.transfer_everything():
-            var.free(self._error)
+        get_ownership = self.transfer_everything()
+        self.out_var = var.unpack(self._error, get_ownership)
 
         return var.block
 

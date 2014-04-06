@@ -71,13 +71,13 @@ $gtype = $GType()
 @registry.register(GITypeTag.ERROR)
 class Error(BaseType):
 
-    def unpack(self, name):
+    def unpack(self, name, own=False):
         var = self.parse("""
 if $gerror_ptr:
-    $out = $PGError._from_gerror($gerror_ptr.contents)
+    $out = $PGError._from_gerror($gerror_ptr, $own)
 else:
     $out = $none
-""", gerror_ptr=name, PGError=PGError, none=None)
+""", gerror_ptr=name, PGError=PGError, none=None, own=own)
 
         return var["out"]
 
@@ -91,9 +91,3 @@ if $error:
         return self.parse("""
 $ptr = $gerror_ptr()
 """, gerror_ptr=GErrorPtr)["ptr"]
-
-    def free(self, name):
-        self.parse("""
-if $ptr:
-    $ptr.free()
-""", ptr=name)
