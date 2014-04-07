@@ -553,8 +553,6 @@ if $ptr is None:
 """, ptr=name)["ptr"]
 
     def pack_in(self, value):
-        assert self.type.is_pointer
-
         checked = self._check(value)
         return self.parse("""
 $c_ptr = $ctypes.c_void_p($ptr)

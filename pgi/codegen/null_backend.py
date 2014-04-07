@@ -46,7 +46,7 @@ class BaseType(object):
     def get_reference(self, name):
         return name
 
-    def unpack(self, name, *args):
+    def unpack(self, name, *args, **kwargs):
         return name
 
     def pre_unpack(self, name):
