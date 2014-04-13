@@ -88,10 +88,11 @@ class TDocstring(unittest.TestCase):
             GLib.ByteArray.new_take.__doc__,
             "new_take(data: bytes) -> bytes")
 
-        self.assertEqual(
-            GLib.Variant.parse_error_print_context.__doc__,
-            "parse_error_print_context(error: GLib.GError, "
-            "source_str: str) -> str")
+        if hasattr(GLib.Variant, "parse_error_print_context"):
+            self.assertEqual(
+                GLib.Variant.parse_error_print_context.__doc__,
+                "parse_error_print_context(error: GLib.GError, "
+                "source_str: str) -> str")
 
     def test_callback_docstring(self):
         string = GLib.DestroyNotify.__doc__
