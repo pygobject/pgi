@@ -105,9 +105,31 @@ class ArrayReturn(ReturnValue):
 
         if value == GIArrayType.C:
             return CArrayReturn
+        elif value == GIArrayType.PTR_ARRAY:
+            return PtrArrayReturn
+        elif value == GIArrayType.BYTE_ARRAY:
+            return ByteArrayReturn
 
         raise NotImplementedError(
             "Unsupported array return type %r" % type_.array_type)
+
+
+class ByteArrayReturn(ArrayReturn):
+
+    def pre_call(self):
+        return None
+
+    def post_call(self, name):
+        return None, name
+
+
+class PtrArrayReturn(ArrayReturn):
+
+    def pre_call(self):
+        return None
+
+    def post_call(self, name):
+        return None, name
 
 
 class CArrayReturn(ArrayReturn):

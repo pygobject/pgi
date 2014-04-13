@@ -7,7 +7,7 @@
 
 import unittest
 
-from pgi.repository import Gtk, GLib, Gio, GObject
+from pgi.repository import Gtk, GLib, Gio, GObject, Atk
 
 
 class TDocstring(unittest.TestCase):
@@ -79,6 +79,19 @@ class TDocstring(unittest.TestCase):
             Gtk.Button.set_label.__doc__,
             "set_label(label: str) -> None")
 
+        self.assertEqual(
+            Atk.NoOpObject.get_row_header_cells.__doc__,
+            "get_row_header_cells() -> [Atk.Object]")
+
+        self.assertEqual(
+            GLib.ByteArray.new_take.__doc__,
+            "new_take(data: bytes) -> bytes")
+
+        self.assertEqual(
+            GLib.Variant.parse_error_print_context.__doc__,
+            "parse_error_print_context(error: GLib.GError, "
+            "source_str: str) -> str")
+
     def test_callback_docstring(self):
         string = GLib.DestroyNotify.__doc__
         self.assertEqual(string, "DestroyNotify(data: object) -> None")
@@ -112,3 +125,9 @@ class TDocstring(unittest.TestCase):
         sigs = Gtk.Window.signals
         sig = sigs.set_focus
         self.assertEqual(sig.__doc__, "set_focus(object: Gtk.Widget) -> None")
+
+        sigs = Gio.MountOperation.signals
+        sig = Gio.MountOperation.signals.show_processes
+        self.assertEqual(sig.__doc__,
+            "show_processes(message: str, processes: [int], "
+            "choices: [str]) -> None")

@@ -56,17 +56,6 @@ class InterfaceField(Field):
             # fall back to object
             pass
 
-    @classmethod
-    def get_class(cls, type_):
-        iface = type_.get_interface()
-        iface_type = iface.type.value
-
-        # no idea how to handle that..
-        if iface_type == GIInfoType.CALLBACK:
-            raise NotImplementedError
-
-        return cls
-
     def get(self, name):
         var = self.backend.get_type(self.type)
         iface = self.type.get_interface()
@@ -97,6 +86,15 @@ class TypeField(Field):
         var = self.backend.get_type(self.type)
         out = var.unpack_out(name)
         return var.block, out
+
+
+class GHashField(Field):
+    TAG = GITypeTag.GHASH
+    py_type = dict
+
+    def setup(self):
+        self.py_type = {
+            self.get_param_type(0).py_type: self.get_param_type(1).py_type}
 
 
 class BasicField(Field):
@@ -193,6 +191,22 @@ class Utf8Field(BasicField):
 class VoidField(BasicField):
     TAG = GITypeTag.VOID
     py_type = object
+
+
+class GSListField(Field):
+    TAG = GITypeTag.GSLIST
+    py_type = list
+
+    def setup(self):
+        self.py_type = [self.get_param_type(0).py_type]
+
+
+class GListField(Field):
+    TAG = GITypeTag.GLIST
+    py_type = list
+
+    def setup(self):
+        self.py_type = [self.get_param_type(0).py_type]
 
 
 _classes = {}

@@ -279,6 +279,7 @@ def $func_name($func_args):
     func = main.compile()[func_name]
     func._code = main
     func.__doc__ = docstring
+    func.__module__ = info.namespace
 
     return func
 

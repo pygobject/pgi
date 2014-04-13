@@ -149,7 +149,7 @@ class GIErrorArgument(GIArgument):
             self.call_var = var.get_reference(self._error)
             return var.block
 
-        raise NotImplementedError("Error not out")
+        # FIXME: in case
 
     def post_call(self):
         if not self.is_direction_out():
@@ -175,12 +175,25 @@ class ArrayArgument(GIArgument):
 
     @classmethod
     def get_class(cls, type_):
-        type_ = type_.array_type.value
+        array_type = type_.array_type
+        typev = array_type.value
 
-        if type_ == GIArrayType.C:
+        if typev == GIArrayType.C:
             return CArrayArgument
+        elif typev == GIArrayType.BYTE_ARRAY:
+            return ByteArrayArgument
+        elif typev == GIArrayType.ARRAY:
+            return GArrayArgument
 
-        raise NotImplementedError("unsupported array type")
+        raise NotImplementedError("unsupported array type: %r" % array_type)
+
+
+class GArrayArgument(ArrayArgument):
+    pass
+
+
+class ByteArrayArgument(ArrayArgument):
+    pass
 
 
 class CArrayArgument(ArrayArgument):

@@ -397,6 +397,9 @@ class FuncsTest(unittest.TestCase):
         error = GLib.GError(1, 2, 3, 4)
         self.assertEqual(str(error), "(1, 2, 3, 4)")
 
+    def test_module(self):
+        self.assertTrue("GLib" in GLib.io_create_watch.__module__)
+
 
 @skipIfGI
 @skipUnlessGIMarshallingTests
