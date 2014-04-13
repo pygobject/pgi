@@ -79,9 +79,10 @@ class TDocstring(unittest.TestCase):
             Gtk.Button.set_label.__doc__,
             "set_label(label: str) -> None")
 
-        self.assertEqual(
-            Atk.NoOpObject.get_row_header_cells.__doc__,
-            "get_row_header_cells() -> [Atk.Object]")
+        if hasattr(Atk.NoOpObject, "get_row_header_cells"):
+            self.assertEqual(
+                Atk.NoOpObject.get_row_header_cells.__doc__,
+                "get_row_header_cells() -> [Atk.Object]")
 
         self.assertEqual(
             GLib.ByteArray.new_take.__doc__,
