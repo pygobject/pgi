@@ -10,7 +10,7 @@ from operator import itemgetter
 
 from .backend import list_backends, get_backend
 from .utils import CodeBlock
-from pgi.util import escape_identifier
+from pgi.util import escape_identifier, escape_parameter
 from .arguments import get_argument_class, ErrorArgument
 from .returnvalues import get_return_class
 from pgi._compat import string_types, PY3
@@ -335,6 +335,7 @@ def generate_dummy_callable(info, func_name, method=False):
     for arg_info, arg_type in zip(arg_infos, arg_types):
         cls = get_argument_class(arg_type)
         name = escape_identifier(arg_info.name)
+        name = escape_parameter(name)
         args.append(cls(name, args, backend, arg_info, arg_type))
 
     cls = get_return_class(return_type)
