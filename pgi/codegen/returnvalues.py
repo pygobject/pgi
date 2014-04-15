@@ -312,7 +312,7 @@ class BaseInterfaceReturn(ReturnValue):
         iface = self.type.get_interface()
         try:
             self.py_type = import_attribute(iface.namespace, iface.name)
-        except NotImplementedError:
+        except ImportError:
             # fall back to object
             pass
 

@@ -187,12 +187,17 @@ def set_gvalue_from_py(ptr, is_interface, tag, value):
 
 
 def import_attribute(namespace, name):
-    mod = __import__(const.PREFIX[-1] + "." + namespace, fromlist=[name])
+    try:
+        mod = __import__(const.PREFIX[-1] + "." + namespace, fromlist=[name])
+    except RuntimeError as e:
+        # this happens on Windows, no idea why
+        raise ImportError(e)
+
     try:
         return getattr(mod, name)
     except AttributeError as e:
         # callback types
-        raise NotImplementedError(e)
+        raise ImportError(e)
 
 
 def import_module(namespace):
