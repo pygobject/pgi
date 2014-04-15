@@ -137,9 +137,3 @@ class PGIMisc(unittest.TestCase):
         # pickle as tuple
         obj = pickle.dumps(align)
         self.assertEqual(pickle.loads(obj), (0.0, 1.0))
-
-    def test_field_type(self):
-        from gi.repository import GLib
-
-        self.assertTrue(isinstance(GLib.Scanner.symbol_table.py_type, dict))
-        self.assertTrue(GLib.Hook.destroy.py_type is GLib.DestroyNotify)

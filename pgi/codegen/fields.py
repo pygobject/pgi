@@ -56,6 +56,17 @@ class InterfaceField(Field):
             # fall back to object
             pass
 
+    @classmethod
+    def get_class(cls, type_):
+        iface = type_.get_interface()
+        iface_type = iface.type.value
+
+        # no idea how to handle that..
+        if iface_type == GIInfoType.CALLBACK:
+            raise NotImplementedError
+
+        return cls
+
     def get(self, name):
         var = self.backend.get_type(self.type)
         iface = self.type.get_interface()
