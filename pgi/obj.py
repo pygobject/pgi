@@ -288,7 +288,7 @@ class VirtualMethodAttribute(object):
         name = self._name
 
         # fixme: generate_callback just gives us a docstring
-        func = generate_dummy_callable(info, "do_" + info.name, method=True)
+        func = generate_dummy_callable(info, name, method=True)
         func._is_virtual = True
         setattr(real_owner, name, func)
         return getattr(instance or owner, name)
@@ -297,6 +297,7 @@ class VirtualMethodAttribute(object):
 def add_method(info, target_cls, virtual=False, dont_replace=False):
     """Add a method to the target class"""
 
+    # escape before prefixing, like pygobject
     name = escape_identifier(info.name)
     if virtual:
         name = "do_" + name

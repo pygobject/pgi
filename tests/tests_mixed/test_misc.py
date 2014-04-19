@@ -111,3 +111,12 @@ class MiscTest(unittest.TestCase):
             self.assertTrue(isinstance(Gtk.__path__, type(u"")))
         else:
             self.assertTrue(isinstance(Gtk.__path__, str))
+
+    def test_vfunc_name_escape(self):
+        try:
+            from gi.repository import WebKit2
+        except ImportError:
+            return
+
+        # pygobject escapes vfuncs before prefixing, do the same
+        self.assertTrue(hasattr(WebKit2.WebView, "do_print_"))
