@@ -112,7 +112,9 @@ class MiscTest(unittest.TestCase):
         else:
             self.assertTrue(isinstance(Gtk.__path__, str))
 
+    @unittest.skipIf(_compat.PY3, "py3")
     def test_vfunc_name_escape(self):
+        # print only a keyword in py2
         try:
             from gi.repository import WebKit2
         except ImportError:
