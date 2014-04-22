@@ -47,6 +47,9 @@ for name in ['markup_escape_text', 'get_application_name',
              'idle_add', 'timeout_add', 'timeout_add_seconds',
              'io_add_watch', 'child_watch_add', 'get_current_time',
              'spawn_async']:
+    # pgi fixme
+    if name in ["Idle"]:
+        continue
     globals()[name] = deprecated(getattr(GLib, name), 'GLib.' + name)
     __all__.append(name)
 
