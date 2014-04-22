@@ -27,7 +27,7 @@ import warnings
 import ctypes
 
 from pgi import PyGIDeprecationWarning
-from pgi.overrides import get_introspection_module, override, deprecated
+from pgi.overrides import get_introspection_module, override
 from pgi.repository import GLib
 from pgi.properties import list_properties
 
