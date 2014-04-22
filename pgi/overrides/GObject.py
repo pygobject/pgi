@@ -36,49 +36,6 @@ GObjectModule = get_introspection_module("GObject")
 __all__ = []
 
 
-# API aliases for backwards compatibility
-for name in ['markup_escape_text', 'get_application_name',
-             'set_application_name', 'get_prgname', 'set_prgname',
-             'main_depth', 'filename_display_basename',
-             'filename_display_name', 'filename_from_utf8',
-             'uri_list_extract_uris',
-             'MainLoop', 'MainContext', 'main_context_default',
-             'source_remove', 'Source', 'Idle', 'Timeout', 'PollFD',
-             'idle_add', 'timeout_add', 'timeout_add_seconds',
-             'io_add_watch', 'child_watch_add', 'get_current_time',
-             'spawn_async']:
-    # pgi fixme
-    if name in ["Idle"]:
-        continue
-    globals()[name] = deprecated(getattr(GLib, name), 'GLib.' + name)
-    __all__.append(name)
-
-
-# constants are also deprecated, but cannot mark them as such
-for name in ['PRIORITY_DEFAULT', 'PRIORITY_DEFAULT_IDLE', 'PRIORITY_HIGH',
-             'PRIORITY_HIGH_IDLE', 'PRIORITY_LOW',
-             'IO_IN', 'IO_OUT', 'IO_PRI', 'IO_ERR', 'IO_HUP', 'IO_NVAL',
-             'IO_STATUS_ERROR', 'IO_STATUS_NORMAL', 'IO_STATUS_EOF',
-             'IO_STATUS_AGAIN', 'IO_FLAG_APPEND', 'IO_FLAG_NONBLOCK',
-             'IO_FLAG_IS_READABLE', 'IO_FLAG_IS_WRITEABLE',
-             'IO_FLAG_IS_SEEKABLE', 'IO_FLAG_MASK', 'IO_FLAG_GET_MASK',
-             'IO_FLAG_SET_MASK',
-             'SPAWN_LEAVE_DESCRIPTORS_OPEN', 'SPAWN_DO_NOT_REAP_CHILD',
-             'SPAWN_SEARCH_PATH', 'SPAWN_STDOUT_TO_DEV_NULL',
-             'SPAWN_STDERR_TO_DEV_NULL', 'SPAWN_CHILD_INHERITS_STDIN',
-             'SPAWN_FILE_AND_ARGV_ZERO',
-             'OPTION_FLAG_HIDDEN', 'OPTION_FLAG_IN_MAIN', 'OPTION_FLAG_REVERSE',
-             'OPTION_FLAG_NO_ARG', 'OPTION_FLAG_FILENAME', 'OPTION_FLAG_OPTIONAL_ARG',
-             'OPTION_FLAG_NOALIAS', 'OPTION_ERROR_UNKNOWN_OPTION',
-             'OPTION_ERROR_BAD_VALUE', 'OPTION_ERROR_FAILED', 'OPTION_REMAINING',
-             'glib_version']:
-    # pgi fixme
-    if name in ["IO_STATUS_ERROR", "OPTION_ERROR_UNKNOWN_OPTION"]:
-        continue
-    globals()[name] = getattr(GLib, name)
-    __all__.append(name)
-
-
 G_MININT8 = GLib.MININT8
 G_MAXINT8 = GLib.MAXINT8
 G_MAXUINT8 = GLib.MAXUINT8
@@ -163,7 +120,7 @@ __all__ += ['TYPE_INVALID', 'TYPE_NONE', 'TYPE_INTERFACE', 'TYPE_CHAR',
 
 # Deprecated, use GLib directly
 #Pid = GLib.Pid
-GError = GLib.GError
+#GError = GLib.GError
 OptionGroup = GLib.OptionGroup
 OptionContext = GLib.OptionContext
 __all__ += ['GError', 'OptionGroup', 'OptionContext']
