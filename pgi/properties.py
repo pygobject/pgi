@@ -67,10 +67,11 @@ class GParamSpec(object):
     @property
     def default_value(self):
         from pgi.repository import GObject
-        ptr = self._spec.get_default_value()
-        ptr = ctypes.cast(ptr, ctypes.c_void_p).value
-        gvalue = GObject.Value._from_pointer(ptr, take_ownership=False)
+        gvalue = GObject.Value()
+        gvalue.init(self.value_type)
+        self._spec.set_default(ctypes.cast(gvalue._obj, GValuePtr))
         value = gvalue.get_value()
+
         try:
             # for flags etc, we create instances
             return self.value_type.pytype(value)

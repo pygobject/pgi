@@ -282,6 +282,12 @@ _methods = [
 
 wrap_class(_gobject, GParamSpec, GParamSpecPtr, "g_param_spec_", _methods)
 
+_methods = [
+    ("set_default", None, [GParamSpecPtr, GValuePtr]),
+]
+
+wrap_class(_gobject, GParamSpec, GParamSpecPtr, "g_param_value_", _methods)
+
 
 class GParameter(Structure):
     _fields_ = [
