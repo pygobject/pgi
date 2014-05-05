@@ -64,6 +64,20 @@ class GParamSpec(object):
     def value_type(self):
         return PGType(self._spec.contents.value_type)
 
+    @property
+    def default_value(self):
+        from pgi.repository import GObject
+        ptr = self._spec.get_default_value()
+        ptr = ctypes.cast(ptr, ctypes.c_void_p).value
+        gvalue = GObject.Value._from_pointer(ptr, take_ownership=False)
+        value = gvalue.get_value()
+        try:
+            # for flags etc, we create instances
+            return self.value_type.pytype(value)
+        except TypeError:
+            # for objects etc, just return the value
+            return value
+
     def __repr__(self):
         return "<%s %r>" % (self.__gtype__.name, self.name)
 

@@ -68,6 +68,14 @@ class _Structure(BaseStructure):
                 "Could not allocate structure %r" % self.__class__.__name__)
         self._obj = obj
 
+    @classmethod
+    def _from_pointer(cls, ptr, take_ownership=False):
+        instance = BaseStructure.__new__(cls)
+        instance._obj = ptr
+        if take_ownership:
+            instance._needs_free = True
+        return instance
+
     def __repr__(self):
         form = "<%s structure at 0x%x (%s at 0x%x)>"
         name = type(self).__name__

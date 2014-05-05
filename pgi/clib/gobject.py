@@ -176,17 +176,6 @@ class GParamSpecPtr(POINTER(GParamSpec)):
 
 
 _methods = [
-    ("get_name", gchar_p, [GParamSpecPtr]),
-    ("get_nick", gchar_p, [GParamSpecPtr]),
-    ("get_blurb", gchar_p, [GParamSpecPtr]),
-    ("ref", GParamSpecPtr, [GParamSpecPtr]),
-    ("unref", None, [GParamSpecPtr]),
-]
-
-wrap_class(_gobject, GParamSpec, GParamSpecPtr, "g_param_spec_", _methods)
-
-
-_methods = [
     ("find_property", GParamSpecPtr, [GTypeInterfacePtr, gchar_p]),
     ("install_property", None, [GTypeInterfacePtr, GParamSpecPtr]),
     ("list_properties ", POINTER(GParamSpecPtr),
@@ -280,6 +269,18 @@ set_property.restype = None
 get_property = _gobject.g_object_get_property
 get_property.argtypes = [gpointer, gchar_p, GValuePtr]
 get_property.restype = None
+
+
+_methods = [
+    ("get_name", gchar_p, [GParamSpecPtr]),
+    ("get_nick", gchar_p, [GParamSpecPtr]),
+    ("get_blurb", gchar_p, [GParamSpecPtr]),
+    ("get_default_value", GValuePtr, [GParamSpecPtr]),
+    ("ref", GParamSpecPtr, [GParamSpecPtr]),
+    ("unref", None, [GParamSpecPtr]),
+]
+
+wrap_class(_gobject, GParamSpec, GParamSpecPtr, "g_param_spec_", _methods)
 
 
 class GParameter(Structure):

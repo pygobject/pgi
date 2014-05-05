@@ -137,3 +137,13 @@ class PGIMisc(unittest.TestCase):
         # pickle as tuple
         obj = pickle.dumps(align)
         self.assertEqual(pickle.loads(obj), (0.0, 1.0))
+
+    def test_property_default_value(self):
+        from gi.repository import Gtk
+
+        self.assertEqual(Gtk.Button.props.xalign.default_value, 0.5)
+        self.assertEqual(Gtk.Button.props.visible.default_value, False)
+
+        valign_default = Gtk.Button.props.valign.default_value
+        self.assertEqual(valign_default, Gtk.Align.FILL)
+        self.assertTrue(isinstance(valign_default, Gtk.Align))
