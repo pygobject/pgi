@@ -71,10 +71,13 @@ class GParamSpec(object):
         gvalue.init(self.value_type)
         self._spec.set_default(ctypes.cast(gvalue._obj, GValuePtr))
         value = gvalue.get_value()
+        pytype = self.value_type.pytype
+        if issubclass(pytype, str):
+            return value
 
         try:
             # for flags etc, we create instances
-            return self.value_type.pytype(value)
+            return pytype(value)
         except TypeError:
             # for objects etc, just return the value
             return value
