@@ -38,6 +38,7 @@ class _GIInfoTest(unittest.TestCase):
         self.failUnlessEqual(b.namespace, "Gtk")
         self.failUnlessEqual(b.is_deprecated, False)
         self.failIf(b.get_container())
+        self.failIf(b == 42)
         self.failUnlessEqual(b.type.value, self.gir.GIInfoType.OBJECT)
         repr(b.get_typelib())
 

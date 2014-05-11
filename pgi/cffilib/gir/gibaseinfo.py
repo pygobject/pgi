@@ -103,6 +103,12 @@ class GIBaseInfo(object):
         return bool(lib.g_base_info_equal(self._ptr, other._ptr))
 
     def __eq__(self, other):
+        if not isinstance(other, GIBaseInfo):
+            return False
+        if not self and not other:
+            return True
+        elif not self or not other:
+            return False
         return self.equal(other)
 
     def __neq__(self, other):

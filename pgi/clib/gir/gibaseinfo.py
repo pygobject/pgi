@@ -71,6 +71,8 @@ class GIBaseInfo(c_void_p):
             self.unref()
 
     def __eq__(self, other):
+        if not isinstance(other, GIBaseInfo):
+            return False
         if not self and not other:
             return True
         elif not self or not other:
