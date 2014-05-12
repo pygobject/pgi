@@ -70,17 +70,7 @@ class GParamSpec(object):
         gvalue = GObject.Value()
         gvalue.init(self.value_type)
         self._spec.set_default(ctypes.cast(gvalue._obj, GValuePtr))
-        value = gvalue.get_value()
-        pytype = self.value_type.pytype
-        if issubclass(pytype, str) or value is None:
-            return value
-
-        try:
-            # for flags etc, we create instances
-            return pytype(value)
-        except TypeError:
-            # for objects etc, just return the value
-            return value
+        return gvalue.get_value()
 
     def __repr__(self):
         return "<%s %r>" % (self.__gtype__.name, self.name)

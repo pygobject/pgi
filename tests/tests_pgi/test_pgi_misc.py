@@ -146,7 +146,6 @@ class PGIMisc(unittest.TestCase):
 
         valign_default = Gtk.Button.props.valign.default_value
         self.assertEqual(valign_default, Gtk.Align.FILL)
-        self.assertTrue(isinstance(valign_default, Gtk.Align))
 
         program_name_default = Gtk.AboutDialog.props.program_name.default_value
         self.assertEqual(program_name_default, None)
