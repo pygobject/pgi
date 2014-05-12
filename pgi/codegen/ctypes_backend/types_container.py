@@ -173,6 +173,9 @@ $array = $ctypes.pointer($data)
         else:
             raise NotImplementedError
 
+    def unpack_return(self, name):
+        raise NotImplementedError
+
 
 @registry.register(GITypeTag.GLIST)
 class GList(BaseType):
