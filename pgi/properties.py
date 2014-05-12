@@ -72,7 +72,7 @@ class GParamSpec(object):
         self._spec.set_default(ctypes.cast(gvalue._obj, GValuePtr))
         value = gvalue.get_value()
         pytype = self.value_type.pytype
-        if issubclass(pytype, str):
+        if issubclass(pytype, str) or value is None:
             return value
 
         try:
