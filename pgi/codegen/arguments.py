@@ -184,6 +184,8 @@ class ArrayArgument(GIArgument):
             return ByteArrayArgument
         elif typev == GIArrayType.ARRAY:
             return GArrayArgument
+        elif typev == GIArrayType.PTR_ARRAY:
+            return PtrArrayArgument
 
         raise NotImplementedError("unsupported array type: %r" % array_type)
 
@@ -193,6 +195,10 @@ class GArrayArgument(ArrayArgument):
 
 
 class ByteArrayArgument(ArrayArgument):
+    pass
+
+
+class PtrArrayArgument(ArrayArgument):
     pass
 
 
