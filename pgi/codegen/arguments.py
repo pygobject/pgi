@@ -53,7 +53,7 @@ class Argument(object):
     def can_unpack_none(self):
         """If we get None if the pointer type is NULL"""
 
-        return True
+        return False
 
 
 class ErrorArgument(Argument):
@@ -167,6 +167,10 @@ class GIErrorArgument(GIArgument):
 
         return var.block
 
+    @property
+    def can_unpack_none(self):
+        return True
+
 
 class ArrayArgument(GIArgument):
     TAG = GITypeTag.ARRAY
@@ -257,10 +261,6 @@ class CArrayArgument(ArrayArgument):
         else:
             self.out_var = var.unpack(self._data, None)
         return var.block
-
-    @property
-    def can_unpack_none(self):
-        return False
 
 
 class BaseInterfaceArgument(GIArgument):
@@ -378,6 +378,10 @@ class StructArgument(BaseInterfaceArgument):
         self.out_var = var.unpack_out(self._data)
         return var.block
 
+    @property
+    def can_unpack_none(self):
+        return True
+
 
 class UnionArgument(BaseInterfaceArgument):
 
@@ -421,6 +425,10 @@ class ObjectArgument(BaseInterfaceArgument):
                 var.ref(out)
             self.out_var = out
             return var.block
+
+    @property
+    def can_unpack_none(self):
+        return True
 
 
 class BasicTypeArgument(GIArgument):
@@ -592,6 +600,10 @@ class Utf8Argument(GIArgument):
         if self.transfer_everything():
             var.free(self._data)
         return var.block
+
+    @property
+    def can_unpack_none(self):
+        return True
 
 
 class FilenameArgument(Utf8Argument):

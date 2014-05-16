@@ -22,6 +22,9 @@ from pgi.clib.gir import GIRepository
 def may_be_null_is_nullable():
     """If may_be_null returns nullable or if NULL can be passed in.
 
+    This can still be wrong if the specific typelib is older than the linked
+    libgirepository.
+
     https://bugzilla.gnome.org/show_bug.cgi?id=660879#c47
     """
 
