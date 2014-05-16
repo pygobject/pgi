@@ -251,6 +251,18 @@ def unescape_parameter(text):
     return unescape_identifier(text).replace("_", "-")
 
 
+def cache_return(func):
+    """Cache the return value of a function without arguments"""
+
+    _cache = []
+
+    def wrap():
+        if not _cache:
+            _cache.append(func())
+        return _cache[0]
+    return wrap
+
+
 class cached_property(object):
     """A read-only @property that is only evaluated once."""
 

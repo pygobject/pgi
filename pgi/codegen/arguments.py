@@ -49,6 +49,12 @@ class Argument(object):
     def post_call(self):
         pass
 
+    @property
+    def can_unpack_none(self):
+        """If we get None if the pointer type is NULL"""
+
+        return True
+
 
 class ErrorArgument(Argument):
 
@@ -251,6 +257,10 @@ class CArrayArgument(ArrayArgument):
         else:
             self.out_var = var.unpack(self._data, None)
         return var.block
+
+    @property
+    def can_unpack_none(self):
+        return False
 
 
 class BaseInterfaceArgument(GIArgument):

@@ -10,11 +10,26 @@ from operator import itemgetter
 
 from .backend import list_backends, get_backend
 from .utils import CodeBlock
-from pgi.util import escape_identifier, escape_parameter
+from pgi.util import escape_identifier, escape_parameter, cache_return
 from .arguments import get_argument_class, ErrorArgument
 from .returnvalues import get_return_class
 from pgi._compat import string_types, PY3
 from pgi.clib.gir import GICallableInfo, GIFunctionInfo, GIFunctionInfoFlags
+from pgi.clib.gir import GIRepository
+
+
+@cache_return
+def may_be_null_is_nullable():
+    """If may_be_null returns nullable or if NULL can be passed in.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=660879#c47
+    """
+
+    repo = GIRepository()
+    repo.require("GLib", "2.0", 0)
+    info = repo.find_by_name("GLib", "spawn_sync")
+    # this argument is (allow-none) and can never be (nullable)
+    return not info.get_arg(8).may_be_null
 
 
 class _ReturnValue(tuple):
@@ -113,6 +128,11 @@ def build_docstring(func_name, args, ret, throws):
                 out_args.append(arg.name)
             else:
                 tname = get_type_name(arg.py_type)
+                # if may_be_null means the arg is nullable, it is nullable
+                # and the marshalling returns None for a NULL pointer
+                if may_be_null_is_nullable() and arg.may_be_null and \
+                        arg.can_unpack_none:
+                    tname += " or None"
                 # When can we assume that out args return None?
                 out_args.append("%s: %s" % (arg.name, tname))
 
