@@ -467,7 +467,7 @@ def ObjectAttribute(obj_info):
         """Returns the class struct casted to the passed type"""
 
         ptr = cls.__gtype__._type.class_ref()
-        return  type_._from_pointer(ptr)
+        return type_._from_pointer(ptr)
 
     setattr(cls, "_get_class_struct", classmethod(get_class_struct))
 
