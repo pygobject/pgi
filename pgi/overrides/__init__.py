@@ -45,7 +45,7 @@ def load(namespace, module):
     _active_module.append(module)
     _overrides.append({})
     try:
-        name = __package__ + "." + namespace
+        name = __name__ + "." + namespace
         override_module = __import__(name, fromlist=[""])
     except Exception as err:
         try:
