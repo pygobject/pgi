@@ -1,3 +1,14 @@
+0.0.8 (2014-07-03)
+~~~~~~~~~~~~~~~~~~
+
+* Support for PyPy3
+* Improved error messages (in generated code)
+* Use namedtuple-like for multiple return values
+  (https://bugzilla.gnome.org/show_bug.cgi?id=727374)
+* Remove Gst overrides to match PyGObject
+* Some minor compatibility fixes, performance improvements
+
+
 0.0.7 (2014-03-24)
 ~~~~~~~~~~~~~~~~~~
 

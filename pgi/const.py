@@ -5,5 +5,5 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-VERSION = (0, 0, 7, -1)
+VERSION = (0, 0, 8)
 PREFIX = ["pgi.repository"]

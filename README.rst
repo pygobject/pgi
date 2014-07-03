@@ -4,21 +4,23 @@ PGI - Pure Python GObject Introspection Bindings
 GObject Introspection bindings written in pure Python using ctypes_
 and cffi_ (optional). API compatible with PyGObject_.
 
+**Development Status:**
+
+WARNING: Lots of things are not implemented/supported.
+
+See the 'examples' directory for working examples.
+Anything else will probably not work.
+
 **Code:** https://github.com/lazka/pgi
 
 **License:** LGPL 2.1+
 
 **Requirements:**
 
-- CPython_ 2.7 or 3.3+ or PyPy_ 1.9
+- CPython_ 2.7 or CPython_ 3.3+ or PyPy_ 1.9+ or PyPy3_ 2.3+
 - libgirepository_ 1.0
 - cffi_ 0.6+ (optional)
 - cairocffi_ 0.4+ (optional, for cairo support)
-
-**Development Status:**
-
-See the 'examples' directory for working examples.
-Anything else will probably not work.
 
 .. _ctypes: http://docs.python.org/2/library/ctypes.html
 .. _cffi: http://cffi.readthedocs.org/en/latest/
@@ -27,6 +29,7 @@ Anything else will probably not work.
 .. _libgirepository: http://git.gnome.org/browse/gobject-introspection/
 .. _CPython: http://www.python.org/
 .. _PyPy: http://pypy.org/
+.. _PyPy3: http://pypy.org/
 
 Usage
 -----
