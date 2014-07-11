@@ -1,5 +1,5 @@
 recursive-include tests *.py README *.c *.h Makefile
-recursive-include examples *.py LICENSE *.png
+recursive-include examples *.py LICENSE *.png *.rst
 recursive-include pgi *.py
 include benchmarks/*.py
 include setup.py
