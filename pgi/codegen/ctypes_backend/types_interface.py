@@ -297,7 +297,13 @@ except KeyError:
 class Callback(BaseInterface):
 
     def check(self, name):
-        return self.parse("""
+        if self.may_be_null:
+            return self.parse("""
+if not $_.callable($py_cb) and $py_cb is not None:
+    raise $_.TypeError("$DESC: %r must be callable or None" % $py_cb)
+""", py_cb=name)["py_cb"]
+        else:
+            return self.parse("""
 if not $_.callable($py_cb):
     raise $_.TypeError("$DESC: %r must be callable" % $py_cb)
 """, py_cb=name)["py_cb"]
