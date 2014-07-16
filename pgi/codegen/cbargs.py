@@ -96,6 +96,11 @@ class Utf8Argument(CallbackArgument):
     py_type = str
 
 
+class BooleanArgument(CallbackArgument):
+    TAG = GITypeTag.BOOLEAN
+    py_type = bool
+
+
 class Int64Argument(CallbackArgument):
     TAG = GITypeTag.INT64
     py_type = int
