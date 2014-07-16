@@ -80,8 +80,11 @@ def $cb_wrapper($args):
      out=out_var, post=return_block)
 
     def create_cb_for_func(real_func):
-        # binds the callback to the block and compiles it
-        func = block.compile(**{cb_name: real_func})[func_name]
+        if real_func is not None:
+            # binds the callback to the block and compiles it
+            func = block.compile(**{cb_name: real_func})[func_name]
+        else:
+            func = None
         return backend.get_callback(func, cb_args, return_value)
 
     return create_cb_for_func, docstring

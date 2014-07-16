@@ -114,6 +114,9 @@ class CTypesBackend(Backend):
         return block, h
 
     def get_callback(self, func, args, ret, is_signal=False):
+        if func is None:
+            return ctypes.cast(None, GCallback)
+
         arg_types = [typeinfo_to_ctypes(a.type) for a in args]
         # skip the first arg, we pass the signal's object manually
         if is_signal:
