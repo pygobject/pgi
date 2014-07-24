@@ -39,15 +39,14 @@ class Object(object):
     __signal_cb_ref = {}
 
     def __init__(self, **kwargs):
-        cls = type(self)
-        gtype = cls.__gtype__
+        gtype = self.__gtype__
 
         if gtype.is_abstract():
             raise TypeError("Cannot create instance of abstract type %r" %
                             gtype.name)
 
         names = kwargs.keys()
-        obj = generate_constructor(cls, tuple(names))(*kwargs.values())
+        obj = self._generate_constructor(tuple(names))(*kwargs.values())
 
         # sink unowned objects
         if self._unowned:
@@ -55,6 +54,20 @@ class Object(object):
 
         self.__weak[weakref.ref(self, self.__destroy)] = obj
         self._obj = obj
+
+    @classmethod
+    def _generate_constructor(cls, names):
+        """Get a hopefully cache constructor"""
+
+        cache = cls._constructors
+        if names in cache:
+            return cache[names]
+        elif len(cache) > 3:
+            cache.clear()
+
+        func = generate_constructor(cls, names)
+        cache[names] = func
+        return func
 
     def set_property(self, name, value):
         """set_property(property_name: str, value: object)

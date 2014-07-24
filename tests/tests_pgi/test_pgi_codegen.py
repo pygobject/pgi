@@ -58,7 +58,7 @@ class TPGICodegen(unittest.TestCase):
         a = CodeBlock()
         a.write_line("abc")
         a.pprint(f)
-        self.assertEqual(f.getvalue(), "abc")
+        self.assertEqual(f.getvalue(), "abc\n")
 
     def test_parse_codeblock(self):
         b = CodeBlock()

@@ -158,7 +158,7 @@ class CodeBlock(object):
                 lexer = PythonLexer()
                 file_.write(highlight(code, lexer, formatter))
                 return
-        file_.write(code)
+        file_.write(code + "\n")
 
     def clear(self):
         del self._lines[:]
