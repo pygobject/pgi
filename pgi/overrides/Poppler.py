@@ -1,7 +1,7 @@
 from ctypes import (
     Structure, POINTER,
     byref, c_bool, c_double, c_uint, c_void_p)
-from weakref import WeakSet, proxy
+from weakref import proxy
 
 from pgi.codegen.ctypes_backend import CTypesBackend
 from pgi.overrides import override, get_introspection_module
