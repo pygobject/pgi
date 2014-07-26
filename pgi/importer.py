@@ -60,7 +60,9 @@ def get_required_version(namespace):
 def extract_namespace(fullname):
     for prefix in const.PREFIX:
         if fullname.startswith(prefix):
-            return fullname[len(prefix) + 1:]
+            namespace = fullname[len(prefix) + 1:]
+            if "." not in namespace:
+                return namespace
 
 
 def install_import_hook():
@@ -70,11 +72,9 @@ def install_import_hook():
 class Importer(object):
     """Import hook according to http://www.python.org/dev/peps/pep-0302/"""
 
-    def find_module(self, fullname, path):
-        namespace = extract_namespace(fullname)
-        if namespace:
-            if GIRepository().enumerate_versions(namespace):
-                return self
+    def find_module(self, fullname, path=None):
+        if extract_namespace(fullname):
+            return self
 
     def load_module(self, fullname):
         global _versions
