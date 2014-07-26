@@ -5,6 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
+import textwrap
 from cffi import FFI
 
 from pgi.clib.gir import GIRepository, GITypeTag, GIInfoType
@@ -123,6 +124,7 @@ class BaseType(object):
         assert "DESC" not in kwargs
         kwargs["DESC"] = self.desc
 
+        code = textwrap.dedent(code)
         block, var = self._gen.parse(code, **kwargs)
         block.write_into(self.block)
         return var
@@ -166,23 +168,23 @@ class Boolean(BasicType):
 
     def _check(self, name):
         return self.parse("""
-$bool = $_.bool($value)
-""", value=name)["bool"]
+            $bool = $_.bool($value)
+            """, value=name)["bool"]
 
     pack_out = _check
     pack_in = _check
 
     def unpack_return(self, name):
         return self.parse("""
-$bool = $_.bool($value)
-""", value=name)["bool"]
+            $bool = $_.bool($value)
+            """, value=name)["bool"]
 
     unpack_out = unpack_return
 
     def new(self):
         return self.parse("""
-$value = $ffi.cast("gboolean", 0)
-""")["value"]
+            $value = $ffi.cast("gboolean", 0)
+            """)["value"]
 
 
 class BaseInt(BasicType):
@@ -191,24 +193,24 @@ class BaseInt(BasicType):
 
     def _check(self, value):
         int_ = self.parse("""
-if not $_.isinstance($value, $basestring):
-    $int = $_.int($value)
-else:
-    raise $_.TypeError("$DESC: not a number")
-""", value=value, basestring=_compat.string_types)["int"]
+            if not $_.isinstance($value, $basestring):
+                $int = $_.int($value)
+            else:
+                raise $_.TypeError("$DESC: not a number")
+            """, value=value, basestring=_compat.string_types)["int"]
 
         if self.CTYPE.startswith("u"):
             bits = int(self.CTYPE[4:])
             return self.parse("""
-if not 0 <= $int < 2**$bits:
-    raise $_.OverflowError("$DESC: %r not in range" % $int)
-""", int=int_, bits=bits)["int"]
+                if not 0 <= $int < 2**$bits:
+                    raise $_.OverflowError("$DESC: %r not in range" % $int)
+                """, int=int_, bits=bits)["int"]
         else:
             bits = int(self.CTYPE[3:])
             return self.parse("""
-if not -2**$bits <= $int < 2**$bits:
-    raise $_.OverflowError("$DESC: %r not in range" % $int)
-""", int=int_, bits=bits - 1)["int"]
+                if not -2**$bits <= $int < 2**$bits:
+                    raise $_.OverflowError("$DESC: %r not in range" % $int)
+                """, int=int_, bits=bits - 1)["int"]
 
     def pack_in(self, value):
         return self._check(value)
@@ -216,21 +218,21 @@ if not -2**$bits <= $int < 2**$bits:
     def pack_out(self, value):
         checked = self._check(value)
         return self.parse("""
-$value = $ffi.cast("g$ctype", $value)
-""", ctype=self.CTYPE, value=checked)["value"]
+            $value = $ffi.cast("g$ctype", $value)
+            """, ctype=self.CTYPE, value=checked)["value"]
 
     def unpack_return(self, value):
         return value
 
     def unpack_out(self, value):
         return self.parse("""
-$value = int($value)
-""", value=value)["value"]
+            $value = int($value)
+            """, value=value)["value"]
 
     def new(self):
         return self.parse("""
-$value = $ffi.cast("g$ctype", 0)
-""", ctype=self.CTYPE)["value"]
+            $value = $ffi.cast("g$ctype", 0)
+            """, ctype=self.CTYPE)["value"]
 
 
 for name in ["Int16", "UInt16", "Int32", "UInt32", "Int64", "UInt64"]:
@@ -245,64 +247,64 @@ class Utf8(BasicType):
     def _check_py3(self, name):
         if self.may_be_null:
             return self.parse("""
-if $value is not None:
-    if isinstance($value, $_.str):
-        $string = $value.encode("utf-8")
-    else:
-        $string = $value
-else:
-    $string = None
-""", value=name)["string"]
+                if $value is not None:
+                    if isinstance($value, $_.str):
+                        $string = $value.encode("utf-8")
+                    else:
+                        $string = $value
+                else:
+                    $string = None
+                """, value=name)["string"]
 
         return self.parse("""
-if isinstance($value, $_.str):
-    $string = $value.encode("utf-8")
-elif not isinstance($value, $_.bytes):
-    raise TypeError
-else:
-    $string = $value
-""", value=name)["string"]
+            if isinstance($value, $_.str):
+                $string = $value.encode("utf-8")
+            elif not isinstance($value, $_.bytes):
+                raise TypeError
+            else:
+                $string = $value
+            """, value=name)["string"]
 
     def _check_py2(self, name):
         if self.may_be_null:
             return self.parse("""
-if $value is not $none:
-    if isinstance($value, $_.unicode):
-        $string = $value.encode("utf-8")
-    elif not isinstance($value, $_.str):
-        raise $_.TypeError("$DESC: %r not a string or None" % $value)
-    else:
-        $string = $value
-else:
-    $string = $none
-""", value=name, none=None)["string"]
+                if $value is not $none:
+                    if isinstance($value, $_.unicode):
+                        $string = $value.encode("utf-8")
+                    elif not isinstance($value, $_.str):
+                        raise $_.TypeError("$DESC: %r not a string or None" % $value)
+                    else:
+                        $string = $value
+                else:
+                    $string = $none
+                """, value=name, none=None)["string"]
 
         return self.parse("""
-if $_.isinstance($value, $_.unicode):
-    $string = $value.encode("utf-8")
-elif not $_.isinstance($value, $_.str):
-    raise $_.TypeError("$DESC: %r not a string" % $value)
-else:
-    $string = $value
-""", value=name)["string"]
+            if $_.isinstance($value, $_.unicode):
+                $string = $value.encode("utf-8")
+            elif not $_.isinstance($value, $_.str):
+                raise $_.TypeError("$DESC: %r not a string" % $value)
+            else:
+                $string = $value
+            """, value=name)["string"]
 
     def pack_in_py2(self, value):
         value = self._check(value)
         return self.parse("""
-if $value:
-    $c_value = $value
-else:
-    $c_value = $ffi.cast("char*", 0)
-""", value=value)["c_value"]
+            if $value:
+                $c_value = $value
+            else:
+                $c_value = $ffi.cast("char*", 0)
+            """, value=value)["c_value"]
 
     def pack_in_py3(self, value):
         value = self._check(value)
         return self.parse("""
-if $value is not None:
-    $c_value = $value
-else:
-    $c_value = $ffi.cast("char*", 0)
-""", value=value)["c_value"]
+            if $value is not None:
+                $c_value = $value
+            else:
+                $c_value = $ffi.cast("char*", 0)
+            """, value=value)["c_value"]
 
     def dup(self, name):
         raise NotImplementedError
@@ -312,19 +314,19 @@ else:
 
     def unpack_return_py2(self, value):
         return self.parse("""
-if $value == $ffi.NULL:
-    $value = None
-else:
-    $value = $ffi.string($value)
-""", value=value)["value"]
+            if $value == $ffi.NULL:
+                $value = None
+            else:
+                $value = $ffi.string($value)
+            """, value=value)["value"]
 
     def unpack_return_py3(self, value):
         return self.parse("""
-if $value == $ffi.NULL:
-    $value = None
-else:
-    $value = $ffi.string($value).decode("utf-8")
-""", value=value)["value"]
+            if $value == $ffi.NULL:
+                $value = None
+            else:
+                $value = $ffi.string($value).decode("utf-8")
+            """, value=value)["value"]
 
     def new(self):
         raise NotImplementedError

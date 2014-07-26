@@ -6,6 +6,7 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 import ctypes
+import textwrap
 
 from pgi.clib.gir import GIRepository
 from pgi.clib.gobject import GCallback, GType
@@ -38,6 +39,7 @@ class CTypesCodeGen(object):
         assert "ctypes" not in kwargs
         kwargs["ctypes"] = ctypes
 
+        code = textwrap.dedent(code)
         block, var = parse_with_objects(code, self.var, **kwargs)
         return block, var
 
@@ -107,9 +109,10 @@ class CTypesBackend(Backend):
         h.restype, h.argtypes = self._get_signature(args, ret, method, throws)
 
         block, var = self.parse("""
-# args: $args
-# ret: $ret
-""", args=repr([n.__name__ for n in h.argtypes]), ret=repr(h.restype))
+            # args: $args
+            # ret: $ret
+            """, args=repr([n.__name__ for n in h.argtypes]),
+            ret=repr(h.restype))
 
         return block, h
 
@@ -147,11 +150,12 @@ class CTypesBackend(Backend):
         type_ = gtype._type
 
         block, var = self.parse("""
-# args: $args
-# ret: $ret
-$out = $func($type_num, $values)
-""", args=repr([n.__name__ for n in h.argtypes]), ret=repr(h.restype),
-        type_num=type_, values=", ".join(values), func=h)
+            # args: $args
+            # ret: $ret
+            $out = $func($type_num, $values)
+            """, args=repr([n.__name__ for n in h.argtypes]),
+            ret=repr(h.restype), type_num=type_,
+            values=", ".join(values), func=h)
 
         return block, var["out"]
 
@@ -160,21 +164,21 @@ $out = $func($type_num, $values)
 
     def cast_pointer(self, name, type_):
         block, var = self.parse("""
-$value = $ctypes.cast($value, $ctypes.POINTER($type))
-""", value=name, type=typeinfo_to_ctypes(type_))
+            $value = $ctypes.cast($value, $ctypes.POINTER($type))
+            """, value=name, type=typeinfo_to_ctypes(type_))
 
         return block, name
 
     def deref_pointer(self, name):
         block, var = self.parse("""
-$value = $value.contents
-""", value=name)
+            $value = $value.contents
+            """, value=name)
 
         return block, var["value"]
 
     def assign_pointer(self, ptr, value):
         block, var = self.parse("""
-$ptr[0] = $value
-""", ptr=ptr, value=value)
+            $ptr[0] = $value
+            """, ptr=ptr, value=value)
 
         return block
