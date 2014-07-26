@@ -78,3 +78,7 @@ Tests
 
 `./tests/libs/` includes additional libraries that will be used for testing
 if present. Call `make` in `./tests/libs/` to build them.
+
+- `./setup.py quality` will run pep8 and pyflakes tests
+
+- `./setup.py coverage` will create a test coverage report
