@@ -26,6 +26,11 @@ class _GIRepoTest(unittest.TestCase):
         repo = self.GIRepository.get_default()
         self.assertRaises(self.GIError, repo.require, "Gtk", "999.0", 0)
 
+        try:
+            repo.require("Gtk", "999.0", 0)
+        except self.GIError as e:
+            self.assertTrue(isinstance(e.message, str))
+
     def test_require_latest(self):
         repo = self.GIRepository.get_default()
         repo.require("GObject", None, 0)

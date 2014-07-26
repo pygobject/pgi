@@ -44,7 +44,10 @@ class GQuark(object):
 
 class GErrorError(Exception):
     def __init__(self, gerror):
-        super(GErrorError, self).__init__(gerror.message)
+        super(GErrorError, self).__init__()
+        self.message = gerror.message
+        if _compat.PY3 and self.message is not None:
+            self.message = self.message.decode("utf-8")
         self.domain = gerror.domain
         self.code = gerror.code
 
