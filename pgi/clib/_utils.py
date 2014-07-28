@@ -73,6 +73,8 @@ def find_library(name, cached=True, internal=True):
 
 
 class _CProperty(object):
+    _cache = {}
+
     def __init__(self, *args):
         self.args = args
 
@@ -82,9 +84,12 @@ class _CProperty(object):
 
         lib, name, symbol, ret, args = self.args
         assert len(args) == 1
-        func = getattr(lib, symbol)
-        func.argtypes = args
-        func.restype = ret
+
+        func = self._cache.get((lib, symbol), None)
+        if func is None:
+            self._cache[(lib, symbol)] = func = getattr(lib, symbol)
+            func.argtypes = args
+            func.restype = ret
 
         value = func(instance)
 
