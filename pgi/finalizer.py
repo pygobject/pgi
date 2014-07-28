@@ -1,4 +1,5 @@
 from weakref import proxy
+from pgi.clib.gobject import gpointer, unref
 
 
 class _BaseFinalizer(object):
@@ -21,3 +22,9 @@ class _BaseFinalizer(object):
     def delete(self, deadweakproxy):
         type(self)._objects.remove(self)
         self.destructor(deadweakproxy, self.ptr)
+
+
+class _UnrefPointer(_BaseFinalizer):
+
+    def destructor(self, deadweakproxy, ptr):
+        unref(gpointer(ptr))

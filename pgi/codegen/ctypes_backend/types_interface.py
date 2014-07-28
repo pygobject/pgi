@@ -10,6 +10,7 @@ import ctypes
 from pgi.clib.gir import GITypeTag, GIInfoType, GIStructInfo
 from pgi.clib.gobject import G_TYPE_FROM_INSTANCE, GTypeInstancePtr
 from pgi.clib import glib
+from pgi.finalizer import _UnrefPointer
 from pgi.gtype import PGType
 from pgi import foreign, _compat
 from pgi.util import import_attribute
@@ -17,6 +18,8 @@ from pgi.util import import_attribute
 from .. import generate_callback_wrapper
 
 from .utils import BaseType, registry
+
+
 
 
 @registry.register(GITypeTag.INTERFACE)
@@ -107,9 +110,11 @@ class Object(BaseInterface):
                 $pyclass = $get_class($value)
                 $obj = $_.object.__new__($pyclass)
                 $obj._obj = $value
+                $track_and_unref($obj, $value)
             else:
                 $obj = None
-            """, value=name, get_class=get_class_func)["obj"]
+            """, value=name, get_class=get_class_func,
+                 track_and_unref=_UnrefPointer.track)["obj"]
 
     unpack_out = unpack_return
 
