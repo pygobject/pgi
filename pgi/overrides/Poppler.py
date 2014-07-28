@@ -22,21 +22,12 @@ Rectangle = Poppler.Rectangle
 
 __all__ = []
 
+from pgi.finalizer import _BaseFinalizer
 
-class _Finalizer(object):
-    _objects = set()
 
-    @classmethod
-    def new(cls, *args):
-        cls._objects.add(cls(*args))
-
-    def __init__(self, obj, ptr):
-        self.obj = proxy(obj, self.free)
-        self.ptr = ptr
-
-    def free(self, deadweakproxy):
-        type(self)._objects.remove(self)
-        g_free(self.ptr)
+class _FreeFinalizer(_BaseFinalizer):
+    def destructor(self, deadweakproxy, ptr):
+        g_free(ptr)
 
 
 class Rectangle(Structure):
@@ -64,7 +55,7 @@ class Page(Poppler.Page):
             return False, None
 
         result = (Rectangle * length.value).from_address(ptr.value)
-        _Finalizer.new(result, ptr)
+        _FreeFinalizer.track(result, ptr)
         return True, result
 
 Page = override(Page)
