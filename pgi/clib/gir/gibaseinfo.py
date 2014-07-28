@@ -29,6 +29,15 @@ wrap_class(_gir, GIInfoType, GIInfoType, "g_info_type_", _methods)
 class GIAttributeIter(c_void_p):
     pass
 
+from pgi.finalizer import _BaseFinalizer
+
+
+class _UnrefFinalizer(_BaseFinalizer):
+
+    def destructor(self, deadweakproxy, ptr):
+        if ptr._unref:
+            ptr.unref()
+
 
 class GIBaseInfo(c_void_p):
     _unref = False
@@ -46,8 +55,9 @@ class GIBaseInfo(c_void_p):
         type_value = base_info.type.value
         try:
             new_obj = cast(base_info, cls.__types[type_value])
+            if base_info._unref:
+                _UnrefFinalizer.track(new_obj, base_info)
             new_obj._unref = base_info._unref
-            base_info._unref = False
             return new_obj
         except KeyError:
             return base_info
@@ -66,9 +76,6 @@ class GIBaseInfo(c_void_p):
 
         return values
 
-    def __del__(self):
-        if self and self._unref:
-            self.unref()
 
     def __eq__(self, other):
         if not isinstance(other, GIBaseInfo):
