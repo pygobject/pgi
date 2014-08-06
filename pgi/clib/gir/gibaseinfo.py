@@ -40,6 +40,7 @@ class _UnrefFinalizer(_BaseFinalizer):
 
 class GIBaseInfo(c_void_p):
     __types = {}
+    __owns = False
 
     @classmethod
     def _register(cls, info_type):
@@ -58,16 +59,27 @@ class GIBaseInfo(c_void_p):
         if self:
             ptr = cast(self.value, GIBaseInfo)
             _UnrefFinalizer.track(self, ptr)
+            self.__owns = True
 
     @classmethod
-    def _cast(cls, base_info):
-        """Casts a GIBaseInfo instance to the right sub type"""
+    def _cast(cls, base_info, take_ownership=True):
+        """Casts a GIBaseInfo instance to the right sub type.
+
+        The original GIBaseInfo can't have ownership.
+        Will take ownership.
+        """
 
         type_value = base_info.type.value
         try:
-            return cast(base_info, cls.__types[type_value])
+            new_obj = cast(base_info, cls.__types[type_value])
         except KeyError:
-            return base_info
+            new_obj = base_info
+
+        if take_ownership:
+            assert not base_info.__owns
+            new_obj._take_ownership()
+
+        return new_obj
 
     def _get_repr(self):
         values = {}

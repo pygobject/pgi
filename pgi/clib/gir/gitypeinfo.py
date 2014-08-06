@@ -84,7 +84,7 @@ _methods = [
     ("is_pointer", gboolean, [GITypeInfo]),
     ("get_tag", GITypeTag, [GITypeInfo]),
     ("get_param_type", GITypeInfo, [GITypeInfo, gint], True),
-    ("_get_interface", GIBaseInfo, [GITypeInfo], True),
+    ("_get_interface", GIBaseInfo, [GITypeInfo], False),
     ("get_array_length", gint, [GITypeInfo]),
     ("get_array_fixed_size", gint, [GITypeInfo]),
     ("is_zero_terminated", gboolean, [GITypeInfo]),
