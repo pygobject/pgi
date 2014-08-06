@@ -35,8 +35,7 @@ class GIAttributeIter(c_void_p):
 class _UnrefFinalizer(_BaseFinalizer):
 
     def destructor(self, deadweakproxy, ptr):
-        if ptr:
-            ptr.unref()
+        ptr.unref()
 
 
 class GIBaseInfo(c_void_p):
@@ -56,8 +55,9 @@ class GIBaseInfo(c_void_p):
         unref if the python instance gets gc'ed.
         """
 
-        ptr = cast(self.value, GIBaseInfo)
-        _UnrefFinalizer.track(self, ptr)
+        if self:
+            ptr = cast(self.value, GIBaseInfo)
+            _UnrefFinalizer.track(self, ptr)
 
     @classmethod
     def _cast(cls, base_info):

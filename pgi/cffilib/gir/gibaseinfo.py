@@ -25,19 +25,14 @@ def _g_info_type_to_string(self):
 GIInfoType.string = property(_g_info_type_to_string)
 
 
-def _destructor(cdata):
-    if cdata:
-        lib.g_base_info_unref(cdata)
-
-
 class GIBaseInfo(object):
     __types = {}
 
     def __init__(self, ptr, take_ownership=True):
         self._ptr = ptr
 
-        if take_ownership:
-            self._gc = ffi.gc(ptr, self._destructor)
+        if take_ownership and ptr:
+            self._gc = ffi.gc(ptr, lib.g_base_info_unref)
 
     @staticmethod
     def _destructor(cdata):
