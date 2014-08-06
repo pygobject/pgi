@@ -183,8 +183,6 @@ class Flags(BaseInterface):
 class Struct(BaseInterface):
 
     def _check(self, name):
-        base_obj = import_attribute("GObject", "Object")
-
         foreign_struct = self._import_foreign()
 
         if foreign_struct:
@@ -203,20 +201,20 @@ class Struct(BaseInterface):
                         "$DESC: %r is not a %r" % ($obj, $struct_class))
                 """, struct_class=foreign_type, obj=name)["obj"]
 
+        struct_class = self._import_type()
         if not self.may_be_null:
             return self.parse("""
-                if not $_.isinstance($obj, ($struct_class, $obj_class)):
+                if not $_.isinstance($obj, $struct_class):
                     raise $_.TypeError(
                         "$DESC: %r is not a structure object" % $obj)
-                """, obj_class=base_obj, struct_class=self._import_type(),
+                """, struct_class=struct_class,
                 obj=name)["obj"]
 
         return self.parse("""
-            if $obj is not None and not $_.isinstance(\
-                    $obj, ($struct_class, $obj_class)):
+            if $obj is not None and not $_.isinstance($obj, ($struct_class)):
                 raise $_.TypeError(
                     "$DESC: %r is not a structure object" % $obj)
-            """, obj_class=base_obj, struct_class=self._import_type(),
+            """, struct_class=struct_class,
             obj=name)["obj"]
 
     def pack_out(self, name):
