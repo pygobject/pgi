@@ -9,7 +9,7 @@ import unittest
 
 import gi
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, Gdk, Atk
+from gi.repository import Gtk, Gdk, Atk, Gio
 
 from tests import FIXME, skipUnlessCairo, skipIfGI
 
@@ -88,3 +88,6 @@ class StructTest(unittest.TestCase):
         for is_false in [False, 0]:
             a.is_private = is_false
             self.assertFalse(a.is_private)
+
+    def test_allow_none_in(self):
+        self.assertTrue(Gio.SimpleAction.new("foo", None))

@@ -189,18 +189,36 @@ class Struct(BaseInterface):
 
         if foreign_struct:
             foreign_type = foreign_struct.get_type()
+            if not self.may_be_null:
+                return self.parse("""
+                    if not $_.isinstance($obj, $struct_class):
+                        raise $_.TypeError(
+                            "$DESC: %r is not a %r" % ($obj, $struct_class))
+                    """, struct_class=foreign_type, obj=name)["obj"]
+
             return self.parse("""
-                if not $_.isinstance($obj, $struct_class):
+                if $obj is not None and not $_.isinstance(\
+                        $obj, $struct_class):
                     raise $_.TypeError(
                         "$DESC: %r is not a %r" % ($obj, $struct_class))
                 """, struct_class=foreign_type, obj=name)["obj"]
-        else:
+
+        if not self.may_be_null:
             return self.parse("""
                 if not $_.isinstance($obj, ($struct_class, $obj_class)):
                     raise $_.TypeError(
                         "$DESC: %r is not a structure object" % $obj)
-                    """, obj_class=base_obj, struct_class=self._import_type(),
-                    obj=name)["obj"]
+                """, obj_class=base_obj, struct_class=self._import_type(),
+                obj=name)["obj"]
+
+        return self.parse("""
+            if $obj is not None and not $_.isinstance(\
+                    $obj, ($struct_class, $obj_class)):
+                raise $_.TypeError(
+                    "$DESC: %r is not a structure object" % $obj)
+            """, obj_class=base_obj, struct_class=self._import_type(),
+            obj=name)["obj"]
+
 
     def pack_out(self, name):
         name = self._check(name)
@@ -208,13 +226,29 @@ class Struct(BaseInterface):
         foreign_struct = self._import_foreign()
 
         if not foreign_struct:
+            if self.may_be_null:
+                return self.parse("""
+                    if $obj is None:
+                        $out = $obj
+                    else:
+                        $out = $ctypes.c_void_p($obj._obj)
+                    """, obj=name)["out"]
+
             return self.parse("""
                 $out = $ctypes.c_void_p($obj._obj)
                     """, obj=name)["out"]
-        else:
+
+        if self.may_be_null:
             return self.parse("""
-                $out = $ctypes.c_void_p($foreign_struct.to_pointer($obj))
+                if $obj is None:
+                    $out = $obj
+                else:
+                    $out = $ctypes.c_void_p($foreign_struct.to_pointer($obj))
                 """, foreign_struct=foreign_struct, obj=name)["out"]
+
+        return self.parse("""
+            $out = $ctypes.c_void_p($foreign_struct.to_pointer($obj))
+            """, foreign_struct=foreign_struct, obj=name)["out"]
 
     pack_in = pack_out
 
