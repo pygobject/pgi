@@ -219,7 +219,6 @@ class Struct(BaseInterface):
             """, obj_class=base_obj, struct_class=self._import_type(),
             obj=name)["obj"]
 
-
     def pack_out(self, name):
         name = self._check(name)
 
