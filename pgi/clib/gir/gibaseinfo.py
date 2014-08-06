@@ -76,7 +76,6 @@ class GIBaseInfo(c_void_p):
 
         return values
 
-
     def __eq__(self, other):
         if not isinstance(other, GIBaseInfo):
             return False
