@@ -112,7 +112,7 @@ class _CMethod(object):
 
         def unref_func(*x):
             instance = func(*x)
-            instance._unref = True
+            instance._take_ownership()
             return instance
 
         if instance is None:

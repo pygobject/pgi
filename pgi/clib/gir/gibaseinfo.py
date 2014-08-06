@@ -7,6 +7,8 @@
 
 from ctypes import POINTER, c_char_p, cast, c_void_p
 
+from pgi.finalizer import _BaseFinalizer
+
 from ..glib import gchar_p, Enum, gboolean
 from .._utils import wrap_class, find_library
 from .gitypelib import GITypelib
@@ -29,36 +31,41 @@ wrap_class(_gir, GIInfoType, GIInfoType, "g_info_type_", _methods)
 class GIAttributeIter(c_void_p):
     pass
 
-from pgi.finalizer import _BaseFinalizer
-
 
 class _UnrefFinalizer(_BaseFinalizer):
 
     def destructor(self, deadweakproxy, ptr):
-        if ptr._unref:
+        if ptr:
             ptr.unref()
 
 
 class GIBaseInfo(c_void_p):
-    _unref = False
     __types = {}
 
     @classmethod
     def _register(cls, info_type):
+        """A class decorator to register sub types of GIBaseInfo"""
+
         def wrap(reg_cls):
             cls.__types[info_type] = reg_cls
             return reg_cls
         return wrap
 
+    def _take_ownership(self):
+        """Make the Python instance take ownership of the GIBaseInfo. i.e.
+        unref if the python instance gets gc'ed.
+        """
+
+        ptr = cast(self.value, GIBaseInfo)
+        _UnrefFinalizer.track(self, ptr)
+
     @classmethod
     def _cast(cls, base_info):
+        """Casts a GIBaseInfo instance to the right sub type"""
+
         type_value = base_info.type.value
         try:
-            new_obj = cast(base_info, cls.__types[type_value])
-            if base_info._unref:
-                _UnrefFinalizer.track(new_obj, base_info)
-            new_obj._unref = base_info._unref
-            return new_obj
+            return cast(base_info, cls.__types[type_value])
         except KeyError:
             return base_info
 
