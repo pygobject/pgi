@@ -1,3 +1,11 @@
+0.0.9 (2014-08-08)
+~~~~~~~~~~~~~~~~~~
+
+* Memory leak fixes (Petter Waller)
+* Work around for broken Poppler.Page.get_text_layout (Petter Waller)
+* Some small fixes/improvements
+
+
 0.0.8 (2014-07-03)
 ~~~~~~~~~~~~~~~~~~
 
