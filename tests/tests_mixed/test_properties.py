@@ -29,7 +29,7 @@ class PropertiesTest(unittest.TestCase):
         param = Gtk.Window.props.transient_for
 
         self.assertEqual(param.flags & 0xF, 7)
-        self.assertEqual(param.flags, 231)
+        self.assertEqual(param.flags & 0xFF, 231)
         self.assertEqual(param.name, "transient-for")
         self.assertEqual(param.nick, "Transient for Window")
         self.assertEqual(param.owner_type, Gtk.Window.__gtype__)

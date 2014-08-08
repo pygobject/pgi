@@ -62,8 +62,8 @@ class FuncsTest(unittest.TestCase):
     def test_misc(self):
         b = Gtk.Button()
         self.assertEqual(b.get_relief(), Gtk.ReliefStyle.NORMAL)
-        b.set_relief(Gtk.ReliefStyle.HALF)
-        self.assertEqual(b.get_relief(), Gtk.ReliefStyle.HALF)
+        b.set_relief(Gtk.ReliefStyle.NONE)
+        self.assertEqual(b.get_relief(), Gtk.ReliefStyle.NONE)
 
         b.set_label("foo")
         self.assertEqual(b.get_label(), "foo")
@@ -393,9 +393,7 @@ class FuncsTest(unittest.TestCase):
 
     def test_error_init(self):
         error = GLib.GError("foo")
-        self.assertEqual(str(error), "foo")
-        error = GLib.GError(1, 2, 3, 4)
-        self.assertEqual(str(error), "(1, 2, 3, 4)")
+        self.assertTrue("foo" in str(error))
 
     def test_module(self):
         self.assertTrue("GLib" in GLib.io_create_watch.__module__)
