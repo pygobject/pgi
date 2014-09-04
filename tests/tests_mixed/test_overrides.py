@@ -18,3 +18,7 @@ class GLibOverrrideTest(unittest.TestCase):
 
     def test_source_remove(self):
         GObject.source_remove is GLib.source_remove
+
+    def test_deprecated_wrapper(self):
+        self.assertEqual(
+            GLib.Timeout.get_current_time.__name__, "get_current_time")

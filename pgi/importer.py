@@ -119,6 +119,6 @@ class Importer(object):
             sys.modules[prefix + "." + namespace] = instance
 
         # Import a override module if available.
-        overrides.load(namespace, instance)
+        proxy = overrides.load(namespace, instance)
 
-        return instance
+        return proxy

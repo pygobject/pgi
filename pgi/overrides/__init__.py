@@ -1,4 +1,4 @@
-# Copyright 2012 Christoph Reiter
+# Copyright 2012,2014 Christoph Reiter
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -9,41 +9,51 @@ import os
 import types
 import sys
 import imp
+import warnings
+from functools import wraps
 
 from pgi import _compat
+from pgi import const
 
 
-_overrides = []
-_active_module = []
-_proxies = {}
+class ProxyModule(types.ModuleType):
 
-
-class ProxyModule(object):
     def __init__(self, module):
-        super(ProxyModule, self).__init__()
+        super(ProxyModule, self).__init__(module.__name__)
         self._module = module
 
     def __getattr__(self, name):
-        attr = getattr(self._module, name)
-        setattr(self, name, attr)
-        return attr
+        return getattr(self._module, name)
+
+    def __dir__(self):
+        attrs = set(self.__dict__.keys())
+        attrs.update(dir(self._module))
+        return sorted(attrs)
+
+    def __repr__(self):
+        return repr(self._module)
 
 
 def get_introspection_module(namespace):
-    global _proxies
+    """Returns the non proxied module for a namespace"""
 
-    if namespace not in _proxies:
-        from pgi.util import import_module
-        module = import_module(namespace)
-        _proxies[namespace] = ProxyModule(module)
-    return _proxies[namespace]
+    mod = sys.modules["pgi.repository." + namespace]
+    return getattr(mod, "_module", mod)
 
 
 def load(namespace, module):
-    global _active_module, _overrides
+    """Takes a namespace e.g. 'Gtk' and a gi module and returns a proxy
+    which contains overrides and will fall back to the original module
+    if needed.
 
-    _active_module.append(module)
-    _overrides.append({})
+    The returned module is either a proxy or the passed in module in
+    case no overrides exist.
+    """
+
+    proxy = ProxyModule(module)
+    for prefix in const.PREFIX:
+        sys.modules[prefix + "." + namespace] = proxy
+
     try:
         name = __name__ + "." + namespace
         override_module = __import__(name, fromlist=[""])
@@ -52,42 +62,41 @@ def load(namespace, module):
             paths = [os.path.dirname(__file__)]
             fp, pn, desc = imp.find_module(namespace, paths)
         except ImportError:
-            pass
+            # no need for a proxy then, so revert back
+            for prefix in const.PREFIX:
+                sys.modules[prefix + "." + namespace] = module
+            return module
         else:
             if fp:
                 fp.close()
             _compat.reraise(ImportError, err, sys.exc_info()[2])
     else:
-        # FIXME!!! we need a real non-override module somewhere
-
-        proxy = get_introspection_module(namespace)
-        for name, klass in _compat.iteritems(_overrides[-1]):
-            setattr(proxy, name, klass)
-
         # add all objects referenced in __all__ to the original module
         override_vars = vars(override_module)
         override_all = override_vars.get("__all__") or []
 
         for var in override_all:
-            getattr(proxy, var, None)
             item = override_vars.get(var)
-            if item:
-                # make sure new classes have a proper __module__
-                try:
-                    if item.__module__.split(".")[-1] == namespace:
-                        item.__module__ = namespace
-                except AttributeError:
-                    pass
+            assert item is not None
+            # make sure new classes have a proper __module__
+            try:
+                if item.__module__.split(".")[-1] == namespace:
+                    item.__module__ = namespace
+            except AttributeError:
+                pass
+            setattr(proxy, var, item)
 
-                setattr(module, var, item)
-
-    _active_module.pop(-1)
-    _overrides.pop(-1)
+        return proxy
 
 
 def override(klass):
-    global _active_module, _overrides
-    module = _active_module[-1]
+    """Takes a override class or function and assigns it dunder arguments
+    form the overidden one.
+    """
+
+    namespace = klass.__module__.rsplit(".", 1)[-1]
+    mod_name = const.PREFIX[-1] + "." + namespace
+    module = sys.modules[mod_name]
 
     if isinstance(klass, types.FunctionType):
         def wrap(wrapped):
@@ -100,14 +109,20 @@ def override(klass):
     klass.__name__ = name
     klass.__module__ = old_klass.__module__
 
-    assert getattr(module, name) is old_klass
-
     setattr(module, name, klass)
-    _overrides[-1][name] = old_klass
 
     return klass
 
 
-def deprecated(obj, name):
-    # TODO
-    return obj
+def deprecated(function, instead):
+    """Mark a function deprecated so calling it issues a warning"""
+
+    from pgi import PyGIDeprecationWarning
+
+    @wraps(function)
+    def wrap(*args, **kwargs):
+        warnings.warn("Deprecated, use %s instead" % instead,
+                      PyGIDeprecationWarning)
+        return function(*args, **kwargs)
+
+    return wrap
