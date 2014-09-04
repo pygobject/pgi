@@ -19,7 +19,7 @@ Anything else will probably not work.
 
 - CPython_ 2.7 or CPython_ 3.3+ or PyPy_ 1.9+ or PyPy3_ 2.3+
 - libgirepository_ 1.0
-- cffi_ 0.6+ (optional)
+- cffi_ 0.8+ (optional, but needed for tests)
 - cairocffi_ 0.4+ (optional, for cairo support)
 
 .. _ctypes: http://docs.python.org/2/library/ctypes.html
