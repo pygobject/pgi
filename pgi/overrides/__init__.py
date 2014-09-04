@@ -119,6 +119,10 @@ def deprecated(function, instead):
 
     from pgi import PyGIDeprecationWarning
 
+    # skip for classes, breaks doc generation
+    if not isinstance(function, types.FunctionType):
+        return function
+
     @wraps(function)
     def wrap(*args, **kwargs):
         warnings.warn("Deprecated, use %s instead" % instead,
