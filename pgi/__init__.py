@@ -57,7 +57,3 @@ def install_as_gi():
     sys.modules["gi"] = pgi
     sys.modules["gi.repository"] = pgi.repository
     const.PREFIX.append("gi.repository")
-
-
-class PyGIDeprecationWarning(RuntimeWarning):
-    pass

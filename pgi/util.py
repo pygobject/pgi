@@ -15,6 +15,10 @@ from .clib.gir import GITypeTag, GIInfoType
 from ._compat import xrange, text_type
 
 
+class PyGIDeprecationWarning(RuntimeWarning):
+    pass
+
+
 def decode_return(codec="ascii"):
     """Decodes the return value of it isn't None"""
 

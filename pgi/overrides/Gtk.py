@@ -22,7 +22,7 @@
 import sys
 
 from pgi.repository import GObject
-from pgi import PyGIDeprecationWarning
+from pgi.util import PyGIDeprecationWarning
 from pgi.overrides import override, get_introspection_module
 
 if sys.version_info >= (3, 0):
@@ -46,6 +46,12 @@ port your app to Gtk 3 or greater. PyGTK is the recomended \
 python module to use with Gtk 2.0"
 
     warnings.warn(warn_msg, RuntimeWarning)
+
+
+class PyGTKDeprecationWarning(PyGIDeprecationWarning):
+    pass
+
+__all__.append('PyGTKDeprecationWarning')
 
 
 class Widget(Gtk.Widget):
@@ -257,7 +263,7 @@ class ActionGroup(Gtk.ActionGroup):
         first_action = None
 
         def _process_action(group_source, name, stock_id=None, label=None, accelerator=None, tooltip=None, entry_value=0):
-            action = RadioAction(name, label, tooltip, stock_id, entry_value)
+            action = RadioAction(name=name, label=label, tooltip=tooltip, stock_id=stock_id, value=entry_value)
 
             # FIXME: join_group is a patch to Gtk+ 3.0
             #        otherwise we can't effectively add radio actions to a
@@ -346,7 +352,6 @@ __all__.append('MenuItem')
 
 
 class Builder(Gtk.Builder):
-
     def connect_signals(self, obj_or_map):
         def _full_callback(builder, gobj, signal_name, handler_name, connect_obj, flags, obj_or_map):
             handler = None
@@ -459,7 +464,9 @@ class Dialog(Gtk.Dialog, Container):
         pairs - button text (or stock ID) and a response ID integer are passed
         individually. For example:
 
-        >>> dialog.add_buttons(Gtk.STOCK_OPEN, 42, "Close", Gtk.ResponseType.CLOSE)
+        .. code-block:: python
+
+            dialog.add_buttons(Gtk.STOCK_OPEN, 42, "Close", Gtk.ResponseType.CLOSE)
 
         will add "Open" and "Close" buttons to dialog.
         """
@@ -514,14 +521,6 @@ class MessageDialog(Gtk.MessageDialog, Dialog):
 
 MessageDialog = override(MessageDialog)
 __all__.append('MessageDialog')
-
-
-class AboutDialog(Gtk.AboutDialog):
-    def __init__(self, **kwds):
-        Gtk.AboutDialog.__init__(self, **kwds)
-
-AboutDialog = override(AboutDialog)
-__all__.append('AboutDialog')
 
 
 class ColorSelectionDialog(Gtk.ColorSelectionDialog):
@@ -1157,7 +1156,7 @@ class TreePath(Gtk.TreePath):
     def __new__(cls, path=0):
         if isinstance(path, int):
             path = str(path)
-        elif isinstance(path, tuple):
+        elif not isinstance(path, _basestring):
             path = ":".join(str(val) for val in path)
 
         if len(path) == 0:
@@ -1167,17 +1166,20 @@ class TreePath(Gtk.TreePath):
         except TypeError:
             raise TypeError("could not parse subscript '%s' as a tree path" % path)
 
+    def __init__(self, *args, **kwargs):
+        super(TreePath, self).__init__()
+
     def __str__(self):
         return self.to_string()
 
     def __lt__(self, other):
-        return not other is None and self.compare(other) < 0
+        return other is not None and self.compare(other) < 0
 
     def __le__(self, other):
-        return not other is None and self.compare(other) <= 0
+        return other is not None and self.compare(other) <= 0
 
     def __eq__(self, other):
-        return not other is None and self.compare(other) == 0
+        return other is not None and self.compare(other) == 0
 
     def __ne__(self, other):
         return other is None or self.compare(other) != 0
@@ -1202,7 +1204,6 @@ __all__.append('TreePath')
 
 
 class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
-
     def __init__(self, *column_types):
         Gtk.TreeStore.__init__(self)
         self.set_column_types(column_types)
@@ -1521,10 +1522,16 @@ __all__.append('Arrow')
 class IconSet(Gtk.IconSet):
     def __new__(cls, pixbuf=None):
         if pixbuf is not None:
+            warnings.warn('Gtk.IconSet(pixbuf) has been deprecated. Please use: '
+                          'Gtk.IconSet.new_from_pixbuf(pixbuf)',
+                          PyGTKDeprecationWarning, stacklevel=2)
             iconset = Gtk.IconSet.new_from_pixbuf(pixbuf)
         else:
             iconset = Gtk.IconSet.__new__(cls)
         return iconset
+
+    def __init__(self, *args, **kwargs):
+        return super(IconSet, self).__init__()
 
 IconSet = override(IconSet)
 __all__.append('IconSet')

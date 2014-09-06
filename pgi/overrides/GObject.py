@@ -1,11 +1,11 @@
 # -*- Mode: Python; py-indent-offset: 4 -*-
 # vim: tabstop=4 shiftwidth=4 expandtab
 #
-# Copyright (C) 2013-2014 Christoph Reiter
 # Copyright (C) 2012 Canonical Ltd.
 # Author: Martin Pitt <martin.pitt@ubuntu.com>
 # Copyright (C) 2012-2013 Simon Feltman <sfeltman@src.gnome.org>
 # Copyright (C) 2012 Bastian Winkler <buz@netbuz.org>
+# Copyright (C) 2013-2014 Christoph Reiter
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -23,16 +23,14 @@
 # USA
 
 import sys
-import warnings
-import ctypes
+from collections import namedtuple
 
-from pgi import PyGIDeprecationWarning
 from pgi.overrides import get_introspection_module, override, deprecated
 from pgi.repository import GLib
-from pgi.properties import list_properties
+from pgi import static as _gobject
 
 
-GObjectModule = get_introspection_module("GObject")
+GObjectModule = get_introspection_module('GObject')
 __all__ = []
 
 
@@ -52,7 +50,6 @@ for name in ['markup_escape_text', 'get_application_name',
         continue
     globals()[name] = deprecated(getattr(GLib, name), 'GLib.' + name)
     __all__.append(name)
-
 
 # constants are also deprecated, but cannot mark them as such
 for name in ['PRIORITY_DEFAULT', 'PRIORITY_DEFAULT_IDLE', 'PRIORITY_HIGH',
@@ -92,32 +89,13 @@ __all__ += ['G_MININT8', 'G_MAXINT8', 'G_MAXUINT8', 'G_MININT16',
             'G_MAXINT16', 'G_MAXUINT16', 'G_MININT32', 'G_MAXINT32',
             'G_MAXUINT32', 'G_MININT64', 'G_MAXINT64', 'G_MAXUINT64']
 
-
-G_MAXDOUBLE = 1.7976931348623157e+308
-G_MAXFLOAT = 3.4028234663852886e+38
-G_MINDOUBLE = 2.2250738585072014e-308
-G_MINFLOAT = 1.1754943508222875e-38
-G_MINSHORT = - 2 ** (ctypes.sizeof(ctypes.c_short) * 8 - 1)
-G_MAXSHORT = 2 ** (ctypes.sizeof(ctypes.c_short) * 8 - 1) - 1
-G_MAXUSHORT = 2 ** (ctypes.sizeof(ctypes.c_short) * 8) - 1
-G_MININT = - 2 ** (ctypes.sizeof(ctypes.c_int) * 8 - 1)
-G_MAXINT = 2 ** (ctypes.sizeof(ctypes.c_int) * 8 - 1) - 1
-G_MAXUINT = 2 ** (ctypes.sizeof(ctypes.c_uint) * 8) - 1
-G_MINLONG = - 2 ** (ctypes.sizeof(ctypes.c_long) * 8 - 1)
-G_MAXLONG = 2 ** (ctypes.sizeof(ctypes.c_long) * 8 - 1) - 1
-G_MAXULONG = 2 ** (ctypes.sizeof(ctypes.c_ulong) * 8) - 1
-G_MAXSIZE = 2 ** (ctypes.sizeof(ctypes.c_size_t) * 8) - 1
-G_MINSSIZE = - 2 ** (ctypes.sizeof(ctypes.c_ssize_t) * 8 - 1)
-G_MAXSSIZE = 2 ** (ctypes.sizeof(ctypes.c_ssize_t) * 8 - 1) - 1
-G_MINOFFSET = G_MININT64
-G_MAXOFFSET = G_MAXINT64
-
 # these are not currently exported in GLib gir, presumably because they are
 # platform dependent; so get them from our static bindings
 for name in ['G_MINFLOAT', 'G_MAXFLOAT', 'G_MINDOUBLE', 'G_MAXDOUBLE',
              'G_MINSHORT', 'G_MAXSHORT', 'G_MAXUSHORT', 'G_MININT', 'G_MAXINT',
              'G_MAXUINT', 'G_MINLONG', 'G_MAXLONG', 'G_MAXULONG', 'G_MAXSIZE',
              'G_MINSSIZE', 'G_MAXSSIZE', 'G_MINOFFSET', 'G_MAXOFFSET']:
+    globals()[name] = getattr(_gobject, name)
     __all__.append(name)
 
 
@@ -160,7 +138,7 @@ __all__ += ['TYPE_INVALID', 'TYPE_NONE', 'TYPE_INTERFACE', 'TYPE_CHAR',
 
 # Deprecated, use GLib directly
 #Pid = GLib.Pid
-#GError = GLib.GError
+GError = GLib.GError
 OptionGroup = GLib.OptionGroup
 OptionContext = GLib.OptionContext
 __all__ += ['GError', 'OptionGroup', 'OptionContext']
@@ -192,11 +170,12 @@ __all__ += ['SIGNAL_ACTION', 'SIGNAL_DETAILED', 'SIGNAL_NO_HOOKS',
             'SIGNAL_RUN_LAST']
 
 
-class Value(GObjectModule.Value):
-    _free_on_dealloc = False
+threads_init = GLib.threads_init
+__all__ += ['threads_init']
 
-    def __new__(cls, *args, **kwargs):
-        return GObjectModule.Value.__new__(cls)
+class Value(GObjectModule.Value):
+    # pgi doesn't define this, so put it here...
+    _free_on_dealloc = False
 
     def __init__(self, value_type=None, py_value=None):
         GObjectModule.Value.__init__(self)
@@ -208,7 +187,7 @@ class Value(GObjectModule.Value):
     def __del__(self):
         if self._free_on_dealloc and self.g_type != TYPE_INVALID:
             self.unset()
-        GObjectModule.Value.__del__(self)
+
 
     def set_value(self, py_value):
         gtype = self.g_type
@@ -378,14 +357,36 @@ def signal_lookup(name, type_):
 __all__.append('signal_lookup')
 
 
-def new(gtype_or_similar):
-    return GType(gtype_or_similar).pytype()
+SignalQuery = namedtuple('SignalQuery',
+                         ['signal_id',
+                          'signal_name',
+                          'itype',
+                          'signal_flags',
+                          'return_type',
+                          # n_params',
+                          'param_types'])
 
-__all__.append('new')
 
+def signal_query(id_or_name, type_=None):
+    if type_ is not None:
+        id_or_name = signal_lookup(id_or_name, type_)
 
-list_properties
-__all__.append("list_properties")
+    res = GObjectModule.signal_query(id_or_name)
+    if res is None:
+        return None
+
+    if res.signal_id == 0:
+        return None
+
+    # Return a named tuple to allows indexing which is compatible with the
+    # static bindings along with field like access of the gi struct.
+    # Note however that the n_params was not returned from the static bindings
+    # so we must skip over it.
+    return SignalQuery(res.signal_id, res.signal_name, res.itype,
+                       res.signal_flags, res.return_type,
+                       tuple(res.param_types))
+
+__all__.append('signal_query')
 
 
 class _HandlerBlockManager(object):
@@ -468,24 +469,34 @@ def signal_accumulator_true_handled(ihint, return_accu, handler_return, user_dat
 __all__.append('signal_accumulator_true_handled')
 
 
-class Binding(GObjectModule.Binding):
-    def __call__(self):
-        warnings.warn('Using parentheses (binding()) to retrieve the Binding object is no '
-                      'longer needed because the binding is returned directly from "bind_property.',
-                      PyGIDeprecationWarning, stacklevel=2)
-        return self
-
-    def unbind(self):
-        if hasattr(self, '_unbound'):
-            raise ValueError('binding has already been cleared out')
-        else:
-            setattr(self, '_unbound', True)
-            super(Binding, self).unbind()
+#~ # Statically bound signal functions which need to clobber GI (for now)
+#~
+#~ add_emission_hook = _gobject.add_emission_hook
+#~ signal_new = _gobject.signal_new
+#~
+#~ __all__ += ['add_emission_hook', 'signal_new']
 
 
-Binding = override(Binding)
-__all__.append('Binding')
+class _FreezeNotifyManager(object):
+    def __init__(self, obj):
+        self.obj = obj
 
+    def __enter__(self):
+        pass
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.obj.thaw_notify()
+
+
+def new(gtype_or_similar):
+    return GType(gtype_or_similar).pytype()
+
+__all__.append("new")
+
+from pgi.properties import list_properties
+
+list_properties
+__all__.append("list_properties")
 
 GObject = GObjectModule.Object
 __all__.append("GObject")

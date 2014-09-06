@@ -19,11 +19,14 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
-from pgi.overrides import override, get_introspection_module
-
 import sys
+import warnings
 
-Gdk = get_introspection_module("Gdk")
+from pgi.overrides import override, get_introspection_module, \
+    strip_boolean_result
+from pgi.util import PyGIDeprecationWarning
+
+Gdk = get_introspection_module('Gdk')
 
 __all__ = []
 
@@ -37,14 +40,11 @@ class Color(Gdk.Color):
         self.green = green
         self.blue = blue
 
-    def __new__(cls, *args, **kwargs):
-        return Gdk.Color.__new__(cls)
-
     def __eq__(self, other):
         return self.equal(other)
 
     def __repr__(self):
-        return '<Gdk.Color(red=%d, green=%d, blue=%d)>' % (self.red, self.green, self.blue)
+        return 'Gdk.Color(red=%d, green=%d, blue=%d)' % (self.red, self.green, self.blue)
 
     red_float = property(fget=lambda self: self.red / float(self.MAX_VALUE),
                          fset=lambda self, v: setattr(self, 'red', int(v * self.MAX_VALUE)))
@@ -80,14 +80,11 @@ if Gdk._version == '3.0':
             self.blue = blue
             self.alpha = alpha
 
-        def __new__(cls, *args, **kwargs):
-            return Gdk.RGBA.__new__(cls)
-
         def __eq__(self, other):
             return self.equal(other)
 
         def __repr__(self):
-            return '<Gdk.Color(red=%f, green=%f, blue=%f, alpha=%f)>' % (self.red, self.green, self.blue, self.alpha)
+            return 'Gdk.RGBA(red=%f, green=%f, blue=%f, alpha=%f)' % (self.red, self.green, self.blue, self.alpha)
 
         def __iter__(self):
             """Iterator which allows easy conversion to tuple and list types."""
@@ -123,11 +120,8 @@ if Gdk._version == '2.0':
             self.width = width
             self.height = height
 
-        def __new__(cls, *args, **kwargs):
-            return Gdk.Rectangle.__new__(cls)
-
         def __repr__(self):
-            return '<Gdk.Rectangle(x=%d, y=%d, width=%d, height=%d)>' % (self.x, self.y, self.height, self.width)
+            return 'Gdk.Rectangle(x=%d, y=%d, width=%d, height=%d)' % (self.x, self.y, self.height, self.width)
 
     Rectangle = override(Rectangle)
     __all__.append('Rectangle')
@@ -201,15 +195,27 @@ class Event(Gdk.Event):
     if Gdk._version == '2.0':
         _UNION_MEMBERS[Gdk.EventType.NO_EXPOSE] = 'no_expose'
 
-    def __new__(cls, *args, **kwargs):
-        return Gdk.Event.__new__(cls)
-
     def __getattr__(self, name):
         real_event = getattr(self, '_UNION_MEMBERS').get(self.type)
         if real_event:
             return getattr(getattr(self, real_event), name)
         else:
             raise AttributeError("'%s' object has no attribute '%s'" % (self.__class__.__name__, name))
+
+    def __setattr__(self, name, value):
+        # pgi fixme
+        Gdk.Event.__setattr__(self, name, value)
+        return
+
+        real_event = getattr(self, '_UNION_MEMBERS').get(self.type)
+        if real_event:
+            setattr(getattr(self, real_event), name, value)
+        else:
+            Gdk.Event.__setattr__(self, name, value)
+
+    def __repr__(self):
+        base_repr = Gdk.Event.__repr__(self).strip("><")
+        return "<%s type=%r>" % (base_repr, self.type)
 
 Event = override(Event)
 __all__.append('Event')
@@ -250,19 +256,6 @@ gsuccess_mask_funcs = ['get_state',
                        'get_root_coords']
 
 
-def _gsuccess_mask(func):
-    def cull_success(*args):
-        result = func(*args)
-        success = result[0]
-        if not success:
-            return None
-        else:
-            if len(result) == 2:
-                return result[1]
-            else:
-                return result[1:]
-    return cull_success
-
 for event_class in event_member_classes:
     override_class = type(event_class, (getattr(Gdk, event_class),), {})
     # add the event methods
@@ -275,7 +268,7 @@ for event_class in event_member_classes:
 
         # use the _gsuccess_mask decorator if this method is whitelisted
         if name in gsuccess_mask_funcs:
-            event_method = _gsuccess_mask(event_method)
+            event_method = strip_boolean_result(event_method)
         setattr(override_class, name, event_method)
 
     setattr(module, event_class, override_class)
@@ -286,7 +279,7 @@ for event_class in event_member_classes:
 
 class DragContext(Gdk.DragContext):
     def finish(self, success, del_, time):
-        Gtk = get_introspection_module("Gtk")
+        Gtk = get_introspection_module('Gtk')
         Gtk.drag_finish(self, success, del_, time)
 
 DragContext = override(DragContext)
@@ -299,50 +292,46 @@ class Cursor(Gdk.Cursor):
         kwd_len = len(kwds)
         total_len = arg_len + kwd_len
 
-        def _new(cursor_type):
-            return cls.new(cursor_type)
-
-        def _new_for_display(display, cursor_type):
-            return cls.new_for_display(display, cursor_type)
-
-        def _new_from_pixbuf(display, pixbuf, x, y):
-            return cls.new_from_pixbuf(display, pixbuf, x, y)
-
-        def _new_from_pixmap(source, mask, fg, bg, x, y):
-            return cls.new_from_pixmap(source, mask, fg, bg, x, y)
-
-        _constructor = None
         if total_len == 1:
-            _constructor = _new
+            # Since g_object_newv (super.__new__) does not seem valid for
+            # direct use with GdkCursor, we must assume usage of at least
+            # one of the C constructors to be valid.
+            return cls.new(*args, **kwds)
+
         elif total_len == 2:
-            _constructor = _new_for_display
+            warnings.warn('Calling "Gdk.Cursor(display, cursor_type)" has been deprecated. '
+                          'Please use Gdk.Cursor.new_for_display(display, cursor_type). '
+                          'See: https://wiki.gnome.org/PyGObject/InitializerDeprecations',
+                          PyGIDeprecationWarning)
+            return cls.new_for_display(*args, **kwds)
+
         elif total_len == 4:
-            _constructor = _new_from_pixbuf
+            warnings.warn('Calling "Gdk.Cursor(display, pixbuf, x, y)" has been deprecated. '
+                          'Please use Gdk.Cursor.new_from_pixbuf(display, pixbuf, x, y). '
+                          'See: https://wiki.gnome.org/PyGObject/InitializerDeprecations',
+                          PyGIDeprecationWarning)
+            return cls.new_from_pixbuf(*args, **kwds)
+
         elif total_len == 6:
             if Gdk._version != '2.0':
                 # pixmaps don't exist in Gdk 3.0
                 raise ValueError("Wrong number of parameters")
-            _constructor = _new_from_pixmap
+
+            warnings.warn('Calling "Gdk.Cursor(source, mask, fg, bg, x, y)" has been deprecated. '
+                          'Please use Gdk.Cursor.new_from_pixmap(source, mask, fg, bg, x, y). '
+                          'See: https://wiki.gnome.org/PyGObject/InitializerDeprecations',
+                          PyGIDeprecationWarning)
+            return cls.new_from_pixmap(*args, **kwds)
+
         else:
             raise ValueError("Wrong number of parameters")
 
-        return _constructor(*args, **kwds)
-
-    def __init__(self, *args, **kwargs):
-        Gdk.Cursor.__init__(self)
 
 Cursor = override(Cursor)
 __all__.append('Cursor')
 
-_Gdk_color_parse = Gdk.color_parse
-
-
-@override(Gdk.color_parse)
-def color_parse(color):
-    success, color = _Gdk_color_parse(color)
-    if not success:
-        return None
-    return color
+color_parse = strip_boolean_result(Gdk.color_parse)
+__all__.append('color_parse')
 
 
 # Note, we cannot override the entire class as Gdk.Atom has no gtype, so just
@@ -358,9 +347,9 @@ def _gdk_atom_str(atom):
 def _gdk_atom_repr(atom):
     n = atom.name()
     if n:
-        return 'Gdk.Atom<%s>' % n
+        return 'Gdk.Atom.intern("%s", False)' % n
     # fall back to atom index
-    return 'Gdk.Atom<%i>' % hash(atom)
+    return '<Gdk.Atom(%i)>' % hash(atom)
 
 
 Gdk.Atom.__str__ = _gdk_atom_str
@@ -419,7 +408,4 @@ if Gdk._version >= '3.0':
 
 import sys
 
-
 initialized, argv = Gdk.init_check(sys.argv)
-if not initialized:
-    raise RuntimeError("Gdk couldn't be initialized")
