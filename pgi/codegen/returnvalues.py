@@ -88,7 +88,7 @@ class VoidReturnValue(ReturnValue):
             return None, None
 
 
-class ArrayReturn(ReturnValue):
+class BaseArrayReturn(ReturnValue):
     TAG = GITypeTag.ARRAY
     py_type = list
 
@@ -109,12 +109,14 @@ class ArrayReturn(ReturnValue):
             return PtrArrayReturn
         elif value == GIArrayType.BYTE_ARRAY:
             return ByteArrayReturn
+        elif value == GIArrayType.ARRAY:
+            return ArrayReturn
 
         raise NotImplementedError(
             "Unsupported array return type %r" % type_.array_type)
 
 
-class ByteArrayReturn(ArrayReturn):
+class ArrayReturn(BaseArrayReturn):
 
     def pre_call(self):
         return None
@@ -123,7 +125,7 @@ class ByteArrayReturn(ArrayReturn):
         return None, name
 
 
-class PtrArrayReturn(ArrayReturn):
+class ByteArrayReturn(BaseArrayReturn):
 
     def pre_call(self):
         return None
@@ -132,7 +134,16 @@ class PtrArrayReturn(ArrayReturn):
         return None, name
 
 
-class CArrayReturn(ArrayReturn):
+class PtrArrayReturn(BaseArrayReturn):
+
+    def pre_call(self):
+        return None
+
+    def post_call(self, name):
+        return None, name
+
+
+class CArrayReturn(BaseArrayReturn):
 
     def setup(self):
         super(CArrayReturn, self).setup()

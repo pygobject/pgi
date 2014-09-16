@@ -542,7 +542,8 @@ class GListArgument(GIArgument):
             self.call_var = var.pack(self.name)
             return var.block
         else:
-            raise NotImplementedError
+            # FIXME
+            return
 
     def post_call(self):
         var = self.get_type()

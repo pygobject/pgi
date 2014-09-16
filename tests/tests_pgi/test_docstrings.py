@@ -9,6 +9,17 @@ import unittest
 
 from pgi.repository import Gtk, GLib, Gio, GObject, Atk
 
+try:
+    from gi.repository import GIMarshallingTests
+    GIMarshallingTests
+except ImportError:
+    GIMarshallingTests = None
+
+
+def skipUnlessGIMarshallingTests(func):
+    return unittest.skipUnless(GIMarshallingTests,
+                               "GIMarshallingTests missing")(func)
+
 
 class TDocstring(unittest.TestCase):
 
@@ -133,3 +144,14 @@ class TDocstring(unittest.TestCase):
         self.assertEqual(sig.__doc__,
             "show_processes(message: str, processes: [int], "
             "choices: [str]) -> None")
+
+    @skipUnlessGIMarshallingTests
+    def test_garray_return(self):
+        func = GIMarshallingTests.garray_int_none_return
+        self.assertEqual(func.__doc__, "garray_int_none_return() -> [int]")
+
+    @skipUnlessGIMarshallingTests
+    def test_glist_out(self):
+        func = GIMarshallingTests.glist_utf8_container_out
+        self.assertEqual(
+            func.__doc__, "glist_utf8_container_out() -> list: [str]")
