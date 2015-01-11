@@ -10,7 +10,7 @@ import unittest
 
 import gi
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, Gdk, Atk, Gio
+from gi.repository import Gtk, Gdk, Atk, Gio, GLib
 
 try:
     from gi.repository import Clutter
@@ -95,6 +95,17 @@ class StructTest(unittest.TestCase):
         field = Clutter.KeyEvent.unicode_value
         self.assertTrue(field.py_type is str)
         self.assertEqual(field.name, "unicode_value")
+
+    @skipIfGI
+    def test_error_field(self):
+        try:
+            from gi.repository import EvinceView
+        except ImportError:
+            return
+
+        field = EvinceView.JobFonts.error
+        self.assertTrue(field.py_type is GLib.GError)
+        self.assertEqual(field.name, "error")
 
     def test_boolean_field(self):
         a = Gtk.RecentData()

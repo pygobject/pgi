@@ -8,6 +8,7 @@
 from pgi.clib.gir import GIInfoType, GITypeTag
 from pgi.gtype import PGType
 from pgi.util import import_attribute
+from pgi.gerror import PGError
 
 
 class Field(object):
@@ -76,6 +77,11 @@ class InterfaceField(Field):
 
         raise NotImplementedError(
             "interface type not supported: %r" % iface.type)
+
+
+class ErrorField(Field):
+    TAG = GITypeTag.ERROR
+    py_type = PGError
 
 
 class TypeField(Field):
