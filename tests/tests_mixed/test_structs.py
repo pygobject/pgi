@@ -1,15 +1,28 @@
-# Copyright 2013 Christoph Reiter
+# Copyright 2013, 2015 Christoph Reiter
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
+import sys
 import unittest
 
 import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk, Atk, Gio
+
+try:
+    from gi.repository import Clutter
+    Clutter
+except ImportError:
+    Clutter = None
+else:
+    status, argv = Clutter.init(sys.argv)
+    if status == Clutter.InitError.SUCCESS:
+        sys.argv = argv
+    else:
+        Clutter = None
 
 from tests import FIXME, skipUnlessCairo, skipIfGI
 
@@ -75,6 +88,13 @@ class StructTest(unittest.TestCase):
         a = Atk.Object()
         a.set_name("foo")
         self.assertEqual(a.name, "foo")
+
+    @skipIfGI
+    @unittest.skipUnless(Clutter, "no clutter")
+    def test_unichar_field(self):
+        field = Clutter.KeyEvent.unicode_value
+        self.assertTrue(field.py_type is str)
+        self.assertEqual(field.name, "unicode_value")
 
     def test_boolean_field(self):
         a = Gtk.RecentData()
