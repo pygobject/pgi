@@ -32,6 +32,12 @@ if os.name == "nt":
         "gobject-2.0": "libgobject-2.0-0.dll",
         "girepository-1.0": "libgirepository-1.0-1.dll",
     }
+elif os.uname()[0] == "Darwin":
+    _so_mapping = {
+        "glib-2.0": "libglib-2.0.0.dylib",
+        "gobject-2.0": "libgobject-2.0.0.dylib",
+        "girepository-1.0": "libgirepository-1.0.1.dylib",
+    }
 else:
     _so_mapping = {
         "glib-2.0": "libglib-2.0.so.0",
@@ -42,6 +48,8 @@ else:
 
 if os.name == "nt":
     stdlib = memcpy = cdll.msvcrt
+elif os.uname()[0] == "Darwin":
+    stdlib = getattr(cdll, "libc.dylib")
 else:
     stdlib = getattr(cdll, "libc.so.6")
 
