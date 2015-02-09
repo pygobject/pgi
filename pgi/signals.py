@@ -29,7 +29,8 @@ class GSignal(object):
 
         if sig_info:
             func_name = sig_info.name.replace("-", "_")
-            return generate_dummy_callable(sig_info, func_name)
+            return generate_dummy_callable(
+                sig_info, func_name, signal_owner_type=self.instance_type)
         else:
             # FIXME: either too old libgirepository or signal
             # that is not in the typelib.

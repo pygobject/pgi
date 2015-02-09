@@ -5,6 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
+import re
 import traceback
 from operator import itemgetter
 
@@ -97,7 +98,13 @@ def get_type_name(type_):
         return "%s.%s" % (type_.__module__, type_.__name__)
 
 
-def build_docstring(func_name, args, ret, throws):
+def get_signal_owner_var_name(type_):
+    tname = get_type_name(type_.pytype)
+    name = tname.rsplit(".", 1)[-1]
+    return "_".join([p.lower() for p in re.findall('[A-Z][^A-Z]*', name)])
+
+
+def build_docstring(func_name, args, ret, throws, signal_owner_type=None):
     """Create a docstring in the form:
         name(in_name: type) -> (ret_type, out_name: type)
     """
@@ -113,6 +120,12 @@ def build_docstring(func_name, args, ret, throws):
             out_args.append(tname)
 
     in_args = []
+
+    if signal_owner_type is not None:
+        name = get_signal_owner_var_name(signal_owner_type)
+        in_args.append("%s: %s" % (
+            name, get_type_name(signal_owner_type.pytype)))
+
     for arg in args:
         if arg.is_aux:
             continue
@@ -334,7 +347,8 @@ def generate_function(info, method=False):
     raise NotImplementedError("\n".join(messages))
 
 
-def generate_dummy_callable(info, func_name, method=False):
+def generate_dummy_callable(info, func_name, method=False,
+                            signal_owner_type=None):
     """Takes a GICallableInfo and generates a dummy callback function which
     just raises but has a correct docstring. They are mainly accessible for
     documentation, so the API reference can reference a real thing.
@@ -370,7 +384,8 @@ def generate_dummy_callable(info, func_name, method=False):
     return_value.setup()
 
     func_name = escape_identifier(func_name)
-    docstring = build_docstring(func_name, args, return_value, False)
+    docstring = build_docstring(func_name, args, return_value,
+                                False, signal_owner_type)
 
     in_args = [a for a in args if not a.is_aux and a.in_var]
     in_names = [a.in_var for a in in_args]

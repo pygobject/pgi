@@ -137,13 +137,15 @@ class TDocstring(unittest.TestCase):
     def test_signal(self):
         sigs = Gtk.Window.signals
         sig = sigs.set_focus
-        self.assertEqual(sig.__doc__, "set_focus(object: Gtk.Widget) -> None")
+        self.assertEqual(
+            sig.__doc__,
+            "set_focus(window: Gtk.Window, object: Gtk.Widget) -> None")
 
         sigs = Gio.MountOperation.signals
         sig = Gio.MountOperation.signals.show_processes
         self.assertEqual(sig.__doc__,
-            "show_processes(message: str, processes: [int], "
-            "choices: [str]) -> None")
+            "show_processes(mount_operation: Gio.MountOperation, "
+            "message: str, processes: [int], choices: [str]) -> None")
 
     @skipUnlessGIMarshallingTests
     def test_garray_return(self):
