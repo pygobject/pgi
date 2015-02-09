@@ -883,7 +883,7 @@ pyglib_version = version_info
 __all__.append('pyglib_version')
 
 
-############ PGI specific
+# PGI specific
 
 def variant_type_from_string(*args, **kwargs):
     raise NotImplementedError
