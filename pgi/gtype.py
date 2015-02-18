@@ -160,7 +160,7 @@ PGType._PYTYPES = {
     "guint64": int,
     "gfloat": float,
     "gdouble": float,
-    "GStrv": list,
+    "GStrv": [str],
     "gpointer": int,  # ?
     "gulong": int,
     "gint64": int,

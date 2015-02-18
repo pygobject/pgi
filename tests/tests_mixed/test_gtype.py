@@ -44,6 +44,10 @@ class GTypeTest(unittest.TestCase):
     def test_pytype(self):
         self.assertTrue(GObject.type_from_name("gint").pytype is int)
 
+    @skipIfGI
+    def test_pytype_2(self):
+        self.assertTrue(GObject.type_from_name("GStrv").pytype == [str])
+
     def test_init_(self):
         window_type = Gtk.Window.__gtype__
         self.assertEqual(GObject.GType(Gtk.Window), window_type)

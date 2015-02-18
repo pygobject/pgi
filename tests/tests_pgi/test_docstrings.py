@@ -157,3 +157,8 @@ class TDocstring(unittest.TestCase):
         func = GIMarshallingTests.glist_utf8_container_out
         self.assertEqual(
             func.__doc__, "glist_utf8_container_out() -> list: [str]")
+
+    @skipUnlessGIMarshallingTests
+    def test_gstrv(self):
+        self.assertEqual(GIMarshallingTests.gstrv_in.__doc__,
+                         "gstrv_in(g_strv: [str]) -> None")

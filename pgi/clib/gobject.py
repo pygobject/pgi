@@ -383,7 +383,12 @@ boxed_type_register_static = _gobject.g_boxed_type_register_static
 boxed_type_register_static.argtypes = [gchar_p, GBoxedCopyFunc, GBoxedFreeFunc]
 boxed_type_register_static.restype = GType
 
+strv_get_type = _gobject.g_strv_get_type
+strv_get_type.argtypes = []
+signal_lookup.restype = GType
+
 g_type_init()
+strv_get_type()
 
 __all__ = ["GType", "g_type_init", "GParamFlags", "GValue", "GValuePtr",
            "GValueTransform", "GSignalFlags", "GTypeFlags", "GParameter",
