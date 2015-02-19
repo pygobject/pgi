@@ -81,8 +81,7 @@ def get_type_name(type_):
     """
 
     if type_ is None:
-        raise TypeError
-
+        return ""
     if isinstance(type_, string_types):
         return type_
     elif isinstance(type_, list):
