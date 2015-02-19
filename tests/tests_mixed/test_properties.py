@@ -7,10 +7,18 @@
 
 import unittest
 
+from tests import skipIfGI
+
 import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk, GObject
 from pgi import _compat
+
+try:
+    from gi.repository import GIMarshallingTests
+    GIMarshallingTests
+except ImportError:
+    GIMarshallingTests = None
 
 
 class PropertiesTest(unittest.TestCase):
@@ -138,3 +146,10 @@ class PropertiesTest(unittest.TestCase):
 
         self.assertEqual(GObject.list_properties(Gtk.Window.__gtype__),
                          GObject.list_properties(Gtk.Window))
+
+    @skipIfGI
+    @unittest.skipUnless(GIMarshallingTests, "no gimarshal")
+    def test_property_default_gstrv(self):
+        self.assertEqual(
+            GIMarshallingTests.PropertiesObject.props.some_strv.default_value,
+            [])

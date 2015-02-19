@@ -70,7 +70,12 @@ class GParamSpec(object):
         gvalue = GObject.Value()
         gvalue.init(self.value_type)
         self._spec.set_default(ctypes.cast(gvalue._obj, GValuePtr))
-        return gvalue.get_value()
+        v = gvalue.get_value()
+        # XXX: add something to register gvalue marshallers for
+        # boxed types like GStrv
+        if v is None and GObject.TYPE_STRV == self.value_type:
+            return []
+        return v
 
     def __repr__(self):
         return "<%s %r>" % (self.__gtype__.name, self.name)
