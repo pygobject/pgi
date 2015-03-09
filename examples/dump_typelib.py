@@ -48,7 +48,7 @@ def handle(info, indent=-1):
 def main(argv):
     parser = argparse.ArgumentParser(
         description='Dump typelibs')
-    parser.add_argument('typelib', help='Pyth to typelib')
+    parser.add_argument('typelib', help='Path to typelib')
     args = parser.parse_args(argv[1:])
 
     with open(args.typelib, "rb") as h:
