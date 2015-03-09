@@ -36,6 +36,7 @@ gpointer g_malloc0(gsize);
 void g_free(gpointer);
 gpointer g_try_malloc0(gsize);
 gchar* g_strdup(gchar*);
+gpointer g_memdup(gconstpointer mem, guint byte_size);
 
 typedef void (*GFunc)(gpointer data, gpointer user_data);
 

@@ -6,6 +6,8 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from ._ffi import ffi, lib
+from ..glib import memdup, free, gerror
+from .error import GIError
 from .._compat import PY3
 
 
@@ -24,6 +26,19 @@ class GITypelib(object):
             if PY3:
                 res = res.decode("ascii")
         return res
+
+    @classmethod
+    def new_from_memory(self, data):
+        size = len(data)
+        mem_ptr = memdup(data, size)
+        mem = ffi.cast("uint8_t*", mem_ptr)
+        try:
+            with gerror(GIError) as error:
+                ptr = lib.g_typelib_new_from_memory(mem, size, error)
+                return GITypelib(ptr)
+        except GIError:
+            free(mem_ptr)
+            raise
 
     def __repr__(self):
         return "<%s namespace=%r>" % (type(self).__name__, self.namespace)

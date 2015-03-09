@@ -51,6 +51,9 @@ class GErrorError(Exception):
         self.domain = gerror.domain
         self.code = gerror.code
 
+    def __str__(self):
+        return self.message or ""
+
 
 @contextmanager
 def gerror(type_=GErrorError):
@@ -215,6 +218,10 @@ def try_malloc0(n_bytes):
 
 def strdup(string):
     return lib.g_strdup(string)
+
+
+def memdup(mem, size):
+    return lib.g_memdup(mem, size)
 
 
 def unpack_glist(glist_ptr, cffi_type, transfer_full=True):

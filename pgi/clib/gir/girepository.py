@@ -15,7 +15,7 @@ from .gibaseinfo import GIBaseInfo
 from .gitypelib import GITypelib
 from .error import GIError
 from .._utils import find_library, wrap_class, fsdecode
-from .._compat import PY3
+from .._compat import PY3, xrange
 
 _gir = find_library("girepository-1.0")
 
@@ -36,8 +36,9 @@ class GIRepository(c_void_p):
     def get_infos(self, namespace):
         if PY3:
             namespace = namespace.encode("ascii")
-        for i in xrange(self.n_infos):
-            yield self.get_info(i)
+        for index in xrange(self._get_n_infos(namespace)):
+            res = self._get_info(namespace, index)
+            yield GIBaseInfo._cast(res)
 
     def get_info(self, namespace, index):
         if PY3:
@@ -146,6 +147,12 @@ class GIRepository(c_void_p):
             res = res.decode("ascii")
         return res
 
+    def load_typelib(self, typelib, flags):
+        with gerror(GIError) as error:
+            res = self._load_typelib(typelib, flags, error)
+        if PY3:
+            res = res.decode("ascii")
+        return res
 
 _methods = [
     ("get_default", GIRepository, []),
@@ -157,7 +164,7 @@ _methods = [
     ("prepend_search_path", None, [c_char_p]),
     ("prepend_library_path", None, [c_char_p]),
     ("_get_search_path", GSListPtr, []),
-    ("load_typelib", c_char_p,
+    ("_load_typelib", c_char_p,
         [GIRepository, GITypelib, GIRepositoryLoadFlags,
          POINTER(GErrorPtr)]),
     ("_is_registered", gboolean, [GIRepository, gchar_p, gchar_p]),

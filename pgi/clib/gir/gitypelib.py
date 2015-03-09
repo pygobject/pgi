@@ -5,11 +5,12 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from ctypes import POINTER, c_void_p
+from ctypes import POINTER, c_void_p, cast
 
-from ..glib import guint8, gsize, gboolean, gchar_p, gpointer
-from ..glib import GError, GMappedFilePtr
+from ..glib import guint8, gsize, gboolean, gchar_p, gpointer, g_memdup
+from ..glib import GError, GMappedFilePtr, gerror, free
 from .._utils import wrap_class, find_library
+from .error import GIError
 
 
 _gir = find_library("girepository-1.0")
@@ -23,8 +24,23 @@ class GITypelib(c_void_p):
         l = ", ".join(("%s=%r" % (k, v) for (k, v) in sorted(values.items())))
         return "<%s %s>" % (type(self).__name__, l)
 
+    @classmethod
+    def new_from_memory(cls, data):
+        """Takes bytes and returns a GITypelib, or raises GIError"""
+
+        size = len(data)
+        copy = g_memdup(data, size)
+        ptr = cast(copy, POINTER(guint8))
+        try:
+            with gerror(GIError) as error:
+                return GITypelib._new_from_memory(ptr, size, error)
+        except GIError:
+            free(copy)
+            raise
+
+
 _methods = [
-    ("new_from_memory",
+    ("_new_from_memory",
         GITypelib, [POINTER(guint8), gsize, POINTER(POINTER(GError))]),
     ("new_from_const_memory",
         GITypelib, [POINTER(guint8), gsize, POINTER(POINTER(GError))]),

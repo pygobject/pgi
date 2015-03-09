@@ -20,6 +20,7 @@ class GICallableInfo(GIBaseInfo):
     def get_caller_owns(self):
         return GITransfer(lib.g_callable_info_get_caller_owns(self._ptr))
 
+    @property
     def may_return_null(self):
         return bool(lib.g_callable_info_may_return_null(self._ptr))
 

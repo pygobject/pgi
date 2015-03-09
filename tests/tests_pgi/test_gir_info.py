@@ -159,6 +159,14 @@ class _GIInfoTest(unittest.TestCase):
         argv = fi.get_arg(1)
         repr(argv)
 
+    def test_arginfo(self):
+        fi = self.repo.find_by_name("Gtk", "init")
+        self.assertTrue(isinstance(fi, self.gir.GICallableInfo))
+        argv = fi.get_arg(1)
+        self.assertTrue(isinstance(argv, self.gir.GIArgInfo))
+        self.assertTrue(
+            isinstance(argv.ownership_transfer, self.gir.GITransfer))
+
     def test_typetag(self):
         self.failIf(self.gir.GITypeTag(18).is_basic)
         self.failUnless(self.gir.GITypeTag(21).is_basic)

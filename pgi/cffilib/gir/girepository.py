@@ -9,7 +9,7 @@ from .. import glib
 from ..glib import unpack_zeroterm_array, unpack_glist
 from .. import _create_enum_class
 from .._utils import fsdecode
-from .._compat import PY3
+from .._compat import PY3, xrange
 
 from ._ffi import ffi, lib
 from .gibaseinfo import GITypelib, GIBaseInfo
@@ -82,7 +82,7 @@ class GIRepository(object):
             version = version.encode("ascii")
         if PY3:
             namespace = namespace.encode("ascii")
-        with glib.gerror() as error:
+        with glib.gerror(GIError) as error:
             res = lib.g_irepository_require_private(self._ptr, typelib_dir,
                                                     namespace, version,
                                                     flags, error)
@@ -109,6 +109,15 @@ class GIRepository(object):
         if res:
             type_ = GIBaseInfo._get_type(res)
             return type_(res)
+
+    def get_infos(self, namespace):
+        if PY3:
+            namespace = namespace.encode("ascii")
+        count = lib.g_irepository_get_n_infos(self._ptr, namespace)
+        for index in xrange(count):
+            res = lib.g_irepository_get_info(self._ptr, namespace, index)
+            type_ = GIBaseInfo._get_type(res)
+            yield type_(res)
 
     def get_n_infos(self, namespace):
         if PY3:
@@ -164,3 +173,13 @@ class GIRepository(object):
         if PY3:
             res = [p.decode("ascii") for p in res]
         return res
+
+    def load_typelib(self, typelib, flags):
+        with glib.gerror(GIError) as error:
+            res = lib.g_irepository_load_typelib(
+                self._ptr, typelib._ptr, flags, error)
+        if res:
+            res = ffi.string(res)
+            if PY3:
+                res = res.decode("ascii")
+            return res

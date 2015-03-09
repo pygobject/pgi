@@ -5,12 +5,15 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
+from __future__ import print_function
+
 import sys
 
 
 PY2 = sys.version_info[0] == 2
 PY3 = not PY2
 
+print_ = print
 
 if PY3:
     string_types = (str,)

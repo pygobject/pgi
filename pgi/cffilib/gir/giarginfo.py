@@ -23,7 +23,8 @@ GIScopeType = _create_enum_class(ffi, "GIScopeType", "GI_SCOPE_TYPE_")
 
 class GIArgInfo(GIBaseInfo):
 
-    def get_direction(self):
+    @property
+    def direction(self):
         return GIDirection(lib.g_arg_info_get_direction(self._ptr))
 
     def is_caller_allocates(self):
@@ -38,7 +39,8 @@ class GIArgInfo(GIBaseInfo):
     def may_be_null(self):
         return bool(lib.g_arg_info_may_be_null(self._ptr))
 
-    def get_ownership_transfer(self):
+    @property
+    def ownership_transfer(self):
         return GITransfer(lib.g_arg_info_get_ownership_transfer(self._ptr))
 
     def get_scope(self):

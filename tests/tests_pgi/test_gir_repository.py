@@ -109,6 +109,13 @@ class _GIRepoTest(unittest.TestCase):
         res = repo.get_info("GObject", 0)
         self.assertTrue(isinstance(res, self.gir.GIBaseInfo))
 
+    def test_get_infos(self):
+        repo = self.GIRepository.get_default()
+        repo.require("GObject", "2.0", 0)
+        for res in repo.get_infos("GObject"):
+            self.assertTrue(isinstance(res, self.gir.GIBaseInfo))
+            break
+
     def test_get_typelib_path(self):
         repo = self.GIRepository.get_default()
         repo.require("GObject", "2.0", 0)
@@ -138,6 +145,19 @@ class _GIRepoTest(unittest.TestCase):
         repo = self.GIRepository.get_default()
         repo.require("GObject", "2.0", 0)
         self.assertEqual(repo.get_c_prefix("GObject"), "G")
+
+    def test_typelib_from_memory_error(self):
+        self.assertRaises(
+            self.GIError, self.gir.GITypelib.new_from_memory, b"foo")
+
+    def test_typelib_from_memory_load_typelib(self):
+        repo = self.GIRepository.get_default()
+        repo.require("GObject", "2.0", 0)
+        path = repo.get_typelib_path("GObject")
+        with open(path, "rb") as h:
+            data = h.read()
+        typelib = self.gir.GITypelib.new_from_memory(data)
+        self.assertEqual(repo.load_typelib(typelib, 0), "GObject")
 
 
 class GIRepoTestCTypes(_GIRepoTest):

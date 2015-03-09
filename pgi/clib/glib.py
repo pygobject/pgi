@@ -56,6 +56,10 @@ g_strdup = _glib.g_strdup
 g_strdup.argtypes = [gchar_p]
 g_strdup.restype = gpointer
 
+g_memdup = _glib.g_memdup
+g_memdup.argtypes = [gconstpointer, guint]
+g_memdup.restype = gpointer
+
 
 class Enum(guint):
     def __str__(self):
@@ -259,6 +263,9 @@ class GErrorError(Exception):
             self.message = self.message.decode("utf-8")
         self.domain = gerror.domain
         self.code = gerror.code
+
+    def __str__(self):
+        return self.message or ""
 
 
 @contextmanager
