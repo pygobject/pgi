@@ -25,3 +25,19 @@ class GIStructInfo(GIRegisteredTypeInfo):
     def get_fields(self):
         for i in xrange(self.n_fields):
             yield self.get_field(i)
+
+    @property
+    def size(self):
+        return lib.g_struct_info_get_size(self._ptr)
+
+    @property
+    def alignment(self):
+        return lib.g_struct_info_get_alignment(self._ptr)
+
+    @property
+    def is_gtype_struct(self):
+        return lib.g_struct_info_is_gtype_struct(self._ptr)
+
+    @property
+    def is_foreign(self):
+        return lib.g_struct_info_is_foreign(self._ptr)

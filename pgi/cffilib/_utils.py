@@ -37,9 +37,12 @@ def _create_enum_class(ffi, type_name, prefix):
         def value(self):
             return int(self)
 
+        def __str__(self):
+            return self._map.get(self, "Unknown")
+
         def __repr__(self):
             return "%s.%s" % (type(self).__name__,
-                              self._map.get(self, "__UNKNOWN__"))
+                              self._map.get(self, "Unknown"))
 
     cls = type(type_name, _template.__bases__, dict(_template.__dict__))
     prefix_len = len(prefix)

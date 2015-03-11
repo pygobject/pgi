@@ -359,6 +359,7 @@ void                g_callable_info_load_arg            (GICallableInfo *info,
                                                          GIArgInfo *arg);
 void                g_callable_info_load_return_type    (GICallableInfo *info,
                                                          GITypeInfo *type);
+gboolean            g_callable_info_can_throw_gerror    (GICallableInfo *info);
 """
 
 
@@ -508,6 +509,13 @@ gboolean            g_struct_info_is_foreign            (GIStructInfo *info);
 """
 
 
+GI_SIGNAL_DEF = """
+GSignalFlags  g_signal_info_get_flags         (GISignalInfo *info);
+GIVFuncInfo * g_signal_info_get_class_closure (GISignalInfo *info);
+gboolean      g_signal_info_true_stops_emit   (GISignalInfo *info);
+"""
+
+
 GIR_CDEF = "".join([
     _fixup_cdef_enums(GI_TYPES_CDEF),
     GI_TYPELIB_CDEF,
@@ -524,4 +532,5 @@ GIR_CDEF = "".join([
     GI_OBJECT_CDEF,
     GI_INTERFACE_CDEF,
     GI_STRUCT_CDEF,
+    GI_SIGNAL_DEF,
 ])

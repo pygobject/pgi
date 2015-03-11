@@ -20,6 +20,7 @@ class GIValueInfo(GIBaseInfo):
         return lib.g_value_info_get_value(self._ptr)
 
 
+@GIBaseInfo._register(GIInfoType.FLAGS)
 @GIBaseInfo._register(GIInfoType.ENUM)
 class GIEnumInfo(GIRegisteredTypeInfo):
 

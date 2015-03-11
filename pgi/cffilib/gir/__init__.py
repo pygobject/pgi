@@ -5,22 +5,23 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from .gibaseinfo import GIBaseInfo, GITypelib, GIInfoType
-from .girepository import GIRepository, GIRepositoryLoadFlags
+from .error import GIError
 from .giarginfo import GIArgInfo, GIDirection, GITransfer, GIScopeType
-from .gitypeinfo import GITypeInfo, GIArrayType, GITypeTag
+from .gibaseinfo import GIBaseInfo, GITypelib, GIInfoType
+from .gicallableinfo import GICallableInfo
 from .giconstantinfo import GIConstantInfo
+from .gienuminfo import GIEnumInfo, GIValueInfo
+from .gifieldinfo import GIFieldInfo, GIFieldInfoFlags
+from .gifunctioninfo import GIFunctionInfo, GIFunctionInfoFlags, GInvokeError
+from .giinterfaceinfo import GIInterfaceInfo
+from .giobjectinfo import GIObjectInfo
 from .gipropertyinfo import GIPropertyInfo
 from .giregisteredtypeinfo import GIRegisteredTypeInfo
-from .gifieldinfo import GIFieldInfo, GIFieldInfoFlags
-from .gicallableinfo import GICallableInfo
-from .gienuminfo import GIEnumInfo, GIValueInfo
-from .gifunctioninfo import GIFunctionInfo, GIFunctionInfoFlags, GInvokeError
-from .giobjectinfo import GIObjectInfo
-from .giunioninfo import GIUnionInfo
+from .girepository import GIRepository, GIRepositoryLoadFlags
+from .gisignalinfo import GISignalInfo
 from .gistructinfo import GIStructInfo
-from .giinterfaceinfo import GIInterfaceInfo
-from .error import GIError
+from .gitypeinfo import GITypeInfo, GIArrayType, GITypeTag
+from .giunioninfo import GIUnionInfo
 
 
 # pyflakes
@@ -31,11 +32,13 @@ GICallableInfo
 GIConstantInfo
 GIDirection
 GIEnumInfo
-GIFieldInfoFlags
+GIError
 GIFieldInfo
-GIFunctionInfoFlags
+GIFieldInfoFlags
 GIFunctionInfo
+GIFunctionInfoFlags
 GIInfoType
+GIInterfaceInfo
 GInvokeError
 GIObjectInfo
 GIPropertyInfo
@@ -43,6 +46,7 @@ GIRegisteredTypeInfo
 GIRepository
 GIRepositoryLoadFlags
 GIScopeType
+GISignalInfo
 GIStructInfo
 GITransfer
 GITypeInfo
@@ -50,5 +54,3 @@ GITypelib
 GITypeTag
 GIUnionInfo
 GIValueInfo
-GIError
-GIInterfaceInfo

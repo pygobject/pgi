@@ -17,13 +17,16 @@ GIFieldInfoFlags = _create_enum_class(ffi, "GIFieldInfoFlags", "GI_FIELD_IS_")
 @GIBaseInfo._register(GIInfoType.FIELD)
 class GIFieldInfo(GIBaseInfo):
 
-    def get_flags(self):
+    @property
+    def flags(self):
         return GIFieldInfoFlags(lib.g_field_info_get_flags(self._ptr))
 
-    def get_size(self):
+    @property
+    def size(self):
         return lib.g_field_info_get_size(self._ptr)
 
-    def get_offset(self):
+    @property
+    def offset(self):
         return lib.g_field_info_get_offset(self._ptr)
 
     def get_type(self):

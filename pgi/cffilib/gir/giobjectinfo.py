@@ -13,10 +13,19 @@ from .gifunctioninfo import GIFunctionInfo
 from .gipropertyinfo import GIPropertyInfo
 from .gifieldinfo import GIFieldInfo
 from .giconstantinfo import GIConstantInfo
+from .gisignalinfo import GISignalInfo
 
 
 @GIBaseInfo._register(GIInfoType.OBJECT)
 class GIObjectInfo(GIRegisteredTypeInfo):
+
+    @property
+    def abstract(self):
+        return lib.g_object_info_get_abstract(self._ptr)
+
+    @property
+    def fundamental(self):
+        return lib.g_object_info_get_fundamental(self._ptr)
 
     @property
     def n_methods(self):
@@ -67,7 +76,7 @@ class GIObjectInfo(GIRegisteredTypeInfo):
         return lib.g_object_info_get_n_signals(self._ptr)
 
     def get_signal(self, n):
-        return GIFunctionInfo(lib.g_object_info_get_signal(self._ptr, n))
+        return GISignalInfo(lib.g_object_info_get_signal(self._ptr, n))
 
     def get_signals(self):
         for i in xrange(self.n_signals):

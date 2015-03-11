@@ -5,12 +5,11 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from ctypes import c_char_p, POINTER, c_int
+from ctypes import c_char_p, POINTER, c_int, byref
 
 from ..glib import gint, Enum, gboolean, gchar_p, GError, Flags
 from ..gobject import GSignalFlags
-from .gibaseinfo import GIBaseInfo
-from .gibaseinfo import GIAttributeIter, GIInfoType
+from .gibaseinfo import GIBaseInfo, GIAttributeIter, GIInfoType
 from .gitypeinfo import GITypeInfo
 from .giarginfo import GITransfer, GIArgInfo
 from .gipropertyinfo import GIPropertyInfo
@@ -27,6 +26,15 @@ class GICallableInfo(GIBaseInfo):
     def get_args(self):
         for i in xrange(self.n_args):
             yield self.get_arg(i)
+
+    def iterate_return_attributes(self):
+        name = c_char_p()
+        value = c_char_p()
+        it = GIAttributeIter()
+
+        while self._iterate_return_attributes(byref(it), byref(name),
+                                              byref(value)):
+            yield (name.value, value.value)
 
     def _get_repr(self):
         values = super(GICallableInfo, self)._get_repr()
@@ -109,13 +117,14 @@ _methods = [
     ("get_caller_owns", GITransfer, [GICallableInfo]),
     ("may_return_null", gboolean, [GICallableInfo]),
     ("get_return_attribute", gchar_p, [GICallableInfo, gchar_p]),
-    ("iterate_return_attributes", gint,
+    ("_iterate_return_attributes", gint,
      [GICallableInfo,
-      GIAttributeIter, POINTER(c_char_p), POINTER(c_char_p)]),
+      POINTER(GIAttributeIter), POINTER(c_char_p), POINTER(c_char_p)]),
     ("get_n_args", gint, [GICallableInfo]),
     ("get_arg", GIArgInfo, [GICallableInfo, gint], True),
     ("load_arg", None, [GICallableInfo, gint, GIArgInfo]),
     ("load_return_type", None, [GICallableInfo, GITypeInfo]),
+    ("can_throw_gerror", gboolean, [GICallableInfo]),
 ]
 
 wrap_class(_gir, GICallableInfo, GICallableInfo,

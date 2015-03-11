@@ -7,22 +7,28 @@
 
 from .._compat import xrange
 from ._ffi import ffi, lib
-from .gibaseinfo import GIBaseInfo
+from .gibaseinfo import GIBaseInfo, GIInfoType
 from .gitypeinfo import GITypeInfo
 from .giarginfo import GITransfer, GIArgInfo
 
 
+@GIBaseInfo._register(GIInfoType.CALLBACK)
 class GICallableInfo(GIBaseInfo):
 
     def get_return_type(self):
         return GITypeInfo(lib.g_callable_info_get_return_type(self._ptr))
 
-    def get_caller_owns(self):
+    @property
+    def caller_owns(self):
         return GITransfer(lib.g_callable_info_get_caller_owns(self._ptr))
 
     @property
+    def can_throw_gerror(self):
+        return lib.g_callable_info_can_throw_gerror(self._ptr)
+
+    @property
     def may_return_null(self):
-        return bool(lib.g_callable_info_may_return_null(self._ptr))
+        return lib.g_callable_info_may_return_null(self._ptr)
 
     def get_return_attribute(self, name):
         res = lib.g_callable_info_get_return_attribute(self._ptr)

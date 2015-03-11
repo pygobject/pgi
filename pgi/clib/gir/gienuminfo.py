@@ -21,7 +21,7 @@ class GIValueInfo(GIBaseInfo):
 
     def _get_repr(self):
         values = super(GIValueInfo, self)._get_repr()
-        values["value"] = repr(self.value)
+        values["value"] = repr(self.value_)
         return values
 
 _methods = [

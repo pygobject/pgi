@@ -5,11 +5,11 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from ctypes import POINTER, c_char_p, cast, c_void_p
+from ctypes import POINTER, c_char_p, cast, c_void_p, byref, Structure
 
 from pgi.finalizer import _BaseFinalizer
 
-from ..glib import gchar_p, Enum, gboolean
+from ..glib import gchar_p, Enum, gboolean, gpointer
 from .._utils import wrap_class, find_library
 from .gitypelib import GITypelib
 
@@ -28,8 +28,17 @@ _methods = [
 wrap_class(_gir, GIInfoType, GIInfoType, "g_info_type_", _methods)
 
 
-class GIAttributeIter(c_void_p):
+class GOptionGroup(Structure):
     pass
+
+
+class GIAttributeIter(Structure):
+    _fields_ = [
+        ("data", gpointer),
+        ("data2", gpointer),
+        ("data3", gpointer),
+        ("data4", gpointer),
+    ]
 
 
 class _UnrefFinalizer(_BaseFinalizer):
@@ -111,6 +120,15 @@ class GIBaseInfo(c_void_p):
         l = ", ".join(("%s=%s" % v for v in sorted(self._get_repr().items())))
         return "<%s %s>" % (type(self).__name__, l)
 
+    def iterate_attributes(self):
+        name = c_char_p()
+        value = c_char_p()
+        it = GIAttributeIter()
+
+        while self._iterate_attributes(byref(it), byref(name), byref(value)):
+            yield (name.value, value.value)
+
+
 _methods = [
     ("ref", GIBaseInfo, [GIBaseInfo], False),
     ("unref", None, [GIBaseInfo]),
@@ -119,8 +137,8 @@ _methods = [
     ("get_namespace", gchar_p, [GIBaseInfo]),
     ("is_deprecated", gboolean, [GIBaseInfo]),
     ("get_attribute", gchar_p, [GIBaseInfo, gchar_p]),
-    ("iterate_attributes", gboolean, [GIBaseInfo, GIAttributeIter,
-                                      POINTER(c_char_p), POINTER(c_char_p)]),
+    ("_iterate_attributes", gboolean, [GIBaseInfo, POINTER(GIAttributeIter),
+                                       POINTER(c_char_p), POINTER(c_char_p)]),
     ("get_container", GIBaseInfo, [GIBaseInfo]),
     ("get_typelib", GITypelib, [GIBaseInfo]),
     ("equal", gboolean, [GIBaseInfo, GIBaseInfo]),

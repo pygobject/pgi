@@ -66,7 +66,7 @@ class Enum(guint):
         for a in (c for c in dir(self) if c.upper() == c):
             if getattr(self, a) == self.value:
                 return a
-        return "Unkown"
+        return "Unknown"
 
     def __repr__(self):
         return repr(str(self))
@@ -81,7 +81,7 @@ class Flags(guint):
         for a in (c for c in dir(self) if c.upper() == c):
             if getattr(self, a) & self.value:
                 values.append(a)
-        return " | ".join(values) or "Unkown"
+        return " | ".join(values) or "Unknown"
 
     def __repr__(self):
         return repr(str(self))

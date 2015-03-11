@@ -27,10 +27,11 @@ class GIFunctionInfo(GICallableInfo):
     @property
     def symbol(self):
         res = lib.g_function_info_get_symbol(self._ptr)
-        res = ffi.string(res)
-        if PY3:
-            res = res.decode("ascii")
-        return res
+        if res:
+            res = ffi.string(res)
+            if PY3:
+                res = res.decode("ascii")
+            return res
 
     @property
     def flags(self):

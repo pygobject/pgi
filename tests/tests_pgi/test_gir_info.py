@@ -41,6 +41,7 @@ class _GIInfoTest(unittest.TestCase):
         self.failIf(b == 42)
         self.failUnlessEqual(b.type.value, self.gir.GIInfoType.OBJECT)
         repr(b.get_typelib())
+        list(b.iterate_attributes())
 
     def test_typelib(self):
         w = self._get_gtk("Window")
@@ -123,6 +124,7 @@ class _GIInfoTest(unittest.TestCase):
         fi = e.get_method(9)
         self.assertTrue(isinstance(fi, self.gir.GICallableInfo))
         repr(fi)
+        list(fi.iterate_return_attributes())
 
     def test_interfaceinfo(self):
         i = self._get_gtk("Editable")

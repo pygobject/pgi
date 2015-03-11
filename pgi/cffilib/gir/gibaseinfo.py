@@ -70,7 +70,7 @@ class GIBaseInfo(object):
             res = ffi.string(res)
             if PY3:
                 res = res.decode("ascii")
-        return res
+            return res
 
     @property
     def namespace(self):
@@ -79,11 +79,11 @@ class GIBaseInfo(object):
             res = ffi.string(res)
             if PY3:
                 res = res.decode("ascii")
-        return res
+            return res
 
     @property
     def is_deprecated(self):
-        return bool(lib.g_base_info_is_deprecated(self._ptr))
+        return lib.g_base_info_is_deprecated(self._ptr)
 
     def get_attribute(self, name):
         res = lib.g_base_info_get_attribute(self._ptr, name)
