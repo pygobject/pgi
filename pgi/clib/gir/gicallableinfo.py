@@ -7,13 +7,14 @@
 
 from ctypes import c_char_p, POINTER, c_int, byref
 
-from ..glib import gint, Enum, gboolean, gchar_p, GError, Flags
+from ..glib import gint, Enum, gboolean, gchar_p, GError, Flags, gerror
 from ..gobject import GSignalFlags
 from .gibaseinfo import GIBaseInfo, GIAttributeIter, GIInfoType
 from .gitypeinfo import GITypeInfo
 from .giarginfo import GITransfer, GIArgInfo
 from .gipropertyinfo import GIPropertyInfo
 from .giargument import GIArgument
+from .error import GIError
 from .._utils import find_library, wrap_class
 from .._compat import xrange
 
@@ -62,6 +63,35 @@ class GInvokeError(Enum):
 
 @GIBaseInfo._register(GIInfoType.FUNCTION)
 class GIFunctionInfo(GICallableInfo):
+
+    def invoke(self, in_args, out_args, return_value):
+        if in_args:
+            n_in_args = len(in_args)
+            in_type = n_in_args * GIArgument
+            in_args = in_type(*in_args)
+        else:
+            n_in_args = 0
+            in_args = None
+
+        if out_args:
+            n_out_args = len(out_args)
+            out_type = n_out_args * GIArgument
+            out_args = in_type(*out_args)
+        else:
+            n_out_args = 0
+            out_args = None
+
+        if return_value is not None:
+            retval = byref(return_value)
+        else:
+            retval = None
+
+        with gerror(GIError) as error:
+            res = self._invoke(
+                in_args, n_in_args, out_args, n_out_args,
+                retval, error)
+
+        return bool(res)
 
     def _get_repr(self):
         values = super(GIFunctionInfo, self)._get_repr()
@@ -135,7 +165,7 @@ _methods = [
     ("get_flags", GIFunctionInfoFlags, [GIFunctionInfo]),
     ("get_property", GIPropertyInfo, [GIFunctionInfo], True),
     ("get_vfunc", GIVFuncInfo, [GIFunctionInfo], True),
-    ("invoke", gboolean, [GIFunctionInfo, POINTER(GIArgument), c_int,
+    ("_invoke", gboolean, [GIFunctionInfo, POINTER(GIArgument), c_int,
                           POINTER(GIArgument), c_int, POINTER(GIArgument),
                           POINTER(POINTER(GError))]),
 ]

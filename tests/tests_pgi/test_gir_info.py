@@ -21,6 +21,9 @@ class _GIInfoTest(unittest.TestCase):
         typelib = repo.require("Gdk", "3.0", 0)
         self.assertTrue(typelib)
 
+        typelib = repo.require("GLib", "2.0", 0)
+        self.assertTrue(typelib)
+
     def _get_gtk(self, name):
         info = self.repo.find_by_name("Gtk", name)
         self.assertTrue(info)
@@ -30,6 +33,21 @@ class _GIInfoTest(unittest.TestCase):
         info = self.repo.find_by_name("Gdk", name)
         self.assertTrue(info)
         return info
+
+    def _get_glib(self, name):
+        info = self.repo.find_by_name("GLib", name)
+        self.assertTrue(info)
+        return info
+
+    def test_invoke(self):
+        info = self.repo.find_by_name("GLib", "utf8_strlen")
+        args = [
+            self.gir.GIArgument(v_string="foobar"),
+            self.gir.GIArgument(v_ssize=43),
+        ]
+        ret = self.gir.GIArgument()
+        info.invoke(args, None, ret)
+        self.assertEqual(ret.v_long, len("foobar"))
 
     def test_baseinfo(self):
         b = self._get_gtk("Button")
@@ -104,6 +122,11 @@ class _GIInfoTest(unittest.TestCase):
         self.assertTrue(isinstance(w, self.gir.GIObjectInfo))
         for fi in w.get_methods():
             repr(fi)
+
+    def test_iface_functioninfo(self):
+        e = self._get_gtk("Actionable")
+        fi = e.get_method(0)
+        self.assertTrue(isinstance(fi.get_property(), self.gir.GIPropertyInfo))
 
     def test_structinfo(self):
         s = self._get_gtk("TargetEntry")

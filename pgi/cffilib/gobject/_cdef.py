@@ -39,6 +39,7 @@ typedef struct _GValue GValue;
 typedef gulong GType;
 
 GType               g_type_from_name                    (const gchar *name);
+void                g_type_init                         (void);
 """
 
 GOBJECT_CDEF = _fixup_cdef_enums(GOBJECT_CDEF)

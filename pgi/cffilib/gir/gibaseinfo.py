@@ -34,11 +34,6 @@ class GIBaseInfo(object):
         if take_ownership and ptr:
             self._gc = ffi.gc(ptr, lib.g_base_info_unref)
 
-    @staticmethod
-    def _destructor(cdata):
-        if cdata:
-            lib.g_base_info_unref(cdata)
-
     @classmethod
     def _register(cls, info_type):
         def wrap(reg_cls):

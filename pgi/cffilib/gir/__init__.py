@@ -22,6 +22,7 @@ from .gisignalinfo import GISignalInfo
 from .gistructinfo import GIStructInfo
 from .gitypeinfo import GITypeInfo, GIArrayType, GITypeTag
 from .giunioninfo import GIUnionInfo
+from .giargument import GIArgument
 
 
 # pyflakes
@@ -54,3 +55,4 @@ GITypelib
 GITypeTag
 GIUnionInfo
 GIValueInfo
+GIArgument

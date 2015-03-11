@@ -18,3 +18,7 @@ class GType(long):
     @classmethod
     def from_name(cls, name):
         return cls(lib.g_type_from_name(name))
+
+
+def g_type_init():
+    lib.g_type_init()
