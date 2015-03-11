@@ -21,7 +21,6 @@ from .._compat import xrange
 _gir = find_library("girepository-1.0")
 
 
-@GIBaseInfo._register(GIInfoType.CALLBACK)
 class GICallableInfo(GIBaseInfo):
 
     def get_args(self):
@@ -46,6 +45,11 @@ class GICallableInfo(GIBaseInfo):
         values["may_return_null"] = repr(self.may_return_null)
         values["n_args"] = repr(self.n_args)
         return values
+
+
+@GIBaseInfo._register(GIInfoType.CALLBACK)
+class GICallbackInfo(GICallableInfo):
+    pass
 
 
 class GIFunctionInfoFlags(Flags):
@@ -155,6 +159,8 @@ _methods = [
     ("load_arg", None, [GICallableInfo, gint, GIArgInfo]),
     ("load_return_type", None, [GICallableInfo, GITypeInfo]),
     ("can_throw_gerror", gboolean, [GICallableInfo]),
+    ("is_method", gboolean, [GICallableInfo]),
+    ("skip_return", gboolean, [GICallableInfo]),
 ]
 
 wrap_class(_gir, GICallableInfo, GICallableInfo,

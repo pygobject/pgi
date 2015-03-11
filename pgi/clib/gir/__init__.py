@@ -8,7 +8,8 @@
 from .giargument import GIArgument
 from .gibaseinfo import GIInfoType, GIBaseInfo, GIAttributeIter
 from .gicallableinfo import GICallableInfo, GIFunctionInfoFlags, \
-    GInvokeError, GIFunctionInfo, GIVFuncInfoFlags, GIVFuncInfo, GISignalInfo
+    GInvokeError, GIFunctionInfo, GIVFuncInfoFlags, GIVFuncInfo, \
+    GISignalInfo, GICallbackInfo
 from .giconstantinfo import GIConstantInfo
 from .gienuminfo import GIEnumInfo, GIValueInfo
 from .gifieldinfo import GIFieldInfo, GIFieldInfoFlags
@@ -29,41 +30,42 @@ from .error import GIError
 
 
 # pyflakes
+GIArgInfo
 GIArgument
-GIInfoType
-GIBaseInfo
+GIArrayType
 GIAttributeIter
+GIBaseInfo
 GICallableInfo
-GIFunctionInfoFlags
-GInvokeError
-GIFunctionInfo
-GIVFuncInfoFlags
-GIVFuncInfo
-GISignalInfo
+GICallbackInfo
 GIConstantInfo
+GIDirection
 GIEnumInfo
-GIValueInfo
+GIError
 GIFieldInfo
 GIFieldInfoFlags
+GIFunctionInfo
+GIFunctionInfoFlags
+GIInfoType
 GIInterfaceInfo
+GInvokeError
 GIObjectInfo
 GIObjectInfoGetValueFunction
 GIObjectInfoRefFunction
 GIObjectInfoSetValueFunction
 GIObjectInfoUnrefFunction
+GIPropertyInfo
 GIRegisteredTypeInfo
-GIRepositoryLoadFlags
 GIRepository
 GIRepositoryError
+GIRepositoryLoadFlags
+GIScopeType
+GISignalInfo
 GIStructInfo
-GIArrayType
-GITypeTag
+GITransfer
 GITypeInfo
 GITypelib
+GITypeTag
 GIUnionInfo
-GITransfer
-GIDirection
-GIScopeType
-GIArgInfo
-GIPropertyInfo
-GIError
+GIValueInfo
+GIVFuncInfo
+GIVFuncInfoFlags

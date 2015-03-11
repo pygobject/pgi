@@ -41,6 +41,10 @@ class GIInterfaceInfo(GIRegisteredTypeInfo):
         for i in xrange(self.n_vfuncs):
             yield self.get_vfunc(i)
 
+    def get_prerequisite(self, i):
+        res = self._get_prerequisite(i)
+        return GIBaseInfo._cast(res)
+
     def get_prerequisites(self):
         for i in xrange(self.n_prerequisites):
             yield self.get_prerequisite(i)
@@ -56,7 +60,7 @@ class GIInterfaceInfo(GIRegisteredTypeInfo):
 
 _methods = [
     ("get_n_prerequisites", gint, [GIInterfaceInfo]),
-    ("get_prerequisite", GIBaseInfo, [GIInterfaceInfo, gint], True),
+    ("_get_prerequisite", GIBaseInfo, [GIInterfaceInfo, gint]),
     ("get_n_properties", gint, [GIInterfaceInfo]),
     ("get_property", GIPropertyInfo, [GIInterfaceInfo, gint], True),
     ("get_n_methods", gint, [GIInterfaceInfo]),

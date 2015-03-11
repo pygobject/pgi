@@ -57,6 +57,7 @@ _methods = [
     ("get_destroy", gint, [GIArgInfo]),
     ("get_type", GITypeInfo, [GIArgInfo], True),
     ("load_type", None, [GIArgInfo, GITypeInfo]),
+    ("is_skip", gboolean, [GIArgInfo]),
 ]
 
 wrap_class(_gir, GIArgInfo, GIArgInfo, "g_arg_info_", _methods)

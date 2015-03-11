@@ -104,6 +104,11 @@ class GIBaseInfo(c_void_p):
 
         return values
 
+    def get_container(self):
+        res = self._get_container()
+        if res:
+            return self._cast(res, take_ownership=False)
+
     def __eq__(self, other):
         if not isinstance(other, GIBaseInfo):
             return False
@@ -139,7 +144,7 @@ _methods = [
     ("get_attribute", gchar_p, [GIBaseInfo, gchar_p]),
     ("_iterate_attributes", gboolean, [GIBaseInfo, POINTER(GIAttributeIter),
                                        POINTER(c_char_p), POINTER(c_char_p)]),
-    ("get_container", GIBaseInfo, [GIBaseInfo]),
+    ("_get_container", GIBaseInfo, [GIBaseInfo]),
     ("get_typelib", GITypelib, [GIBaseInfo]),
     ("equal", gboolean, [GIBaseInfo, GIBaseInfo]),
 ]

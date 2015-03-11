@@ -77,7 +77,8 @@ class GITypeInfo(GIBaseInfo):
 
     def get_interface(self, *args):
         res = self._get_interface(*args)
-        return GIBaseInfo._cast(res)
+        if res:
+            return GIBaseInfo._cast(res)
 
 
 _methods = [

@@ -6,7 +6,7 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from .._compat import xrange
-from ..glib import gint64, gint
+from ..glib import gint64, gint, gchar_p
 from .gibaseinfo import GIBaseInfo, GIInfoType
 from .gicallableinfo import GIFunctionInfo
 from .gitypeinfo import GITypeTag
@@ -56,6 +56,7 @@ _methods = [
     ("get_n_methods", gint, [GIEnumInfo]),
     ("get_method", GIFunctionInfo, [GIEnumInfo], True),
     ("get_storage_type", GITypeTag, [GIEnumInfo]),
+    ("get_error_domain", gchar_p, [GIEnumInfo]),
 ]
 
 wrap_class(_gir, GIEnumInfo, GIEnumInfo, "g_enum_info_", _methods)

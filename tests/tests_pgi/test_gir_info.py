@@ -55,6 +55,7 @@ class _GIInfoTest(unittest.TestCase):
         self.failUnlessEqual(b.name, "Button")
         self.failUnlessEqual(b.namespace, "Gtk")
         self.failUnlessEqual(b.is_deprecated, False)
+        self.assertTrue(b.get_container() is None)
         self.failIf(b.get_container())
         self.failIf(b == 42)
         self.failUnlessEqual(b.type.value, self.gir.GIInfoType.OBJECT)
@@ -139,6 +140,9 @@ class _GIInfoTest(unittest.TestCase):
         self.assertTrue(isinstance(s, self.gir.GIStructInfo))
         f = s.get_field(0)
         self.assertTrue(isinstance(f, self.gir.GIFieldInfo))
+        container = f.get_container()
+        self.assertTrue(container)
+        self.assertTrue(isinstance(container, self.gir.GIStructInfo))
         repr(f)
 
     def test_callableinfo(self):
