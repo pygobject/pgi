@@ -76,7 +76,7 @@ class GIFunctionInfo(GICallableInfo):
         if out_args:
             n_out_args = len(out_args)
             out_type = n_out_args * GIArgument
-            out_args = in_type(*out_args)
+            out_args = out_type(*out_args)
         else:
             n_out_args = 0
             out_args = None
