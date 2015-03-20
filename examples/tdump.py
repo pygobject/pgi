@@ -18,38 +18,44 @@ architectures / compiler versions.
 """
 
 import sys
+import json
 import argparse
+from collections import OrderedDict
 
-from pgi.clib.gir import GITypelib, GIRepository, GIRepositoryLoadFlags, \
+from pgi.clib.gir import GITypelib, GIRepository, \
     GICallableInfo, GIBaseInfo, GIFunctionInfo, GIArgInfo, GIObjectInfo, \
     GIStructInfo, GIEnumInfo, GIInterfaceInfo, GIConstantInfo, GIUnionInfo, \
     GIValueInfo, GIFieldInfo, GISignalInfo, GIInfoType, GITypeInfo, \
     GICallbackInfo, GIVFuncInfo, GIRegisteredTypeInfo, GIPropertyInfo, \
     GITypeTag
-from pgi._compat import print_, StringIO
+from pgi._compat import print_
 
 
 def sort_infos(infos):
     return sorted(infos, key=lambda i: i.name)
 
 
-def handle(info, indent=-1, file_=None, skip_abi=False, minimal=False):
+def handle_list(infos, skip_abi=False):
+    l = []
+    for info in sort_infos(infos):
+        obj = OrderedDict()
+        handle(info, obj, skip_abi=skip_abi)
+        l.append(obj)
+    return l
 
-    def show(name, *values):
-        print_("   " * indent + "| " + name, *values, file=file_)
+
+def handle(info, obj, skip_abi=False, minimal=False):
+
+    def show(name, value):
+        obj[name] = str(value)
 
     def showt(type_):
-        print_("   " * indent + "< %s >" % type_.__name__, file=file_)
-
-    def _sub(info, minimal):
-        print_("   " * (indent + 1) + "-" * 15, file=file_)
-        handle(info, indent=indent, file_=file_, skip_abi=skip_abi,
-               minimal=minimal)
-        print_("   " * (indent + 1) + "-" * 15, file=file_)
+        obj["type"] = type_.__name__
 
     def sub(name, info, minimal=False):
-        show("%s:" % name)
-        _sub(info, minimal)
+        new = OrderedDict()
+        obj[name] = new
+        handle(info, new, skip_abi=skip_abi, minimal=minimal)
 
     def abi(value):
         if skip_abi:
@@ -57,15 +63,15 @@ def handle(info, indent=-1, file_=None, skip_abi=False, minimal=False):
         return value
 
     def sublist(name, info, minimal=False):
-        show("%s:" % name)
+        l = []
+        obj[name] = l
         func = getattr(info, "get_%s" % name)
         for child in sort_infos(func()):
-            _sub(child, minimal)
-
-    indent += 1
+            new = OrderedDict()
+            handle(child, new, skip_abi=skip_abi, minimal=minimal)
+            l.append(new)
 
     if not info:
-        show("None")
         return
 
     assert isinstance(info, GIBaseInfo)
@@ -76,7 +82,6 @@ def handle(info, indent=-1, file_=None, skip_abi=False, minimal=False):
         show("name", info.name)
         show("type", info.type)
         if minimal:
-            show("...")
             return
         show("is_deprecated", info.is_deprecated)
         for name, value in sorted(info.iterate_attributes()):
@@ -99,8 +104,8 @@ def handle(info, indent=-1, file_=None, skip_abi=False, minimal=False):
             showt(GIFunctionInfo)
             show("flags", info.flags)
             show("symbol", info.symbol)
-            if isinstance(info.get_container(), GIInterfaceInfo):
-                sub("property", info.get_property())
+            # if isinstance(info.get_container(), GIInterfaceInfo):
+            #     sub("property", info.get_property())
         elif isinstance(info, GICallbackInfo):
             showt(GICallbackInfo)
         elif isinstance(info, GISignalInfo):
@@ -219,14 +224,13 @@ def handle(info, indent=-1, file_=None, skip_abi=False, minimal=False):
 def get_dump(typelib_path, skip_abi):
     with open(typelib_path, "rb") as h:
         data = h.read()
-    file_ = StringIO()
+
     typelib = GITypelib.new_from_memory(data)
     repo = GIRepository.get_default()
     namespace = repo.load_typelib(typelib, 0)
-    for info in sort_infos(repo.get_infos(namespace)):
-        handle(info, file_=file_, skip_abi=skip_abi)
-    return file_.getvalue()
-
+    infos = repo.get_infos(namespace)
+    l = handle_list(infos, skip_abi=skip_abi)
+    return json.dumps(l, indent=2)
 
 
 def main(argv):
@@ -241,5 +245,5 @@ def main(argv):
     return 0
 
 
-if __name__== "__main__":
+if __name__ == "__main__":
     sys.exit(main(sys.argv))
