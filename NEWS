@@ -1,3 +1,13 @@
+0.0.10 (2015-03-23)
+~~~~~~~~~~~~~~~~~~~
+
+* Fix lib filenames using OS X (Benjamin Henne) [pr 16]
+* Reduce PyGObject overrides diff
+* tools: new tdump tool to print the typelib content as json
+* docs: GArray return, GList out args, Unichar fields, GError fields, GStrv
+* docs: include signal owner type in signal signature
+
+
 0.0.9 (2014-08-08)
 ~~~~~~~~~~~~~~~~~~
 
