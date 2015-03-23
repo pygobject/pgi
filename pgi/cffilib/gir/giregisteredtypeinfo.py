@@ -6,16 +6,21 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from ._ffi import ffi, lib
+from .._utils import string_decode
 from .gibaseinfo import GIBaseInfo
 
 
 class GIRegisteredTypeInfo(GIBaseInfo):
 
-    def get_type_name(self):
-        return ffi.string(lib.g_registered_type_info_get_type_name(self._ptr))
+    @property
+    def type_name(self):
+        res = lib.g_registered_type_info_get_type_name(self._ptr)
+        return string_decode(ffi, res)
 
-    def get_type_init(self):
-        return ffi.string(lib.g_registered_type_info_get_type_init(self._ptr))
+    @property
+    def type_init(self):
+        res = lib.g_registered_type_info_get_type_init(self._ptr)
+        return string_decode(ffi, res)
 
     def get_g_type(self):
         # FIXME

@@ -6,7 +6,7 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from .. import _create_enum_class, glib
-from .._compat import PY3
+from .._utils import string_decode
 from ._ffi import ffi, lib
 from .gibaseinfo import GIBaseInfo, GIInfoType
 from .gicallableinfo import GICallableInfo
@@ -14,7 +14,7 @@ from .gipropertyinfo import GIPropertyInfo
 
 
 GIFunctionInfoFlags = _create_enum_class(ffi, "GIFunctionInfoFlags",
-                                         "GI_FUNCTION_")
+                                         "GI_FUNCTION_", flags=True)
 
 
 GInvokeError = _create_enum_class(ffi, "GInvokeError", "G_INVOKE_ERROR_")
@@ -22,16 +22,11 @@ GInvokeError = _create_enum_class(ffi, "GInvokeError", "G_INVOKE_ERROR_")
 
 @GIBaseInfo._register(GIInfoType.FUNCTION)
 class GIFunctionInfo(GICallableInfo):
-    # FIXME: everything here..
 
     @property
     def symbol(self):
         res = lib.g_function_info_get_symbol(self._ptr)
-        if res:
-            res = ffi.string(res)
-            if PY3:
-                res = res.decode("ascii")
-            return res
+        return string_decode(ffi, res)
 
     @property
     def flags(self):

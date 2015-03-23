@@ -115,6 +115,7 @@ class GIVFuncInfoFlags(Enum):
     MUST_CHAIN_UP = 1 << 0
     MUST_OVERRIDE = 1 << 1
     MUST_NOT_OVERRIDE = 1 << 2
+    THROWS = 1 << 3
 
 
 @GIBaseInfo._register(GIInfoType.VFUNC)

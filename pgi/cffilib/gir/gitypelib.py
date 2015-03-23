@@ -7,8 +7,8 @@
 
 from ._ffi import ffi, lib
 from ..glib import memdup, free, gerror
+from .._utils import string_decode
 from .error import GIError
-from .._compat import PY3
 
 
 class GITypelib(object):
@@ -21,11 +21,7 @@ class GITypelib(object):
     @property
     def namespace(self):
         res = lib.g_typelib_get_namespace(self._ptr)
-        if res:
-            res = ffi.string(res)
-            if PY3:
-                res = res.decode("ascii")
-        return res
+        return string_decode(ffi, res)
 
     @classmethod
     def new_from_memory(self, data):

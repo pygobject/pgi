@@ -6,7 +6,8 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 from .._compat import xrange
-from ._ffi import lib
+from .._utils import string_decode
+from ._ffi import lib, ffi
 from .gibaseinfo import GIBaseInfo, GIInfoType
 from .gitypeinfo import GITypeTag
 from .giregisteredtypeinfo import GIRegisteredTypeInfo
@@ -51,3 +52,8 @@ class GIEnumInfo(GIRegisteredTypeInfo):
     @property
     def storage_type(self):
         return GITypeTag(lib.g_enum_info_get_storage_type(self._ptr))
+
+    @property
+    def error_domain(self):
+        res = lib.g_enum_info_get_error_domain(self._ptr)
+        return string_decode(ffi, res)

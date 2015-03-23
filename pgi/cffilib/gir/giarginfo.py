@@ -27,29 +27,40 @@ class GIArgInfo(GIBaseInfo):
     def direction(self):
         return GIDirection(lib.g_arg_info_get_direction(self._ptr))
 
+    @property
     def is_caller_allocates(self):
-        return bool(lib.g_arg_info_is_caller_allocates(self._ptr))
+        return lib.g_arg_info_is_caller_allocates(self._ptr)
 
+    @property
     def is_return_value(self):
-        return bool(lib.g_arg_info_is_return_value(self._ptr))
+        return lib.g_arg_info_is_return_value(self._ptr)
 
+    @property
     def is_optional(self):
-        return bool(lib.g_arg_info_is_optional(self._ptr))
+        return lib.g_arg_info_is_optional(self._ptr)
 
+    @property
+    def is_skip(self):
+        return lib.g_arg_info_is_skip(self._ptr)
+
+    @property
     def may_be_null(self):
-        return bool(lib.g_arg_info_may_be_null(self._ptr))
+        return lib.g_arg_info_may_be_null(self._ptr)
 
     @property
     def ownership_transfer(self):
         return GITransfer(lib.g_arg_info_get_ownership_transfer(self._ptr))
 
-    def get_scope(self):
+    @property
+    def scope(self):
         return GIScopeType(lib.g_arg_info_get_scope(self._ptr))
 
-    def get_closure(self):
+    @property
+    def closure(self):
         return lib.g_arg_info_get_closure(self._ptr)
 
-    def get_destroy(self):
+    @property
+    def destroy(self):
         return lib.g_arg_info_get_destroy(self._ptr)
 
     def get_type(self):

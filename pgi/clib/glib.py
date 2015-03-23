@@ -78,7 +78,7 @@ class Enum(guint):
 class Flags(guint):
     def __str__(self):
         values = []
-        for a in (c for c in dir(self) if c.upper() == c):
+        for a in (c for c in sorted(dir(self)) if c.upper() == c):
             if getattr(self, a) & self.value:
                 values.append(a)
         return " | ".join(values) or "Unknown"

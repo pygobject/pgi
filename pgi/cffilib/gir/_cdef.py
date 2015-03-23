@@ -272,7 +272,6 @@ typedef struct {
   gpointer data4;
 } GIAttributeIter;
 
-const gchar *       g_info_type_to_string           (GIInfoType type);
 GIBaseInfo *        g_base_info_ref                 (GIBaseInfo *info);
 void                g_base_info_unref               (GIBaseInfo *info);
 GIInfoType          g_base_info_get_type            (GIBaseInfo *info);
@@ -289,6 +288,20 @@ GIBaseInfo *        g_base_info_get_container       (GIBaseInfo *info);
 GITypelib *         g_base_info_get_typelib         (GIBaseInfo *info);
 gboolean            g_base_info_equal               (GIBaseInfo *info1,
                                                      GIBaseInfo *info2);
+"""
+
+GI_TYPEINFO_CDEF = """
+const gchar*           g_type_tag_to_string            (GITypeTag   type);
+const gchar*           g_info_type_to_string           (GIInfoType  type);
+gboolean               g_type_info_is_pointer          (GITypeInfo *info);
+GITypeTag              g_type_info_get_tag             (GITypeInfo *info);
+GITypeInfo *           g_type_info_get_param_type      (GITypeInfo *info,
+                                                        gint       n);
+GIBaseInfo *           g_type_info_get_interface       (GITypeInfo *info);
+gint                   g_type_info_get_array_length    (GITypeInfo *info);
+gint                   g_type_info_get_array_fixed_size(GITypeInfo *info);
+gboolean               g_type_info_is_zero_terminated  (GITypeInfo *info);
+GIArrayType            g_type_info_get_array_type      (GITypeInfo *info);
 """
 
 GI_ARGINFO_CDEF = """
@@ -360,6 +373,7 @@ void                g_callable_info_load_arg            (GICallableInfo *info,
 void                g_callable_info_load_return_type    (GICallableInfo *info,
                                                          GITypeInfo *type);
 gboolean            g_callable_info_can_throw_gerror    (GICallableInfo *info);
+gboolean            g_callable_info_skip_return         (GICallableInfo *info);
 """
 
 
@@ -371,6 +385,7 @@ gint                g_enum_info_get_n_methods           (GIEnumInfo *info);
 GIFunctionInfo *    g_enum_info_get_method              (GIEnumInfo *info,
                                                          gint n);
 GITypeTag           g_enum_info_get_storage_type        (GIEnumInfo *info);
+const gchar *       g_enum_info_get_error_domain        (GIEnumInfo *info);
 gint64              g_value_info_get_value              (GIValueInfo *info);
 """
 
@@ -516,6 +531,24 @@ gboolean      g_signal_info_true_stops_emit   (GISignalInfo *info);
 """
 
 
+GI_VFUNC_CDEF = """
+GIVFuncInfoFlags  g_vfunc_info_get_flags   (GIVFuncInfo *info);
+gint              g_vfunc_info_get_offset  (GIVFuncInfo *info);
+GISignalInfo *    g_vfunc_info_get_signal  (GIVFuncInfo *info);
+GIFunctionInfo *  g_vfunc_info_get_invoker (GIVFuncInfo *info);
+gpointer          g_vfunc_info_get_address (GIVFuncInfo *info,
+                                            GType        implementor_gtype,
+                                            GError     **error);
+"""
+
+
+GI_PROP_CDEF = """
+GParamFlags  g_property_info_get_flags (GIPropertyInfo *info);
+GITypeInfo * g_property_info_get_type  (GIPropertyInfo *info);
+GITransfer   g_property_info_get_ownership_transfer (GIPropertyInfo *info);
+"""
+
+
 GIR_CDEF = "".join([
     _fixup_cdef_enums(GI_TYPES_CDEF),
     GI_TYPELIB_CDEF,
@@ -526,6 +559,7 @@ GIR_CDEF = "".join([
     GI_REGIST_CDEF,
     GI_FIELD_CDEF,
     GI_CALL_CDEF,
+    GI_VFUNC_CDEF,
     GI_ENUM_CDEF,
     GI_FUNC_CDEF,
     GI_UNION_CDEF,
@@ -533,4 +567,6 @@ GIR_CDEF = "".join([
     GI_INTERFACE_CDEF,
     GI_STRUCT_CDEF,
     GI_SIGNAL_DEF,
+    GI_TYPEINFO_CDEF,
+    GI_PROP_CDEF,
 ])

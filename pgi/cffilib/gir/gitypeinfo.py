@@ -32,26 +32,35 @@ GITypeTag.is_basic = property(_is_basic)
 
 class GITypeInfo(GIBaseInfo):
 
+    @property
     def is_pointer(self):
-        return bool(lib.g_type_info_is_pointer(self._ptr))
+        return lib.g_type_info_is_pointer(self._ptr)
 
-    def get_tag(self):
+    @property
+    def tag(self):
         return GITypeTag(lib.g_type_info_get_tag(self._ptr))
 
     def get_param_type(self, n):
         return GITypeInfo(lib.g_type_info_get_param_type(self._ptr, n))
 
     def get_interface(self):
-        return GIBaseInfo(lib.g_type_info_get_interface(self._ptr))
+        res = lib.g_type_info_get_interface(self._ptr)
+        if res:
+            cls = GIBaseInfo._get_type(res)
+            return cls(res)
 
-    def get_array_length(self):
+    @property
+    def array_length(self):
         return lib.g_type_info_get_array_length(self._ptr)
 
-    def get_array_fixed_size(self):
+    @property
+    def array_fixed_size(self):
         return lib.g_type_info_get_array_fixed_size(self._ptr)
 
+    @property
     def is_zero_terminated(self):
-        return bool(lib.g_type_info_is_zero_terminated(self._ptr))
+        return lib.g_type_info_is_zero_terminated(self._ptr)
 
-    def g_type_info_get_array_type(self):
+    @property
+    def array_type(self):
         return GIArrayType(lib.g_type_info_get_array_type(self._ptr))

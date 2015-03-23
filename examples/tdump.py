@@ -28,7 +28,7 @@ from pgi.clib.gir import GITypelib, GIRepository, \
     GIValueInfo, GIFieldInfo, GISignalInfo, GIInfoType, GITypeInfo, \
     GICallbackInfo, GIVFuncInfo, GIRegisteredTypeInfo, GIPropertyInfo, \
     GITypeTag
-from pgi._compat import print_
+from pgi._compat import print_, integer_types
 
 
 def sort_infos(infos):
@@ -47,7 +47,9 @@ def handle_list(infos, skip_abi=False):
 def handle(info, obj, skip_abi=False, minimal=False):
 
     def show(name, value):
-        obj[name] = str(value)
+        if type(value) not in integer_types:
+            value = str(value)
+        obj[name] = value
 
     def showt(type_):
         obj["type"] = type_.__name__
@@ -91,7 +93,6 @@ def handle(info, obj, skip_abi=False, minimal=False):
         showt(GICallableInfo)
 
         show("can_throw_gerror", info.can_throw_gerror)
-        show("is_method", info.is_method)
         show("may_return_null", info.may_return_null)
         show("skip_return", info.skip_return)
         show("caller_owns", info.caller_owns)

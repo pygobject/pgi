@@ -10,6 +10,7 @@ from ._ffi import lib
 from .gibaseinfo import GIBaseInfo, GIInfoType
 from .giregisteredtypeinfo import GIRegisteredTypeInfo
 from .gifieldinfo import GIFieldInfo
+from .gifunctioninfo import GIFunctionInfo
 
 
 @GIBaseInfo._register(GIInfoType.STRUCT)
@@ -41,3 +42,14 @@ class GIStructInfo(GIRegisteredTypeInfo):
     @property
     def is_foreign(self):
         return lib.g_struct_info_is_foreign(self._ptr)
+
+    @property
+    def n_methods(self):
+        return lib.g_struct_info_get_n_methods(self._ptr)
+
+    def get_method(self, n):
+        return GIFunctionInfo(lib.g_struct_info_get_method(self._ptr, n))
+
+    def get_methods(self):
+        for i in xrange(self.n_methods):
+            yield self.get_method(i)

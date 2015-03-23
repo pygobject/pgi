@@ -12,7 +12,6 @@ from .gitypeinfo import GITypeInfo
 from .giarginfo import GITransfer, GIArgInfo
 
 
-@GIBaseInfo._register(GIInfoType.CALLBACK)
 class GICallableInfo(GIBaseInfo):
 
     def get_return_type(self):
@@ -65,3 +64,12 @@ class GICallableInfo(GIBaseInfo):
         info = ffi.new("GITypeInfo*")
         lib.g_callable_info_load_return_type(self._ptr, info)
         return GITypeInfo(info)
+
+    @property
+    def skip_return(self):
+        return lib.g_callable_info_skip_return(self._ptr)
+
+
+@GIBaseInfo._register(GIInfoType.CALLBACK)
+class GICallbackInfo(GICallableInfo):
+    pass

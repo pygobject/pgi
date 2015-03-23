@@ -5,7 +5,8 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-from .._compat import xrange, PY3
+from .._compat import xrange
+from .._utils import string_decode
 from ._ffi import ffi, lib
 from .giregisteredtypeinfo import GIRegisteredTypeInfo
 from .gibaseinfo import GIBaseInfo, GIInfoType
@@ -13,7 +14,9 @@ from .gifunctioninfo import GIFunctionInfo
 from .gipropertyinfo import GIPropertyInfo
 from .gifieldinfo import GIFieldInfo
 from .giconstantinfo import GIConstantInfo
-from .gisignalinfo import GISignalInfo
+from .gisignalinfo import GISignalInfo, GIVFuncInfo
+from .gistructinfo import GIStructInfo
+from .giinterfaceinfo import GIInterfaceInfo
 
 
 @GIBaseInfo._register(GIInfoType.OBJECT)
@@ -65,7 +68,7 @@ class GIObjectInfo(GIRegisteredTypeInfo):
         return lib.g_object_info_get_n_vfuncs(self._ptr)
 
     def get_vfunc(self, n):
-        return GIFunctionInfo(lib.g_object_info_get_vfunc(self._ptr, n))
+        return GIVFuncInfo(lib.g_object_info_get_vfunc(self._ptr, n))
 
     def get_vfuncs(self):
         for i in xrange(self.n_vfuncs):
@@ -87,7 +90,7 @@ class GIObjectInfo(GIRegisteredTypeInfo):
         return lib.g_object_info_get_n_interfaces(self._ptr)
 
     def get_interface(self, n):
-        return GIFunctionInfo(lib.g_object_info_get_interface(self._ptr, n))
+        return GIInterfaceInfo(lib.g_object_info_get_interface(self._ptr, n))
 
     def get_interfaces(self):
         for i in xrange(self.n_interfaces):
@@ -106,14 +109,35 @@ class GIObjectInfo(GIRegisteredTypeInfo):
 
     @property
     def type_name(self):
-        res = ffi.string(lib.g_object_info_get_type_name(self._ptr))
-        if PY3:
-            res = res.decode("ascii")
-        return res
+        res = lib.g_object_info_get_type_name(self._ptr)
+        return string_decode(ffi, res)
 
     @property
     def type_init(self):
-        res = ffi.string(lib.g_object_info_get_type_init(self._ptr))
-        if PY3:
-            res = res.decode("ascii")
-        return res
+        res = lib.g_object_info_get_type_init(self._ptr)
+        return string_decode(ffi, res)
+
+    @property
+    def ref_function(self):
+        res = lib.g_object_info_get_ref_function(self._ptr)
+        return string_decode(ffi, res)
+
+    @property
+    def unref_function(self):
+        res = lib.g_object_info_get_unref_function(self._ptr)
+        return string_decode(ffi, res)
+
+    @property
+    def set_value_function(self):
+        res = lib.g_object_info_get_set_value_function(self._ptr)
+        return string_decode(ffi, res)
+
+    @property
+    def get_value_function(self):
+        res = lib.g_object_info_get_get_value_function(self._ptr)
+        return string_decode(ffi, res)
+
+    def get_class_struct(self):
+        res = lib.g_object_info_get_class_struct(self._ptr)
+        if res:
+            return GIStructInfo(res)

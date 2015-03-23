@@ -8,8 +8,8 @@
 from .. import _create_enum_class
 
 from ._ffi import ffi, lib
+from .._utils import string_decode
 from .gitypelib import GITypelib
-from .._compat import PY3
 
 
 GIInfoType = _create_enum_class(ffi, "GIInfoType", "GI_INFO_TYPE_")
@@ -17,10 +17,7 @@ GIInfoType = _create_enum_class(ffi, "GIInfoType", "GI_INFO_TYPE_")
 
 def _g_info_type_to_string(self):
     res = lib.g_info_type_to_string(self)
-    res = ffi.string(res)
-    if PY3:
-        res = res.decode("ascii")
-    return res
+    return string_decode(ffi, res)
 
 GIInfoType.string = property(_g_info_type_to_string)
 
@@ -56,25 +53,18 @@ class GIBaseInfo(object):
 
     @property
     def type(self):
+        assert self._ptr, type(self)
         return GIInfoType(lib.g_base_info_get_type(self._ptr))
 
     @property
     def name(self):
         res = lib.g_base_info_get_name(self._ptr)
-        if res:
-            res = ffi.string(res)
-            if PY3:
-                res = res.decode("ascii")
-            return res
+        return string_decode(ffi, res)
 
     @property
     def namespace(self):
         res = lib.g_base_info_get_namespace(self._ptr)
-        if res:
-            res = ffi.string(res)
-            if PY3:
-                res = res.decode("ascii")
-            return res
+        return string_decode(ffi, res)
 
     @property
     def is_deprecated(self):

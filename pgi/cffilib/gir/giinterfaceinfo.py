@@ -11,6 +11,9 @@ from .giregisteredtypeinfo import GIRegisteredTypeInfo
 from .gibaseinfo import GIBaseInfo, GIInfoType
 from .gifunctioninfo import GIFunctionInfo
 from .gipropertyinfo import GIPropertyInfo
+from .gistructinfo import GIStructInfo
+from .gisignalinfo import GISignalInfo, GIVFuncInfo
+from .giconstantinfo import GIConstantInfo
 
 
 @GIBaseInfo._register(GIInfoType.INTERFACE)
@@ -32,7 +35,7 @@ class GIInterfaceInfo(GIRegisteredTypeInfo):
         return lib.g_interface_info_get_n_vfuncs(self._ptr)
 
     def get_vfunc(self, n):
-        return GIFunctionInfo(lib.g_interface_info_get_vfunc(self._ptr, n))
+        return GIVFuncInfo(lib.g_interface_info_get_vfunc(self._ptr, n))
 
     def get_vfuncs(self):
         for i in xrange(self.n_vfuncs):
@@ -43,7 +46,7 @@ class GIInterfaceInfo(GIRegisteredTypeInfo):
         return lib.g_interface_info_get_n_signals(self._ptr)
 
     def get_signal(self, n):
-        return GIFunctionInfo(lib.g_interface_info_get_signal(self._ptr, n))
+        return GISignalInfo(lib.g_interface_info_get_signal(self._ptr, n))
 
     def get_signals(self):
         for i in xrange(self.n_signals):
@@ -54,7 +57,7 @@ class GIInterfaceInfo(GIRegisteredTypeInfo):
         return lib.g_interface_info_get_n_constants(self._ptr)
 
     def get_constant(self, n):
-        return GIFunctionInfo(lib.g_interface_info_get_constant(self._ptr, n))
+        return GIConstantInfo(lib.g_interface_info_get_constant(self._ptr, n))
 
     def get_constants(self):
         for i in xrange(self.n_constants):
@@ -83,3 +86,8 @@ class GIInterfaceInfo(GIRegisteredTypeInfo):
     def get_prerequisites(self):
         for i in xrange(self.n_prerequisites):
             yield self.get_prerequisite(i)
+
+    def get_iface_struct(self):
+        res = lib.g_interface_info_get_iface_struct(self._ptr)
+        if res:
+            return GIStructInfo(res)

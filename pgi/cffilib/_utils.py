@@ -15,19 +15,47 @@ from ._compat import PY3
 
 # decode a path from glib
 if os.name == "nt":
-    def fsdecode(path):
-        return path.decode("utf-8")
+    def fsdecode(ffi, cdata):
+        if cdata:
+            return ffi.string(cdata).decode("utf-8")
 elif PY3:
     _FSENC = sys.getfilesystemencoding()
 
-    def fsdecode(path):
-        return path.decode(_FSENC, "surrogateescape")
+    def fsdecode(ffi, cdata):
+        if cdata:
+            return ffi.string(cdata).decode(_FSENC, "surrogateescape")
 else:
-    def fsdecode(path):
-        return path
+    def fsdecode(ffi, cdata):
+        if cdata:
+            return ffi.string(cdata)
 
 
-def _create_enum_class(ffi, type_name, prefix):
+if PY3:
+    def string_decode(ffi, cdata):
+        if cdata:
+            bytes_ = ffi.string(cdata)
+            return bytes_.decode("ascii")
+
+    def string_encode(ffi, string, null=False):
+        if string is None:
+            if not null:
+                return
+            return ffi.cast("gchar*", ffi.NULL)
+        return string.encode("ascii")
+else:
+    def string_decode(ffi, cdata):
+        if cdata:
+            return ffi.string(cdata)
+
+    def string_encode(ffi, string, null=False):
+        if string is None:
+            if not null:
+                return
+            return ffi.cast("gchar*", ffi.NULL)
+        return string
+
+
+def _create_enum_class(ffi, type_name, prefix, flags=False):
     """Returns a new shiny class for the given enum type"""
 
     class _template(int):
@@ -41,10 +69,35 @@ def _create_enum_class(ffi, type_name, prefix):
             return self._map.get(self, "Unknown")
 
         def __repr__(self):
-            return "%s.%s" % (type(self).__name__,
-                              self._map.get(self, "Unknown"))
+            return "%s.%s" % (type(self).__name__, str(self))
 
-    cls = type(type_name, _template.__bases__, dict(_template.__dict__))
+    class _template_flags(int):
+        _map = {}
+
+        @property
+        def value(self):
+            return int(self)
+
+        def __str__(self):
+            names = []
+            val = int(self)
+            for flag, name in self._map.items():
+                if val & flag:
+                    names.append(name)
+                    val &= ~flag
+            if val:
+                names.append(str(val))
+            return " | ".join(sorted(names or ["Unknown"]))
+
+        def __repr__(self):
+            return "%s(%s)" % (type(self).__name__, str(self))
+
+    if flags:
+        template = _template_flags
+    else:
+        template = _template
+
+    cls = type(type_name, template.__bases__, dict(template.__dict__))
     prefix_len = len(prefix)
     for value, name in ffi.typeof(type_name).elements.items():
         assert name[:prefix_len] == prefix

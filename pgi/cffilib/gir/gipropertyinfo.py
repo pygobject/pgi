@@ -15,12 +15,14 @@ from .giarginfo import GITransfer
 @GIBaseInfo._register(GIInfoType.PROPERTY)
 class GIPropertyInfo(GIBaseInfo):
 
-    def get_flags(self):
+    @property
+    def flags(self):
         return GParamFlags(lib.g_property_info_get_flags(self._ptr))
 
     def get_type(self):
         return GITypeInfo(lib.g_property_info_get_type(self._ptr))
 
-    def get_ownership_transfer(self):
+    @property
+    def ownership_transfer(self):
         return GITransfer(
             lib.g_property_info_get_ownership_transfer(self._ptr))

@@ -11,7 +11,8 @@ from .gibaseinfo import GIBaseInfo, GIInfoType
 from .gitypeinfo import GITypeInfo
 
 
-GIFieldInfoFlags = _create_enum_class(ffi, "GIFieldInfoFlags", "GI_FIELD_IS_")
+GIFieldInfoFlags = _create_enum_class(
+    ffi, "GIFieldInfoFlags", "GI_FIELD_", flags=True)
 
 
 @GIBaseInfo._register(GIInfoType.FIELD)
@@ -33,7 +34,7 @@ class GIFieldInfo(GIBaseInfo):
         return GITypeInfo(lib.g_field_info_get_type(self._ptr))
 
     def get_field(self, mem, value):
-        return bool(lib.g_field_info_get_field(self._ptr, mem, value))
+        return lib.g_field_info_get_field(self._ptr, mem, value)
 
     def set_field(self, mem, value):
-        return bool(lib.g_field_info_set_field(self._ptr, mem, value))
+        return lib.g_field_info_set_field(self._ptr, mem, value)

@@ -7,10 +7,8 @@
 
 from ctypes import POINTER, c_char_p, cast, c_void_p, byref, Structure
 
-from pgi.finalizer import _BaseFinalizer
-
 from ..glib import gchar_p, Enum, gboolean, gpointer
-from .._utils import wrap_class, find_library
+from .._utils import wrap_class, find_library, _BaseFinalizer
 from .gitypelib import GITypelib
 
 _gir = find_library("girepository-1.0")

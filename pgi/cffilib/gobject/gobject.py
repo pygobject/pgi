@@ -10,7 +10,10 @@ from .._compat import long
 from .. import _create_enum_class
 
 
-GParamFlags = _create_enum_class(ffi, "GParamFlags", "G_PARAM_")
+GParamFlags = _create_enum_class(ffi, "GParamFlags", "G_PARAM_", flags=True)
+
+
+GSignalFlags = _create_enum_class(ffi, "GSignalFlags", "G_SIGNAL_", flags=True)
 
 
 class GType(long):
