@@ -1081,7 +1081,7 @@ class TestPGI(unittest.TestCase):
 class TestProjectVersion(unittest.TestCase):
     @skipUnlessGIVersionAtLeast(3, 4)
     def test_version_str(self):
-        self.assertGreaterEqual(gi.__version__, "0.0.2")
+        self.assertEqual(gi.__version__, ".".join(map(str, gi.version_info)))
 
     @skipUnlessGIVersionAtLeast(3, 4)
     def test_version_info(self):
