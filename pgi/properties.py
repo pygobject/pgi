@@ -14,7 +14,7 @@ from .clib.gobject import GObjectClassPtr
 from .clib.gir import GIInfoType, GITypeTag
 
 from .util import escape_parameter, unescape_parameter, InfoIterWrapper
-from .util import import_attribute, set_gvalue_from_py, decode_return
+from .util import import_attribute, set_gvalue_from_py
 from .gtype import PGType
 from ._compat import PY3
 
@@ -35,8 +35,9 @@ class GParamSpec(object):
         self._name = name
 
     @property
-    @decode_return()
     def name(self):
+        if PY3 and self._name is not None:
+            return self._name.decode("utf-8")
         return self._name
 
     @property
@@ -52,7 +53,6 @@ class GParamSpec(object):
         return self._spec.nick
 
     @property
-    @decode_return()
     def blurb(self):
         return self._spec.blurb
 
@@ -221,7 +221,7 @@ class _ObjectClassProp(object):
         gname = unescape_parameter(name)
         prop_info = self._wrapper.lookup_name(gname)
         if PY3:
-            gname = gname.encode("ascii")
+            gname = gname.encode("utf-8")
         if prop_info:
             gtype = info.g_type
             if info.type.value == GIInfoType.OBJECT:

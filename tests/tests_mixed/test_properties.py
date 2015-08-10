@@ -43,6 +43,13 @@ class PropertiesTest(unittest.TestCase):
         self.assertEqual(param.owner_type, Gtk.Window.__gtype__)
         self.assertEqual(param.value_type, Gtk.Window.__gtype__)
 
+    def test_gparam_type(self):
+        param = Gtk.Window.props.transient_for
+
+        self.assertTrue(isinstance(param.name, str))
+        self.assertTrue(isinstance(param.nick, str))
+        self.assertTrue(isinstance(param.blurb, str))
+
     def test_gtype(self):
         w = Gtk.Window
         self.assertEqual(w.props.transient_for.__gtype__.name, "GParamObject")
