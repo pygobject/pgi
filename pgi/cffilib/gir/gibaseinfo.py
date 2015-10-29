@@ -25,10 +25,10 @@ GIInfoType.string = property(_g_info_type_to_string)
 class GIBaseInfo(object):
     __types = {}
 
-    def __init__(self, ptr, take_ownership=True):
+    def __init__(self, ptr):
         self._ptr = ptr
 
-        if take_ownership and ptr:
+        if ptr:
             self._gc = ffi.gc(ptr, lib.g_base_info_unref)
 
     @classmethod
@@ -86,7 +86,9 @@ class GIBaseInfo(object):
         res = lib.g_base_info_get_container(self._ptr)
         if res:
             type_ = self._get_type(res)
-            return type_(res)
+            inst = type_(res)
+            inst.ref()
+            return inst
 
     def get_typelib(self):
         return GITypelib(lib.g_base_info_get_typelib(self._ptr))
