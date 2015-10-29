@@ -50,20 +50,6 @@ class TDocstring(unittest.TestCase):
             "targets_include_image(targets: [Gdk.Atom], writable: bool) "
             "-> bool")
 
-        try:
-            self.assertEqual(
-                Gtk.init_with_args.__doc__,
-                "init_with_args(argv: [str] or None, "
-                "parameter_string: str or None, entries: [GLib.OptionEntry], "
-                "translation_domain: str) raises -> (bool, argv: [str])")
-        except:
-            # Gtk+ 3.2
-            self.assertEqual(
-                Gtk.init_with_args.__doc__,
-                "init_with_args(argv: [str] or None, "
-                "parameter_string: str, entries: [GLib.OptionEntry], "
-                "translation_domain: str) raises -> (bool, argv: [str])")
-
         self.assertEqual(
             GLib.source_remove_by_funcs_user_data.__doc__,
             "source_remove_by_funcs_user_data(funcs: GLib.SourceFuncs, "
@@ -74,9 +60,15 @@ class TDocstring(unittest.TestCase):
             "get_filenames() -> [str]")
 
         self.assertEqual(
+            Gtk.init_with_args.__doc__,
+            "init_with_args(argv: [str] or None, "
+            "parameter_string: str or None, entries: [GLib.OptionEntry], "
+            "translation_domain: str or None) raises -> (bool, argv: [str])")
+
+        self.assertEqual(
             Gtk.AboutDialog.drag_begin.__doc__,
             "drag_begin(targets: Gtk.TargetList, actions: Gdk.DragAction, "
-            "button: int, event: Gdk.Event) -> Gdk.DragContext")
+            "button: int, event: Gdk.Event or None) -> Gdk.DragContext")
 
         self.assertEqual(
             Gtk.AboutDialog.set_default_icon_from_file.__doc__,
@@ -111,9 +103,15 @@ class TDocstring(unittest.TestCase):
 
         # out arguments
         string = Gtk.MenuPositionFunc.__doc__
-        self.assertEqual(string,
-            "MenuPositionFunc(menu: Gtk.Menu, user_data: object) -> "
-            "(x: int, y: int, push_in: bool)")
+        try:
+            # older gtk+
+            self.assertEqual(string,
+                "MenuPositionFunc(menu: Gtk.Menu, user_data: object) -> "
+                "(x: int, y: int, push_in: bool)")
+        except:
+            self.assertEqual(string,
+                "MenuPositionFunc(menu: Gtk.Menu, x: int, y: int, "
+                "user_data: object) -> (x: int, y: int, push_in: bool)")
 
     def test_uint8_array_docstring(self):
         string = Gio.File.load_contents_finish.__doc__
