@@ -61,13 +61,12 @@ class BaseInterfaceSetter(ConstructorSetter):
         iface = type_.get_interface()
         iface_type = iface.type.value
 
-        if iface_type == GIInfoType.ENUM:
+        if iface_type in [GIInfoType.ENUM, GIInfoType.FLAGS]:
             return EnumFlagsSetter
         elif iface_type == GIInfoType.OBJECT:
             return ObjectSetter
         elif iface_type == GIInfoType.STRUCT:
             return StructSetter
-
         raise NotImplementedError(iface.type)
 
     def set(self, name):
