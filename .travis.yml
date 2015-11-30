@@ -19,11 +19,11 @@ matrix:
 install:
  - sudo add-apt-repository -y ppa:pypy/ppa
  - sudo apt-get update -q
- - sudo apt-get install --no-install-recommends -y xvfb pep8 pyflakes pypy python-gi python-gi-cairo python3-gi python3-gi-cairo gir1.2-gtk-3.0 python-cffi python3-cffi gobject-introspection libcairo2-dev python-cairo-dev python3-cairo-dev libglib2.0-dev libgirepository1.0-dev
+ - sudo apt-get install --no-install-recommends -y xvfb pep8 pyflakes pypy python-gi python-gi-cairo python3-gi python3-gi-cairo gir1.2-gtk-3.0 gobject-introspection libcairo2-dev python-cairo-dev python3-cairo-dev libglib2.0-dev libgirepository1.0-dev libpython-dev libpython3-dev build-essential
  - make -C "tests/libs"
  - virtualenv --python=$PYTHON --system-site-packages _venv
  - source _venv/bin/activate
- - pip install cairocffi
+ - pip install cffi cairocffi
 
 script:
  - xvfb-run -a $PYTHON ./setup.py test
