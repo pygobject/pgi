@@ -159,9 +159,12 @@ class TestCommand(Command):
             pid = os.fork()
             if pid != 0:
                 pid, status = os.waitpid(pid, 0)
-                returncode = status >> 8  # extract return code
-                if returncode:
+                kill_signal = (status & 0xff)
+                returncode = (status >> 8) & 0xff
+                if not kill_signal:
                     exit(returncode)
+                else:
+                    exit(1)
             else:
                 exit(tests.test(
                     is_gi, backend, self.strict, filter_tests, self.exitfirst))
