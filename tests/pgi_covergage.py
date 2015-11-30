@@ -55,7 +55,7 @@ def get_typelibs():
     for typelib in glob(TYPELIB_DIR + "/*.typelib"):
         fn = basename(typelib).partition("-")[0]
         typelibs.append(fn)
-    return typelibs
+    return sorted(typelibs)
 
 if __name__=='__main__':
     typelibs = get_typelibs()
