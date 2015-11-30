@@ -1,0 +1,20 @@
+matrix:
+  include:
+    - os: linux
+      sudo: required
+      dist: trusty
+      language: python
+      python: "2.7_with_system_site_packages"
+      env: PYTHON="python2"
+    - os: linux
+      sudo: required
+      dist: trusty
+      language: python
+      python: "3.4_with_system_site_packages"
+      env: PYTHON="python3"
+
+install:
+ - sudo apt-get install -y xvfb pep8 pyflakes python3-gi python3-gi-cairo gir1.2-gtk-3.0
+
+script:
+ - xvfb-run -a $PYTHON ./setup.py test
