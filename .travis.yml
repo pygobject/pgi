@@ -14,6 +14,7 @@ matrix:
       env: PYTHON="python3"
 
 install:
+ - sudo apt-get update -q
  - sudo apt-get install -y xvfb pep8 pyflakes python-gi python-gi-cairo python3-gi python3-gi-cairo gir1.2-gtk-3.0
 
 script:
