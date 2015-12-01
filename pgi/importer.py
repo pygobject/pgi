@@ -113,12 +113,11 @@ class Importer(object):
         instance.__file__ = "<%s.%s>" % (const.PREFIX[0], namespace)
         instance._version = version or repository.get_version(namespace)
 
-        # add to module and sys.modules
-        for prefix in const.PREFIX:
-            setattr(__import__(prefix, fromlist=[""]), namespace, instance)
-            sys.modules[prefix + "." + namespace] = instance
-
         # Import a override module if available.
-        proxy = overrides.load(namespace, instance)
+        proxy = overrides.load_overrides(instance)
+
+        for prefix in const.PREFIX:
+            module_key = prefix + "." + namespace
+            sys.modules[module_key] = proxy
 
         return proxy

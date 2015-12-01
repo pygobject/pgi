@@ -130,7 +130,7 @@ else:
     # typelib. See https://bugzilla.gnome.org/show_bug.cgi?id=748832 and
     # https://bugzilla.gnome.org/show_bug.cgi?id=748833
     if not hasattr(Gdk, 'Rectangle'):
-        from gi.repository import cairo as _cairo
+        from pgi.repository import cairo as _cairo
         Rectangle = _cairo.RectangleInt
 
         __all__.append('Rectangle')

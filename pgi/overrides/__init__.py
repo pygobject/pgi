@@ -1,18 +1,17 @@
-# Copyright 2012,2014 Christoph Reiter
+# Copyright 2012,2014,2015 Christoph Reiter
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
-import os
 import types
 import sys
-import imp
+import importlib
 import warnings
 from functools import wraps
+from pkgutil import get_loader
 
-from pgi import _compat
 from pgi import const
 from pgi.util import PyGIDeprecationWarning
 
@@ -80,66 +79,85 @@ def get_introspection_module(namespace):
     return getattr(mod, "_introspection_module", mod)
 
 
-def load(namespace, module):
-    """Takes a namespace e.g. 'Gtk' and a gi module and returns a proxy
-    which contains overrides and will fall back to the original module
-    if needed.
+def load_overrides(introspection_module):
+    """Loads overrides for an introspection module.
 
-    The returned module is either a proxy or the passed in module in
-    case no overrides exist.
+    Either returns the same module again in case there are no overrides or a
+    proxy module including overrides. Doesn't cache the result.
     """
 
+    namespace = introspection_module.__name__.rsplit(".", 1)[-1]
+    module_keys = [prefix + "." + namespace for prefix in const.PREFIX]
+
+    # We use sys.modules so overrides can import from gi.repository
+    # but restore everything at the end so this doesn't have any side effects
+    for module_key in module_keys:
+        has_old = module_key in sys.modules
+        old_module = sys.modules.get(module_key)
+
+    # Create a new sub type, so we can separate descriptors like
+    # _DeprecatedAttribute for each namespace.
     proxy_type = type(namespace + "ProxyModule", (OverridesProxyModule, ), {})
-    proxy = proxy_type(module)
-    for prefix in const.PREFIX:
-        sys.modules[prefix + "." + namespace] = proxy
+
+    proxy = proxy_type(introspection_module)
+    for module_key in module_keys:
+        sys.modules[module_key] = proxy
 
     try:
-        name = __name__ + "." + namespace
-        override_module = __import__(name, fromlist=[""])
-    except Exception as err:
+        override_package_name = 'pgi.overrides.' + namespace
+
+        # http://bugs.python.org/issue14710
         try:
-            paths = [os.path.dirname(__file__)]
-            fp, pn, desc = imp.find_module(namespace, paths)
-        except ImportError:
-            # no need for a proxy then, so revert back
-            for prefix in const.PREFIX:
-                sys.modules[prefix + "." + namespace] = module
-            return module
-        else:
-            if fp:
-                fp.close()
-            _compat.reraise(ImportError, err, sys.exc_info()[2])
-    else:
-        # add all objects referenced in __all__ to the original module
-        override_vars = vars(override_module)
-        override_all = override_vars.get("__all__") or []
+            override_loader = get_loader(override_package_name)
 
-        for var in override_all:
-            item = override_vars.get(var)
-            assert item is not None
-            # make sure new classes have a proper __module__
-            try:
-                if item.__module__.split(".")[-1] == namespace:
-                    item.__module__ = namespace
-            except AttributeError:
-                pass
-            setattr(proxy, var, item)
+        except AttributeError:
+            override_loader = None
 
-        # Replace deprecated module level attributes with a descriptor
-        # which emits a warning when accessed.
-        for attr, replacement in _deprecated_attrs.pop(namespace, []):
-            try:
-                value = getattr(proxy, attr)
-            except AttributeError:
-                raise AssertionError(
-                    "%s was set deprecated but wasn't added to __all__" % attr)
-            delattr(proxy, attr)
-            deprecated_attr = _DeprecatedAttribute(
-                namespace, attr, value, replacement)
-            setattr(proxy_type, attr, deprecated_attr)
+        # Avoid checking for an ImportError, an override might
+        # depend on a missing module thus causing an ImportError
+        if override_loader is None:
+            return introspection_module
 
-        return proxy
+        override_mod = importlib.import_module(override_package_name)
+
+    finally:
+        for module_key in module_keys:
+            del sys.modules[module_key]
+            if has_old:
+                sys.modules[module_key] = old_module
+
+    override_all = []
+    if hasattr(override_mod, "__all__"):
+        override_all = override_mod.__all__
+
+    for var in override_all:
+        try:
+            item = getattr(override_mod, var)
+        except (AttributeError, TypeError):
+            # Gedit puts a non-string in __all__, so catch TypeError here
+            continue
+        # make sure new classes have a proper __module__
+        try:
+            if item.__module__.split(".")[-1] == namespace:
+                item.__module__ = namespace
+        except AttributeError:
+            pass
+        setattr(proxy, var, item)
+
+    # Replace deprecated module level attributes with a descriptor
+    # which emits a warning when accessed.
+    for attr, replacement in _deprecated_attrs.pop(namespace, []):
+        try:
+            value = getattr(proxy, attr)
+        except AttributeError:
+            raise AssertionError(
+                "%s was set deprecated but wasn't added to __all__" % attr)
+        delattr(proxy, attr)
+        deprecated_attr = _DeprecatedAttribute(
+            namespace, attr, value, replacement)
+        setattr(proxy_type, attr, deprecated_attr)
+
+    return proxy
 
 
 def override(klass):
