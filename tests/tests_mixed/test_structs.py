@@ -29,6 +29,7 @@ from tests import FIXME, skipUnlessCairo, skipIfGI
 
 class StructTest(unittest.TestCase):
 
+    @FIXME
     @skipUnlessCairo
     def test_foreign_cairo(self):
         window = Gtk.OffscreenWindow()
