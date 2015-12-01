@@ -4,22 +4,22 @@ matrix:
       sudo: required
       dist: trusty
       language: generic
-      env: PYTHON="python2"
+      env: PYTHON="python2" PACKAGES="pep8 pyflakes python-gi python-gi-cairo python-faulthandler libpython-dev"
     - os: linux
       sudo: required
       dist: trusty
       language: generic
-      env: PYTHON="python3"
+      env: PYTHON="python3" PACKAGES="python3-gi python3-gi-cairo libpython3-dev"
     - os: linux
       sudo: required
       dist: trusty
       language: generic
-      env: PYTHON="pypy"
+      env: PYTHON="pypy" PACKAGES="pypy"
 
 install:
- - sudo add-apt-repository -y ppa:pypy/ppa
+ - if [ "$PYTHON" == "pypy" ]; then sudo add-apt-repository -y ppa:pypy/ppa; fi
  - sudo apt-get update -q
- - sudo apt-get install --no-install-recommends -y xvfb pep8 pyflakes pypy python-gi python-gi-cairo python3-gi python3-gi-cairo gir1.2-gtk-3.0 gobject-introspection libcairo2-dev python-cairo-dev python3-cairo-dev libglib2.0-dev libgirepository1.0-dev libpython-dev libpython3-dev build-essential python-faulthandler libcairo2-dbg libglib2.0-0-dbg
+ - sudo apt-get install --no-install-recommends -y xvfb gir1.2-gtk-3.0 gobject-introspection libcairo2-dev libglib2.0-dev libgirepository1.0-dev build-essential libcairo2-dbg libglib2.0-0-dbg $(echo $PACKAGES)
  - make -C "tests/libs"
  - virtualenv --python=$PYTHON --system-site-packages _venv
  - source _venv/bin/activate
@@ -27,4 +27,4 @@ install:
 
 script:
  - xvfb-run -a $PYTHON ./setup.py test
- - $PYTHON ./setup.py quality
+ - if [ "$PYTHON" == "python2" ]; then $PYTHON ./setup.py quality; fi
