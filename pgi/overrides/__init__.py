@@ -17,29 +17,67 @@ from pgi import const
 from pgi.util import PyGIDeprecationWarning
 
 
-class ProxyModule(types.ModuleType):
+# namespace -> (attr, replacement)
+_deprecated_attrs = {}
 
-    def __init__(self, module):
-        super(ProxyModule, self).__init__(module.__name__)
-        self._module = module
+
+class OverridesProxyModule(types.ModuleType):
+    """Wraps a introspection module and contains all overrides"""
+
+    def __init__(self, introspection_module):
+        super(OverridesProxyModule, self).__init__(
+            introspection_module.__name__)
+        self._introspection_module = introspection_module
 
     def __getattr__(self, name):
-        return getattr(self._module, name)
+        return getattr(self._introspection_module, name)
 
     def __dir__(self):
-        attrs = set(self.__dict__.keys())
-        attrs.update(dir(self._module))
-        return sorted(attrs)
+        result = set(dir(self.__class__))
+        result.update(self.__dict__.keys())
+        result.update(dir(self._introspection_module))
+        return sorted(result)
 
     def __repr__(self):
-        return repr(self._module)
+        return "<%s %r>" % (type(self).__name__, self._introspection_module)
+
+
+class _DeprecatedAttribute(object):
+    """A deprecation descriptor for OverridesProxyModule subclasses.
+
+    Emits a PyGIDeprecationWarning on every access and tries to act as a
+    normal instance attribute (can be replaced and deleted).
+    """
+
+    def __init__(self, namespace, attr, value, replacement):
+        self._attr = attr
+        self._value = value
+        self._warning = PyGIDeprecationWarning(
+            '%s.%s is deprecated; use %s instead' % (
+                namespace, attr, replacement))
+
+    def __get__(self, instance, owner):
+        if instance is None:
+            raise AttributeError(self._attr)
+        warnings.warn(self._warning, stacklevel=2)
+        return self._value
+
+    def __set__(self, instance, value):
+        attr = self._attr
+        # delete the descriptor, then set the instance value
+        delattr(type(instance), attr)
+        setattr(instance, attr, value)
+
+    def __delete__(self, instance):
+        # delete the descriptor
+        delattr(type(instance), self._attr)
 
 
 def get_introspection_module(namespace):
     """Returns the non proxied module for a namespace"""
 
     mod = sys.modules["pgi.repository." + namespace]
-    return getattr(mod, "_module", mod)
+    return getattr(mod, "_introspection_module", mod)
 
 
 def load(namespace, module):
@@ -51,7 +89,8 @@ def load(namespace, module):
     case no overrides exist.
     """
 
-    proxy = ProxyModule(module)
+    proxy_type = type(namespace + "ProxyModule", (OverridesProxyModule, ), {})
+    proxy = proxy_type(module)
     for prefix in const.PREFIX:
         sys.modules[prefix + "." + namespace] = proxy
 
@@ -86,6 +125,19 @@ def load(namespace, module):
             except AttributeError:
                 pass
             setattr(proxy, var, item)
+
+        # Replace deprecated module level attributes with a descriptor
+        # which emits a warning when accessed.
+        for attr, replacement in _deprecated_attrs.pop(namespace, []):
+            try:
+                value = getattr(proxy, attr)
+            except AttributeError:
+                raise AssertionError(
+                    "%s was set deprecated but wasn't added to __all__" % attr)
+            delattr(proxy, attr)
+            deprecated_attr = _DeprecatedAttribute(
+                namespace, attr, value, replacement)
+            setattr(proxy_type, attr, deprecated_attr)
 
         return proxy
 
@@ -129,6 +181,26 @@ def deprecated(function, instead):
         return function(*args, **kwargs)
 
     return wrap
+
+
+def deprecated_attr(namespace, attr, replacement):
+    """Marks a module level attribute as deprecated. Accessing it will emit
+    a PyGIDeprecationWarning warning.
+
+    e.g. for ``deprecated_attr("GObject", "STATUS_FOO", "GLib.Status.FOO")``
+    accessing GObject.STATUS_FOO will emit:
+
+        "GObject.STATUS_FOO is deprecated; use GLib.Status.FOO instead"
+
+    :param str namespace:
+        The namespace of the override this is called in.
+    :param str namespace:
+        The attribute name (which gets added to __all__).
+    :param str replacement:
+        The replacement text which will be included in the warning.
+    """
+
+    _deprecated_attrs.setdefault(namespace, []).append((attr, replacement))
 
 
 def deprecated_init(super_init_func, arg_names, ignore=tuple(),
