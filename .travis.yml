@@ -27,3 +27,4 @@ install:
 
 script:
  - xvfb-run -a $PYTHON ./setup.py test
+ - $PYTHON ./setup.py quality
