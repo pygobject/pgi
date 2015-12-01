@@ -162,7 +162,8 @@ class TestCommand(Command):
                 kill_signal = (status & 0xff)
                 returncode = (status >> 8) & 0xff
                 if not kill_signal:
-                    exit(returncode)
+                    if returncode:
+                        exit(returncode)
                 else:
                     exit(1)
             else:
