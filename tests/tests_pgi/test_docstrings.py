@@ -20,6 +20,9 @@ def skipUnlessGIMarshallingTests(func):
     return unittest.skipUnless(GIMarshallingTests,
                                "GIMarshallingTests missing")(func)
 
+def gtk_typelib_version():
+    return (Gtk.MAJOR_VERSION, Gtk.MINOR_VERSION, Gtk.MICRO_VERSION)
+
 
 class TDocstring(unittest.TestCase):
 
@@ -59,16 +62,35 @@ class TDocstring(unittest.TestCase):
             Gtk.FileChooser.get_filenames.__doc__,
             "get_filenames() -> [str]")
 
-        self.assertEqual(
-            Gtk.init_with_args.__doc__,
-            "init_with_args(argv: [str] or None, "
-            "parameter_string: str or None, entries: [GLib.OptionEntry], "
-            "translation_domain: str or None) raises -> (bool, argv: [str])")
+        if gtk_typelib_version() < (3, 12):
+            self.assertEqual(
+                Gtk.init_with_args.__doc__,
+                "init_with_args(argv: [str] or None, "
+                "parameter_string: str or None, "
+                "entries: [GLib.OptionEntry], "
+                "translation_domain: str) raises "
+                "-> (bool, argv: [str])")
 
-        self.assertEqual(
-            Gtk.AboutDialog.drag_begin.__doc__,
-            "drag_begin(targets: Gtk.TargetList, actions: Gdk.DragAction, "
-            "button: int, event: Gdk.Event or None) -> Gdk.DragContext")
+            self.assertEqual(
+                Gtk.AboutDialog.drag_begin.__doc__,
+                "drag_begin(targets: Gtk.TargetList, "
+                "actions: Gdk.DragAction, "
+                "button: int, event: Gdk.Event) -> Gdk.DragContext")
+        else:
+            self.assertEqual(
+                Gtk.init_with_args.__doc__,
+                "init_with_args(argv: [str] or None, "
+                "parameter_string: str or None, "
+                "entries: [GLib.OptionEntry], "
+                "translation_domain: str or None) raises "
+                "-> (bool, argv: [str])")
+
+            self.assertEqual(
+                Gtk.AboutDialog.drag_begin.__doc__,
+                "drag_begin(targets: Gtk.TargetList, "
+                "actions: Gdk.DragAction, "
+                "button: int, event: Gdk.Event or None) "
+                "-> Gdk.DragContext")
 
         self.assertEqual(
             Gtk.AboutDialog.set_default_icon_from_file.__doc__,
