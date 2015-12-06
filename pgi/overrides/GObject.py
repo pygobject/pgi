@@ -542,7 +542,6 @@ def _signalmethod(func):
     return meth
 
 
-Object = override(Object)
 GObject = Object
 __all__ += ['Object', 'GObject']
 

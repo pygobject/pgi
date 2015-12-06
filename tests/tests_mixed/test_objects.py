@@ -75,6 +75,9 @@ class ObjectTest(unittest.TestCase):
         self.assertTrue("GObject" in r)
         self.assertTrue(str(hex(int(id(g)))) in r)
 
+    def test_obj_type_name(self):
+        self.assertEqual(GObject.Object.__name__, "Object")
+
     def test_mro(self):
         klass = Gtk.Window
         parents = [Gtk.Bin, Gtk.Container, Gtk.Widget, GObject.Object]
