@@ -5,6 +5,7 @@
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
 
+import warnings
 import unittest
 
 from gi.repository import GLib, GObject
@@ -22,3 +23,9 @@ class GLibOverrrideTest(unittest.TestCase):
     def test_deprecated_wrapper(self):
         self.assertEqual(
             GLib.Timeout.get_current_time.__name__, "get_current_time")
+
+    def test_import_keysyms(self):
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            from gi.overrides import keysyms
+            keysyms

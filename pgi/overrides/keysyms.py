@@ -20,7 +20,8 @@
 import sys
 import warnings
 
-from ..module import get_introspection_module
+from pgi.overrides import get_introspection_module
+
 
 Gdk = get_introspection_module('Gdk')
 
