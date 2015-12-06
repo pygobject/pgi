@@ -26,15 +26,6 @@ Pango = get_introspection_module('Pango')
 __all__ = []
 
 
-class Context(Pango.Context):
-
-    def get_metrics(self, desc, language=None):
-        return super(Context, self).get_metrics(desc, language)
-
-Context = override(Context)
-__all__.append('Context')
-
-
 class FontDescription(Pango.FontDescription):
 
     def __new__(cls, string=None):
@@ -42,6 +33,9 @@ class FontDescription(Pango.FontDescription):
             return Pango.font_description_from_string(string)
         else:
             return Pango.FontDescription.__new__(cls)
+
+    def __init__(self, *args, **kwargs):
+        return super(FontDescription, self).__init__()
 
 FontDescription = override(FontDescription)
 __all__.append('FontDescription')
@@ -51,11 +45,6 @@ class Layout(Pango.Layout):
 
     def __new__(cls, context):
         return Pango.Layout.new(context)
-
-    def __init__(self, context, **kwds):
-        # simply discard 'context', since it was set by
-        # __new__ and it is not a PangoLayout property
-        super(Layout, self).__init__(**kwds)
 
     def set_markup(self, text, length=-1):
         super(Layout, self).set_markup(text, length)
