@@ -168,6 +168,22 @@ def test(load_gi, backend=None, strict=False, filter_=None, failfast=False):
         return (("### %s " % text) + "#" * 80)[:80]
 
     import gi
+
+    TYPELIBS = {
+        "Gtk": "3.0",
+        "Gdk": "3.0",
+        "Clutter": "1.0",
+        "Regress": "1.0",
+        "GIMarshallingTests": "1.0",
+        "PangoCairo": "1.0"
+    }
+
+    for name, version in TYPELIBS.items():
+        try:
+            gi.require_version(name, version)
+        except ValueError:
+            pass
+
     if load_gi:
         assert gi.__name__ == "gi"
         try:
