@@ -5,7 +5,6 @@
 # Author: Martin Pitt <martin.pitt@ubuntu.com>
 # Copyright (C) 2012-2013 Simon Feltman <sfeltman@src.gnome.org>
 # Copyright (C) 2012 Bastian Winkler <buz@netbuz.org>
-# Copyright (C) 2013-2014 Christoph Reiter
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -23,15 +22,25 @@
 # USA
 
 import sys
+import warnings
 from collections import namedtuple
 
-from pgi.overrides import get_introspection_module, override, deprecated
+import pgi
+from pgi.overrides import get_introspection_module, override, deprecated_attr
 from pgi.repository import GLib
+from pgi import propertyhelper
+from pgi import signalhelper
 from pgi import static as _gobject
+from pgi.util import PyGIDeprecationWarning
 
 
 GObjectModule = get_introspection_module('GObject')
 __all__ = []
+
+
+_gobject.GObject = GObjectModule.Object
+_gobject.TYPE_INVALID = GObjectModule.type_from_name('invalid')
+Object = GObjectModule.Object
 
 
 # API aliases for backwards compatibility
@@ -45,13 +54,11 @@ for name in ['markup_escape_text', 'get_application_name',
              'idle_add', 'timeout_add', 'timeout_add_seconds',
              'io_add_watch', 'child_watch_add', 'get_current_time',
              'spawn_async']:
-    # ubuntu 12.04 glib
-    if name == "uri_list_extract_uris" and not hasattr(GLib, name):
-        continue
-    globals()[name] = deprecated(getattr(GLib, name), 'GLib.' + name)
+    globals()[name] = getattr(GLib, name)
+    deprecated_attr("GObject", name, "GLib." + name)
     __all__.append(name)
 
-# constants are also deprecated, but cannot mark them as such
+# deprecated constants
 for name in ['PRIORITY_DEFAULT', 'PRIORITY_DEFAULT_IDLE', 'PRIORITY_HIGH',
              'PRIORITY_HIGH_IDLE', 'PRIORITY_LOW',
              'IO_IN', 'IO_OUT', 'IO_PRI', 'IO_ERR', 'IO_HUP', 'IO_NVAL',
@@ -69,25 +76,21 @@ for name in ['PRIORITY_DEFAULT', 'PRIORITY_DEFAULT_IDLE', 'PRIORITY_HIGH',
              'OPTION_FLAG_NOALIAS', 'OPTION_ERROR_UNKNOWN_OPTION',
              'OPTION_ERROR_BAD_VALUE', 'OPTION_ERROR_FAILED', 'OPTION_REMAINING',
              'glib_version']:
-    globals()[name] = getattr(GLib, name)
+    with warnings.catch_warnings():
+        # TODO: this uses deprecated Glib attributes, silence for now
+        warnings.simplefilter('ignore', PyGIDeprecationWarning)
+        globals()[name] = getattr(GLib, name)
+    deprecated_attr("GObject", name, "GLib." + name)
     __all__.append(name)
 
 
-G_MININT8 = GLib.MININT8
-G_MAXINT8 = GLib.MAXINT8
-G_MAXUINT8 = GLib.MAXUINT8
-G_MININT16 = GLib.MININT16
-G_MAXINT16 = GLib.MAXINT16
-G_MAXUINT16 = GLib.MAXUINT16
-G_MININT32 = GLib.MININT32
-G_MAXINT32 = GLib.MAXINT32
-G_MAXUINT32 = GLib.MAXUINT32
-G_MININT64 = GLib.MININT64
-G_MAXINT64 = GLib.MAXINT64
-G_MAXUINT64 = GLib.MAXUINT64
-__all__ += ['G_MININT8', 'G_MAXINT8', 'G_MAXUINT8', 'G_MININT16',
-            'G_MAXINT16', 'G_MAXUINT16', 'G_MININT32', 'G_MAXINT32',
-            'G_MAXUINT32', 'G_MININT64', 'G_MAXINT64', 'G_MAXUINT64']
+for name in ['G_MININT8', 'G_MAXINT8', 'G_MAXUINT8', 'G_MININT16',
+             'G_MAXINT16', 'G_MAXUINT16', 'G_MININT32', 'G_MAXINT32',
+             'G_MAXUINT32', 'G_MININT64', 'G_MAXINT64', 'G_MAXUINT64']:
+    new_name = name.split("_", 1)[-1]
+    globals()[name] = getattr(GLib, new_name)
+    deprecated_attr("GObject", name, "GLib." + new_name)
+    __all__.append(name)
 
 # these are not currently exported in GLib gir, presumably because they are
 # platform dependent; so get them from our static bindings
@@ -95,7 +98,9 @@ for name in ['G_MINFLOAT', 'G_MAXFLOAT', 'G_MINDOUBLE', 'G_MAXDOUBLE',
              'G_MINSHORT', 'G_MAXSHORT', 'G_MAXUSHORT', 'G_MININT', 'G_MAXINT',
              'G_MAXUINT', 'G_MINLONG', 'G_MAXLONG', 'G_MAXULONG', 'G_MAXSIZE',
              'G_MINSSIZE', 'G_MAXSSIZE', 'G_MINOFFSET', 'G_MAXOFFSET']:
-    globals()[name] = getattr(_gobject, name)
+    new_name = name.split("_", 1)[-1]
+    globals()[name] = getattr(GLib, new_name)
+    deprecated_attr("GObject", name, "GLib." + new_name)
     __all__.append(name)
 
 
@@ -137,41 +142,69 @@ __all__ += ['TYPE_INVALID', 'TYPE_NONE', 'TYPE_INTERFACE', 'TYPE_CHAR',
 
 
 # Deprecated, use GLib directly
-#Pid = GLib.Pid
-GError = GLib.GError
-OptionGroup = GLib.OptionGroup
-OptionContext = GLib.OptionContext
-__all__ += ['GError', 'OptionGroup', 'OptionContext']
+for name in ['Pid', 'GError', 'OptionGroup', 'OptionContext']:
+    globals()[name] = getattr(GLib, name)
+    deprecated_attr("GObject", name, "GLib." + name)
+    __all__.append(name)
 
 
 # Deprecated, use: GObject.ParamFlags.* directly
-PARAM_CONSTRUCT = GObjectModule.ParamFlags.CONSTRUCT
-PARAM_CONSTRUCT_ONLY = GObjectModule.ParamFlags.CONSTRUCT_ONLY
-PARAM_LAX_VALIDATION = GObjectModule.ParamFlags.LAX_VALIDATION
-PARAM_READABLE = GObjectModule.ParamFlags.READABLE
-PARAM_WRITABLE = GObjectModule.ParamFlags.WRITABLE
+for name in ['PARAM_CONSTRUCT', 'PARAM_CONSTRUCT_ONLY', 'PARAM_LAX_VALIDATION',
+             'PARAM_READABLE', 'PARAM_WRITABLE']:
+    new_name = name.split("_", 1)[-1]
+    globals()[name] = getattr(GObjectModule.ParamFlags, new_name)
+    deprecated_attr("GObject", name, "GObject.ParamFlags." + new_name)
+    __all__.append(name)
+
 # PARAM_READWRITE should come from the gi module but cannot due to:
 # https://bugzilla.gnome.org/show_bug.cgi?id=687615
-PARAM_READWRITE = PARAM_READABLE | PARAM_WRITABLE
-__all__ += ['PARAM_CONSTRUCT', 'PARAM_CONSTRUCT_ONLY', 'PARAM_LAX_VALIDATION',
-            'PARAM_READABLE', 'PARAM_WRITABLE', 'PARAM_READWRITE']
+PARAM_READWRITE = GObjectModule.ParamFlags.READABLE | \
+    GObjectModule.ParamFlags.WRITABLE
+__all__.append("PARAM_READWRITE")
+
+# READWRITE is part of ParamFlags since glib 2.42. Only mark PARAM_READWRITE as
+# deprecated in case ParamFlags.READWRITE is available. Also include the glib
+# version in the warning so it's clear that this needs a newer glib, unlike
+# the other ParamFlags related deprecations.
+# https://bugzilla.gnome.org/show_bug.cgi?id=726037
+if hasattr(GObjectModule.ParamFlags, "READWRITE"):
+    deprecated_attr("GObject", "PARAM_READWRITE",
+                    "GObject.ParamFlags.READWRITE (glib 2.42+)")
 
 
 # Deprecated, use: GObject.SignalFlags.* directly
-SIGNAL_ACTION = GObjectModule.SignalFlags.ACTION
-SIGNAL_DETAILED = GObjectModule.SignalFlags.DETAILED
-SIGNAL_NO_HOOKS = GObjectModule.SignalFlags.NO_HOOKS
-SIGNAL_NO_RECURSE = GObjectModule.SignalFlags.NO_RECURSE
-SIGNAL_RUN_CLEANUP = GObjectModule.SignalFlags.RUN_CLEANUP
-SIGNAL_RUN_FIRST = GObjectModule.SignalFlags.RUN_FIRST
-SIGNAL_RUN_LAST = GObjectModule.SignalFlags.RUN_LAST
-__all__ += ['SIGNAL_ACTION', 'SIGNAL_DETAILED', 'SIGNAL_NO_HOOKS',
-            'SIGNAL_NO_RECURSE', 'SIGNAL_RUN_CLEANUP', 'SIGNAL_RUN_FIRST',
-            'SIGNAL_RUN_LAST']
+for name in ['SIGNAL_ACTION', 'SIGNAL_DETAILED', 'SIGNAL_NO_HOOKS',
+             'SIGNAL_NO_RECURSE', 'SIGNAL_RUN_CLEANUP', 'SIGNAL_RUN_FIRST',
+             'SIGNAL_RUN_LAST']:
+    new_name = name.split("_", 1)[-1]
+    globals()[name] = getattr(GObjectModule.SignalFlags, new_name)
+    deprecated_attr("GObject", name, "GObject.SignalFlags." + new_name)
+    __all__.append(name)
+
+# Static types
+GBoxed = _gobject.GBoxed
+GEnum = _gobject.GEnum
+GFlags = _gobject.GFlags
+GInterface = _gobject.GInterface
+GObject = _gobject.GObject
+GObjectWeakRef = _gobject.GObjectWeakRef
+GParamSpec = _gobject.GParamSpec
+GPointer = _gobject.GPointer
+GType = _gobject.GType
+Warning = _gobject.Warning
+__all__ += ['GBoxed', 'GEnum', 'GFlags', 'GInterface', 'GObject',
+            'GObjectWeakRef', 'GParamSpec', 'GPointer', 'GType',
+            'Warning']
 
 
+features = _gobject.features
+list_properties = _gobject.list_properties
+new = _gobject.new
+pygobject_version = _gobject.pygobject_version
 threads_init = GLib.threads_init
-__all__ += ['threads_init']
+type_register = _gobject.type_register
+__all__ += ['features', 'list_properties', 'new',
+            'pygobject_version', 'threads_init', 'type_register']
 
 class Value(GObjectModule.Value):
     # pgi doesn't define this, so put it here...
@@ -188,11 +221,22 @@ class Value(GObjectModule.Value):
         if self._free_on_dealloc and self.g_type != TYPE_INVALID:
             self.unset()
 
+        # We must call base class __del__() after unset.
+        super(Value, self).__del__()
+
+    def set_boxed(self, boxed):
+        # Workaround the introspection marshalers inability to know
+        # these methods should be marshaling boxed types. This is because
+        # the type information is stored on the GValue.
+        _gobject._gvalue_set(self, boxed)
+
+    def get_boxed(self):
+        return _gobject._gvalue_get(self)
 
     def set_value(self, py_value):
         gtype = self.g_type
 
-        if gtype == TYPE_INVALID:
+        if gtype == _gobject.TYPE_INVALID:
             raise TypeError("GObject.Value needs to be initialized first")
         elif gtype == TYPE_BOOLEAN:
             self.set_boolean(py_value)
@@ -469,12 +513,12 @@ def signal_accumulator_true_handled(ihint, return_accu, handler_return, user_dat
 __all__.append('signal_accumulator_true_handled')
 
 
-#~ # Statically bound signal functions which need to clobber GI (for now)
-#~
-#~ add_emission_hook = _gobject.add_emission_hook
-#~ signal_new = _gobject.signal_new
-#~
-#~ __all__ += ['add_emission_hook', 'signal_new']
+# Statically bound signal functions which need to clobber GI (for now)
+
+add_emission_hook = _gobject.add_emission_hook
+signal_new = _gobject.signal_new
+
+__all__ += ['add_emission_hook', 'signal_new']
 
 
 class _FreezeNotifyManager(object):
@@ -488,48 +532,45 @@ class _FreezeNotifyManager(object):
         self.obj.thaw_notify()
 
 
-def new(gtype_or_similar):
-    return GType(gtype_or_similar).pytype()
-
-__all__.append("new")
-
-from pgi.properties import list_properties
-
-list_properties
-__all__.append("list_properties")
-
-GObject = GObjectModule.Object
-__all__.append("GObject")
+def _signalmethod(func):
+    # Function wrapper for signal functions used as instance methods.
+    # This is needed when the signal functions come directly from GI.
+    # (they are not already wrapped)
+    @pgi.overrides.wraps(func)
+    def meth(*args, **kwargs):
+        return func(*args, **kwargs)
+    return meth
 
 
-from pgi.gtype import PGType as GType
-GType = GType
-__all__.append("GType")
+Object = override(Object)
+GObject = Object
+__all__ += ['Object', 'GObject']
 
 
-from pgi.enum import EnumBase as GEnum
-GEnum = GEnum
-__all__.append("GEnum")
+class Binding(GObjectModule.Binding):
+    def __call__(self):
+        warnings.warn('Using parentheses (binding()) to retrieve the Binding object is no '
+                      'longer needed because the binding is returned directly from "bind_property.',
+                      PyGIDeprecationWarning, stacklevel=2)
+        return self
+
+    def unbind(self):
+        if hasattr(self, '_unbound'):
+            raise ValueError('binding has already been cleared out')
+        else:
+            setattr(self, '_unbound', True)
+            super(Binding, self).unbind()
 
 
-from pgi.enum import FlagsBase as GFlags
-GFlags = GFlags
-__all__.append("GFlags")
+Binding = override(Binding)
+__all__.append('Binding')
 
 
-from pgi.gerror import PGError as GError
-GError = GError
-__all__.append("GError")
-
-
-from pgi.obj import InterfaceBase as GInterface
-GInterface = GInterface
-__all__.append("GInterface")
-
-
-idle_add = GLib.idle_add
-__all__.append("idle_add")
-
-
-source_remove = GLib.source_remove
-__all__.append("source_remove")
+Property = propertyhelper.Property
+Signal = signalhelper.Signal
+SignalOverride = signalhelper.SignalOverride
+# Deprecated naming "property" available for backwards compatibility.
+# Keep this at the end of the file to avoid clobbering the builtin.
+property = Property
+deprecated_attr("GObject", "property", "GObject.Property")
+__all__ += ['Property', 'Signal', 'SignalOverride', 'property']
