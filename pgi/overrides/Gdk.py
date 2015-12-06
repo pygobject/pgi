@@ -25,10 +25,20 @@ import warnings
 from pgi.overrides import override, get_introspection_module, \
     strip_boolean_result
 from pgi.util import PyGIDeprecationWarning
+from pgi import require_version
 
 Gdk = get_introspection_module('Gdk')
 
 __all__ = []
+
+
+# https://bugzilla.gnome.org/show_bug.cgi?id=673396
+try:
+    require_version("GdkX11", Gdk._version)
+    from gi.repository import GdkX11
+    GdkX11  # pyflakes
+except (ValueError, ImportError):
+    pass
 
 
 class Color(Gdk.Color):
@@ -207,6 +217,15 @@ class Event(Gdk.Event):
     if Gdk._version == '2.0':
         _UNION_MEMBERS[Gdk.EventType.NO_EXPOSE] = 'no_expose'
 
+    if hasattr(Gdk.EventType, 'TOUCH_BEGIN'):
+        _UNION_MEMBERS.update(
+            {
+                Gdk.EventType.TOUCH_BEGIN: 'touch',
+                Gdk.EventType.TOUCH_UPDATE: 'touch',
+                Gdk.EventType.TOUCH_END: 'touch',
+                Gdk.EventType.TOUCH_CANCEL: 'touch',
+            })
+
     def __getattr__(self, name):
         real_event = getattr(self, '_UNION_MEMBERS').get(self.type)
         if real_event:
@@ -260,6 +279,10 @@ event_member_classes = ['EventAny',
 
 if Gdk._version == '2.0':
     event_member_classes.append('EventNoExpose')
+
+if hasattr(Gdk, 'EventTouch'):
+    event_member_classes.append('EventTouch')
+
 
 # whitelist all methods that have a success return we want to mask
 gsuccess_mask_funcs = ['get_state',
