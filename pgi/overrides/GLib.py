@@ -33,6 +33,8 @@ from pgi import static as _glib
 
 GLib = get_introspection_module('GLib')
 
+_glib._init_glib(GLib)
+
 __all__ = []
 
 #~ from gi import _option as option

@@ -16,6 +16,14 @@ from .properties import list_properties
 from . import version_info as pygobject_version
 
 
+def _init_glib(glib_module):
+    global OptionContext, OptionGroup, spawn_async
+
+    OptionContext = glib_module.OptionContext
+    OptionGroup = glib_module.OptionGroup
+    spawn_async = glib_module.spawn_async
+
+
 GType, GEnum, GFlags, GError, GInterface, list_properties, pygobject_version
 
 GBoxed = None
@@ -25,6 +33,9 @@ GParamSpec = None
 GPointer = None
 Warning = None
 TYPE_INVALID = None
+OptionContext = None
+OptionGroup = None
+spawn_async = None
 
 features = {'generic-c-marshaller': True}
 
@@ -79,26 +90,10 @@ G_MINOFFSET = _min_value(ctypes.c_int64)
 G_MAXOFFSET = _max_value(ctypes.c_int64)
 
 
-class OptionContext(object):
-
-    def __init__(*args, **kwargs):
-        raise NotImplementedError
-
-
-class OptionGroup(object):
-
-    def __init__(*args, **kwargs):
-        raise NotImplementedError
-
-
 class Pid(object):
 
     def __init__(*args, **kwargs):
         raise NotImplementedError
-
-
-def spawn_async(*args, **kwargs):
-    raise NotImplementedError
 
 
 def add_emission_hook(*args, **kwargs):
