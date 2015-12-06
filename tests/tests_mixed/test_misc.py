@@ -11,13 +11,17 @@ import os
 
 from tests import skipIfGI
 
-from gi import get_required_version, require_version
+from gi import get_required_version, require_version, PyGIDeprecationWarning
 require_version("Gtk", "3.0")
 from gi.repository import Gtk, GObject, GLib, Gdk
 from pgi import _compat
 
 
 class MiscTest(unittest.TestCase):
+
+    def test_deprecation_warning(self):
+        self.assertTrue(issubclass(PyGIDeprecationWarning, DeprecationWarning))
+
     def test_module_dir(self):
         # make sure all descriptors show up in dir(module)
         self.assertTrue(len(dir(Gtk)) > 750)
