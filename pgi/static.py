@@ -102,3 +102,23 @@ def add_emission_hook(*args, **kwargs):
 
 def signal_new(*args, **kwargs):
     raise NotImplementedError
+
+
+def variant_type_from_string(*args, **kwargs):
+    raise NotImplementedError
+
+
+def variant_new_tuple(*args, **kwargs):
+    raise NotImplementedError
+
+
+def source_new(*args, **kwargs):
+    raise NotImplementedError
+
+
+def source_set_callback(*args, **kwargs):
+    raise NotImplementedError
+
+
+def io_channel_read(*args, **kwargs):
+    raise NotImplementedError

@@ -28,24 +28,17 @@ from pgi.overrides import get_introspection_module, override, deprecated, \
     deprecated_attr
 from pgi.util import PyGIDeprecationWarning
 from pgi import version_info
+from pgi.static import (variant_type_from_string, source_new,
+                        source_set_callback, io_channel_read)
 from pgi import static as _gobject
 from pgi import static as _glib
 
-GLib = get_introspection_module('GLib')
 
-_glib._init_glib(GLib)
+GLib = get_introspection_module('GLib')
 
 __all__ = []
 
-#~ from gi import _option as option
-#~ option  # pyflakes
-#~ __all__.append('option')
-#~
-#~
-#~ # Types and functions still needed from static bindings
-#~ from gi._gi import _glib
-#~ from gi._error import GError
-#~
+_glib._init_glib(GLib)
 Error = GError
 OptionContext = _glib.OptionContext
 OptionGroup = _glib.OptionGroup
@@ -936,25 +929,3 @@ deprecated_attr("GLib", "glib_version",
 pyglib_version = version_info
 __all__.append('pyglib_version')
 deprecated_attr("GLib", "pyglib_version", "gi.version_info")
-
-
-# PGI specific
-
-def variant_type_from_string(*args, **kwargs):
-    raise NotImplementedError
-
-
-def variant_new_tuple(*args, **kwargs):
-    raise NotImplementedError
-
-
-def source_new(*args, **kwargs):
-    raise NotImplementedError
-
-
-def source_set_callback(*args, **kwargs):
-    raise NotImplementedError
-
-
-def io_channel_read(*args, **kwargs):
-    raise NotImplementedError
