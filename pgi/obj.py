@@ -475,9 +475,21 @@ def ObjectAttribute(obj_info):
         signal_name = sig_info.name
         cls.__sigs__[signal_name] = sig_info
 
+    cs_info = obj_info.get_class_struct()
+    if cs_info:
+        class_struct = import_attribute(cs_info.namespace, cs_info.name)
+    else:
+        class_struct = None
+
     # XXX ^ 2
-    def get_class_struct(cls, type_):
+    def get_class_struct(cls, type_=None):
         """Returns the class struct casted to the passed type"""
+
+        if type_ is None:
+            type_ = class_struct
+
+        if type_ is None:
+            return None
 
         ptr = cls.__gtype__._type.class_ref()
         return type_._from_pointer(ptr)

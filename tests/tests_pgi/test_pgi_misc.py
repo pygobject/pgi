@@ -149,3 +149,12 @@ class PGIMisc(unittest.TestCase):
 
         program_name_default = Gtk.AboutDialog.props.program_name.default_value
         self.assertEqual(program_name_default, None)
+
+    def test_get_class_struct(self):
+        from gi.repository import Gtk
+
+        x = Gtk.Button._get_class_struct(Gtk.ContainerClass)
+        self.assertTrue(isinstance(x, Gtk.ContainerClass))
+
+        x = Gtk.Button._get_class_struct()
+        self.assertTrue(isinstance(x, Gtk.ButtonClass))
