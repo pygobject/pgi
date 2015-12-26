@@ -35,7 +35,7 @@ __all__ = []
 # https://bugzilla.gnome.org/show_bug.cgi?id=673396
 try:
     require_version("GdkX11", Gdk._version)
-    from gi.repository import GdkX11
+    from pgi.repository import GdkX11
     GdkX11  # pyflakes
 except (ValueError, ImportError):
     pass
