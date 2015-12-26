@@ -65,8 +65,7 @@ class _Module(types.ModuleType):
             except NotImplementedError:
                 pass
             else:
-                if not getattr(obj, "_is_gtype_struct", False):
-                    implemented_names.append(name)
+                implemented_names.append(name)
 
         return implemented_names
 
