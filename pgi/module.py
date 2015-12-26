@@ -61,7 +61,7 @@ class _Module(types.ModuleType):
         implemented_names = []
         for name in list(set(names)):
             try:
-                obj = getattr(self, name)
+                getattr(self, name)
             except NotImplementedError:
                 pass
             else:
