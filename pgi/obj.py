@@ -379,6 +379,9 @@ def InterfaceAttribute(iface_info):
         iface_struct = None
 
     def get_iface_struct(cls):
+        if not iface_struct:
+            return None
+
         ptr = cls.__gtype__._type.default_interface_ref()
         if not ptr:
             return None

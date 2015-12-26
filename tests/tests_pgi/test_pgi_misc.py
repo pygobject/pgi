@@ -160,7 +160,9 @@ class PGIMisc(unittest.TestCase):
         self.assertTrue(isinstance(x, Gtk.ButtonClass))
 
     def test_get_iface_struct(self):
-        from gi.repository import Gtk
+        from gi.repository import Gtk, Atk
 
         x = Gtk.Actionable._get_iface_struct()
         self.assertTrue(isinstance(x, Gtk.ActionableInterface))
+
+        self.assertTrue(Atk.ImplementorIface._get_iface_struct() is None)
