@@ -6,7 +6,7 @@
 # version 2.1 of the License, or (at your option) any later version.
 
 import itertools
-from ctypes import cast
+from ctypes import cast, addressof
 import weakref
 
 from .clib import gobject
@@ -325,7 +325,11 @@ def add_method(info, target_cls, virtual=False, dont_replace=False):
 
 
 class InterfaceBase(object):
-    pass
+
+    @classmethod
+    def _get_iface_struct(*args):
+        return
+
 
 InterfaceBase.__module__ = "GObject"
 InterfaceBase.__name__ = "GInterface"
@@ -367,6 +371,20 @@ def InterfaceAttribute(iface_info):
         add_method(vfunc_info, cls, virtual=True)
 
     cls._sigs = {}
+
+    is_info = iface_info.get_iface_struct()
+    if is_info:
+        iface_struct = import_attribute(is_info.namespace, is_info.name)
+    else:
+        iface_struct = None
+
+    def get_iface_struct(cls):
+        ptr = cls.__gtype__._type.default_interface_ref()
+        if not ptr:
+            return None
+        return iface_struct._from_pointer(addressof(ptr.contents))
+
+    setattr(cls, "_get_iface_struct", classmethod(get_iface_struct))
 
     return cls
 
