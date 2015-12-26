@@ -118,6 +118,22 @@ def _builder_connect_callback(builder, gobj, signal_name, handler_name, connect_
 class Widget(Gtk.Widget):
 
     translate_coordinates = strip_boolean_result(Gtk.Widget.translate_coordinates)
+    """translate_coordinates(dest_widget, src_x, src_y)
+
+    :param dest_widget: a :obj:`Gtk.Widget`
+    :type dest_widget: :obj:`Gtk.Widget`
+    :param src_x: X position relative to `src_widget`
+    :type src_x: :obj:`int`
+    :param src_y: Y position relative to `src_widget`
+    :type src_y: :obj:`int`
+    :returns:
+        :obj:`None` if either widget was not realized, or there
+        was no common ancestor. Otherwise a ``(dest_x, dest_y)`` tuple
+        containing the X and Y position relative to `dest_widget`.
+    :rtype: (**dest_x**: :obj:`int`, **dest_y**: :obj:`int`) or :obj:`None`
+
+    {{ body }}
+    """
 
     def drag_dest_set_target_list(self, target_list):
         if (target_list is not None) and (not isinstance(target_list, Gtk.TargetList)):
