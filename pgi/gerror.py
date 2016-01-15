@@ -55,4 +55,4 @@ class PGError(RuntimeError):
 
 
 PGError.__module__ = "GLib"
-PGError.__name__ = "GError"
+PGError.__name__ = "Error"
