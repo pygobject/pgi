@@ -26,10 +26,6 @@ from .codegen import generate_signal_callback, generate_dummy_callable
 from ._compat import PY3
 
 
-class _Object(object):
-    pass
-
-
 class Object(object):
 
     __gtype__ = None
@@ -404,7 +400,7 @@ def new_class_from_gtype(gtype):
         interfaces = [i.pytype for i in gtype.interfaces]
         bases = tuple([parent] + interfaces)
 
-        cls = type(gtype.name, bases, dict(_Object.__dict__))
+        cls = type(gtype.name, bases, dict())
         cls.__gtype__ = gtype
 
         return cls
@@ -428,7 +424,7 @@ def ObjectAttribute(obj_info):
             attr = import_attribute(parent_obj.namespace, parent_obj.name)
             bases = (attr,)
         else:
-            bases = _Object.__bases__
+            bases = (object,)
 
         # Get all object interfaces
         ifaces = []
@@ -446,7 +442,7 @@ def ObjectAttribute(obj_info):
             bases = tuple(list(bases) + ifaces)
 
         # Create a new class
-        cls = type(obj_info.name, bases, dict(_Object.__dict__))
+        cls = type(obj_info.name, bases, dict())
 
     cls.__module__ = obj_info.namespace
 
@@ -460,14 +456,21 @@ def ObjectAttribute(obj_info):
     # GType
     cls.__gtype__ = PGType(obj_info.g_type)
 
-    # Constructor cache
-    cls._constructors = {}
+    if not obj_info.fundamental:
+        # Constructor cache
+        cls._constructors = {}
 
-    # Properties
-    setattr(cls, PROPS_NAME, PropertyAttribute(obj_info))
+        # Properties
+        setattr(cls, PROPS_NAME, PropertyAttribute(obj_info))
 
-    # Signals
-    cls.signals = SignalsAttribute(obj_info)
+        # Signals
+        cls.signals = SignalsAttribute(obj_info)
+
+        # Signals
+        cls.__sigs__ = {}
+        for sig_info in obj_info.get_signals():
+            signal_name = sig_info.name
+            cls.__sigs__[signal_name] = sig_info
 
     # Add constants
     for constant in obj_info.get_constants():
@@ -489,12 +492,6 @@ def ObjectAttribute(obj_info):
     # VFuncs
     for vfunc_info in obj_info.get_vfuncs():
         add_method(vfunc_info, cls, virtual=True)
-
-    # Signals
-    cls.__sigs__ = {}
-    for sig_info in obj_info.get_signals():
-        signal_name = sig_info.name
-        cls.__sigs__[signal_name] = sig_info
 
     cs_info = obj_info.get_class_struct()
     if cs_info:
