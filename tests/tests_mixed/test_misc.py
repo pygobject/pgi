@@ -77,7 +77,7 @@ class MiscTest(unittest.TestCase):
     def test_base_types_class(self):
         c = GObject.GError
         self.assertTrue("GLib" in c.__module__)
-        self.assertTrue("GError" in c.__name__)
+        self.assertTrue("Error" in c.__name__)
 
         c = GObject.GFlags
         self.assertTrue("GObject" in c.__module__)

@@ -116,7 +116,7 @@ class TDocstring(unittest.TestCase):
         if hasattr(GLib.Variant, "parse_error_print_context"):
             self.assertEqual(
                 GLib.Variant.parse_error_print_context.__doc__,
-                "parse_error_print_context(error: GLib.GError, "
+                "parse_error_print_context(error: GLib.Error, "
                 "source_str: str) -> str")
 
     def test_callback_docstring(self):
