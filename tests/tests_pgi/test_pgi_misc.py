@@ -166,3 +166,15 @@ class PGIMisc(unittest.TestCase):
         self.assertTrue(isinstance(x, Gtk.ActionableInterface))
 
         self.assertTrue(Atk.ImplementorIface._get_iface_struct() is None)
+
+    def test_non_gtype_enum(self):
+        from gi.repository import GLib, GObject
+
+        self.assertTrue(issubclass(GLib.BookmarkFileError, GLib.Enum))
+        self.assertFalse(issubclass(GLib.BookmarkFileError, GObject.GEnum))
+
+    def test_non_gtype_flags(self):
+        from gi.repository import GLib, GObject
+
+        self.assertTrue(issubclass(GLib.IOFlags, GLib.Flags))
+        self.assertFalse(issubclass(GLib.IOFlags, GObject.GFlags))

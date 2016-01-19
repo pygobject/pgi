@@ -28,7 +28,7 @@ from pgi.overrides import get_introspection_module, override, deprecated, \
     deprecated_attr
 from pgi.util import PyGIDeprecationWarning
 from pgi import version_info
-from pgi.static import (variant_type_from_string, source_new,
+from pgi.static import (variant_type_from_string, source_new, Enum, Flags,
                         source_set_callback, io_channel_read)
 from pgi import static as _gobject
 from pgi import static as _glib
@@ -37,6 +37,8 @@ from pgi import static as _glib
 GLib = get_introspection_module('GLib')
 
 __all__ = []
+
+__all__ += ["Enum", "Flags"]
 
 _glib._init_glib(GLib)
 Error = GError

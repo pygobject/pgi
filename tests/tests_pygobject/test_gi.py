@@ -1246,7 +1246,8 @@ class TestGFlags(unittest.TestCase):
 class TestNoTypeFlags(unittest.TestCase):
 
     def test_flags(self):
-        self.assertTrue(issubclass(GIMarshallingTests.NoTypeFlags, GObject.GFlags))
+        no_gtype_base = GObject.GFlags if _is_gi else GLib.Flags
+        self.assertTrue(issubclass(GIMarshallingTests.NoTypeFlags, no_gtype_base))
         self.assertTrue(isinstance(GIMarshallingTests.NoTypeFlags.VALUE1, GIMarshallingTests.NoTypeFlags))
         self.assertTrue(isinstance(GIMarshallingTests.NoTypeFlags.VALUE2, GIMarshallingTests.NoTypeFlags))
         self.assertTrue(isinstance(GIMarshallingTests.NoTypeFlags.VALUE3, GIMarshallingTests.NoTypeFlags))

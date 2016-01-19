@@ -8,7 +8,7 @@
 import sys
 import ctypes
 
-from .clib.gobject import GEnumClassPtr, GFlagsClassPtr
+from .clib.gobject import GEnumClassPtr, GFlagsClassPtr, GType
 from .clib.glib import gint
 from .gtype import PGType
 from .util import cached_property, escape_identifier, decode_return, \
@@ -18,15 +18,33 @@ from ._compat import integer_types
 
 
 class EnumBase(int):
-    __gtype__ = PGType.from_name("GEnum")
 
-EnumBase.__name__ = "GEnum"
-EnumBase.__module__ = "GObject"
-
-
-class _EnumClass(EnumBase):
     _allowed = {}
-    _info = None
+
+    def __new__(cls, value):
+        if not isinstance(value, integer_types):
+            raise TypeError("int expected, got %r instead" % type(value))
+        if value > sys.maxsize:
+            raise OverflowError
+        instance = int.__new__(cls, value)
+        if value in cls._allowed:
+            return instance
+        raise ValueError("invalid enum value: %r", value)
+
+    def __repr__(self):
+        return "<enum %s of type %s>" % (self._allowed[self],
+                                         self.__class__.__name__)
+
+    __str__ = __repr__
+
+
+EnumBase.__name__ = "Enum"
+EnumBase.__module__ = "GLib"
+
+
+class GEnumBase(EnumBase):
+
+    __gtype__ = PGType.from_name("GEnum")
 
     def __get_enum_value(self):
         gtype = self.__gtype__._type
@@ -45,37 +63,49 @@ class _EnumClass(EnumBase):
         enum_value = self.__get_enum_value()
         return enum_value.value_name
 
+
+GEnumBase.__name__ = "GEnum"
+GEnumBase.__module__ = "GObject"
+
+
+class FlagsBase(int):
+
+    _flags = []
+
     def __new__(cls, value):
         if not isinstance(value, integer_types):
             raise TypeError("int expected, got %r instead" % type(value))
         if value > sys.maxsize:
             raise OverflowError
-        instance = EnumBase.__new__(cls, value)
-        if value in cls._allowed:
-            return instance
-        raise ValueError("invalid enum value: %r", value)
+        return int.__new__(cls, value)
 
     def __repr__(self):
-        return "<enum %s of type %s>" % (self._allowed[self],
-                                         self.__class__.__name__)
+        names = []
+        for (num, vname) in self._flags:
+            if not self and not num:
+                names.append(vname)
+                break
+            if self & num:
+                names.append(vname)
+
+        names = " | ".join(names) or "0"
+        return "<flags %s of type %s>" % (names, self.__class__.__name__)
 
     __str__ = __repr__
 
+    def __or__(self, other):
+        return type(self)(int(self) | other)
 
-class FlagsBase(int):
-    pass
-
-FlagsBase.__name__ = "GFlags"
-FlagsBase.__module__ = "GObject"
+    def __and__(self, other):
+        return type(self)(int(self) & other)
 
 
-class _FlagsClass(FlagsBase):
-    _flags = []
-    _info = None
+FlagsBase.__name__ = "Flags"
+FlagsBase.__module__ = "GLib"
 
-    @property
-    def __gtype__(self):
-        return PGType(self._info.g_type)
+
+class GFlagsBase(FlagsBase):
+    __gtype__ = PGType.from_name("GFlags")
 
     def __get_flags_value(self, value):
         gtype = self.__gtype__._type
@@ -114,32 +144,8 @@ class _FlagsClass(FlagsBase):
     def first_value_name(self):
         return (self.value_names and self.value_names[0]) or None
 
-    def __new__(cls, value):
-        if not isinstance(value, integer_types):
-            raise TypeError("int expected, got %r instead" % type(value))
-        if value > sys.maxsize:
-            raise OverflowError
-        return FlagsBase.__new__(cls, value)
-
-    def __repr__(self):
-        names = []
-        for (num, vname) in self._flags:
-            if not self and not num:
-                names.append(vname)
-                break
-            if self & num:
-                names.append(vname)
-
-        names = " | ".join(names) or "0"
-        return "<flags %s of type %s>" % (names, self.__class__.__name__)
-
-    __str__ = __repr__
-
-    def __or__(self, other):
-        return type(self)(int(self) | other)
-
-    def __and__(self, other):
-        return type(self)(int(self) & other)
+GFlagsBase.__name__ = "GFlags"
+GFlagsBase.__module__ = "GObject"
 
 
 def _get_values(enum):
@@ -154,13 +160,20 @@ def _get_values(enum):
 
 
 def FlagsAttribute(info):
-    # add them to the class for init checks
-    cls = type(info.name, _FlagsClass.__bases__, dict(_FlagsClass.__dict__))
+    if info.g_type.value != GType.from_name(b"void").value:
+        gtype = PGType(info.g_type)
+        base = GFlagsBase
+    else:
+        gtype = None
+        base = FlagsBase
+
+    cls = type(info.name, (base,), dict())
     cls.__module__ = info.namespace
+    if gtype is not None:
+        cls.__gtype__ = gtype
 
     values = _get_values(info)
     cls._flags = values
-    cls._info = info
 
     # create instances for all of them and add to the class
     for num, vname in values:
@@ -174,13 +187,21 @@ def FlagsAttribute(info):
 
 
 def EnumAttribute(info):
-    # add them to the class for init checks
-    cls = type(info.name, _EnumClass.__bases__, dict(_EnumClass.__dict__))
+
+    if info.g_type.value != GType.from_name(b"void").value:
+        gtype = PGType(info.g_type)
+        base = GEnumBase
+    else:
+        gtype = None
+        base = EnumBase
+
+    cls = type(info.name, (base,), dict())
     cls.__module__ = info.namespace
 
     values = _get_values(info)
     cls._allowed = dict(values)
-    cls.__gtype__ = PGType(info.g_type)
+    if gtype is not None:
+        cls.__gtype__ = gtype
 
     for method in info.get_methods():
         add_method(method, cls)

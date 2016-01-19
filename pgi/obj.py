@@ -405,8 +405,8 @@ def new_class_from_gtype(gtype):
 
         return cls
     elif gtype.is_a(PGType.from_name("GEnum")):
-        from pgi.enum import EnumBase
-        return EnumBase
+        from pgi.enum import GEnumBase
+        return GEnumBase
 
 
 def ObjectAttribute(obj_info):

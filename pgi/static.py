@@ -8,8 +8,8 @@
 import ctypes
 
 from .gtype import PGType as GType
-from .enum import EnumBase as GEnum
-from .enum import FlagsBase as GFlags
+from .enum import GEnumBase as GEnum, EnumBase as Enum
+from .enum import GFlagsBase as GFlags, FlagsBase as Flags
 from .gerror import PGError as GError
 from .obj import InterfaceBase as GInterface
 from .properties import list_properties
@@ -25,6 +25,7 @@ def _init_glib(glib_module):
 
 
 GType, GEnum, GFlags, GError, GInterface, list_properties, pygobject_version
+Flags, Enum
 
 GBoxed = None
 GObject = None
