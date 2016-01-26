@@ -11,6 +11,7 @@ import os
 
 from tests import skipIfGI
 
+import gi
 from gi import get_required_version, require_version, PyGIDeprecationWarning
 require_version("Gtk", "3.0")
 from gi.repository import Gtk, GObject, GLib, Gdk
@@ -126,3 +127,8 @@ class MiscTest(unittest.TestCase):
 
         # pygobject escapes vfuncs before prefixing, do the same
         self.assertTrue(hasattr(WebKit2.WebView, "do_print_"))
+
+    @unittest.skipUnless(hasattr(gi, "require_foreign"), "too old gi")
+    def test_check_foreign(self):
+        self.assertRaises(ImportError, gi.require_foreign, "foo", "bar")
+        self.assertRaises(ImportError, gi.require_foreign, "foo")

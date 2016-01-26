@@ -9,14 +9,14 @@ from . import const
 from ._compat import iterkeys, string_types
 from .importer import require_version, get_required_version
 from .codegen import set_backend
-from .foreign import check_foreign
+from .foreign import require_foreign
 from .util import PyGIDeprecationWarning
 
 
 require_version = require_version
 get_required_version = get_required_version
 set_backend = set_backend
-check_foreign = check_foreign
+require_foreign = require_foreign
 PyGIDeprecationWarning = PyGIDeprecationWarning
 
 version_info = const.VERSION

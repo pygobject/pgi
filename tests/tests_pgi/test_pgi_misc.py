@@ -85,11 +85,8 @@ class PGIMisc(unittest.TestCase):
         self.assertEqual(sig.flags, 2)
         self.assertEqual(sig.return_type, PGType.from_name("void"))
 
-    def test_check_foreign(self):
-        self.assertRaises(ValueError, pgi.check_foreign, "foo", "bar")
-
     @skipUnlessCairo
-    def test_get_foreing(self):
+    def test_get_foreign(self):
         foreign = get_foreign("cairo", "Context")
         self.assertTrue(foreign)
 
