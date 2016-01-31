@@ -7,6 +7,7 @@
 
 import keyword
 import re
+from operator import itemgetter
 from ctypes import cdll
 from ctypes.util import find_library
 
@@ -302,3 +303,40 @@ class cached_property_writable(object):
             return self
         obj.__dict__[self.__name__] = result = self.fget(obj)
         return result
+
+
+class ResultTuple(tuple):
+
+    __slots__ = ()
+    _fformat = ()
+
+    def __repr__(self):
+        return self._fformat % self
+
+    def __reduce__(self):
+        return (tuple, (tuple(self),))
+
+    @classmethod
+    def _new_type(cls, args):
+        """Creates a new class similar to namedtuple.
+
+        Pass a list of field names or None for no field name.
+
+        >>> x = ResultTuple._new_type([None, "bar"])
+        >>> x((1, 3))
+        ResultTuple(1, bar=3)
+        """
+
+        fformat = ["%r" if f is None else "%s=%%r" % f for f in args]
+        fformat = "(%s)" % ", ".join(fformat)
+
+        class _ResultTuple(cls):
+            __slots__ = ()
+            _fformat = fformat
+            if args:
+                for i, a in enumerate(args):
+                    if a is not None:
+                        vars()[a] = property(itemgetter(i))
+                del i, a
+
+        return _ResultTuple

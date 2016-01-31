@@ -7,8 +7,8 @@
 
 import re
 import traceback
-from operator import itemgetter
 
+from ..util import ResultTuple
 from .backend import list_backends, get_backend
 from .utils import CodeBlock
 from pgi.util import escape_identifier, escape_parameter, cache_return
@@ -34,41 +34,6 @@ def may_be_null_is_nullable():
     info = repo.find_by_name("GLib", "spawn_sync")
     # this argument is (allow-none) and can never be (nullable)
     return not info.get_arg(8).may_be_null
-
-
-class _ReturnValue(tuple):
-    __slots__ = ()
-    _fformat = ()
-
-    def __repr__(self):
-        return self._fformat % self
-
-    def __reduce__(self):
-        return (tuple, (tuple(self),))
-
-
-def create_return_tuple(args):
-    """Creates a new class similar to namedtuple.
-
-    Pass a list of field names or None for no field name.
-
-    >>> x = new_named_tuple([None, "bar"])
-    >>> x((1, 3))
-    ReturnValue(1, bar=3)
-    """
-
-    fformat = ["%r" if f is None else "%s=%%r" % f for f in args]
-    fformat = "(%s)" % ", ".join(fformat)
-
-    class ReturnValue(_ReturnValue):
-        __slots__ = ()
-        _fformat = fformat
-        for i, a in enumerate(args):
-            if a is not None:
-                vars()[a] = property(itemgetter(i))
-        del i, a
-
-    return ReturnValue
 
 
 def get_type_name(type_):
@@ -290,7 +255,7 @@ except AttributeError:
     elif len(out) > 1:
         # for more than one value use a named tuple.
         out_vars, out_names = zip(*out)
-        ntuple = create_return_tuple(out_names)
+        ntuple = ResultTuple._new_type(out_names)
         block, var = backend.parse("""
 return $ntuple((%s))
 """ % ", ".join(out_vars), ntuple=ntuple)
