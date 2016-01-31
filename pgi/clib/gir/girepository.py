@@ -109,6 +109,8 @@ class GIRepository(c_void_p):
         if PY3:
             namespace = namespace.encode("ascii")
         res = immediate_dependencies(namespace)
+        if not res:
+            return []
         res = unpack_nullterm_array(res)
         if PY3:
             res = [p.decode("ascii") for p in res]
