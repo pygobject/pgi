@@ -46,6 +46,7 @@ class TestOverrides(unittest.TestCase):
         self.assertEqual(mod_override.OVERRIDES_CONSTANT, 7)
         self.assertEqual(mod.OVERRIDES_CONSTANT, 42)
 
+    @unittest.skipUnless(hasattr(gi.overrides, "load_overrides"), 'too old gi')
     def test_load_no_overrides(self):
         mod_key = "gi.overrides.GIMarshallingTests"
         had_mod = mod_key in sys.modules
@@ -137,6 +138,8 @@ class TestImporter(unittest.TestCase):
         else:
             self.assertTrue('introspection typelib' in exception_string)
 
+    @unittest.skipUnless(
+        hasattr(gi.importer, "_check_require_version"), 'too old gi')
     def test_require_version_warning(self):
         check = gi.importer._check_require_version
 
