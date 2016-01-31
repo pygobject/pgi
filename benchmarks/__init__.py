@@ -37,6 +37,10 @@ def run(load_gi, backend=None):
             hl = "### PGI " + "#" * 100
     print(hl[:80])
 
+    gi.require_version('Gtk', '3.0')
+    gi.require_version('Regress', '1.0')
+    gi.require_version('GIMarshallingTests', '1.0')
+
     t = time.time()
     from gi.repository import Gtk, GObject, GLib, Gio, Pango, Gdk
     GLib = GLib
