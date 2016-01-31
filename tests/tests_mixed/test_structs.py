@@ -100,8 +100,9 @@ class StructTest(unittest.TestCase):
     @skipIfGI
     def test_error_field(self):
         try:
+            gi.require_version('EvinceView', '3.0')
             from gi.repository import EvinceView
-        except ImportError:
+        except (ImportError, ValueError):
             return
 
         field = EvinceView.JobFonts.error

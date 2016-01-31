@@ -99,10 +99,16 @@ class GIRepository(c_void_p):
             res = [b.decode("ascii") for b in res]
         return res
 
-    def get_dependencies(self, namespace):
+    def get_immediate_dependencies(self, namespace):
+        try:
+            # https://bugzilla.gnome.org/show_bug.cgi?id=743782
+            immediate_dependencies = self._get_immediate_dependencies
+        except AttributeError:
+            immediate_dependencies = self._get_dependencies
+
         if PY3:
             namespace = namespace.encode("ascii")
-        res = self._get_dependencies(namespace)
+        res = immediate_dependencies(namespace)
         res = unpack_nullterm_array(res)
         if PY3:
             res = [p.decode("ascii") for p in res]
@@ -116,7 +122,8 @@ class GIRepository(c_void_p):
     def get_shared_library(self, namespace):
         if PY3:
             namespace = namespace.encode("ascii")
-            return self._get_shared_library(namespace).decode("ascii")
+            lib = self._get_shared_library(namespace)
+            return lib.decode("ascii") if lib else lib
         return self._get_shared_library(namespace)
 
     def get_typelib_path(self, namespace):
@@ -132,7 +139,7 @@ class GIRepository(c_void_p):
             return self._get_version(namespace).decode("ascii")
         return self._get_version(namespace)
 
-    def is_registered(self, namespace, version):
+    def is_registered(self, namespace, version=None):
         if PY3:
             namespace = namespace.encode("ascii")
             if version is not None:
@@ -172,6 +179,7 @@ _methods = [
         GITypelib, [GIRepository, gchar_p, gchar_p, gchar_p,
                     GIRepositoryLoadFlags, POINTER(GErrorPtr)]),
     ("_get_dependencies", POINTER(gchar_p), [GIRepository, gchar_p]),
+    ("_get_immediate_dependencies", POINTER(gchar_p), [GIRepository, gchar_p]),
     ("_get_loaded_namespaces", POINTER(gchar_p), [GIRepository]),
     ("_find_by_gtype", GIBaseInfo, [GIRepository, GType], False),
     ("_get_n_infos", gint, [GIRepository, gchar_p]),

@@ -10,7 +10,7 @@ from ._compat import iterkeys, string_types
 from .importer import require_version, get_required_version
 from .codegen import set_backend
 from .foreign import require_foreign
-from .util import PyGIDeprecationWarning
+from .util import PyGIDeprecationWarning, PyGIWarning
 
 
 require_version = require_version
@@ -18,6 +18,7 @@ get_required_version = get_required_version
 set_backend = set_backend
 require_foreign = require_foreign
 PyGIDeprecationWarning = PyGIDeprecationWarning
+PyGIWarning = PyGIWarning
 
 version_info = const.VERSION
 __version__ = ".".join(map(str, version_info))

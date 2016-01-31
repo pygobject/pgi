@@ -42,7 +42,7 @@ class GIRepository(object):
         return [fsdecode(ffi, p) for p in unpack_glist(res, "gchar*",
                                                        transfer_full=False)]
 
-    def is_registered(self, namespace, version):
+    def is_registered(self, namespace, version=None):
         version = string_encode(ffi, version, null=True)
         namespace = string_encode(ffi, namespace)
         return bool(lib.g_irepository_is_registered(self._ptr,
@@ -74,9 +74,13 @@ class GIRepository(object):
                                                     flags, error)
         return GITypelib(res)
 
-    def get_dependencies(self, namespace):
+    def get_immediate_dependencies(self, namespace):
+        try:
+            get_deps = lib.g_irepository_get_immediate_dependencies
+        except AttributeError:
+            get_deps = lib.g_irepository_get_dependencies
         namespace = string_encode(ffi, namespace)
-        res = lib.g_irepository_get_dependencies(self._ptr, namespace)
+        res = get_deps(self._ptr, namespace)
         return [string_decode(ffi, p) for p in unpack_zeroterm_array(res)]
 
     def get_loaded_namespaces(self):

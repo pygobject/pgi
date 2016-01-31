@@ -15,6 +15,10 @@ from .clib.gir import GITypeTag, GIInfoType
 from ._compat import xrange, text_type
 
 
+class PyGIWarning(Warning):
+    pass
+
+
 class PyGIDeprecationWarning(DeprecationWarning):
     pass
 

@@ -216,6 +216,8 @@ GITypelib *    g_irepository_require_private (GIRepository  *repository,
                          GError       **error);
 gchar      ** g_irepository_get_dependencies (GIRepository *repository,
                           const gchar  *namespace_);
+gchar      ** g_irepository_get_immediate_dependencies (GIRepository *repository,
+                                          const char   *namespace);
 gchar      ** g_irepository_get_loaded_namespaces (GIRepository *repository);
 GIBaseInfo *  g_irepository_find_by_gtype (GIRepository *repository,
                        GType         gtype);

@@ -53,10 +53,11 @@ class _GIRepoTest(unittest.TestCase):
         self.assertTrue(isinstance(res, list))
         self.assertTrue("GObject" in res)
 
-    def test_get_dependencies(self):
+    def test_get_immediate_dependencies(self):
         repo = self.GIRepository.get_default()
         repo.require("GObject", "2.0", 0)
-        self.assertEqual(repo.get_dependencies("GObject"), ["GLib-2.0"])
+        self.assertEqual(
+            repo.get_immediate_dependencies("GObject"), ["GLib-2.0"])
 
     def test_search_path(self):
         repo = self.GIRepository.get_default()
@@ -94,6 +95,8 @@ class _GIRepoTest(unittest.TestCase):
         res = repo.is_registered("GObject", "2.0")
         self.assertTrue(res)
         res = repo.is_registered("GObject", None)
+        self.assertTrue(res)
+        res = repo.is_registered("GObject")
         self.assertTrue(res)
         res = repo.is_registered("Foobar", "2.0")
         self.assertFalse(res)

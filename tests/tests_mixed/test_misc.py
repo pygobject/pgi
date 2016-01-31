@@ -121,8 +121,9 @@ class MiscTest(unittest.TestCase):
     def test_vfunc_name_escape(self):
         # print only a keyword in py2
         try:
+            gi.require_version('WebKit2', '4.0')
             from gi.repository import WebKit2
-        except ImportError:
+        except (ImportError, ValueError):
             return
 
         # pygobject escapes vfuncs before prefixing, do the same
