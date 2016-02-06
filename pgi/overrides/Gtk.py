@@ -118,8 +118,7 @@ def _builder_connect_callback(builder, gobj, signal_name, handler_name, connect_
 class Widget(Gtk.Widget):
 
     translate_coordinates = strip_boolean_result(Gtk.Widget.translate_coordinates)
-    """translate_coordinates(dest_widget, src_x, src_y)
-
+    """
     :param dest_widget: a :obj:`Gtk.Widget`
     :type dest_widget: :obj:`Gtk.Widget`
     :param src_x: X position relative to `src_widget`
@@ -132,7 +131,7 @@ class Widget(Gtk.Widget):
         containing the X and Y position relative to `dest_widget`.
     :rtype: (**dest_x**: :obj:`int`, **dest_y**: :obj:`int`) or :obj:`None`
 
-    {{ body }}
+    {{ docs }}
     """
 
     def drag_dest_set_target_list(self, target_list):
@@ -146,6 +145,21 @@ class Widget(Gtk.Widget):
         super(Widget, self).drag_source_set_target_list(target_list)
 
     def style_get_property(self, property_name, value=None):
+        """style_get_property(property_name, value=None)
+
+        :param property_name:
+            the name of a style property
+        :type property_name: :obj:`str`
+
+        :param value:
+            Either :obj:`None` or a correctly initialized :obj:`GObject.Value`
+        :type value: :obj:`GObject.Value` or :obj:`None`
+
+        :returns: The Python value of the style property
+
+        {{ docs }}
+        """
+
         if value is None:
             prop = self.find_style_property(property_name)
             if prop is None:
@@ -162,7 +176,6 @@ __all__.append('Widget')
 
 
 class Container(Gtk.Container, Widget):
-
     def __len__(self):
         return len(self.get_children())
 
@@ -179,8 +192,39 @@ class Container(Gtk.Container, Widget):
     __nonzero__ = __bool__
 
     get_focus_chain = strip_boolean_result(Gtk.Container.get_focus_chain)
+    """
+    :returns:
+        A list of focusable widgets or :obj:`None` if no focus chain has
+        been explicitly set.
+
+    :rtype: [:obj:`Gtk.Widget`] or :obj:`None`
+
+    Retrieves the focus chain of the container, if one has been
+    set explicitly. If no focus chain has been explicitly
+    set, GTK+ computes the focus chain based on the positions
+    of the children. In that case returns :obj:`None`.
+    """
 
     def child_get_property(self, child, property_name, value=None):
+        """child_get_property(child, property_name, value=None)
+
+        :param child:
+            a widget which is a child of `self`
+        :type child: :obj:`Gtk.Widget`
+
+        :param property_name:
+            the name of the property to get
+        :type property_name: :obj:`str`
+
+        :param value:
+            Either :obj:`None` or a correctly initialized :obj:`GObject.Value`
+        :type value: :obj:`GObject.Value` or :obj:`None`
+
+        :returns: The Python value of the child property
+
+        {{ docs }}
+        """
+
         if value is None:
             prop = self.find_child_property(property_name)
             if prop is None:
@@ -193,10 +237,12 @@ class Container(Gtk.Container, Widget):
 
     def child_get(self, child, *prop_names):
         """Returns a list of child property values for the given names."""
+
         return [self.child_get_property(child, name) for name in prop_names]
 
     def child_set(self, child, **kwargs):
         """Set a child properties on the given child to key/value pairs."""
+
         for name, value in kwargs.items():
             name = name.replace('_', '-')
             self.child_set_property(child, name, value)
@@ -209,9 +255,44 @@ __all__.append('Container')
 class Editable(Gtk.Editable):
 
     def insert_text(self, text, position):
+        """insert_text(self, text, position)
+
+        :param new_text:
+            the text to append
+        :type new_text: :obj:`str`
+
+        :param position:
+            location of the position text will be inserted at
+        :type position: :obj:`int`
+
+        :returns:
+            location of the position text will be inserted at
+        :rtype: :obj:`int`
+
+        Inserts `new_text` into the contents of the
+        widget, at position `position`.
+
+        Note that the position is in characters, not in bytes.
+        """
+
         return super(Editable, self).insert_text(text, -1, position)
 
     get_selection_bounds = strip_boolean_result(Gtk.Editable.get_selection_bounds, fail_ret=())
+    """
+    :returns:
+        An empty tuple if no area is selected or a tuple containing:
+
+        :start_pos: the starting position
+        :end_pos: the end position
+
+    :rtype: (**start_pos**: :obj:`int`, **end_pos**: :obj:`int`) or ``()``
+
+    Retrieves the selection bound of the editable. start_pos will be filled
+    with the start of the selection and `end_pos` with end. If no text was
+    selected an empty tuple will be returned.
+
+    Note that positions are specified in characters, not bytes.
+    """
 
 
 Editable = override(Editable)
@@ -404,16 +485,16 @@ __all__.append('ActionGroup')
 
 
 class UIManager(Gtk.UIManager):
-    def add_ui_from_string(self, buffer):
-        if not isinstance(buffer, _basestring):
-            raise TypeError('buffer must be a string')
+    def add_ui_from_string(self, buffer, length=-1):
+        """add_ui_from_string(buffer, length=-1)
 
-        length = len(buffer.encode('UTF-8'))
+        {{ all }}
+        """
 
         return Gtk.UIManager.add_ui_from_string(self, buffer, length)
 
-    def insert_action_group(self, buffer, length=-1):
-        return Gtk.UIManager.insert_action_group(self, buffer, length)
+    def insert_action_group(self, action_group, pos=-1):
+        return Gtk.UIManager.insert_action_group(self, action_group, pos)
 
 UIManager = override(UIManager)
 __all__.append('UIManager')
@@ -421,6 +502,12 @@ __all__.append('UIManager')
 
 class ComboBox(Gtk.ComboBox, Container):
     get_active_iter = strip_boolean_result(Gtk.ComboBox.get_active_iter)
+    """
+    :returns: a :obj:`Gtk.TreeIter` or :obj:`None` if there is no active item
+    :rtype: :obj:`Gtk.TreeIter` or :obj:`None`
+
+    Returns the `iter` for the current active item, if it exists.
+    """
 
 ComboBox = override(ComboBox)
 __all__.append('ComboBox')
@@ -456,7 +543,9 @@ __all__.append('MenuItem')
 
 class Builder(Gtk.Builder):
     def connect_signals(self, obj_or_map):
-        """Connect signals specified by this builder to a name, handler mapping.
+        """connect_signals(self, obj_or_map)
+
+        Connect signals specified by this builder to a name, handler mapping.
 
         Connect signal, name, and handler sets specified in the builder with
         the given mapping "obj_or_map". The handler/value aspect of the mapping
@@ -469,20 +558,31 @@ class Builder(Gtk.Builder):
         """
         self.connect_signals_full(_builder_connect_callback, obj_or_map)
 
-    def add_from_string(self, buffer):
-        if not isinstance(buffer, _basestring):
-            raise TypeError('buffer must be a string')
+    def add_from_string(self, buffer, length=-1):
+        """add_from_string(buffer, length=-1)
 
-        length = len(buffer)
+        {{ all }}
+        """
 
         return Gtk.Builder.add_from_string(self, buffer, length)
 
     def add_objects_from_string(self, buffer, object_ids):
-        if not isinstance(buffer, _basestring):
-            raise TypeError('buffer must be a string')
+        """add_objects_from_string(buffer, object_ids)
 
-        length = len(buffer)
+        :param buffer: the string to parse
+        :type buffer: :obj:`str`
+        :param object_ids: array of objects to build
+        :type object_ids: [:obj:`str`]
 
+        :raises: :class:`GLib.Error`
+
+        :returns: A positive value on success, 0 if an error occurred
+        :rtype: :obj:`int`
+
+        {{ docs }}
+        """
+
+        length = -1
         return Gtk.Builder.add_objects_from_string(self, buffer, length, object_ids)
 
 Builder = override(Builder)
@@ -559,7 +659,8 @@ class Dialog(Gtk.Dialog, Container):
     vbox = property(lambda dialog: dialog.get_content_area())
 
     def add_buttons(self, *args):
-        """
+        """add_buttons(*args)
+
         The add_buttons() method adds several buttons to the Gtk.Dialog using
         the button data passed as arguments to the method. This method is the
         same as calling the Gtk.Dialog.add_button() repeatedly. The button data
@@ -653,8 +754,60 @@ class IconView(Gtk.IconView):
                                category=PyGTKDeprecationWarning)
 
     get_item_at_pos = strip_boolean_result(Gtk.IconView.get_item_at_pos)
+    """
+    :param x: The x position to be identified
+    :type x: :obj:`int`
+
+    :param y: The y position to be identified
+    :type y: :obj:`int`
+
+    :returns:
+        If not item exists at the specified position returns :obj:`None`,
+        otherwise a tuple containing:
+
+        :path: The path
+        :cell: The renderer responsible for the cell at (`x`, `y`)
+
+    :rtype: (**path**: :obj:`Gtk.TreePath`, **cell**: :obj:`Gtk.CellRenderer`) or :obj:`None`
+
+    {{ docs }}
+    """
+
     get_visible_range = strip_boolean_result(Gtk.IconView.get_visible_range)
+    """
+    :returns:
+        Returns :obj:`None` if there is no visible range or a tuple
+        containing:
+
+        :start_path: Start of region
+        :end_path: End of region
+
+    :rtype: (**start_path**: :obj:`Gtk.TreePath`, **end_path**: :obj:`Gtk.TreePath`) or :obj:`None`
+
+    {{ docs }}
+    """
+
     get_dest_item_at_pos = strip_boolean_result(Gtk.IconView.get_dest_item_at_pos)
+    """
+    :param drag_x:
+        the position to determine the destination item for
+    :type drag_x: :obj:`int`
+
+    :param drag_y:
+        the position to determine the destination item for
+    :type drag_y: :obj:`int`
+
+    :returns:
+        If there is no item at the given position return :obj:`None` otherwise
+        a tuple containing:
+
+        :path: The path of the item
+        :pos: The drop position
+
+    :rtype: (**path**: :obj:`Gtk.TreePath`, **pos**: :obj:`Gtk.IconViewDropPosition`) or :obj:`None`
+
+    {{ docs }}
+    """
 
 IconView = override(IconView)
 __all__.append('IconView')
@@ -671,6 +824,18 @@ __all__.append('ToolButton')
 
 class IMContext(Gtk.IMContext):
     get_surrounding = strip_boolean_result(Gtk.IMContext.get_surrounding)
+    """
+    :returns:
+        :obj:`None` if no surrounding text was provided; otherwise a tuple
+        containing:
+
+        :text: text holding context around the insertion point.
+        :cursor_index: byte index of the insertion cursor within `text`
+
+    :rtype: (**text**: :obj:`str`, **cursor_index**: :obj:`int`) or :obj:`None`
+
+    {{ docs }}
+    """
 
 IMContext = override(IMContext)
 __all__.append('IMContext')
@@ -678,6 +843,22 @@ __all__.append('IMContext')
 
 class RecentInfo(Gtk.RecentInfo):
     get_application_info = strip_boolean_result(Gtk.RecentInfo.get_application_info)
+    """
+    :param app_name: the name of the application that has registered this item
+    :type app_name: :obj:`str`
+
+    :returns:
+        :obj:`None` if no application with `app_name` has registered this
+        resource inside the recently used list otherwise a tuple containing:
+
+        :app_exec: string containing the command line
+        :count: the number of times this item was registered
+        :time_: the timestamp this item was last registered for this application
+
+    :rtype: (**app_exec**: :obj:`str`, **count**: :obj:`int`, **time_**: :obj:`int`) or :obj:`None`
+
+    {{ docs }}
+    """
 
 RecentInfo = override(RecentInfo)
 __all__.append('RecentInfo')
@@ -699,6 +880,8 @@ class TextBuffer(Gtk.TextBuffer):
             Name of the new tag, or None
         :param **properties:
             Keyword list of properties and their values
+        :returns:
+            A new tag.
 
         This is equivalent to creating a Gtk.TextTag and then adding the
         tag to the buffer's tag table. The returned tag is owned by
@@ -711,9 +894,6 @@ class TextBuffer(Gtk.TextBuffer):
 
         Properties are passed as a keyword list of names and values (e.g.
         foreground='DodgerBlue', weight=Pango.Weight.BOLD)
-
-        :returns:
-            A new tag.
         """
 
         tag = Gtk.TextTag(name=tag_name, **properties)
@@ -724,11 +904,18 @@ class TextBuffer(Gtk.TextBuffer):
         return Gtk.TextBuffer.create_mark(self, mark_name, where, left_gravity)
 
     def set_text(self, text, length=-1):
+        """set_text(text, length=-1)
+
+        {{ all }}
+        """
+
         Gtk.TextBuffer.set_text(self, text, length)
 
     def insert(self, iter, text, length=-1):
-        if not isinstance(text, _basestring):
-            raise TypeError('text must be a string, not %s' % type(text))
+        """insert(iter, text, length=-1)
+
+        {{ all }}
+        """
 
         Gtk.TextBuffer.insert(self, iter, text, length)
 
@@ -765,6 +952,18 @@ class TextBuffer(Gtk.TextBuffer):
         Gtk.TextBuffer.insert_at_cursor(self, text, length)
 
     get_selection_bounds = strip_boolean_result(Gtk.TextBuffer.get_selection_bounds, fail_ret=())
+    """
+    :returns:
+        If there is no selection returns an empty tuple otherwise a tuple
+        containing:
+
+        :start: selection start
+        :end: selection end
+
+    :rtype: (**start**: :obj:`Gtk.TextIter`, **end**: :obj:`Gtk.TextIter`) or :obj:`None`
+
+    {{ docs }}
+    """
 
 TextBuffer = override(TextBuffer)
 __all__.append('TextBuffer')
@@ -772,13 +971,68 @@ __all__.append('TextBuffer')
 
 class TextIter(Gtk.TextIter):
     forward_search = strip_boolean_result(Gtk.TextIter.forward_search)
+    """
+    :param str: a search string
+    :type str: :obj:`str`
+
+    :param flags: flags affecting how the search is done
+    :type flags: :obj:`Gtk.TextSearchFlags`
+
+    :param limit: location of last possible `match_end`, or :obj:`None` for the end of the buffer
+    :type limit: :obj:`Gtk.TextIter` or :obj:`None`
+
+    :returns:
+        If no match was found returns :obj:`None` otherwise a tuple containing:
+
+        :match_start: start of match
+        :match_end: end of match
+
+    :rtype: (**match\_start**: :obj:`Gtk.TextIter`, **match\_end**: :obj:`Gtk.TextIter`) or :obj:`None`
+
+    {{ docs }}
+    """
+
     backward_search = strip_boolean_result(Gtk.TextIter.backward_search)
+    """
+    :param str: search string
+    :type str: :obj:`str`
+
+    :param flags: bitmask of flags affecting the search
+    :type flags: :obj:`Gtk.TextSearchFlags`
+
+    :param limit: location of last possible `match_start`, or :obj:`None` for start of buffer
+    :type limit: :obj:`Gtk.TextIter` or :obj:`None`
+
+    :returns:
+        :obj:`None` if not match was found otherwise a tuple containing:
+
+        :match_start: start of match
+        :match_end: end of match
+
+    :rtype: (**match_start**: :obj:`Gtk.TextIter`, **match_end**: :obj:`Gtk.TextIter`) or :obj:`None`
+
+    {{ docs }}
+    """
 
 TextIter = override(TextIter)
 __all__.append('TextIter')
 
 
 class TreeModel(Gtk.TreeModel):
+    """
+    .. note::
+
+        Implements ``__len__``, ``__bool__``, ``__nonzero__``, ``__iter__``,
+        ``__getitem__``, ``__setitem__`` and ``__delitem__``.
+
+        Iterating over a :obj:`Gtk.TreeModel` yields
+        :obj:`Gtk.TreeModelRow` instances.
+
+        ``__getitem__`` returns a :obj:`Gtk.TreeModelRow`.
+
+    {{ all }}
+    """
+
     def __len__(self):
         return self.iter_n_children(None)
 
@@ -829,27 +1083,127 @@ class TreeModel(Gtk.TreeModel):
         return TreeModelRowIter(self, self.get_iter_first())
 
     get_iter_first = strip_boolean_result(Gtk.TreeModel.get_iter_first)
+    """
+    :returns: :obj:`Gtk.TreeIter` or :obj:`None` if the tree is empty.
+    :rtype: :obj:`Gtk.TreeIter` or :obj:`None`
+
+    {{ docs }}
+    """
+
     iter_children = strip_boolean_result(Gtk.TreeModel.iter_children)
+    """
+    :param parent: the :obj:`Gtk.TreeIter`-struct, or :obj:`None`
+    :type parent: :obj:`Gtk.TreeIter` or :obj:`None`
+
+    :returns: :obj:`Gtk.TreeIter` or :obj:`None`
+    :rtype: :obj:`Gtk.TreeIter` or :obj:`None`
+
+    Sets `iter` to point to the first child of `parent`.
+    If `parent` has no children, :obj:`None` is returned.
+    If `parent` is :obj:`None` returns the first node, equivalent to
+    ``Gtk.TreeModel.iter_first()``.
+    """
+
     iter_nth_child = strip_boolean_result(Gtk.TreeModel.iter_nth_child)
+    """
+    :param parent: the :obj:`Gtk.TreeIter`-struct to get the child from, or :obj:`None`.
+    :type parent: :obj:`Gtk.TreeIter` or :obj:`None`
+
+    :param n: the index of the desired child
+    :type n: :obj:`int`
+
+    :returns: :obj:`Gtk.TreeIter` if `parent` has an `n`-th child otherwise :obj:`None`
+    :rtype: :obj:`Gtk.TreeIter` or :obj:`None`
+
+    Returns child `iter` of `parent`, using the given index.
+
+    The first index is 0. If `n` is too big, or `parent` has no children,
+    :obj:`None` is returned. `parent` will remain a valid node after this
+    function has been called. As a special case, if `parent` is :obj:`None`,
+    then the `n`-th root node is set.
+    """
+
     iter_parent = strip_boolean_result(Gtk.TreeModel.iter_parent)
+    """
+    :param child: the :obj:`Gtk.TreeIter`-struct
+    :type child: :obj:`Gtk.TreeIter`
+
+    :returns: :obj:`Gtk.TreeIter` or :obj:`None` if `child` has a parent.
+    :rtype:  :obj:`Gtk.TreeIter` or :obj`None`
+
+    Returns iter of the parent of `child`.
+
+    If `child` is at the toplevel, and doesn't have a parent, then :obj:`None`
+    is returned. `child` will remain a valid node after this function has been
+    called.
+    """
+
     get_iter_from_string = strip_boolean_result(Gtk.TreeModel.get_iter_from_string,
                                                 ValueError, 'invalid tree path')
+    """
+    :param path_string: a string representation of a :obj:`Gtk.TreePath`-struct
+    :type path_string: :obj:`str`
+
+    :raises: :class:`ValueError` if an iterator pointing to `path_string` does not exist.
+    :returns: a :obj:`Gtk.TreeIter`
+    :rtype: :obj:`Gtk.TreeIter`
+
+    Returns a valid iterator pointing to `path_string`, if it
+    exists. Otherwise raises :class:`ValueError`
+    """
 
     def get_iter(self, path):
+        """
+        :param path: the :obj:`Gtk.TreePath`-struct
+        :type path: :obj:`Gtk.TreePath`
+
+        :raises: :class:`ValueError` if `path` doesn't exist
+        :returns: a :obj:`Gtk.TreeIter`
+        :rtype: :obj:`Gtk.TreeIter`
+
+        Returns an iterator pointing to `path`. If `path` does not exist
+        :class:`ValueError` is raised.
+        """
+
         path = self._coerce_path(path)
         success, aiter = super(TreeModel, self).get_iter(path)
         if not success:
             raise ValueError("invalid tree path '%s'" % path)
         return aiter
 
-    def iter_next(self, aiter):
-        next_iter = aiter.copy()
+    def iter_next(self, iter):
+        """
+        :param iter: the :obj:`Gtk.TreeIter`-struct
+        :type iter: :obj:`Gtk.TreeIter`
+
+        :returns: a :obj:`Gtk.TreeIter` or :obj:`None`
+        :rtype: :obj:`Gtk.TreeIter` or :obj:`None`
+
+        Returns an iterator pointing to the node following `iter` at the
+        current level.
+
+        If there is no next `iter`, :obj:`None` is returned.
+        """
+
+        next_iter = iter.copy()
         success = super(TreeModel, self).iter_next(next_iter)
         if success:
             return next_iter
 
-    def iter_previous(self, aiter):
-        prev_iter = aiter.copy()
+    def iter_previous(self, iter):
+        """
+        :param iter: the :obj:`Gtk.TreeIter`-struct
+        :type iter: :obj:`Gtk.TreeIter`
+
+        :returns: a :obj:`Gtk.TreeIter` or :obj:`None`
+        :rtype: :obj:`Gtk.TreeIter` or :obj:`None`
+
+        Returns an iterator pointing to the previous node at the current level.
+
+        If there is no previous `iter`, :obj:`None` is returned.
+        """
+
+        prev_iter = iter.copy()
         success = super(TreeModel, self).iter_previous(prev_iter)
         if success:
             return prev_iter
@@ -875,6 +1229,22 @@ class TreeModel(Gtk.TreeModel):
         return (result, columns)
 
     def set_row(self, treeiter, row):
+        """
+        :param treeiter: the :obj:`Gtk.TreeIter`
+        :type treeiter: :obj:`Gtk.TreeIter`
+
+        :param row: a list of values for each column
+        :type row: [:obj:`object`]
+
+        Sets all values of a row pointed to by `treeiter` from a list of
+        values passes as `row`. The length of the row has to match the number
+        of columns of the model. :obj:`None` in `row` means the value will be
+        skipped and not set.
+
+        Also see :obj:`Gtk.ListStore.set_value`\() and
+        :obj:`Gtk.TreeStore.set_value`\()
+        """
+
         converted_row, columns = self._convert_row(row)
         for column in columns:
             value = row[column]
@@ -891,6 +1261,19 @@ class TreeModel(Gtk.TreeModel):
         return GObject.Value(self.get_column_type(column), value)
 
     def get(self, treeiter, *columns):
+        """
+        :param treeiter: the :obj:`Gtk.TreeIter`
+        :type treeiter: :obj:`Gtk.TreeIter`
+
+        :param \\*columns: a list of column indices to fetch
+        :type columns: (:obj:`int`)
+
+        Returns a tuple of all values specified by their indices in `columns`
+        in the order the indices are contained in `columns`
+
+        Also see :obj:`Gtk.TreeStore.get_value`\()
+        """
+
         n_columns = self.get_n_columns()
 
         values = []
@@ -933,6 +1316,21 @@ __all__.append('TreeModel')
 class TreeSortable(Gtk.TreeSortable, ):
 
     get_sort_column_id = strip_boolean_result(Gtk.TreeSortable.get_sort_column_id, fail_ret=(None, None))
+    """
+    :returns:
+        `(None, None)` if the sort column is one of the special sort
+        column ids. Otherwise a tuple containing:
+
+        :sort_column_id: The sort column id
+        :order: The :obj:`Gtk.SortType`
+
+    :rtype: (**sort_column_id**: :obj:`int`, **order**: :obj:`Gtk.SortType`) or (:obj:`None, :obj:`None`)
+
+    Returns `sort_column_id` and `order` with the current sort column and the
+    order. It returns (:obj:`None, :obj:`None`) if the `sort_column_id` is
+    :obj:`Gtk.TREE_SORTABLE_DEFAULT_SORT_COLUMN_ID` or
+    :obj:`Gtk.TREE_SORTABLE_UNSORTED_SORT_COLUMN_ID`.
+    """
 
     def set_sort_func(self, sort_column_id, sort_func, user_data=None):
         super(TreeSortable, self).set_sort_func(sort_column_id, sort_func, user_data)
@@ -968,6 +1366,22 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
         return treeiter
 
     def append(self, row=None):
+        """append(row=None)
+
+        :param row: a list of values to apply to the newly append row or :obj:`None`
+        :type row: [:obj:`object`] or :obj:`None`
+
+        :returns: :obj:`Gtk.TreeIter` of the appended row
+        :rtype: :obj:`Gtk.TreeIter`
+
+        If `row` is :obj:`None` the appended row will be empty and to fill in
+        values you need to call :obj:`Gtk.ListStore.set`\() or
+        :obj:`Gtk.ListStore.set_value`\().
+
+        If `row` isn't :obj:`None` it has to be a list of values which will be
+        used to fill the row .
+        """
+
         if row:
             return self._do_insert(-1, row)
         # gtk_list_store_insert() does not know about the "position == -1"
@@ -976,15 +1390,75 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
             return Gtk.ListStore.append(self)
 
     def prepend(self, row=None):
+        """prepend(row=None)
+
+        :param row: a list of values to apply to the newly prepend row or :obj:`None`
+        :type row: [:obj:`object`] or :obj:`None`
+
+        :returns: :obj:`Gtk.TreeIter` of the prepended row
+        :rtype: :obj:`Gtk.TreeIter`
+
+        If `row` is :obj:`None` the prepended row will be empty and to fill in
+        values you need to call :obj:`Gtk.ListStore.set`\() or
+        :obj:`Gtk.ListStore.set_value`\().
+
+        If `row` isn't :obj:`None` it has to be a list of values which will be
+        used to fill the row.
+        """
+
         return self._do_insert(0, row)
 
     def insert(self, position, row=None):
+        """insert(position, row=None)
+
+        :param position: the position the new row will be inserted at
+        :type position: :obj:`int`
+
+        :param row: a list of values to apply to the newly inserted row or :obj:`None`
+        :type row: [:obj:`object`] or :obj:`None`
+
+        :returns: :obj:`Gtk.TreeIter` of the inserted row
+        :rtype: :obj:`Gtk.TreeIter`
+
+        If `row` is :obj:`None` the inserted row will be empty and to fill in
+        values you need to call :obj:`Gtk.ListStore.set`\() or
+        :obj:`Gtk.ListStore.set_value`\().
+
+        If `row` isn't :obj:`None` it has to be a list of values which will be
+        used to fill the row.
+
+        If `position` is -1 or is larger than the number of rows on the list,
+        then the new row will be appended to the list.
+        """
+
         return self._do_insert(position, row)
 
     # FIXME: sends two signals; check if this can use an atomic
     # insert_with_valuesv()
 
     def insert_before(self, sibling, row=None):
+        """insert_before(sibling, row=None)
+
+        :param sibling: A valid :obj:`Gtk.TreeIter`, or :obj:`None`
+        :type sibling: :obj:`Gtk.TreeIter` or :obj:`None`
+
+        :param row: a list of values to apply to the newly inserted row or :obj:`None`
+        :type row: [:obj:`object`] or :obj:`None`
+
+        :returns: :obj:`Gtk.TreeIter` pointing to the new row
+        :rtype: :obj:`Gtk.TreeIter`
+
+        Inserts a new row before `sibling`. If `sibling` is :obj:`None`, then
+        the row will be appended to the end of the list.
+
+        The row will be empty if `row` is :obj:`None. To fill in values, you
+        need to call :obj:`Gtk.ListStore.set`\() or
+        :obj:`Gtk.ListStore.set_value`\().
+
+        If `row` isn't :obj:`None` it has to be a list of values which will be
+        used to fill the row.
+        """
+
         treeiter = Gtk.ListStore.insert_before(self, sibling)
 
         if row is not None:
@@ -996,7 +1470,27 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
     # insert_with_valuesv()
 
     def insert_after(self, sibling, row=None):
-        treeiter = Gtk.ListStore.insert_after(self, sibling)
+        """insert_after(sibling, row=None)
+
+        :param sibling: A valid :obj:`Gtk.TreeIter`, or :obj:`None`
+        :type sibling: :obj:`Gtk.TreeIter` or :obj:`None`
+
+        :param row: a list of values to apply to the newly inserted row or :obj:`None`
+        :type row: [:obj:`object`] or :obj:`None`
+
+        :returns: :obj:`Gtk.TreeIter` pointing to the new row
+        :rtype: :obj:`Gtk.TreeIter`
+
+        Inserts a new row after `sibling`. If `sibling` is :obj:`None`, then
+        the row will be prepended to the beginning of the list.
+
+        The row will be empty if `row` is :obj:`None. To fill in values, you
+        need to call :obj:`Gtk.ListStore.set`\() or
+        :obj:`Gtk.ListStore.set_value`\().
+
+        If `row` isn't :obj:`None` it has to be a list of values which will be
+        used to fill the row.
+        """
 
         if row is not None:
             self.set_row(treeiter, row)
@@ -1004,11 +1498,18 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
         return treeiter
 
     def set_value(self, treeiter, column, value):
+        """
+        {{ all }}
+
+        `value` can also be a Python value and will be converted to a
+        :obj:`GObject.Value` using the corresponding column type (See
+        :obj:`Gtk.ListStore.set_column_types`\()).
+        """
+
         value = self._convert_value(column, value)
         Gtk.ListStore.set_value(self, treeiter, column, value)
 
     def set(self, treeiter, *args):
-
         def _set_lists(columns, values):
             if len(columns) != len(values):
                 raise TypeError('The number of columns do not match the number of values')
@@ -1220,18 +1721,127 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
         return treeiter
 
     def append(self, parent, row=None):
+        """append(parent, row=None)
+
+        :param parent: A valid :obj:`Gtk.TreeIter`, or :obj:`None`
+        :type parent: :obj:`Gtk.TreeIter` or :obj:`None`
+
+        :param row: a list of values to apply to the newly inserted row or :obj:`None`
+        :type row: [:obj:`object`] or :obj:`None`
+
+        :returns: obj:`Gtk.TreeIter` pointing to the inserted row
+        :rtype: :obj:`Gtk.TreeIter`
+
+        Appends a new row to `self`. If `parent` is not :obj:`None`, then it
+        will append the new row after the last child of `parent`, otherwise it
+        will append a row to the top level.
+
+        The returned `iterator will point to the new row. The row will be
+        empty after this function is called  if `row` is :obj:`None`. To fill
+        in values, you need to call :obj:`Gtk.TreeStore.set`\() or
+        :obj:`Gtk.TreeStore.set_value`\().
+
+        If `row` isn't :obj:`None` it has to be a list of values which will be
+        used to fill the row.
+        """
+
         return self._do_insert(parent, -1, row)
 
     def prepend(self, parent, row=None):
+        """prepend(parent, row=None)
+
+        :param parent: A valid :obj:`Gtk.TreeIter`, or :obj:`None`
+        :type parent: :obj:`Gtk.TreeIter` or :obj:`None`
+
+        :param row: a list of values to apply to the newly inserted row or :obj:`None`
+        :type row: [:obj:`object`] or :obj:`None`
+
+        :returns: obj:`Gtk.TreeIter` pointing to the inserted row
+        :rtype: :obj:`Gtk.TreeIter`
+
+        Prepends a new row to `self`. If `parent` is not :obj:`None`, then it
+        will prepend the new row before the first child of `parent`, otherwise
+        it will prepend a row to the top level.
+
+        The returned `iterator will point to the new row. The row will be
+        empty after this function is called if `row` is :obj:`None`. To fill
+        in values, you need to call :obj:`Gtk.TreeStore.set`\() or
+        :obj:`Gtk.TreeStore.set_value`\().
+
+        If `row` isn't :obj:`None` it has to be a list of values which will be
+        used to fill the row.
+        """
+
         return self._do_insert(parent, 0, row)
 
     def insert(self, parent, position, row=None):
+        """insert(parent, position, row=None)
+
+        :param parent:
+            A valid :obj:`Gtk.TreeIter`, or :obj:`None`
+        :type parent: :obj:`Gtk.TreeIter` or :obj:`None`
+
+        :param position:
+            position to insert the new row, or -1 for last
+        :type position: :obj:`int`
+
+        :param row: a list of values to apply to the newly inserted row or :obj:`None`
+        :type row: [:obj:`object`] or :obj:`None`
+
+        :returns: a :obj:`Gtk.TreeIter` pointing to the new row
+        :rtype: :obj:`Gtk.TreeIter`
+
+        Creates a new row at `position`.  If parent is not :obj:`None`, then
+        the row will be made a child of `parent`.  Otherwise, the row will be
+        created at the toplevel. If `position` is -1 or is larger than the
+        number of rows at that level, then the new row will be inserted to the
+        end of the list.
+
+        The returned iterator will point to the newly inserted row. The row
+        will be empty after this function is called if `row` is :obj:`None`.
+        To fill in values, you need to call :obj:`Gtk.TreeStore.set`\() or
+        :obj:`Gtk.TreeStore.set_value`\().
+
+        If `row` isn't :obj:`None` it has to be a list of values which will be
+        used to fill the row.
+        """
+
         return self._do_insert(parent, position, row)
 
     # FIXME: sends two signals; check if this can use an atomic
     # insert_with_valuesv()
 
     def insert_before(self, parent, sibling, row=None):
+        """insert_before(parent, sibling, row=None)
+
+        :param parent: A valid :obj:`Gtk.TreeIter`, or :obj:`None`
+        :type parent: :obj:`Gtk.TreeIter` or :obj:`None`
+
+        :param sibling: A valid :obj:`Gtk.TreeIter`, or :obj:`None`
+        :type sibling: :obj:`Gtk.TreeIter` or :obj:`None`
+
+        :param row: a list of values to apply to the newly inserted row or :obj:`None`
+        :type row: [:obj:`object`] or :obj:`None`
+
+        :returns: a :obj:`Gtk.TreeIter` pointing to the new row
+        :rtype: :obj:`Gtk.TreeIter`
+
+        Inserts a new row before `sibling`. If `sibling` is :obj:`None`, then
+        the row will be appended to `parent` 's children. If `parent` and
+        `sibling` are :obj:`None`, then the row will be appended to the
+        toplevel.  If both `sibling` and `parent` are set, then `parent` must
+        be the parent of `sibling`.  When `sibling` is set, `parent` is
+        optional.
+
+        The returned iterator will point to this new row. The row will be
+        empty after this function is called if `row` is :obj:`None`.  To fill
+        in values, you need to call :obj:`Gtk.TreeStore.set`\() or
+        :obj:`Gtk.TreeStore.set_value`\().
+
+        If `row` isn't :obj:`None` it has to be a list of values which will be
+        used to fill the row.
+        """
+
         treeiter = Gtk.TreeStore.insert_before(self, parent, sibling)
 
         if row is not None:
@@ -1243,6 +1853,35 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
     # insert_with_valuesv()
 
     def insert_after(self, parent, sibling, row=None):
+        """
+        :param parent: A valid :obj:`Gtk.TreeIter`, or :obj:`None`
+        :type parent: :obj:`Gtk.TreeIter` or :obj:`None`
+
+        :param sibling: A valid :obj:`Gtk.TreeIter`, or :obj:`None`
+        :type sibling: :obj:`Gtk.TreeIter` or :obj:`None`
+
+        :param row: a list of values to apply to the newly inserted row or :obj:`None`
+        :type row: [:obj:`object`] or :obj:`None`
+
+        :returns: a :obj:`Gtk.TreeIter` pointing to the new row
+        :rtype: :obj:`Gtk.TreeIter`
+
+        Inserts a new row after `sibling`.  If `sibling` is :obj:`None`, then
+        the row will be prepended to `parent` 's children.  If `parent` and
+        `sibling` are :obj:`None`, then the row will be prepended to the
+        toplevel.  If both `sibling` and `parent` are set, then `parent` must
+        be the parent of `sibling`.  When `sibling` is set, `parent` is
+        optional.
+
+        The returned iterator will point to this new row.  The row will be
+        empty after this function is called if `row` is :obj:`None`.  To fill
+        in values, you need to call :obj:`Gtk.TreeStore.set`\() or
+        :obj:`Gtk.TreeStore.set_value`\().
+
+        If `row` isn't :obj:`None` it has to be a list of values which will be
+        used to fill the row.
+        """
+
         treeiter = Gtk.TreeStore.insert_after(self, parent, sibling)
 
         if row is not None:
@@ -1251,6 +1890,14 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
         return treeiter
 
     def set_value(self, treeiter, column, value):
+        """
+        {{ all }}
+
+        `value` can also be a Python value and will be converted to a
+        :obj:`GObject.Value` using the corresponding column type (See
+        :obj:`Gtk.ListStore.set_column_types`\()).
+        """
+
         value = self._convert_value(column, value)
         Gtk.TreeStore.set_value(self, treeiter, column, value)
 
@@ -1290,8 +1937,63 @@ class TreeView(Gtk.TreeView, Container):
                                category=PyGTKDeprecationWarning)
 
     get_path_at_pos = strip_boolean_result(Gtk.TreeView.get_path_at_pos)
+    """
+    :param x: The x position to be identified (relative to bin\_window).
+    :type x: :obj:`int`
+
+    :param y: The y position to be identified (relative to bin\_window).
+    :type y: :obj:`int`
+
+    :returns:
+        :obj:`None` if the row doesn't exist at that coordinates or
+        a tuple containing:
+
+        :path: a :obj:`Gtk.TreePath`
+        :column: a :obj:`Gtk.TreeViewColumn`
+        :cell_x: the X coordinate relative to the cell
+        :cell_y: the Y coordinate relative to the cell
+
+    :rtype: (**path**: :obj:`Gtk.TreePath` or :obj:`None`, **column**: :obj:`Gtk.TreeViewColumn` or :obj:`None`, **cell_x**: :obj:`int`, **cell_y**: :obj:`int`) or :obj:`None`
+
+    {{ docs }}
+    """
+
     get_visible_range = strip_boolean_result(Gtk.TreeView.get_visible_range)
+    """
+    :returns:
+        Either :obj:`None` if there is no visible range or a tuple containing:
+
+        :start_path: start of region
+        :end_path: end of region
+
+    :rtype: (**start_path**: :obj:`Gtk.TreePath`, **end_path**: :obj:`Gtk.TreePath`) or :obj:`None`
+
+    Returns the first and last visible path. Note that there may be invisible
+    paths in between.
+    """
+
     get_dest_row_at_pos = strip_boolean_result(Gtk.TreeView.get_dest_row_at_pos)
+    """
+    :param drag_x: the position to determine the destination row for
+    :type drag_x: :obj:`int`
+
+    :param drag_y: the position to determine the destination row for
+    :type drag_y: :obj:`int`
+
+    :returns:
+        :obj:`None` if there is no row at the given position or a tuple
+        containing:
+
+        :path: the path of the highlighted row
+        :pos: the drop position
+
+    :rtype: (**path**: :obj:`Gtk.TreePath` or :obj:`None`, **pos**: :obj:`Gtk.TreeViewDropPosition`) or :obj:`None`
+
+    Determines the destination row for a given position.  `drag_x` and
+    `drag_y` are expected to be in widget coordinates.  This function is only
+    meaningful if `self` is realized.  Therefore this function will always
+    return :obj:`None` if `self` is not realized or does not have a model.
+    """
 
     def enable_model_drag_source(self, start_button_mask, targets, actions):
         target_entries = _construct_target_list(targets)
@@ -1320,6 +2022,19 @@ class TreeView(Gtk.TreeView, Container):
         return super(TreeView, self).get_cell_area(path, column)
 
     def insert_column_with_attributes(self, position, title, cell, **kwargs):
+        """
+        :param position: The position to insert the new column in
+        :type position: :obj:`int`
+
+        :param title: The title to set the header to
+        :type title: :obj:`str`
+
+        :param cell: The :obj:`Gtk.CellRenderer`
+        :type cell: :obj:`Gtk.CellRenderer`
+
+        {{ docs }}
+        """
+
         column = TreeViewColumn()
         column.set_title(title)
         column.pack_start(cell, False)
@@ -1342,11 +2057,33 @@ class TreeViewColumn(Gtk.TreeViewColumn):
             self.add_attribute(cell_renderer, name, value)
 
     cell_get_position = strip_boolean_result(Gtk.TreeViewColumn.cell_get_position)
+    """
+    :param cell_renderer: a :obj:`Gtk.CellRenderer`
+    :type cell_renderer: :obj:`Gtk.CellRenderer`
+
+    :returns:
+        :obj:`None` if `cell` does not belong to `self` or a tuple containing:
+
+        :x_offset: the horizontal position of `cell` within `self`
+        :width: the width of `cell`
+
+    :rtype: (**x_offset**: :obj:`int`, **width**: :obj:`int`) or :obj:`None`
+
+    Obtains the horizontal position and size of a cell in a column. If the
+    cell is not found in the column :obj:`None` is returned.
+    """
 
     def set_cell_data_func(self, cell_renderer, func, func_data=None):
         super(TreeViewColumn, self).set_cell_data_func(cell_renderer, func, func_data)
 
     def set_attributes(self, cell_renderer, **attributes):
+        """
+        :param cell_renderer: the :obj:`Gtk.CellRenderer` we're setting the attributes of
+        :type cell_renderer: :obj:`Gtk.CellRenderer`
+
+        {{ docs }}
+        """
+
         Gtk.CellLayout.clear_attributes(self, cell_renderer)
 
         for (name, value) in attributes.items():
@@ -1365,6 +2102,16 @@ class TreeSelection(Gtk.TreeSelection):
         super(TreeSelection, self).select_path(path)
 
     def get_selected(self):
+        """
+        :returns:
+            :model: the :obj:`Gtk.TreeModel`
+            :iter: The :obj:`Gtk.TreeIter` or :obj:`None`
+
+        :rtype: (**model**: :obj:`Gtk.TreeModel`, **iter**: :obj:`Gtk.TreeIter` or :obj:`None`)
+
+        {{ docs }}
+        """
+
         success, model, aiter = super(TreeSelection, self).get_selected()
         if success:
             return (model, aiter)
@@ -1374,6 +2121,16 @@ class TreeSelection(Gtk.TreeSelection):
     # for compatibility with PyGtk
 
     def get_selected_rows(self):
+        """
+        :returns:
+            A list containing a :obj:`Gtk.TreePath` for each selected row
+            and a :obj:`Gtk.TreeModel` or :obj:`None`.
+
+        :rtype: (:obj:`Gtk.TreeModel`, [:obj:`Gtk.TreePath`])
+
+        {{ docs }}
+        """
+
         rows, model = super(TreeSelection, self).get_selected_rows()
         return (model, rows)
 
@@ -1543,6 +2300,8 @@ class TreeModelFilter(Gtk.TreeModelFilter):
         super(TreeModelFilter, self).set_visible_func(func, data)
 
     def set_value(self, iter, column, value):
+        """Set the value of the child model"""
+
         # Delegate to child model
         iter = self.convert_iter_to_child_iter(iter)
         self.get_model().set_value(iter, column, value)
@@ -1565,6 +2324,14 @@ def main_quit(*args):
     _Gtk_main_quit()
 
 stock_lookup = strip_boolean_result(Gtk.stock_lookup)
+"""
+:param stock_id: a stock item name
+:type stock_id: :obj:`str`
+
+:returns: a stock item or :obj:`None` if the stock icon isn't known.
+:rtype: :obj:`Gtk.StockItem` or :obj:`None`
+"""
+
 __all__.append('stock_lookup')
 
 initialized, argv = Gtk.init_check(sys.argv)
