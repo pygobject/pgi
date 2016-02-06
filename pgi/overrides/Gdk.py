@@ -366,6 +366,14 @@ Cursor = override(Cursor)
 __all__.append('Cursor')
 
 color_parse = strip_boolean_result(Gdk.color_parse)
+"""
+    :param spec: the string specifying the color
+    :type spec: :obj:`str`
+
+    :returns: :obj:`Gdk.Color` or :obj:`None` if the parsing didn't succeed
+    :rtype: :obj:`Gdk.Color` or :obj:`None`
+"""
+
 __all__.append('color_parse')
 
 
