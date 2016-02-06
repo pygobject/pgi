@@ -1492,6 +1492,8 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
         used to fill the row.
         """
 
+        treeiter = Gtk.ListStore.insert_after(self, sibling)
+
         if row is not None:
             self.set_row(treeiter, row)
 
