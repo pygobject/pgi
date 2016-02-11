@@ -1324,10 +1324,10 @@ class TreeSortable(Gtk.TreeSortable, ):
         :sort_column_id: The sort column id
         :order: The :obj:`Gtk.SortType`
 
-    :rtype: (**sort_column_id**: :obj:`int`, **order**: :obj:`Gtk.SortType`) or (:obj:`None, :obj:`None`)
+    :rtype: (**sort_column_id**: :obj:`int`, **order**: :obj:`Gtk.SortType`) or (:obj:`None`, :obj:`None`)
 
     Returns `sort_column_id` and `order` with the current sort column and the
-    order. It returns (:obj:`None, :obj:`None`) if the `sort_column_id` is
+    order. It returns (:obj:`None`, :obj:`None`) if the `sort_column_id` is
     :obj:`Gtk.TREE_SORTABLE_DEFAULT_SORT_COLUMN_ID` or
     :obj:`Gtk.TREE_SORTABLE_UNSORTED_SORT_COLUMN_ID`.
     """
@@ -1541,6 +1541,37 @@ __all__.append('ListStore')
 
 
 class TreeModelRow(object):
+    """A :obj:`Gtk.TreeModelRow` object represents a row in a
+    :obj:`Gtk.TreeModel`. A :obj:`Gtk.TreeModelRow` is created by taking the
+    mapping of a :obj:`Gtk.TreeModel`. For example::
+
+        treemodelrow = liststore[0]
+        treemodelrow = liststore[(0,)]
+        treemodelrow = liststore['0']
+
+    all create a :obj:`Gtk.TreeModelRow` for the first row in liststore. The
+    :obj:`Gtk.TreeModelRow` implements some of the Python sequence protocol
+    that makes the row behave like a sequence of objects. Specifically a tree
+    model row has the capability of:
+
+    * getting and setting column values,
+    * returning a tuple or list containing the column values, and
+    * getting the number of values in the row i.e. the number of columns
+
+    For example to get and set the value in the second column of a row, you
+    could do the following::
+
+        value = treemodelrow[1]
+        treemodelrow[1] = value
+
+    You can use the Python len() function to get the number of columns in the
+    row and you can retrieve all the column values as a list (tuple) using the
+    Python list() (tuple()) function.
+
+    The :obj:`Gtk.TreeModelRow` supports one method: the iterchildren() method
+    that returns a :obj:`Gtk.TreeModelRowIter` for iterating over the children
+    of the row.
+    """
 
     def __init__(self, model, iter_or_path):
         if not isinstance(model, Gtk.TreeModel):
@@ -1554,33 +1585,53 @@ class TreeModelRow(object):
             raise TypeError("expected Gtk.TreeIter or Gtk.TreePath, \
                 %s found" % type(iter_or_path).__name__)
 
+    iter = None
+    """A :obj:`Gtk.TreeIter` pointing at the row"""
+
+    model = None
+    """	The :obj:`Gtk.TreeModel` that the row is part of"""
+
     @property
     def path(self):
+        """The tree path of the row"""
+
         return self.model.get_path(self.iter)
 
     @property
     def next(self):
+        """	The next :obj:`Gtk.TreeModelRow` or None"""
+
         return self.get_next()
 
     @property
     def previous(self):
+        """	The previous :obj:`Gtk.TreeModelRow` or None"""
+
         return self.get_previous()
 
     @property
     def parent(self):
+        """The parent :obj:`Gtk.TreeModelRow` or htis row or None"""
+
         return self.get_parent()
 
     def get_next(self):
+        """Returns the next :obj:`Gtk.TreeModelRow` or None"""
+
         next_iter = self.model.iter_next(self.iter)
         if next_iter:
             return TreeModelRow(self.model, next_iter)
 
     def get_previous(self):
+        """Returns the previous :obj:`Gtk.TreeModelRow` or None"""
+
         prev_iter = self.model.iter_previous(self.iter)
         if prev_iter:
             return TreeModelRow(self.model, prev_iter)
 
     def get_parent(self):
+        """Returns the parent :obj:`Gtk.TreeModelRow` or htis row or None"""
+
         parent_iter = self.model.iter_parent(self.iter)
         if parent_iter:
             return TreeModelRow(self.model, parent_iter)
@@ -1628,6 +1679,8 @@ class TreeModelRow(object):
         return new_index
 
     def iterchildren(self):
+        """Returns a :obj:`Gtk.TreeModelRowIter` for the row's children"""
+
         child_iter = self.model.iter_children(self.iter)
         return TreeModelRowIter(self.model, child_iter)
 
@@ -1635,6 +1688,24 @@ __all__.append('TreeModelRow')
 
 
 class TreeModelRowIter(object):
+    """A :obj:`Gtk.TreeModelRowIter` is an object that implements the Python
+    Iterator protocol. It provides the means to iterate over a set of
+    :obj:`Gtk.TreeModelRow` objects in a :obj:`Gtk.TreeModel`. A
+    :obj:`Gtk.TreeModelRowIter` is created by calling the Python iter()
+    function on a :obj:`Gtk.TreeModel` object::
+
+        treemodelrowiter = iter(treestore)
+
+    or, calling the :obj:`Gtk.TreeModelRow.iterchildren`\() method to iterate
+    over its child rows.
+
+    Each time you call the next() method it returns the next sibling
+    :obj:`Gtk.TreeModelRow`. When there are no rows left the StopIteration
+    exception is raised. Note that a :obj:`Gtk.TreeModelRowIter` does not
+    iterate over the child rows of the rows it is iterating over. You'll have
+    to use the :obj:`Gtk.TreeModelRow.iterchildren`\() method to retrieve an
+    iterator for the child rows.
+    """
 
     def __init__(self, model, aiter):
         self.model = model
@@ -1649,6 +1720,7 @@ class TreeModelRowIter(object):
 
     # alias for Python 2.x object protocol
     next = __next__
+    """Returns the next :obj:`Gtk.TreeModelRow`"""
 
     def __iter__(self):
         return self
