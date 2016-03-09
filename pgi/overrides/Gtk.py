@@ -121,9 +121,9 @@ class Widget(Gtk.Widget):
     """
     :param dest_widget: a :obj:`Gtk.Widget`
     :type dest_widget: :obj:`Gtk.Widget`
-    :param src_x: X position relative to `src_widget`
+    :param src_x: X position relative to `self`
     :type src_x: :obj:`int`
-    :param src_y: Y position relative to `src_widget`
+    :param src_y: Y position relative to `self`
     :type src_y: :obj:`int`
     :returns:
         :obj:`None` if either widget was not realized, or there
