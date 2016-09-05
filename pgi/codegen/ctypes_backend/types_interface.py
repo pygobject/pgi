@@ -211,7 +211,7 @@ class Struct(BaseInterface):
                 obj=name)["obj"]
 
         return self.parse("""
-            if $obj is not None and not $_.isinstance($obj, ($struct_class)):
+            if False and $obj is not None and not $_.isinstance($obj, ($struct_class)):
                 raise $_.TypeError(
                     "$DESC: %r is not a structure object" % $obj)
             """, struct_class=struct_class,
