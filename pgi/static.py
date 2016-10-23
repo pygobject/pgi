@@ -177,14 +177,6 @@ def signal_new(signal_name, type, flags, return_type, param_types):
     raise NotImplementedError
 
 
-def variant_type_from_string(*args, **kwargs):
-    raise NotImplementedError
-
-
-def variant_new_tuple(*args, **kwargs):
-    raise NotImplementedError
-
-
 def source_new(*args, **kwargs):
     raise NotImplementedError
 

@@ -59,6 +59,13 @@ class BaseInterface(BaseType):
         iface = self.type.get_interface()
         return import_attribute(iface.namespace, iface.name)
 
+    def _late_import_type(self):
+        iface = self.type.get_interface()
+        return self.parse("""
+            $type = $import_attribute("{}", "{}")""".format(iface.namespace, iface.name),
+            import_attribute=import_attribute
+        )["type"]
+
 
 class Object(BaseInterface):
 
@@ -269,7 +276,7 @@ class Struct(BaseInterface):
                 $obj._obj = $value
             else:
                 $obj = None
-            """, value=name, type=self._import_type())["obj"]
+            """, value=name, type=self._late_import_type())["obj"]
 
     def unpack_out(self, name):
         pre = self.parse("""
@@ -296,6 +303,9 @@ class Struct(BaseInterface):
                 raise $_.MemoryError("$DESC")
             $value = $ctypes.c_void_p($mem)
             """, malloc=malloc, size=size)["value"]
+
+    def ref_sink_variant(self, name):
+        self.parse("""$f($obj._obj)""", obj=name, f=glib.variant_ref_sink)
 
     def unpack_gvalue(self, name):
 

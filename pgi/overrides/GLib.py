@@ -28,7 +28,7 @@ from pgi.overrides import get_introspection_module, override, deprecated, \
     deprecated_attr
 from pgi.util import PyGIDeprecationWarning
 from pgi import version_info
-from pgi.static import (variant_type_from_string, source_new, Enum, Flags,
+from pgi.static import (source_new, Enum, Flags,
                         source_set_callback, io_channel_read)
 from pgi import static as _gobject
 from pgi import static as _glib
@@ -47,6 +47,9 @@ OptionGroup = _glib.OptionGroup
 Pid = _glib.Pid
 spawn_async = _glib.spawn_async
 
+
+def variant_type_from_string(s):
+    return GLib.VariantType.new(s)
 
 def threads_init():
     warnings.warn('Since version 3.11, calling threads_init is no longer needed. '
@@ -242,12 +245,23 @@ class Variant(GLib.Variant):
         v.format_string = format_string
         return v
 
+    # Called by Python on the result of __new__, shall do nothing.
+    def __init__(self, format_string, value):
+        assert(self.format_string == format_string)
+
     @staticmethod
     def new_tuple(*elements):
         return GLib.Variant.new_tuple(elements)
 
     def __del__(self):
         self.unref()
+
+    try:
+        GLib.Variant.print_
+    except AttributeError:
+        # Python 3
+        def print_(self, type_annotate):
+            return getattr(self, "print")(type_annotate)
 
     def __str__(self):
         return self.print_(True)

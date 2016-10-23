@@ -388,6 +388,9 @@ class StructReturn(BaseInterfaceReturn):
         out = var.unpack_return(name)
         if iface_namespace == "GObject" and iface_name == "Value":
             out = var.unpack_gvalue(out)
+        if iface_namespace == "GLib" and iface_name == "Variant":
+            if self.transfer_nothing():
+                var.ref_sink_variant(out)
         return var.block, out
 
 
