@@ -53,10 +53,14 @@ class TDocstring(unittest.TestCase):
             "targets_include_image(targets: [Gdk.Atom], writable: bool) "
             "-> bool")
 
-        self.assertEqual(
-            GLib.source_remove_by_funcs_user_data.__doc__,
-            "source_remove_by_funcs_user_data(funcs: GLib.SourceFuncs, "
-            "user_data: object) -> bool")
+        self.assertTrue(
+            GLib.source_remove_by_funcs_user_data.__doc__ in (
+                "source_remove_by_funcs_user_data(funcs: GLib.SourceFuncs, "
+                "user_data: object) -> bool",
+                "source_remove_by_funcs_user_data(funcs: GLib.SourceFuncs, "
+                "user_data: object or None) -> bool",
+                )
+            )
 
         self.assertEqual(
             Gtk.FileChooser.get_filenames.__doc__,
@@ -121,19 +125,23 @@ class TDocstring(unittest.TestCase):
 
     def test_callback_docstring(self):
         string = GLib.DestroyNotify.__doc__
-        self.assertEqual(string, "DestroyNotify(data: object) -> None")
+        # annotations changed over time, allow both variants
+        self.assertTrue(
+            string in ("DestroyNotify(data: object) -> None",
+                       "DestroyNotify(data: object or None) -> None"))
 
         # out arguments
         string = Gtk.MenuPositionFunc.__doc__
-        try:
-            # older gtk+
-            self.assertEqual(string,
-                "MenuPositionFunc(menu: Gtk.Menu, user_data: object) -> "
-                "(x: int, y: int, push_in: bool)")
-        except:
-            self.assertEqual(string,
-                "MenuPositionFunc(menu: Gtk.Menu, x: int, y: int, "
-                "user_data: object) -> (x: int, y: int, push_in: bool)")
+        # annotations changed over time
+        possible = [
+            ("MenuPositionFunc(menu: Gtk.Menu, user_data: object) -> "
+             "(x: int, y: int, push_in: bool)"),
+            ("MenuPositionFunc(menu: Gtk.Menu, x: int, y: int, "
+             "user_data: object) -> (x: int, y: int, push_in: bool)"),
+            ("MenuPositionFunc(menu: Gtk.Menu, x: int, y: int, "
+             "user_data: object or None) -> (x: int, y: int, push_in: bool)"),
+        ]
+        self.assertTrue(string in possible)
 
     def test_uint8_array_docstring(self):
         string = Gio.File.load_contents_finish.__doc__
