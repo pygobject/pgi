@@ -228,7 +228,6 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(Everything.test_int_value_arg(GObject.G_MAXINT), GObject.G_MAXINT)
         self.assertEqual(Everything.test_value_return(GObject.G_MAXINT), GObject.G_MAXINT)
 
-    @FIXME
     def test_variant(self):
         v = Everything.test_gvariant_i()
         self.assertEqual(v.get_type_string(), 'i')

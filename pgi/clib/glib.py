@@ -315,6 +315,16 @@ def unpack_nullterm_array(array):
     return l
 
 
+_methods = [
+    ("variant_ref_sink", gpointer, [gpointer])
+]
+
+for (name, ret, args) in _methods:
+    h = getattr(_glib, "g_" + name)
+    h.argtypes = args
+    h.restype = ret
+    globals()[name] = h
+
 __all__ = ["gchar_p", "guint", "gpointer", "gint32", "guint32", "gint",
            "GQuark", "gboolean", "gint8", "guint8", "gint16", "guint16",
            "gint64", "guint64", "gfloat", "gdouble", "gshort", "gushort",
