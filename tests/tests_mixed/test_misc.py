@@ -36,10 +36,6 @@ class MiscTest(unittest.TestCase):
         self.assertEqual(GObject._version, "2.0")
         self.assertEqual(GLib._version, "2.0")
 
-    def test_module_dir2(self):
-        self.assertTrue("HAVE___INLINE__" in dir(GLib))
-        self.assertTrue(hasattr(GLib, "HAVE___INLINE__"))
-
     def test_require_version(self):
         self.assertTrue(require_version("Gtk", "3.0") is None)
         self.assertRaises(ValueError, require_version, "Gtk", "4.0")
