@@ -310,7 +310,6 @@ class FuncsTest(unittest.TestCase):
     def test_value_pointer(self):
         v = GObject.Value()
         v.init(GObject.TYPE_POINTER)
-        self.assertRaises(TypeError, v.set_pointer, None)
         v.set_pointer(0)
         v.set_pointer(0xdeadbeef)
         self.assertEqual(v.get_pointer(), 0xdeadbeef)
