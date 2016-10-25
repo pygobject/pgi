@@ -66,7 +66,8 @@ class ObjectTest(unittest.TestCase):
     def test_obj_repr(self):
         w = Gtk.Window()
         r = repr(w)
-        self.assertTrue("<Window" in r)
+        # newer pygobject adds the namespace
+        self.assertTrue("<Window" in r or "<Gtk.Window" in r)
         self.assertTrue("GtkWindow" in r)
         self.assertTrue(str(hex(int(id(w)))) in r)
 
