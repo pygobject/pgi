@@ -27,6 +27,9 @@ class EnumTest(unittest.TestCase):
         self.assertTrue("CENTER" in repr(Gtk.WindowPosition.CENTER))
         self.assertTrue("WindowPosition" in repr(Gtk.WindowPosition(0)))
 
+    def test_init(self):
+        self.assertEqual(Gtk.WindowPosition(value=0), Gtk.WindowPosition.NONE)
+
     def test_inval_value(self):
         self.assertRaises(ValueError, Gtk.WindowPosition, 9)
         self.assertRaises(OverflowError, Gtk.WindowPosition, sys.maxsize + 1)

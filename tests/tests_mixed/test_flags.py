@@ -36,6 +36,9 @@ class FlagsTest(unittest.TestCase):
         self.assertTrue("0" in repr(Gtk.RcFlags(0)))
         self.assertTrue("RcFlags" in repr(Gtk.RcFlags.BASE))
 
+    def test_init(self):
+        self.assertEqual(Gtk.RcFlags(value=8), Gtk.RcFlags.BASE)
+
     @skipIfGI
     def test_repr_2(self):
         self.assertTrue("NONE" in repr(Gtk.JunctionSides.NONE))
