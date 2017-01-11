@@ -45,7 +45,55 @@ Error = GError
 OptionContext = _glib.OptionContext
 OptionGroup = _glib.OptionGroup
 Pid = _glib.Pid
+
+
 spawn_async = _glib.spawn_async
+"""spawn_async(argv, envp=None, working_directory=None, flags=GLib.SpawnFlags.DEFAULT, child_setup=None, user_data=None, standard_input=False, standard_output=False, standard_error=False)
+
+:param argv: child's argument vector
+:type argv: [:obj:`str`]
+
+:param envp: child's environment, or :obj:`None` to inherit parent's
+:type envp: [:obj:`str`] or :obj:`None`
+
+:param flags: flags from :obj:`GLib.SpawnFlags`
+:type flags: :obj:`GLib.SpawnFlags`
+
+:param child_setup: function to run in the child just before exec()
+:type child_setup: :obj:`GLib.SpawnChildSetupFunc` or :obj:`None`
+
+:param user_data: user data for `child_setup`
+:type user_data: :obj:`object` or :obj:`None`
+
+:param standard_input: pipe stdin if :obj:`True`
+:type standard_input: :obj:`bool`
+
+:param standard_output: pipe stdout if :obj:`True`
+:type standard_output: :obj:`bool`
+
+:param standard_error: pipe stderr if :obj:`True`
+:type standard_error: :obj:`bool`
+
+:raises: :class:`GLib.Error`
+
+:returns:
+    :pid: child process ID
+    :stdin: file descriptor to child's stdin, or :obj:`None`
+    :stdout: file descriptor to read child's stdout, or :obj:`None`
+    :stderr: file descriptor to read child's stderr, or :obj:`None`
+
+:rtype: (**pid**: :obj:`int`, **stdin**: :obj:`int` or :obj:`None`, **stdout**: :obj:`int` or :obj:`None`, **stderr**: :obj:`int` or :obj:`None`)
+
+See :obj:`GLib.spawn_async_with_pipes`\() for a full description; this function
+simply calls the :obj:`GLib.spawn_async_with_pipes`\()
+
+You should call :obj:`GLib.spawn_close_pid`\() on the returned child process
+reference when you don't need it any more.
+
+In case `standard_input`/`standard_output`/`standard_error` are True a file
+descriptor is returned which needs to be closed by the caller after it is no
+longer needed.
+"""
 
 
 def variant_type_from_string(s):
