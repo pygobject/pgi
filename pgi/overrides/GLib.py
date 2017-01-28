@@ -610,8 +610,8 @@ class MainLoop(GLib.MainLoop):
     # Retain classic pygobject behaviour of quitting main loops on SIGINT
     def __init__(self, context=None):
         def _handler(loop):
-            loop.quit()
-            loop._quit_by_sigint = True
+            self.quit()
+            self._quit_by_sigint = True
             # We handle signal deletion in __del__, return True so GLib
             # doesn't do the deletion for us.
             return True
