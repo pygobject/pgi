@@ -133,6 +133,10 @@ __all__ += ['GError', 'Error', 'OptionContext', 'OptionGroup', 'Pid',
 
 class _VariantCreator(object):
 
+    _CONTAINER_CONSTRUCTORS = {
+        'tuple': GLib.Variant.new_tuple,
+    }
+
     _LEAF_CONSTRUCTORS = {
         'b': GLib.Variant.new_boolean,
         'y': GLib.Variant.new_byte,
@@ -188,37 +192,35 @@ class _VariantCreator(object):
 
     def _create_tuple(self, format, args):
         """Handle the case where the outermost type of format is a tuple."""
-
         format = format[1:]  # eat the '('
         if args is None:
             # empty value: we need to call _create() to parse the subtype
             rest_format = format
-            while rest_format:
+            while format:
                 if rest_format.startswith(')'):
                     break
                 rest_format = self._create(rest_format, None)[1]
             else:
                 raise TypeError('tuple type string not closed with )')
-
             rest_format = rest_format[1:]  # eat the )
             return (None, rest_format, None)
         else:
             if not args or not isinstance(args[0], tuple):
                 raise TypeError('expected tuple argument')
-
-            builder = GLib.VariantBuilder.new(variant_type_from_string('r'))
-            for i in range(len(args[0])):
-                if format.startswith(')'):
-                    raise TypeError('too many arguments for tuple signature')
-
-                (v, format, _) = self._create(format, args[0][i:])
-                builder.add_value(v)
-            args = args[1:]
-            if not format.startswith(')'):
-                raise TypeError('tuple type string not closed with )')
-
-            rest_format = format[1:]  # eat the )
-            return (builder.end(), rest_format, args)
+            tuple_ = None
+            items = []
+            for index in range(len(format)):
+                if format[0] in self._LEAF_CONSTRUCTORS:
+                    v = Variant(format[0], args[0][0])
+                    args[0] = args[0][1:]
+                    format = format[1:]
+                    items.append(v)
+                elif format[0] == ')':
+                    # end of tuple
+                    tuple_ = self._CONTAINER_CONSTRUCTORS['tuple'](items)
+                    format = format[1:]
+                    break
+            return (tuple_, format, args)
 
     def _create_dict(self, format, args):
         """Handle the case where the outermost type of format is a dict."""
