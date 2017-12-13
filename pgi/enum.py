@@ -27,7 +27,7 @@ class EnumBase(int):
     _allowed = {}
 
     def __init__(self, value):
-        super(EnumBase, self).__init__(value)
+        super(EnumBase, self).__init__()
 
     def __new__(cls, value):
         if not isinstance(value, integer_types):
@@ -91,7 +91,7 @@ class FlagsBase(int):
     _flags = []
 
     def __init__(self, value):
-        super(FlagsBase, self).__init__(value)
+        super(FlagsBase, self).__init__()
 
     def __new__(cls, value):
         if not isinstance(value, integer_types):
