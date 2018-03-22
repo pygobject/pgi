@@ -671,8 +671,14 @@ class Source(GLib.Source):
     def get_current_time(self):
         return GLib.get_real_time() * 0.000001
 
-    get_current_time = deprecated(get_current_time,
-                                  'GLib.Source.get_time() or GLib.get_real_time()')
+    get_current_time = deprecated(get_current_time, 'GLib.Source.get_time() or GLib.get_real_time()')
+    """get_current_time()
+
+    :returns: Time in seconds since the Epoch
+    :rtype: float
+
+    {{ docs }}
+    """
 
     # as get/set_priority are introspected, we can't use the static
     # property(get_priority, ..) here
@@ -962,6 +968,13 @@ def get_current_time():
     return GLib.get_real_time() * 0.000001
 
 get_current_time = deprecated(get_current_time, 'GLib.get_real_time()')
+"""get_current_time()
+
+:returns: Time in seconds since the Epoch
+:rtype: float
+
+{{ docs }}
+"""
 
 __all__.append('get_current_time')
 
