@@ -730,23 +730,28 @@ __all__.append('Timeout')
 
 
 # backwards compatible API
+
+# These functions will incorrectly be called with None as last argument, so
+# work around that with wrappers.
+
 def idle_add(function, *user_data, **kwargs):
     priority = kwargs.get('priority', GLib.PRIORITY_DEFAULT_IDLE)
-    return GLib.idle_add(priority, function, *user_data)
+    return GLib.idle_add(priority, lambda _: function(*user_data))
 
 __all__.append('idle_add')
 
 
 def timeout_add(interval, function, *user_data, **kwargs):
     priority = kwargs.get('priority', GLib.PRIORITY_DEFAULT)
-    return GLib.timeout_add(priority, interval, function, *user_data)
+    return GLib.timeout_add(priority, interval, lambda _: function(*user_data))
 
 __all__.append('timeout_add')
 
 
 def timeout_add_seconds(interval, function, *user_data, **kwargs):
     priority = kwargs.get('priority', GLib.PRIORITY_DEFAULT)
-    return GLib.timeout_add_seconds(priority, interval, function, *user_data)
+    return GLib.timeout_add_seconds(
+        priority, interval, lambda _: function(*user_data))
 
 __all__.append('timeout_add_seconds')
 
