@@ -26,6 +26,11 @@ def gtk_typelib_version():
 
 class TDocstring(unittest.TestCase):
 
+    def test_callback_varpos(self):
+        self.assertEqual(GLib.CompareDataFunc.__doc__,
+            "CompareDataFunc(a: object or None, b: object or None, "
+            "*user_data: object or None) -> int")
+
     def test_doc_strings(self):
         self.assertEqual(Gtk.init.__doc__,
             "init(argv: [str] or None) -> argv: [str]")
@@ -134,14 +139,14 @@ class TDocstring(unittest.TestCase):
         string = Gtk.MenuPositionFunc.__doc__
         # annotations changed over time
         possible = [
-            ("MenuPositionFunc(menu: Gtk.Menu, user_data: object) -> "
+            ("MenuPositionFunc(menu: Gtk.Menu, *user_data: object) -> "
              "(x: int, y: int, push_in: bool)"),
             ("MenuPositionFunc(menu: Gtk.Menu, x: int, y: int, "
-             "user_data: object) -> (x: int, y: int, push_in: bool)"),
+             "*user_data: object) -> (x: int, y: int, push_in: bool)"),
             ("MenuPositionFunc(menu: Gtk.Menu, x: int, y: int, "
-             "user_data: object or None) -> (x: int, y: int, push_in: bool)"),
+             "*user_data: object or None) -> (x: int, y: int, push_in: bool)"),
         ]
-        self.assertTrue(string in possible)
+        self.assertTrue(string in possible, msg=string)
 
     def test_uint8_array_docstring(self):
         string = Gio.File.load_contents_finish.__doc__

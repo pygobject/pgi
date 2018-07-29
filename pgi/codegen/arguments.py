@@ -94,8 +94,10 @@ class GIArgument(Argument):
         # param type case
         if self.info is not None:
             self.direction = self.info.direction.value
+            self.closure = self.info.closure
         else:
             self.direction = None
+            self.closure = -1
 
         if self.is_direction_in():
             self.in_var = name
@@ -303,8 +305,8 @@ class CallbackArgument(BaseInterfaceArgument):
         super(CallbackArgument, self).setup()
 
         self._user_data = None
-        if self.info.closure != -1:
-            self._user_data = self.args[self.info.closure]
+        if self.closure != -1:
+            self._user_data = self.args[self.closure]
             self._user_data.is_userdata = True
 
         self._destroy = None
