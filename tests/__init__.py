@@ -120,21 +120,6 @@ def discover(base, dir_):
     return test_classes
 
 
-def test_pep8():
-    """Run pep8 pyflakes tests"""
-
-    import pgi
-    pgi.install_as_gi()
-
-    current_dir = os.path.join(os.path.dirname(__file__))
-    tests = discover(current_dir, "misc")
-    tests = [unittest.makeSuite(t) for t in tests]
-
-    run = unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite(tests))
-
-    return len(run.failures) + len(run.errors)
-
-
 def test(load_gi, backend=None, strict=False, filter_=None, failfast=False):
     """Run the test suite.
 

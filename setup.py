@@ -174,22 +174,6 @@ class TestCommand(Command):
                     is_gi, backend, self.strict, filter_tests, self.exitfirst))
 
 
-class QualityCommand(Command):
-    description = "run pep8 pyflakes"
-    user_options = []
-
-    def initialize_options(self):
-        pass
-
-    def finalize_options(self):
-        pass
-
-    def run(self):
-        import tests
-
-        exit(tests.test_pep8() != 0)
-
-
 class BenchmarkCommand(Command):
     description = "run benchmarks"
     user_options = [
@@ -270,6 +254,5 @@ setup(name='pgi',
             'test': TestCommand,
             'coverage': CoverageCommand,
             'benchmark': BenchmarkCommand,
-            'quality': QualityCommand,
       }
      )
