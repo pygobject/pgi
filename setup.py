@@ -227,9 +227,15 @@ class BenchmarkCommand(Command):
             else:
                 exit(benchmarks.run(is_gi, backend))
 
+version = pgi.version_info
+# convert to a setuptools compatible version string
+if version[-1] == -1:
+    version_string = ".".join(map(str, version[:-1])) + ".dev0"
+else:
+    version_string = ".".join(map(str, version))
 
 setup(name='pgi',
-      version=pgi.__version__,
+      version=version_string,
       description='Pure Python GObject Introspection Bindings',
       author='Christoph Reiter',
       author_email='reiter.christoph@gmail.com',
