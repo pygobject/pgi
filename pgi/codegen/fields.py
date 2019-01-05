@@ -56,6 +56,13 @@ class InterfaceField(Field):
         except ImportError:
             # fall back to object
             pass
+        else:
+            # XXX: some structs like MemVTable contain a callback for which
+            # the name clashes with a function in the same namespace. Special
+            # case this here and force back to "object"
+            if iface.type.value == GIInfoType.CALLBACK and not \
+                    getattr(self.py_type, "_is_callback", False):
+                self.py_type = object
 
     def get(self, name):
         var = self.backend.get_type(self.type)
