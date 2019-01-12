@@ -159,7 +159,7 @@ def signal_new(signal_name, type, flags, return_type, param_types):
     :returns: a unique integer signal ID
     :rtype: :obj:`int`
 
-    The :obj:`GObject.signal_new`\() function registers a signal with the
+    The :obj:`GObject.signal_new`\\() function registers a signal with the
     specified `signal_name` for the specified object `type`.
 
     `return_type` is the type of the return value from a signal handler and may

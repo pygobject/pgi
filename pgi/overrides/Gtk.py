@@ -987,7 +987,7 @@ class TextIter(Gtk.TextIter):
         :match_start: start of match
         :match_end: end of match
 
-    :rtype: (**match\_start**: :obj:`Gtk.TextIter`, **match\_end**: :obj:`Gtk.TextIter`) or :obj:`None`
+    :rtype: (**match\\_start**: :obj:`Gtk.TextIter`, **match\\_end**: :obj:`Gtk.TextIter`) or :obj:`None`
 
     {{ docs }}
     """
@@ -1241,8 +1241,8 @@ class TreeModel(Gtk.TreeModel):
         of columns of the model. :obj:`None` in `row` means the value will be
         skipped and not set.
 
-        Also see :obj:`Gtk.ListStore.set_value`\() and
-        :obj:`Gtk.TreeStore.set_value`\()
+        Also see :obj:`Gtk.ListStore.set_value`\\() and
+        :obj:`Gtk.TreeStore.set_value`\\()
         """
 
         converted_row, columns = self._convert_row(row)
@@ -1271,7 +1271,7 @@ class TreeModel(Gtk.TreeModel):
         Returns a tuple of all values specified by their indices in `columns`
         in the order the indices are contained in `columns`
 
-        Also see :obj:`Gtk.TreeStore.get_value`\()
+        Also see :obj:`Gtk.TreeStore.get_value`\\()
         """
 
         n_columns = self.get_n_columns()
@@ -1375,8 +1375,8 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
         :rtype: :obj:`Gtk.TreeIter`
 
         If `row` is :obj:`None` the appended row will be empty and to fill in
-        values you need to call :obj:`Gtk.ListStore.set`\() or
-        :obj:`Gtk.ListStore.set_value`\().
+        values you need to call :obj:`Gtk.ListStore.set`\\() or
+        :obj:`Gtk.ListStore.set_value`\\().
 
         If `row` isn't :obj:`None` it has to be a list of values which will be
         used to fill the row .
@@ -1399,8 +1399,8 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
         :rtype: :obj:`Gtk.TreeIter`
 
         If `row` is :obj:`None` the prepended row will be empty and to fill in
-        values you need to call :obj:`Gtk.ListStore.set`\() or
-        :obj:`Gtk.ListStore.set_value`\().
+        values you need to call :obj:`Gtk.ListStore.set`\\() or
+        :obj:`Gtk.ListStore.set_value`\\().
 
         If `row` isn't :obj:`None` it has to be a list of values which will be
         used to fill the row.
@@ -1421,8 +1421,8 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
         :rtype: :obj:`Gtk.TreeIter`
 
         If `row` is :obj:`None` the inserted row will be empty and to fill in
-        values you need to call :obj:`Gtk.ListStore.set`\() or
-        :obj:`Gtk.ListStore.set_value`\().
+        values you need to call :obj:`Gtk.ListStore.set`\\() or
+        :obj:`Gtk.ListStore.set_value`\\().
 
         If `row` isn't :obj:`None` it has to be a list of values which will be
         used to fill the row.
@@ -1452,8 +1452,8 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
         the row will be appended to the end of the list.
 
         The row will be empty if `row` is :obj:`None. To fill in values, you
-        need to call :obj:`Gtk.ListStore.set`\() or
-        :obj:`Gtk.ListStore.set_value`\().
+        need to call :obj:`Gtk.ListStore.set`\\() or
+        :obj:`Gtk.ListStore.set_value`\\().
 
         If `row` isn't :obj:`None` it has to be a list of values which will be
         used to fill the row.
@@ -1485,8 +1485,8 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
         the row will be prepended to the beginning of the list.
 
         The row will be empty if `row` is :obj:`None. To fill in values, you
-        need to call :obj:`Gtk.ListStore.set`\() or
-        :obj:`Gtk.ListStore.set_value`\().
+        need to call :obj:`Gtk.ListStore.set`\\() or
+        :obj:`Gtk.ListStore.set_value`\\().
 
         If `row` isn't :obj:`None` it has to be a list of values which will be
         used to fill the row.
@@ -1505,7 +1505,7 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
 
         `value` can also be a Python value and will be converted to a
         :obj:`GObject.Value` using the corresponding column type (See
-        :obj:`Gtk.ListStore.set_column_types`\()).
+        :obj:`Gtk.ListStore.set_column_types`\\()).
         """
 
         value = self._convert_value(column, value)
@@ -1696,14 +1696,14 @@ class TreeModelRowIter(object):
 
         treemodelrowiter = iter(treestore)
 
-    or, calling the :obj:`Gtk.TreeModelRow.iterchildren`\() method to iterate
+    or, calling the :obj:`Gtk.TreeModelRow.iterchildren`\\() method to iterate
     over its child rows.
 
     Each time you call the next() method it returns the next sibling
     :obj:`Gtk.TreeModelRow`. When there are no rows left the StopIteration
     exception is raised. Note that a :obj:`Gtk.TreeModelRowIter` does not
     iterate over the child rows of the rows it is iterating over. You'll have
-    to use the :obj:`Gtk.TreeModelRow.iterchildren`\() method to retrieve an
+    to use the :obj:`Gtk.TreeModelRow.iterchildren`\\() method to retrieve an
     iterator for the child rows.
     """
 
@@ -1812,8 +1812,8 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
 
         The returned `iterator will point to the new row. The row will be
         empty after this function is called  if `row` is :obj:`None`. To fill
-        in values, you need to call :obj:`Gtk.TreeStore.set`\() or
-        :obj:`Gtk.TreeStore.set_value`\().
+        in values, you need to call :obj:`Gtk.TreeStore.set`\\() or
+        :obj:`Gtk.TreeStore.set_value`\\().
 
         If `row` isn't :obj:`None` it has to be a list of values which will be
         used to fill the row.
@@ -1839,8 +1839,8 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
 
         The returned `iterator will point to the new row. The row will be
         empty after this function is called if `row` is :obj:`None`. To fill
-        in values, you need to call :obj:`Gtk.TreeStore.set`\() or
-        :obj:`Gtk.TreeStore.set_value`\().
+        in values, you need to call :obj:`Gtk.TreeStore.set`\\() or
+        :obj:`Gtk.TreeStore.set_value`\\().
 
         If `row` isn't :obj:`None` it has to be a list of values which will be
         used to fill the row.
@@ -1873,8 +1873,8 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
 
         The returned iterator will point to the newly inserted row. The row
         will be empty after this function is called if `row` is :obj:`None`.
-        To fill in values, you need to call :obj:`Gtk.TreeStore.set`\() or
-        :obj:`Gtk.TreeStore.set_value`\().
+        To fill in values, you need to call :obj:`Gtk.TreeStore.set`\\() or
+        :obj:`Gtk.TreeStore.set_value`\\().
 
         If `row` isn't :obj:`None` it has to be a list of values which will be
         used to fill the row.
@@ -1909,8 +1909,8 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
 
         The returned iterator will point to this new row. The row will be
         empty after this function is called if `row` is :obj:`None`.  To fill
-        in values, you need to call :obj:`Gtk.TreeStore.set`\() or
-        :obj:`Gtk.TreeStore.set_value`\().
+        in values, you need to call :obj:`Gtk.TreeStore.set`\\() or
+        :obj:`Gtk.TreeStore.set_value`\\().
 
         If `row` isn't :obj:`None` it has to be a list of values which will be
         used to fill the row.
@@ -1949,8 +1949,8 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
 
         The returned iterator will point to this new row.  The row will be
         empty after this function is called if `row` is :obj:`None`.  To fill
-        in values, you need to call :obj:`Gtk.TreeStore.set`\() or
-        :obj:`Gtk.TreeStore.set_value`\().
+        in values, you need to call :obj:`Gtk.TreeStore.set`\\() or
+        :obj:`Gtk.TreeStore.set_value`\\().
 
         If `row` isn't :obj:`None` it has to be a list of values which will be
         used to fill the row.
@@ -1969,7 +1969,7 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
 
         `value` can also be a Python value and will be converted to a
         :obj:`GObject.Value` using the corresponding column type (See
-        :obj:`Gtk.ListStore.set_column_types`\()).
+        :obj:`Gtk.ListStore.set_column_types`\\()).
         """
 
         value = self._convert_value(column, value)
@@ -2012,10 +2012,10 @@ class TreeView(Gtk.TreeView, Container):
 
     get_path_at_pos = strip_boolean_result(Gtk.TreeView.get_path_at_pos)
     """
-    :param x: The x position to be identified (relative to bin\_window).
+    :param x: The x position to be identified (relative to bin\\_window).
     :type x: :obj:`int`
 
-    :param y: The y position to be identified (relative to bin\_window).
+    :param y: The y position to be identified (relative to bin\\_window).
     :type y: :obj:`int`
 
     :returns:

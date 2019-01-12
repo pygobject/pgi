@@ -84,10 +84,10 @@ spawn_async = _glib.spawn_async
 
 :rtype: (**pid**: :obj:`int`, **stdin**: :obj:`int` or :obj:`None`, **stdout**: :obj:`int` or :obj:`None`, **stderr**: :obj:`int` or :obj:`None`)
 
-See :obj:`GLib.spawn_async_with_pipes`\() for a full description; this function
-simply calls the :obj:`GLib.spawn_async_with_pipes`\()
+See :obj:`GLib.spawn_async_with_pipes`\\() for a full description; this function
+simply calls the :obj:`GLib.spawn_async_with_pipes`\\()
 
-You should call :obj:`GLib.spawn_close_pid`\() on the returned child process
+You should call :obj:`GLib.spawn_close_pid`\\() on the returned child process
 reference when you don't need it any more.
 
 In case `standard_input`/`standard_output`/`standard_error` are True a file
