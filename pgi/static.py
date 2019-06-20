@@ -48,7 +48,10 @@ def _gvalue_set(self, boxed):
 
 def _gvalue_get(self):
     # XXX
-    return type(self).__mro__[1].get_boxed(self)
+    val = type(self).__mro__[1].get_boxed(self)
+    if self.g_type.is_a(GType.from_name("GBoxed")) and isinstance(val, int):
+        return self.g_type.pytype._from_pointer(val)
+    return val
 
 
 def type_register(class_):
