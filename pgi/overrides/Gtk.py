@@ -1810,7 +1810,7 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
         will append the new row after the last child of `parent`, otherwise it
         will append a row to the top level.
 
-        The returned `iterator will point to the new row. The row will be
+        The returned `iterator` will point to the new row. The row will be
         empty after this function is called  if `row` is :obj:`None`. To fill
         in values, you need to call :obj:`Gtk.TreeStore.set`\\() or
         :obj:`Gtk.TreeStore.set_value`\\().
@@ -1837,7 +1837,7 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
         will prepend the new row before the first child of `parent`, otherwise
         it will prepend a row to the top level.
 
-        The returned `iterator will point to the new row. The row will be
+        The returned `iterator` will point to the new row. The row will be
         empty after this function is called if `row` is :obj:`None`. To fill
         in values, you need to call :obj:`Gtk.TreeStore.set`\\() or
         :obj:`Gtk.TreeStore.set_value`\\().
