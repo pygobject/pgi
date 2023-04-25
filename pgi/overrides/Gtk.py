@@ -115,6 +115,17 @@ def _builder_connect_callback(builder, gobj, signal_name, handler_name, connect_
             gobj.connect(signal_name, handler, *args)
 
 
+class _FreezeNotifyManager(object):
+    def __init__(self, obj):
+        self.obj = obj
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.obj.thaw_child_notify()
+
+
 class Widget(Gtk.Widget):
 
     translate_coordinates = strip_boolean_result(Gtk.Widget.translate_coordinates)
@@ -134,41 +145,59 @@ class Widget(Gtk.Widget):
     {{ docs }}
     """
 
-    def drag_dest_set_target_list(self, target_list):
-        if (target_list is not None) and (not isinstance(target_list, Gtk.TargetList)):
-            target_list = Gtk.TargetList.new(_construct_target_list(target_list))
-        super(Widget, self).drag_dest_set_target_list(target_list)
+    if GTK4:
+        def __contains__(self, child):
+            return child in list(self)
 
-    def drag_source_set_target_list(self, target_list):
-        if (target_list is not None) and (not isinstance(target_list, Gtk.TargetList)):
-            target_list = Gtk.TargetList.new(_construct_target_list(target_list))
-        super(Widget, self).drag_source_set_target_list(target_list)
+        def __iter__(self):
+            child = self.get_first_child()
+            while child:
+                yield child
+                child = child.get_next_sibling()
 
-    def style_get_property(self, property_name, value=None):
-        """style_get_property(property_name, value=None)
+    if GTK2 or GTK3:
+        def freeze_child_notify(self):
+            super(Widget, self).freeze_child_notify()
+            return _FreezeNotifyManager(self)
 
-        :param property_name:
-            the name of a style property
-        :type property_name: :obj:`str`
+    if GTK2 or GTK3:
+        def drag_dest_set_target_list(self, target_list):
+            if (target_list is not None) and (not isinstance(target_list, Gtk.TargetList)):
+                target_list = Gtk.TargetList.new(_construct_target_list(target_list))
+            super(Widget, self).drag_dest_set_target_list(target_list)
 
-        :param value:
-            Either :obj:`None` or a correctly initialized :obj:`GObject.Value`
-        :type value: :obj:`GObject.Value` or :obj:`None`
+    if GTK2 or GTK3:
+        def drag_source_set_target_list(self, target_list):
+            if (target_list is not None) and (not isinstance(target_list, Gtk.TargetList)):
+                target_list = Gtk.TargetList.new(_construct_target_list(target_list))
+            super(Widget, self).drag_source_set_target_list(target_list)
 
-        :returns: The Python value of the style property
+    if GTK2 or GTK3:
+        def style_get_property(self, property_name, value=None):
+            """style_get_property(property_name, value=None)
 
-        {{ docs }}
-        """
+            :param property_name:
+                the name of a style property
+            :type property_name: :obj:`str`
 
-        if value is None:
-            prop = self.find_style_property(property_name)
-            if prop is None:
-                raise ValueError('Class "%s" does not contain style property "%s"' %
-                                 (self, property_name))
-            value = GObject.Value(prop.value_type)
+            :param value:
+                Either :obj:`None` or a correctly initialized :obj:`GObject.Value`
+            :type value: :obj:`GObject.Value` or :obj:`None`
 
-        Gtk.Widget.style_get_property(self, property_name, value)
-        return value.get_value()
+            :returns: The Python value of the style property
+
+            {{ docs }}
+            """
+
+            if value is None:
+                prop = self.find_style_property(property_name)
+                if prop is None:
+                    raise ValueError('Class "%s" does not contain style property "%s"' %
+                                     (self, property_name))
+                value = GObject.Value(prop.value_type)
+
+            Gtk.Widget.style_get_property(self, property_name, value)
+            return value.get_value()
 
 
 Widget = override(Widget)
@@ -177,6 +206,7 @@ __all__.append('Widget')
 
 if GTK2 or GTK3:
     class Container(Gtk.Container, Widget):
+
         def __len__(self):
             return len(self.get_children())
 
@@ -191,20 +221,6 @@ if GTK2 or GTK3:
 
         # alias for Python 2.x object protocol
         __nonzero__ = __bool__
-
-        get_focus_chain = strip_boolean_result(Gtk.Container.get_focus_chain)
-        """
-        :returns:
-            A list of focusable widgets or :obj:`None` if no focus chain has
-            been explicitly set.
-
-        :rtype: [:obj:`Gtk.Widget`] or :obj:`None`
-
-        Retrieves the focus chain of the container, if one has been
-        set explicitly. If no focus chain has been explicitly
-        set, GTK+ computes the focus chain based on the positions
-        of the children. In that case returns :obj:`None`.
-        """
 
         def child_get_property(self, child, property_name, value=None):
             """child_get_property(child, property_name, value=None)
@@ -238,15 +254,27 @@ if GTK2 or GTK3:
 
         def child_get(self, child, *prop_names):
             """Returns a list of child property values for the given names."""
-
             return [self.child_get_property(child, name) for name in prop_names]
 
         def child_set(self, child, **kwargs):
             """Set a child properties on the given child to key/value pairs."""
-
             for name, value in kwargs.items():
                 name = name.replace('_', '-')
                 self.child_set_property(child, name, value)
+
+        get_focus_chain = strip_boolean_result(Gtk.Container.get_focus_chain)
+        """
+        :returns:
+            A list of focusable widgets or :obj:`None` if no focus chain has
+            been explicitly set.
+
+        :rtype: [:obj:`Gtk.Widget`] or :obj:`None`
+
+        Retrieves the focus chain of the container, if one has been
+        set explicitly. If no focus chain has been explicitly
+        set, GTK+ computes the focus chain based on the positions
+        of the children. In that case returns :obj:`None`.
+        """
 
 
     Container = override(Container)
@@ -456,12 +484,7 @@ if GTK2 or GTK3:
             def _process_action(group_source, name, stock_id=None, label=None, accelerator=None, tooltip=None, entry_value=0):
                 action = RadioAction(name=name, label=label, tooltip=tooltip, stock_id=stock_id, value=entry_value)
 
-                # FIXME: join_group is a patch to Gtk+ 3.0
-                #        otherwise we can't effectively add radio actions to a
-                #        group.  Should we depend on 3.0 and error out here
-                #        or should we offer the functionality via a compat
-                #        C module?
-                if hasattr(action, 'join_group'):
+                if GTK3:
                     action.join_group(group_source)
 
                 if value == entry_value:
@@ -485,18 +508,22 @@ if GTK2 or GTK3:
     ActionGroup = override(ActionGroup)
     __all__.append('ActionGroup')
 
-
     class UIManager(Gtk.UIManager):
-        def add_ui_from_string(self, buffer, length=-1):
-            """add_ui_from_string(buffer, length=-1)
+        def add_ui_from_string(self, buffer):
+            """add_ui_from_string(buffer)
 
             {{ all }}
             """
 
+            if not isinstance(buffer, str):
+                raise TypeError('buffer must be a string')
+
+            length = _get_utf8_length(buffer)
+
             return Gtk.UIManager.add_ui_from_string(self, buffer, length)
 
-        def insert_action_group(self, action_group, pos=-1):
-            return Gtk.UIManager.insert_action_group(self, action_group, pos)
+        def insert_action_group(self, buffer, length=-1):
+            return Gtk.UIManager.insert_action_group(self, buffer, length)
 
     UIManager = override(UIManager)
     __all__.append('UIManager')
@@ -554,27 +581,34 @@ def _get_utf8_length(string):
 
 
 class Builder(Gtk.Builder):
-    def connect_signals(self, obj_or_map):
-        """connect_signals(self, obj_or_map)
+    if GTK4:
+        pass
+    else:
+        def connect_signals(self, obj_or_map):
+            """connect_signals(self, obj_or_map)
 
-        Connect signals specified by this builder to a name, handler mapping.
+            Connect signals specified by this builder to a name, handler mapping.
 
-        Connect signal, name, and handler sets specified in the builder with
-        the given mapping "obj_or_map". The handler/value aspect of the mapping
-        can also contain a tuple in the form of (handler [,arg1 [,argN]])
-        allowing for extra arguments to be passed to the handler. For example:
+            Connect signal, name, and handler sets specified in the builder with
+            the given mapping "obj_or_map". The handler/value aspect of the mapping
+            can also contain a tuple in the form of (handler [,arg1 [,argN]])
+            allowing for extra arguments to be passed to the handler. For example:
 
-        .. code-block:: python
+            .. code-block:: python
 
-            builder.connect_signals({'on_clicked': (on_clicked, arg1, arg2)})
-        """
-        self.connect_signals_full(_builder_connect_callback, obj_or_map)
+                builder.connect_signals({'on_clicked': (on_clicked, arg1, arg2)})
+            """
+            self.connect_signals_full(_builder_connect_callback, obj_or_map)
 
-    def add_from_string(self, buffer, length=-1):
-        """add_from_string(buffer, length=-1)
+    def add_from_string(self, buffer):
+        """add_from_string(buffer)
 
         {{ all }}
         """
+        if not isinstance(buffer, str):
+            raise TypeError('buffer must be a string')
+
+        length = _get_utf8_length(buffer)
 
         return Gtk.Builder.add_from_string(self, buffer, length)
 
@@ -594,8 +628,13 @@ class Builder(Gtk.Builder):
         {{ docs }}
         """
 
-        length = -1
+        if not isinstance(buffer, str):
+            raise TypeError('buffer must be a string')
+
+        length = _get_utf8_length(buffer)
+
         return Gtk.Builder.add_objects_from_string(self, buffer, length, object_ids)
+
 
 Builder = override(Builder)
 __all__.append('Builder')
@@ -1685,6 +1724,8 @@ class TreeModelRow(object):
             for i in range(start, stop, step):
                 alist.append(self.model.get_value(self.iter, i))
             return alist
+        elif isinstance(key, tuple):
+            return [self[k] for k in key]
         else:
             raise TypeError("indices must be integers, slice or tuple, not %s"
                             % type(key).__name__)
@@ -1706,6 +1747,13 @@ class TreeModelRow(object):
 
             for i, v in enumerate(indexList):
                 self.model.set_value(self.iter, v, value[i])
+        elif isinstance(key, tuple):
+            if len(key) != len(value):
+                raise ValueError(
+                    "attempt to assign sequence of size %d to sequence of size %d"
+                    % (len(value), len(key)))
+            for k, v in zip(key, value):
+                self[k] = v
         else:
             raise TypeError("indices must be an integer, slice or tuple, not %s"
                             % type(key).__name__)
@@ -2042,14 +2090,16 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
             else:
                 raise TypeError('Argument list must be in the form of (column, value, ...), ((columns,...), (values, ...)) or {column: value}.  No -1 termination is needed.')
 
+
 TreeStore = override(TreeStore)
 __all__.append('TreeStore')
 
 
 class TreeView(Gtk.TreeView, Container):
-    __init__ = deprecated_init(Gtk.TreeView.__init__,
-                               arg_names=('model',),
-                               category=PyGTKDeprecationWarning)
+    if GTK2 or GTK3:
+        __init__ = deprecated_init(Gtk.TreeView.__init__,
+                                   arg_names=('model',),
+                                   category=PyGTKDeprecationWarning)
 
     get_path_at_pos = strip_boolean_result(Gtk.TreeView.get_path_at_pos)
     """
@@ -2110,16 +2160,18 @@ class TreeView(Gtk.TreeView, Container):
     return :obj:`None` if `self` is not realized or does not have a model.
     """
 
-    def enable_model_drag_source(self, start_button_mask, targets, actions):
-        target_entries = _construct_target_list(targets)
-        super(TreeView, self).enable_model_drag_source(start_button_mask,
-                                                       target_entries,
-                                                       actions)
+    if GTK2 or GTK3:
+        def enable_model_drag_source(self, start_button_mask, targets, actions):
+            target_entries = _construct_target_list(targets)
+            super(TreeView, self).enable_model_drag_source(start_button_mask,
+                                                           target_entries,
+                                                           actions)
 
-    def enable_model_drag_dest(self, targets, actions):
-        target_entries = _construct_target_list(targets)
-        super(TreeView, self).enable_model_drag_dest(target_entries,
-                                                     actions)
+    if GTK2 or GTK3:
+        def enable_model_drag_dest(self, targets, actions):
+            target_entries = _construct_target_list(targets)
+            super(TreeView, self).enable_model_drag_dest(target_entries,
+                                                         actions)
 
     def scroll_to_cell(self, path, column=None, use_align=False, row_align=0.0, col_align=0.0):
         if not isinstance(path, Gtk.TreePath):
@@ -2280,6 +2332,18 @@ if GTK2 or GTK3:
                 Gtk.Button.__init__(self, **new_kwargs)
             else:
                 self._init(*args, **kwargs)
+
+        if hasattr(Gtk.Widget, "set_focus_on_click"):
+            def set_focus_on_click(self, *args, **kwargs):
+                # Gtk.Widget.set_focus_on_click should be used instead but it's
+                # no obvious how because of the shadowed method, so override here
+                return Gtk.Widget.set_focus_on_click(self, *args, **kwargs)
+
+        if hasattr(Gtk.Widget, "get_focus_on_click"):
+            def get_focus_on_click(self, *args, **kwargs):
+                # Gtk.Widget.get_focus_on_click should be used instead but it's
+                # no obvious how because of the shadowed method, so override here
+                return Gtk.Widget.get_focus_on_click(self, *args, **kwargs)
 
     Button = override(Button)
     __all__.append('Button')
