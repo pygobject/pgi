@@ -12,3 +12,4 @@ MANIFEST
 coverage/
 build/
 dist/
+*.lock

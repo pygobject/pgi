@@ -14,11 +14,7 @@ import glob
 import subprocess
 import re
 
-try:
-    from setuptools import setup, Command
-except ImportError:
-    from distutils.core import setup, Command
-import pgi
+from setuptools import setup, Command
 
 
 class CoverageCommand(Command):
@@ -211,15 +207,9 @@ class BenchmarkCommand(Command):
             else:
                 exit(benchmarks.run(is_gi, backend))
 
-version = pgi.version_info
-# convert to a setuptools compatible version string
-if version[-1] == -1:
-    version_string = ".".join(map(str, version[:-1])) + ".dev0"
-else:
-    version_string = ".".join(map(str, version))
 
 setup(name='pgi',
-      version=version_string,
+      version='0.0.12',
       description='Pure Python GObject Introspection Bindings',
       author='Christoph Reiter',
       author_email='reiter.christoph@gmail.com',

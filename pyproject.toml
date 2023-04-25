@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "pgi"
+version = "0.0.12"
+description = "Pure Python GObject Introspection Bindings"
+authors = ["Christoph Reiter <reiter.christoph@gmail.com>"]
+license = "LGPL-2.1-or-later"
+readme = "README.rst"
+
+[tool.poetry.dependencies]
+python = "^3.8.1"
+cffi = "^1.15.1"
+cairocffi = "^1.5.1"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
