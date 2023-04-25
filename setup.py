@@ -244,5 +244,6 @@ setup(name='pgi',
             'test': TestCommand,
             'coverage': CoverageCommand,
             'benchmark': BenchmarkCommand,
-      }
+      },
+      python_requires=">=3.8, <4"
      )
