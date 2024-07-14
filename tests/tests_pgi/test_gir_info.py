@@ -56,8 +56,8 @@ class _GIInfoTest(unittest.TestCase):
         self.assertEqual(b.namespace, "Gtk")
         self.assertEqual(b.is_deprecated, False)
         self.assertTrue(b.get_container() is None)
-        self.failIf(b.get_container())
-        self.failIf(b == 42)
+        self.assertFalse(b.get_container())
+        self.assertFalse(b == 42)
         self.assertEqual(b.type.value, self.gir.GIInfoType.OBJECT)
         repr(b.get_typelib())
         list(b.iterate_attributes())
@@ -197,7 +197,7 @@ class _GIInfoTest(unittest.TestCase):
             isinstance(argv.ownership_transfer, self.gir.GITransfer))
 
     def test_typetag(self):
-        self.failIf(self.gir.GITypeTag(18).is_basic)
+        self.assertFalse(self.gir.GITypeTag(18).is_basic)
         self.failUnless(self.gir.GITypeTag(21).is_basic)
         self.failUnless(self.gir.GITypeTag(10).is_basic)
 
