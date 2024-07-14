@@ -60,7 +60,7 @@ class StructTest(unittest.TestCase):
     def test_struct_out(self):
         model = Gtk.ListStore(int)
         iter_ = model.insert_with_valuesv(0, [], [])
-        self.failUnless(isinstance(iter_, Gtk.TreeIter))
+        self.assertTrue(isinstance(iter_, Gtk.TreeIter))
 
     def test_struct_copy(self):
         iter_ = Gtk.TreeIter()

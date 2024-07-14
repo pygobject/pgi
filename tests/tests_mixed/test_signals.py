@@ -69,7 +69,7 @@ class SignalTest(unittest.TestCase):
         w = Gtk.Window()
         for name in ["scroll-event", "scroll_event"]:
             id_ = w.connect("scroll_event", lambda *x: None)
-            self.failUnless(id_ is not None)
+            self.assertTrue(id_ is not None)
 
 
 class SignalReturnTest(unittest.TestCase):

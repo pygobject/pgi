@@ -30,8 +30,8 @@ class FuncsTest(unittest.TestCase):
 
     @skipIfGI
     def test_escape_name(self):
-        self.failUnless(Pango.break_)
-        self.failUnless(Pango.break_.__doc__.startswith("break_("))
+        self.assertTrue(Pango.break_)
+        self.assertTrue(Pango.break_.__doc__.startswith("break_("))
 
     def test_basic(self):
         self.assertTrue("themes" in Gtk.rc_get_theme_dir())

@@ -198,8 +198,8 @@ class _GIInfoTest(unittest.TestCase):
 
     def test_typetag(self):
         self.assertFalse(self.gir.GITypeTag(18).is_basic)
-        self.failUnless(self.gir.GITypeTag(21).is_basic)
-        self.failUnless(self.gir.GITypeTag(10).is_basic)
+        self.assertTrue(self.gir.GITypeTag(21).is_basic)
+        self.assertTrue(self.gir.GITypeTag(10).is_basic)
 
     def test_infotype(self):
         c = self._get_gtk("Expander")
