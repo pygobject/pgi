@@ -10,6 +10,7 @@
 import sys
 import warnings
 import importlib
+import importlib.util
 from contextlib import contextmanager
 
 from .clib.gir import GIRepository
@@ -139,7 +140,7 @@ def get_import_stacklevel(import_hook):
 class Importer(object):
     """Import hook according to http://www.python.org/dev/peps/pep-0302/"""
 
-    def find_module(self, fullname, path=None):
+    def find_spec(self, fullname, path=None, target=None):
         namespace = extract_namespace(fullname)
 
         if not namespace:
@@ -152,13 +153,13 @@ class Importer(object):
         # dependencies, is_registered() returns True for all dependencies.
         if repository.is_registered(namespace) or \
                 repository.enumerate_versions(namespace):
-            return self
+            return importlib.util.spec_from_loader(fullname, self)
         else:
             raise ImportError('cannot import name %s, '
                               'introspection typelib not found' % namespace)
 
-    def load_module(self, fullname):
-        global _versions
+    def create_module(self, spec):
+        fullname = spec.name
 
         # Dependency already loaded, skip
         if fullname in sys.modules:
@@ -187,3 +188,6 @@ class Importer(object):
             sys.modules[module_key] = proxy
 
         return proxy
+
+    def exec_module(self, fullname):
+        return None
