@@ -92,10 +92,10 @@ class PGIMisc(unittest.TestCase):
 
     def test_check_version(self):
         # make sure the exception mentions both versions in case of an error
-        self.assertRaisesRegexp(ValueError, re.escape("99.99.99"),
+        self.assertRaisesRegex(ValueError, re.escape("99.99.99"),
                                 pgi.check_version, "99.99.99")
 
-        self.assertRaisesRegexp(ValueError, re.escape(pgi.__version__),
+        self.assertRaisesRegex(ValueError, re.escape(pgi.__version__),
                                 pgi.check_version, "99.99.99")
 
     def test_callback(self):
