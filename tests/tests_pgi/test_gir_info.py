@@ -52,13 +52,13 @@ class _GIInfoTest(unittest.TestCase):
     def test_baseinfo(self):
         b = self._get_gtk("Button")
         repr(b)
-        self.failUnlessEqual(b.name, "Button")
-        self.failUnlessEqual(b.namespace, "Gtk")
-        self.failUnlessEqual(b.is_deprecated, False)
+        self.assertEqual(b.name, "Button")
+        self.assertEqual(b.namespace, "Gtk")
+        self.assertEqual(b.is_deprecated, False)
         self.assertTrue(b.get_container() is None)
         self.failIf(b.get_container())
         self.failIf(b == 42)
-        self.failUnlessEqual(b.type.value, self.gir.GIInfoType.OBJECT)
+        self.assertEqual(b.type.value, self.gir.GIInfoType.OBJECT)
         repr(b.get_typelib())
         list(b.iterate_attributes())
 
@@ -66,14 +66,14 @@ class _GIInfoTest(unittest.TestCase):
         w = self._get_gtk("Window")
         t = w.get_typelib()
         repr(t)
-        self.failUnlessEqual(t.namespace, "Gtk")
+        self.assertEqual(t.namespace, "Gtk")
 
     def test_objectinfo(self):
         e = self._get_gtk("Expander")
         self.assertTrue(isinstance(e, self.gir.GIObjectInfo))
         repr(e)
-        self.failUnlessEqual(e.type_name, "GtkExpander")
-        self.failUnlessEqual(e.type_init, "gtk_expander_get_type")
+        self.assertEqual(e.type_name, "GtkExpander")
+        self.assertEqual(e.type_init, "gtk_expander_get_type")
 
         list(e.get_methods())
         list(e.get_fields())
@@ -87,9 +87,9 @@ class _GIInfoTest(unittest.TestCase):
         t = self._get_gtk("WindowType")
         self.assertTrue(isinstance(t, self.gir.GIEnumInfo))
         repr(t)
-        self.failUnlessEqual(t.n_methods, 0)
-        self.failUnlessEqual(t.storage_type.value, self.gir.GITypeTag.UINT32)
-        self.failUnlessEqual(t.get_value(0).value_, 0)
+        self.assertEqual(t.n_methods, 0)
+        self.assertEqual(t.storage_type.value, self.gir.GITypeTag.UINT32)
+        self.assertEqual(t.get_value(0).value_, 0)
 
         t.get_values()
         t.get_methods()
@@ -115,8 +115,8 @@ class _GIInfoTest(unittest.TestCase):
         fi = e.get_method(10)
         self.assertTrue(isinstance(fi, self.gir.GIFunctionInfo))
         repr(fi)
-        self.failUnlessEqual(fi.symbol, "gtk_expander_set_expanded")
-        self.failUnlessEqual(fi.flags.value,
+        self.assertEqual(fi.symbol, "gtk_expander_set_expanded")
+        self.assertEqual(fi.flags.value,
                              self.gir.GIFunctionInfoFlags.IS_METHOD)
 
         w = self._get_gtk("Window")

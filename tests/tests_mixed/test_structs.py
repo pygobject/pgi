@@ -66,10 +66,10 @@ class StructTest(unittest.TestCase):
         iter_ = Gtk.TreeIter()
         iter_.stamp = 4
         new = iter_.copy()
-        self.failUnlessEqual(new.stamp, 4)
+        self.assertEqual(new.stamp, 4)
         iter_.stamp = 999
-        self.failUnlessEqual(new.stamp, 4)
-        self.failUnlessEqual(iter_.stamp, 999)
+        self.assertEqual(new.stamp, 4)
+        self.assertEqual(iter_.stamp, 999)
 
     @FIXME
     def test_foo(self):
