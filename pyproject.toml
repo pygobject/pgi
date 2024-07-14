@@ -11,6 +11,10 @@ python = "^3.8.1"
 cffi = "^1.15.1"
 cairocffi = "^1.5.1"
 
+[tool.poetry.group.dev.dependencies]
+setuptools = "^70.3.0"
+pytest = "^8.2.2"
+
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
