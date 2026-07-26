@@ -8,9 +8,9 @@
 import types
 import sys
 import importlib
+import importlib.util
 import warnings
 from functools import wraps
-from pkgutil import get_loader
 
 from pgi import const
 from pgi.util import PyGIDeprecationWarning
@@ -106,12 +106,9 @@ def load_overrides(introspection_module):
     try:
         override_package_name = 'pgi.overrides.' + namespace
 
-        # http://bugs.python.org/issue14710
-        try:
-            override_loader = get_loader(override_package_name)
-
-        except AttributeError:
-            override_loader = None
+        # Avoid importing the override just to test whether it exists.
+        spec = importlib.util.find_spec(override_package_name)
+        override_loader = spec.loader if spec is not None else None
 
         # Avoid checking for an ImportError, an override might
         # depend on a missing module thus causing an ImportError

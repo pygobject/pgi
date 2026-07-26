@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
-import collections
+from collections.abc import Mapping, Sequence
 import sys
 import warnings
 
@@ -74,7 +74,7 @@ if GTK2 or GTK3:
 
 def _extract_handler_and_args(obj_or_map, handler_name):
     handler = None
-    if isinstance(obj_or_map, collections.Mapping):
+    if isinstance(obj_or_map, Mapping):
         handler = obj_or_map.get(handler_name, None)
     else:
         handler = getattr(obj_or_map, handler_name, None)
@@ -83,7 +83,7 @@ def _extract_handler_and_args(obj_or_map, handler_name):
         raise AttributeError('Handler %s not found' % handler_name)
 
     args = ()
-    if isinstance(handler, collections.Sequence):
+    if isinstance(handler, Sequence):
         if len(handler) == 0:
             raise TypeError("Handler %s tuple can not be empty" % handler)
         args = handler[1:]
